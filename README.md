@@ -30,7 +30,7 @@
 <details>
   <summary>点击展开游戏截图</summary>
   
-  ![游戏截图v1.15.3](screenshot1.jpeg)
+  ![游戏截图v1.15.3](screenshot1.15.3.jpeg)
   *（图为v1.15.3）*
 </details>
 
