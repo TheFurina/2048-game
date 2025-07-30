@@ -2,6 +2,8 @@
 
 一个基于 HTML5 和 JavaScript 的 2048 游戏实现，支持多种游戏模式、难度选择和网格大小。
 
+[在线体验](https://thefurina.github.io/2048-game/)
+
 ## 功能特性
 
 - 🎮 **多种游戏模式**
@@ -53,5 +55,3 @@
 ## 后续计划
 
 - [ ] 重构代码，提升运行效率（v2.0）
-
-## [在线体验(点这里)](https://thefurina.github.io/2048-game/)
