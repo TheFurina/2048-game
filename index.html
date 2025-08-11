@@ -921,7 +921,7 @@
                             <option value="dark">&#xf186; 深色</option>
                         </select>
                     </div>
-                    <div class="text-sm text-secondary/70 mt-4">2048 v1.16.1 | by TheFurina</div>
+                    <div class="text-sm text-secondary/70 mt-4">2048 v1.16.2 | by TheFurina</div>
                     <button id="close-settings-button" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl" title="关闭设置">
                         <i class="fa-solid fa-times"></i>
                     </button>
@@ -1869,6 +1869,9 @@
             const selectOptions = document.querySelectorAll('.select-item');
             const nativeSelect = document.getElementById('theme-toggle');
             selectedValue.textContent = nativeSelect.options[nativeSelect.selectedIndex].text; selectOptions.forEach(option => { if (option.getAttribute('data-value') === nativeSelect.value) { option.classList.add('selected'); } else { option.classList.remove('selected'); } });
+            selectItems.classList.add('hidden');
+            selectItems.style.maxHeight = null;
+            selectItems.style.opacity = '0';
             customSelect.addEventListener('click', function(e) {
                 e.stopPropagation();
                 const selectSelected = this.querySelector('.select-selected');
