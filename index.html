@@ -1044,6 +1044,13 @@
                         </label>
                     </div>
                     <div class="flex items-center justify-between mt-2 mb-2 px-2">
+                        <span class="text-gray-700 dark:text-dark-muted">滑块动画</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="tile-animation" class="sr-only peer" checked title="滑块动画">
+                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary transition-all duration-300 hover:scale-105 hover:shadow-md"></div>
+                        </label>
+                    </div>
+                    <div class="flex items-center justify-between mt-2 mb-2 px-2">
                         <label for="theme-toggle" class="text-gray-700 dark:text-dark-muted">主题</label>
                         <div class="custom-select relative w-full max-w-[180px]">
                             <div class="select-selected flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md shadow border border-gray-300 dark:border-gray-600 cursor-pointer transition-all duration-200 hover:border-primary/50">
@@ -1062,7 +1069,7 @@
                             <option value="dark">&#xf186; 深色</option>
                         </select>
                     </div>
-                    <div class="text-sm text-secondary/70 mt-4">2048 v1.19.0 | by TheFurina</div>
+                    <div class="text-sm text-secondary/70 mt-4">2048 v1.20.0 | by TheFurina</div>
                     <button id="close-settings-button" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl" title="关闭设置">
                         <i class="fa-solid fa-times"></i>
                     </button>
@@ -1155,6 +1162,7 @@
             winningValue: 2048, // 获胜目标值
             touchThreshold: 10, // 触摸滑动的最小距离
             maxUndoSteps: 10, // 最大撤销步数
+            animationDuration: 150, // 滑块移动动画持续时间（毫秒）
             difficultySettings: { // 难度设置
                 easy: { // 简单
                     fourProbability: 0.4, // 4出现的概率为40%
@@ -1172,6 +1180,7 @@
         };
         const gameState = {
             gpuAccelerationEnabled: localStorage.getItem('2048-gpu-acceleration') !== 'false',
+            tileAnimationEnabled: localStorage.getItem('2048-tile-animation') !== 'false',
             grid: [],
             gridSize: 4,
             score: 0,
@@ -1245,7 +1254,8 @@
             difficultyButtons: document.getElementById('difficulty-buttons'),
             gameDescription: document.querySelector('.text-secondary\\/80.dark\\:text-dark-muted.mb-2'),
             gameTouchArea: document.getElementById('game-touch-area'),
-            gameContainer: document.querySelector('.game-container')
+            gameContainer: document.querySelector('.game-container'),
+            tileAnimation: document.getElementById('tile-animation')
         };
         function updateDocumentTitle() {
             const mode = gameState.isEndlessMode ? '无尽模式' : '标准模式';
@@ -1298,39 +1308,96 @@
             }
             return false;
         }
-        function renderTile(x, y) {
+        function renderTile(x, y, animate = true) {
             const tile = gameState.grid[y][x];
             if (!tile) return;
-            const tileElement = document.createElement('div');
-            tileElement.className = `tile tile-${tile.value} ${tile.new ? 'tile-appear' : ''} ${tile.value > 32768 ? 'tile-super' : ''} ${tile.value >= 10000 ? 'tile-5digit' : ''} ${gameState.gpuAccelerationEnabled ? 'gpu-accelerated' : ''}`;
+            let tileSize = '';
+            let gapSize = 16;
+            if (gameState.gridSize === 3) {
+                tileSize = `calc((100% - 32px) / 3)`;
+            } else if (gameState.gridSize === 4) {
+                tileSize = `calc((100% - 48px) / 4)`;
+            } else {
+                tileSize = `calc((100% - 64px) / 5)`;
+            }
+            const leftPos = `calc((${tileSize} + ${gapSize}px) * ${x})`;
+            const topPos = `calc((${tileSize} + ${gapSize}px) * ${y})`;
+            let tileElement = elements.tileContainer.querySelector(`.tile[data-pos="${x}-${y}"]`);
+            if (!tileElement) {
+                tileElement = document.createElement('div');
+                tileElement.dataset.pos = `${x}-${y}`;
+                elements.tileContainer.appendChild(tileElement);
+                tileElement.style.transition = 'none';
+                tileElement.style.left = leftPos;
+                tileElement.style.top = topPos;
+                void tileElement.offsetWidth;
+            }
+            const animationClass = gameState.tileAnimationEnabled && animate ? 'transition-all duration-150' : '';
+            tileElement.className = `tile tile-${tile.value} ${gameState.tileAnimationEnabled && tile.new ? 'tile-appear' : ''} ${tile.value > 32768 ? 'tile-super' : ''} ${tile.value >= 10000 ? 'tile-5digit' : ''} ${gameState.gpuAccelerationEnabled ? 'gpu-accelerated' : ''} ${animationClass}`;
             tileElement.textContent = tile.value;
-            tileElement.dataset.pos = `${x}-${y}`;
-            elements.tileContainer.appendChild(tileElement);
+            if (gameState.tileAnimationEnabled && animate) {
+                tileElement.style.transition = 'left 150ms ease-in-out, top 150ms ease-in-out, transform 150ms ease-in-out';
+            }
+            tileElement.style.left = leftPos;
+            tileElement.style.top = topPos;
             if (tile.new) {
                 setTimeout(() => {
                     tile.new = false;
                 }, 200);
             }
         }
-        function renderAllTiles() {
-            elements.tileContainer.innerHTML = '';
+        function renderAllTiles(animate = true) {
+            const currentTiles = {};
+            const tileElements = elements.tileContainer.querySelectorAll('.tile');
+            tileElements.forEach(tile => {
+                const pos = tile.dataset.pos;
+                currentTiles[pos] = tile;
+            });
+            const preservedPositions = new Set();
             for (let y = 0; y < gameState.gridSize; y++) {
                 for (let x = 0; x < gameState.gridSize; x++) {
                     if (gameState.grid[y][x]) {
-                        renderTile(x, y);
+                        const posKey = `${x}-${y}`;
+                        preservedPositions.add(posKey);
+                        renderTile(x, y, animate);
                     }
                 }
             }
+            Object.keys(currentTiles).forEach(pos => {
+                if (!preservedPositions.has(pos)) {
+                    const tile = currentTiles[pos];
+                    if (gameState.tileAnimationEnabled && animate) {
+                        tile.style.transition = 'opacity 150ms ease-in-out';
+                        tile.style.opacity = '0';
+                        setTimeout(() => {
+                            if (tile.parentNode === elements.tileContainer) {
+                                elements.tileContainer.removeChild(tile);
+                            }
+                        }, 150);
+                    } else {
+                        if (tile.parentNode === elements.tileContainer) {
+                            elements.tileContainer.removeChild(tile);
+                        }
+                    }
+                }
+            });
         }
         function move(direction) {
             const modal = document.getElementById('ai-analysis-modal');
             if (gameState.isPaused || gameState.gameOver || !elements.gameMessage.classList.contains('hidden') || !modal.classList.contains('hidden')) return false;
             saveHistory();
             let moved = false;
+            const moveLog = [];
             for (let y = 0; y < gameState.gridSize; y++) {
                 for (let x = 0; x < gameState.gridSize; x++) {
                     if (gameState.grid[y][x]) {
                         gameState.grid[y][x].merged = false;
+                        moveLog.push({
+                            originalX: x,
+                            originalY: y,
+                            value: gameState.grid[y][x].value,
+                            tile: { ...gameState.grid[y][x] }
+                        });
                     }
                 }
             }
@@ -1473,33 +1540,54 @@
                     break;
             }
             if (moved) {
-                elements.tileContainer.innerHTML = '';
-                renderAllTiles();
-                setTimeout(() => {
-                    for (let y = 0; y < gameState.gridSize; y++) {
-                        for (let x = 0; x < gameState.gridSize; x++) {
-                            if (gameState.grid[y][x] && gameState.grid[y][x].mergedAnimation) {
-                                const tileElement = elements.tileContainer.querySelector(`.tile[data-pos="${x}-${y}"]`);
-                                if (tileElement) {
-                                    tileElement.classList.add('tile-merge');
-                                    setTimeout(() => {
-                                        if (gameState.grid[y][x]) {
-                                            gameState.grid[y][x].mergedAnimation = false;
+                if (gameState.tileAnimationEnabled) {
+                    renderAllTiles(true);
+                    setTimeout(() => {
+                        if (gameState.tileAnimationEnabled) {
+                            for (let y = 0; y < gameState.gridSize; y++) {
+                                for (let x = 0; x < gameState.gridSize; x++) {
+                                    if (gameState.grid[y][x] && gameState.grid[y][x].mergedAnimation) {
+                                        const tileElement = elements.tileContainer.querySelector(`.tile[data-pos="${x}-${y}"]`);
+                                        if (tileElement) {
+                                            tileElement.classList.add('tile-merge');
+                                            setTimeout(() => {
+                                                if (gameState.grid[y][x]) {
+                                                    gameState.grid[y][x].mergedAnimation = false;
+                                                }
+                                            }, config.animationDuration);
                                         }
-                                    }, 200);
+                                    }
+                                }
+                            }
+                        } else {
+                            for (let y = 0; y < gameState.gridSize; y++) {
+                                for (let x = 0; x < gameState.gridSize; x++) {
+                                    if (gameState.grid[y][x]) {
+                                        gameState.grid[y][x].mergedAnimation = false;
+                                    }
                                 }
                             }
                         }
-                    }
-                }, 10);
-                setTimeout(() => {
-                    generateRandomTile();
-                    if (!gameState.gameWon) {
-                        checkWin();
-                    }
-                    checkGameOver();
-                    saveGameState();
-                }, 200);
+                    }, 10);
+                    setTimeout(() => {
+                        generateRandomTile();
+                        if (!gameState.gameWon) {
+                            checkWin();
+                        }
+                        checkGameOver();
+                        saveGameState();
+                    }, config.animationDuration);
+                } else {
+                    renderAllTiles(false);
+                    setTimeout(() => {
+                        generateRandomTile();
+                        if (!gameState.gameWon) {
+                            checkWin();
+                        }
+                        checkGameOver();
+                        saveGameState();
+                    }, 10);
+                }
             }
             updateUndoButtonState();
             return moved;
@@ -1721,12 +1809,51 @@
             elements.themeToggle.querySelector('i').className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
         }
         function resetAllSettings() {
-            if (confirm('确定要重置所有设置吗？这将清除游戏进度和偏好设置。')) {
-                localStorage.removeItem('2048-game-state');
+            if (confirm('确定要重置所有设置吗？这将重置游戏偏好设置。')) {
                 localStorage.removeItem('2048-theme');
                 localStorage.removeItem('2048-gpu-acceleration');
+                localStorage.removeItem('2048-tile-animation');
+                gameState.gpuAccelerationEnabled = true;
+                gameState.tileAnimationEnabled = true;
+                gameState.difficulty = 'medium';
                 document.documentElement.classList.remove('dark');
-                location.reload();
+                const themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                const updateTheme = (e) => {
+                    const isDark = e ? e.matches : window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    document.documentElement.classList.toggle('dark', isDark);
+                };
+                themeMediaQuery.addEventListener('change', updateTheme);
+                updateTheme(themeMediaQuery);
+                window.themeMediaQueryListener = {
+                    mediaQuery: themeMediaQuery,
+                    handler: updateTheme
+                };
+                localStorage.setItem('2048-theme', 'auto');
+                elements.themeToggle.value = 'auto';
+                const selectedValue = document.querySelector('.selected-value');
+                const selectOptions = document.querySelectorAll('.select-item');
+                if (selectedValue && selectOptions.length > 0) {
+                    const nativeSelect = elements.themeToggle;
+                    for (let i = 0; i < nativeSelect.options.length; i++) {
+                        if (nativeSelect.options[i].value === 'auto') {
+                            selectedValue.textContent = nativeSelect.options[i].text;
+                            break;
+                        }
+                    }
+                    selectOptions.forEach(option => {
+                        if (option.getAttribute('data-value') === 'auto') {
+                            option.classList.add('selected');
+                        } else {
+                            option.classList.remove('selected');
+                        }
+                    });
+                }
+                elements.gpuAccelerationToggle.checked = true;
+                elements.tileAnimation.checked = true;
+                updateDifficultyButtons();
+                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
+                renderAllTiles();
+                saveGameState();
             }
         }
         function handleResize() {
@@ -1945,6 +2072,11 @@
                 gameState.gpuAccelerationEnabled = e.target.checked;
                 localStorage.setItem('2048-gpu-acceleration', gameState.gpuAccelerationEnabled);
                 renderAllTiles();
+            });
+            elements.tileAnimation.checked = gameState.tileAnimationEnabled;
+            elements.tileAnimation.addEventListener('change', (e) => {
+                gameState.tileAnimationEnabled = e.target.checked;
+                localStorage.setItem('2048-tile-animation', gameState.tileAnimationEnabled);
             });
             elements.dataTransferButton.addEventListener('click', () => {
                 showModal('data-transfer-modal');
