@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="icon" href="https://github.com/TheFurina/2048-game/blob/12bf3a1220a66c991e7f4e190a5592b0baf56203/icon.png">
+    <link rel="icon" href="https://cdn.jsdelivr.net/gh/TheFurina/2048-game@main/icon.png">
     <title>2048 游戏</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
@@ -141,7 +141,7 @@
             }
             .game-container {
                 position: relative;
-                padding: 16px;
+                padding: clamp(8px, 3vw, 16px);
                 cursor: default;
                 -webkit-touch-callout: none;
                 -webkit-user-select: none;
@@ -169,15 +169,18 @@
             .grid-container {
                 position: absolute;
                 z-index: 1;
-                width: calc(100% - 32px);
-                height: calc(100% - 32px);
+                width: calc(100% - (2 * clamp(8px, 3vw, 16px)));
+                height: calc(100% - (2 * clamp(8px, 3vw, 16px)));
             }
             .grid-row {
                 display: flex;
-                margin-bottom: 16px;
+                margin-bottom: clamp(8px, 3vw, 16px);
+            }
+            .grid-row:last-child {
+                margin-bottom: 0;
             }
             .grid-cell {
-                margin-right: 16px;
+                margin-right: clamp(8px, 3vw, 16px);
                 border-radius: 6px;
                 background: rgba(238, 228, 218, 0.35);
                 transition: background-color 0.3s ease;
@@ -191,8 +194,8 @@
             .tile-container {
                 position: absolute;
                 z-index: 2;
-                width: calc(100% - 32px);
-                height: calc(100% - 32px);
+                width: calc(100% - (2 * clamp(8px, 3vw, 16px)));
+                height: calc(100% - (2 * clamp(8px, 3vw, 16px)));
             }
             .tile {
                 position: absolute;
@@ -244,34 +247,34 @@
                 border-color: theme('colors.dark.primary');
             }
             .grid-3x3 .grid-row {
-                height: calc((100% - 32px) / 3);
+                height: calc((100% - clamp(16px, 6vw, 32px)) / 3);
             }
             .grid-3x3 .grid-cell {
-                width: calc((100% - 32px) / 3);
+                width: calc((100% - clamp(16px, 6vw, 32px)) / 3);
             }
             .grid-3x3 .tile {
-                width: calc((100% - 32px) / 3);
-                height: calc((100% - 32px) / 3);
+                width: calc((100% - clamp(16px, 6vw, 32px)) / 3);
+                height: calc((100% - clamp(16px, 6vw, 32px)) / 3);
             }
             .grid-4x4 .grid-row {
-                height: calc((100% - 48px) / 4);
+                height: calc((100% - clamp(24px, 9vw, 48px)) / 4);
             }
             .grid-4x4 .grid-cell {
-                width: calc((100% - 48px) / 4);
+                width: calc((100% - clamp(24px, 9vw, 48px)) / 4);
             }
             .grid-4x4 .tile {
-                width: calc((100% - 48px) / 4);
-                height: calc((100% - 48px) / 4);
+                width: calc((100% - clamp(24px, 9vw, 48px)) / 4);
+                height: calc((100% - clamp(24px, 9vw, 48px)) / 4);
             }
             .grid-5x5 .grid-row {
-                height: calc((100% - 64px) / 5);
+                height: calc((100% - clamp(32px, 12vw, 64px)) / 5);
             }
             .grid-5x5 .grid-cell {
-                width: calc((100% - 64px) / 5);
+                width: calc((100% - clamp(32px, 12vw, 64px)) / 5);
             }
             .grid-5x5 .tile {
-                width: calc((100% - 64px) / 5);
-                height: calc((100% - 64px) / 5);
+                width: calc((100% - clamp(32px, 12vw, 64px)) / 5);
+                height: calc((100% - clamp(32px, 12vw, 64px)) / 5);
                 font-size: clamp(0.8rem, 3vw, 2rem);
             }
             .grid-5x5 .tile-5digit {
@@ -1041,7 +1044,6 @@
                             <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary transition-all duration-300 hover:scale-105 hover:shadow-md"></div>
                         </label>
                     </div>
-                    <div class="border-b border-gray-200 dark:border-gray-700 mt-1"></div>
                     <div class="flex items-center justify-between mt-2 mb-2 px-2">
                         <span class="text-gray-700 dark:text-dark-muted">滑块动画</span>
                         <label class="relative inline-flex items-center cursor-pointer">
@@ -1069,7 +1071,7 @@
                             <option value="dark">&#xf186; 深色</option>
                         </select>
                     </div>
-                    <div class="text-sm text-secondary/70 mt-4">2048 v1.20.1 | by TheFurina</div>
+                    <div class="text-sm text-secondary/70 mt-4">2048 v1.20.2 | by TheFurina</div>
                     <button id="reset-settings-button" class="text-gray-500 hover:text-gray-700 focus:outline-none text-sm inline-block mx-auto">
                         <i class="fa-solid fa-rotate-right mr-1"></i><span class="settings-text">重置所有设置</span>
                     </button>
@@ -1317,16 +1319,19 @@
             const tile = gameState.grid[y][x];
             if (!tile) return;
             let tileSize = '';
-            let gapSize = 16;
+            let gapValue = '';
             if (gameState.gridSize === 3) {
-                tileSize = `calc((100% - 32px) / 3)`;
+                tileSize = `calc((100% - clamp(16px, 6vw, 32px)) / 3)`;
+                gapValue = `clamp(8px, 3vw, 16px)`;
             } else if (gameState.gridSize === 4) {
-                tileSize = `calc((100% - 48px) / 4)`;
+                tileSize = `calc((100% - clamp(24px, 9vw, 48px)) / 4)`;
+                gapValue = `clamp(8px, 3vw, 16px)`;
             } else {
-                tileSize = `calc((100% - 64px) / 5)`;
+                tileSize = `calc((100% - clamp(32px, 12vw, 64px)) / 5)`;
+                gapValue = `clamp(8px, 3vw, 16px)`;
             }
-            const leftPos = `calc((${tileSize} + ${gapSize}px) * ${x})`;
-            const topPos = `calc((${tileSize} + ${gapSize}px) * ${y})`;
+            const leftPos = `calc((${tileSize} + ${gapValue}) * ${x})`;
+            const topPos = `calc((${tileSize} + ${gapValue}) * ${y})`;
             let tileElement = elements.tileContainer.querySelector(`.tile[data-pos="${x}-${y}"]`);
             if (!tileElement) {
                 tileElement = document.createElement('div');
