@@ -128,15 +128,17 @@
                 animation: appear 200ms ease-in-out;
             }
             .tile-merge {
-                animation: merge 200ms ease-in-out;
+                animation: merge 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
             }
             @keyframes appear {
                 0% { transform: scale(0.8); opacity: 0.8; }
+                50% { transform: scale(1.02); opacity: 0.9; }
+                75% { transform: scale(0.98); opacity: 0.95; }
                 100% { transform: scale(1); opacity: 1; }
             }
             @keyframes merge {
                 0% { transform: scale(1); }
-                50% { transform: scale(1.2); }
+                60% { transform: scale(1.15); }
                 100% { transform: scale(1); }
             }
             .game-container {
@@ -338,7 +340,7 @@
                 will-change: transform, box-shadow;
             }
             .btn-hover:hover, .btn-hover:focus {
-                transform: translateY(-2px);
+                transform: translateY(-1px);
             }
             .btn-hover:active, .btn-hover:focus:active {
                 transform: translateY(0);
@@ -675,15 +677,7 @@
         .dark .setting-label {
             color: #e0e0e0;
         }
-        @media (max-width: 200px){
-            .hide-small{
-                display:none;
-            }
-        }
         @media (max-width: 170px){
-            .settings-text{
-                display:none;
-            }
             #close-settings-button{
                 right: 15px;
             }
@@ -698,17 +692,261 @@
                 right: 0 !important;
             }
         }
+        #mode-description, #difficulty-description {
+            font-size: 0.8rem;
+        }
+        @media (max-width: 195px) {
+            .selected-value {
+                font-size: 0;
+            }
+            .selected-value i {
+                font-size: 16px;
+            }
+            .select-item {
+                font-size: 0;
+                padding: 6px;
+                text-align: center;
+            }
+            .select-item i {
+                font-size: 16px;
+                margin: 0;
+            }
+        }
         @media (max-width: 160px){
             .text-content{
                 display:none;
             }
         }
-        @media (max-width: 400px) and (max-height: 400px) {
+        @media (max-height: 400px) {
             body {
-                padding: 2px;
+                padding: 4px;
             }
             #game-header {
+                margin-bottom: 4px;
+            }
+            #game-title {
+                font-size: 1.75rem !important;
+                margin-bottom: 0;
+            }
+            .compact-title {
+                font-size: 1.75rem !important;
+            }
+            #game-header p {
+                font-size: 0.7rem !important;
+                margin-bottom: 4px;
+            }
+            #game-buttons {
+                margin-bottom: 4px;
+            }
+            #new-game, #endless-mode {
+                padding: 12px 16px !important;
+                font-size: 1rem !important;
+                min-height: 44px;
+                min-width: 100px;
+            }
+            #undo-button, #pause-button {
+                padding: 10px !important;
+                font-size: 0.9rem !important;
+                min-height: 40px;
+                min-width: 40px;
+            }
+            .options-container {
+                margin-bottom: 4px;
+            }
+            .options-row {
                 margin-bottom: 2px;
+            }
+            .option-label {
+                font-size: 0.6rem;
+            }
+            #grid-3x3, #grid-4x4, #grid-5x5, #easy-mode, #medium-mode, #hard-mode {
+                padding: 8px 12px !important;
+                font-size: 0.8rem !important;
+                min-height: 36px;
+            }
+            .stats-container {
+                margin-bottom: 4px;
+            }
+            .bg-grid {
+                padding: 4px !important;
+            }
+            #score, #best-score {
+                font-size: 1.2rem !important;
+            }
+            .text-xs {
+                font-size: 0.7rem !important;
+            }
+            #mode-description, #difficulty-description {
+                font-size: 0.7rem !important;
+                margin-bottom: 2px;
+            }
+            #ai-analysis-button {
+                width: 32px !important;
+                height: 32px !important;
+                font-size: 1rem !important;
+                min-height: 32px;
+                min-width: 32px;
+            }
+            .game-container {
+                padding: 4px;
+                border-radius: 4px;
+                width: 90vw;
+                height: 90vw;
+                max-height: 360px;
+                box-sizing: border-box;
+                position: relative;
+            }
+            .grid-container, .tile-container {
+                position: absolute;
+                z-index: 1;
+                width: calc(100% - 8px) !important;
+                height: calc(100% - 8px) !important;
+                top: 4px !important;
+                left: 4px !important;
+                padding: 0 !important;
+                box-sizing: border-box !important;
+                margin: 0 !important;
+            }
+            .grid-row {
+                display: flex;
+                margin-bottom: 0.5px;
+                width: 100%;
+            }
+            .grid-row:last-child {
+                margin-bottom: 0;
+            }
+            .grid-3x3 .grid-row {
+                height: calc((100% - 1px) / 3);
+            }
+            .grid-4x4 .grid-row {
+                height: calc((100% - 1.5px) / 4);
+            }
+            .grid-5x5 .grid-row {
+                height: calc((100% - 2px) / 5);
+            }
+            .grid-cell {
+                margin-right: 0.5px;
+                border-radius: 1px;
+                background: rgba(238, 228, 218, 0.35);
+                height: 100%;
+                flex: none;
+                box-sizing: border-box !important;
+            }
+            .grid-cell:last-child {
+                margin-right: 0;
+            }
+            .dark .grid-cell {
+                background: rgba(84, 110, 122, 0.35);
+            }
+            .grid-3x3 .grid-cell {
+                width: calc((100% - 1px) / 3);
+            }
+            .grid-4x4 .grid-cell {
+                width: calc((100% - 1.5px) / 4);
+            }
+            .grid-5x5 .grid-cell {
+                width: calc((100% - 2px) / 5);
+            }
+            .tile {
+                position: absolute !important;
+                border-radius: 1px;
+                box-sizing: border-box !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: 1px solid transparent;
+            }
+            .grid-3x3 .tile {
+                width: calc((100% - 1px) / 3);
+                height: calc((100% - 1px) / 3);
+                font-size: 1.2rem;
+            }
+            .grid-4x4 .tile {
+                width: calc((100% - 1.5px) / 4);
+                height: calc((100% - 1.5px) / 4);
+                font-size: 1rem;
+            }
+            .grid-5x5 .tile {
+                width: calc((100% - 2px) / 5);
+                height: calc((100% - 2px) / 5);
+                font-size: 0.9rem;
+            }
+            .grid-3x3 .tile[data-pos="0-0"] { left: 0 !important; top: 0 !important; }
+            .grid-3x3 .tile[data-pos="1-0"] { left: calc(33.333% + 0.5px) !important; top: 0 !important; }
+            .grid-3x3 .tile[data-pos="2-0"] { left: calc(66.666% + 1px) !important; top: 0 !important; }
+            .grid-3x3 .tile[data-pos="0-1"] { left: 0 !important; top: calc(33.333% + 0.5px) !important; }
+            .grid-3x3 .tile[data-pos="1-1"] { left: calc(33.333% + 0.5px) !important; top: calc(33.333% + 0.5px) !important; }
+            .grid-3x3 .tile[data-pos="2-1"] { left: calc(66.666% + 1px) !important; top: calc(33.333% + 0.5px) !important; }
+            .grid-3x3 .tile[data-pos="0-2"] { left: 0 !important; top: calc(66.666% + 1px) !important; }
+            .grid-3x3 .tile[data-pos="1-2"] { left: calc(33.333% + 0.5px) !important; top: calc(66.666% + 1px) !important; }
+            .grid-3x3 .tile[data-pos="2-2"] { left: calc(66.666% + 1px) !important; top: calc(66.666% + 1px) !important; }
+            .grid-4x4 .tile[data-pos="0-0"] { left: 0 !important; top: 0 !important; }
+            .grid-4x4 .tile[data-pos="1-0"] { left: calc(25% + 0.5px) !important; top: 0 !important; }
+            .grid-4x4 .tile[data-pos="2-0"] { left: calc(50% + 1px) !important; top: 0 !important; }
+            .grid-4x4 .tile[data-pos="3-0"] { left: calc(75% + 1.5px) !important; top: 0 !important; }
+            .grid-4x4 .tile[data-pos="0-1"] { left: 0 !important; top: calc(25% + 0.5px) !important; }
+            .grid-4x4 .tile[data-pos="1-1"] { left: calc(25% + 0.5px) !important; top: calc(25% + 0.5px) !important; }
+            .grid-4x4 .tile[data-pos="2-1"] { left: calc(50% + 1px) !important; top: calc(25% + 0.5px) !important; }
+            .grid-4x4 .tile[data-pos="3-1"] { left: calc(75% + 1.5px) !important; top: calc(25% + 0.5px) !important; }
+            .grid-4x4 .tile[data-pos="0-2"] { left: 0 !important; top: calc(50% + 1px) !important; }
+            .grid-4x4 .tile[data-pos="1-2"] { left: calc(25% + 0.5px) !important; top: calc(50% + 1px) !important; }
+            .grid-4x4 .tile[data-pos="2-2"] { left: calc(50% + 1px) !important; top: calc(50% + 1px) !important; }
+            .grid-4x4 .tile[data-pos="3-2"] { left: calc(75% + 1.5px) !important; top: calc(50% + 1px) !important; }
+            .grid-4x4 .tile[data-pos="0-3"] { left: 0 !important; top: calc(75% + 1.5px) !important; }
+            .grid-4x4 .tile[data-pos="1-3"] { left: calc(25% + 0.5px) !important; top: calc(75% + 1.5px) !important; }
+            .grid-4x4 .tile[data-pos="2-3"] { left: calc(50% + 1px) !important; top: calc(75% + 1.5px) !important; }
+            .grid-4x4 .tile[data-pos="3-3"] { left: calc(75% + 1.5px) !important; top: calc(75% + 1.5px) !important; }
+            .grid-5x5 .tile[data-pos="0-0"] { left: 0 !important; top: 0 !important; }
+            .grid-5x5 .tile[data-pos="1-0"] { left: calc(20% + 0.5px) !important; top: 0 !important; }
+            .grid-5x5 .tile[data-pos="2-0"] { left: calc(40% + 1px) !important; top: 0 !important; }
+            .grid-5x5 .tile[data-pos="3-0"] { left: calc(60% + 1.5px) !important; top: 0 !important; }
+            .grid-5x5 .tile[data-pos="4-0"] { left: calc(80% + 2px) !important; top: 0 !important; }
+            .grid-5x5 .tile[data-pos="0-1"] { left: 0 !important; top: calc(20% + 0.5px) !important; }
+            .grid-5x5 .tile[data-pos="1-1"] { left: calc(20% + 0.5px) !important; top: calc(20% + 0.5px) !important; }
+            .grid-5x5 .tile[data-pos="2-1"] { left: calc(40% + 1px) !important; top: calc(20% + 0.5px) !important; }
+            .grid-5x5 .tile[data-pos="3-1"] { left: calc(60% + 1.5px) !important; top: calc(20% + 0.5px) !important; }
+            .grid-5x5 .tile[data-pos="4-1"] { left: calc(80% + 2px) !important; top: calc(20% + 0.5px) !important; }
+            .grid-5x5 .tile[data-pos="0-2"] { left: 0 !important; top: calc(40% + 1px) !important; }
+            .grid-5x5 .tile[data-pos="1-2"] { left: calc(20% + 0.5px) !important; top: calc(40% + 1px) !important; }
+            .grid-5x5 .tile[data-pos="2-2"] { left: calc(40% + 1px) !important; top: calc(40% + 1px) !important; }
+            .grid-5x5 .tile[data-pos="3-2"] { left: calc(60% + 1.5px) !important; top: calc(40% + 1px) !important; }
+            .grid-5x5 .tile[data-pos="4-2"] { left: calc(80% + 2px) !important; top: calc(40% + 1px) !important; }
+            .grid-5x5 .tile[data-pos="0-3"] { left: 0 !important; top: calc(60% + 1.5px) !important; }
+            .grid-5x5 .tile[data-pos="1-3"] { left: calc(20% + 0.5px) !important; top: calc(60% + 1.5px) !important; }
+            .grid-5x5 .tile[data-pos="2-3"] { left: calc(40% + 1px) !important; top: calc(60% + 1.5px) !important; }
+            .grid-5x5 .tile[data-pos="3-3"] { left: calc(60% + 1.5px) !important; top: calc(60% + 1.5px) !important; }
+            .grid-5x5 .tile[data-pos="4-3"] { left: calc(80% + 2px) !important; top: calc(60% + 1.5px) !important; }
+            .grid-5x5 .tile[data-pos="0-4"] { left: 0 !important; top: calc(80% + 2px) !important; }
+            .grid-5x5 .tile[data-pos="1-4"] { left: calc(20% + 0.5px) !important; top: calc(80% + 2px) !important; }
+            .grid-5x5 .tile[data-pos="2-4"] { left: calc(40% + 1px) !important; top: calc(80% + 2px) !important; }
+            .grid-5x5 .tile[data-pos="3-4"] { left: calc(60% + 1.5px) !important; top: calc(80% + 2px) !important; }
+            .grid-5x5 .tile[data-pos="4-4"] { left: calc(80% + 2px) !important; top: calc(80% + 2px) !important; }
+            #game-touch-area {
+                height: 4px;
+            }
+            footer {
+                margin-top: 4px;
+                padding: 2px;
+                font-size: 0.6rem;
+            }
+            .button-text {
+                display: inline !important;
+            }
+        }
+        @media (max-width: 400px) and (max-height: 400px) {
+            .grid-3x3 .tile {
+                font-size: 1.2rem !important;
+            }
+            .grid-4x4 .tile {
+                font-size: 1rem !important;
+            }
+            .grid-5x5 .tile {
+                font-size: 0.9rem !important;
+            }
+            body {
+                padding: 4px;
+            }
+            #game-header {
+                margin-bottom: 4px;
             }
             #game-title {
                 font-size: 1.5rem !important;
@@ -718,49 +956,60 @@
                 font-size: 1.5rem !important;
             }
             #game-header p {
-                font-size: 0.6rem !important;
-                margin-bottom: 2px;
+                font-size: 0.7rem !important;
+                margin-bottom: 4px;
             }
             #game-buttons {
-                margin-bottom: 2px;
+                margin-bottom: 4px;
             }
             #new-game, #endless-mode {
-                padding: 2px 4px !important;
-                font-size: 0.6rem;
+                padding: 12px 16px !important;
+                font-size: 1rem !important;
+                min-height: 44px;
+                min-width: 100px;
+            }
+            #undo-button, #pause-button {
+                padding: 10px !important;
+                font-size: 0.9rem !important;
+                min-height: 40px;
+                min-width: 40px;
             }
             .options-container {
-                margin-bottom: 2px;
+                margin-bottom: 4px;
             }
             .options-row {
-                margin-bottom: 1px;
-            }
-            .option-label {
-                font-size: 0.5rem;
-            }
-            #grid-3x3, #grid-4x4, #grid-5x5, #easy-mode, #medium-mode, #hard-mode {
-                padding: 1px 2px !important;
-                font-size: 0.5rem;
-            }
-            .stats-container {
                 margin-bottom: 2px;
             }
+            .option-label {
+                font-size: 0.7rem;
+            }
+            #grid-3x3, #grid-4x4, #grid-5x5, #easy-mode, #medium-mode, #hard-mode {
+                padding: 8px 12px !important;
+                font-size: 0.8rem !important;
+                min-height: 36px;
+            }
+            .stats-container {
+                margin-bottom: 4px;
+            }
             .bg-grid {
-                padding: 1px !important;
+                padding: 4px !important;
             }
             #score, #best-score {
-                font-size: 0.8rem !important;
+                font-size: 1.2rem !important;
             }
             .text-xs {
-                font-size: 0.5rem !important;
+                font-size: 0.7rem !important;
             }
             #mode-description, #difficulty-description {
-                font-size: 0.5rem !important;
-                margin-bottom: 1px;
+                font-size: 0.7rem !important;
+                margin-bottom: 2px;
             }
             #ai-analysis-button {
-                width: 16px !important;
-                height: 16px !important;
-                font-size: 0.6rem;
+                width: 32px !important;
+                height: 32px !important;
+                font-size: 1rem !important;
+                min-height: 32px;
+                min-width: 32px;
             }
             .game-container {
                 padding: 2px;
@@ -779,25 +1028,21 @@
                 box-shadow: none;
             }
             #game-touch-area {
-                height: 2px;
+                height: 4px;
             }
             footer {
-                margin-top: 2px;
-                padding: 1px;
-                font-size: 0.5rem;
-            }
-            #undo-button, #pause-button {
-                padding: 1px !important;
+                margin-top: 4px;
+                padding: 2px;
                 font-size: 0.6rem;
             }
             .button-text, .prefix-text, .mode-text {
-                display: none;
+                display: inline !important;
             }
             .icon-margin {
-                margin-right: 0 !important;
+                margin-right: 0.25rem !important;
             }
             #new-game .mr-2, #endless-mode .mr-2, #undo-button .mr-1, #pause-button .mr-1 {
-                margin-right: 0 !important;
+                margin-right: 0.5rem !important;
             }
         }
         .ai-analysis-modal {
@@ -921,19 +1166,19 @@
             .select-item {display: flex;align-items: center;font-family: 'Font Awesome 6 Free', sans-serif;font-weight: 900;}.select-item.selected { background-color: #d1d5db; } .dark .select-item.selected { background-color: #4b5563; }.selected-value {font-family: 'Font Awesome 6 Free', sans-serif;font-weight: 900;}
         </style>
             <div class="flex gap-2 mt-4 md:mt-0">
-                <button id="undo-button" class="bg-grid hover:bg-grid/80 text-white p-2 rounded-md shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none dark:bg-dark-grid" title="撤销上一步">
+                <button id="undo-button" class="bg-grid hover:bg-grid/80 text-white p-2 rounded-md shadow-md transition-all duration-200 focus:outline-none dark:bg-dark-grid" title="撤销上一步">
                     <i class="fa-solid fa-undo mr-1"></i><span class="button-text">撤销</span>
                 </button>
-                <button id="pause-button" class="bg-grid hover:bg-grid/80 text-white p-2 rounded-md shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none dark:bg-dark-grid" title="暂停游戏">
+                <button id="pause-button" class="bg-grid hover:bg-grid/80 text-white p-2 rounded-md shadow-md transition-all duration-200 focus:outline-none dark:bg-dark-grid" title="暂停游戏">
                     <i class="fa-solid fa-pause mr-1"></i><span class="button-text">暂停</span>
                 </button>
             </div>
         </header>
         <div id="game-buttons" class="flex flex-wrap gap-2 mb-4">
-            <button id="new-game" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50 flex-1 btn-hover dark:bg-dark-primary">
+            <button id="new-game" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 flex-1 btn-hover dark:bg-dark-primary">
                 <i class="fa-solid fa-gamepad mr-2"></i><span class="prefix-text">标准</span><span class="mode-text">模式</span>
             </button>
-            <button id="endless-mode" class="bg-secondary hover:bg-secondary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-secondary/50 flex-1 btn-hover dark:bg-dark-secondary">
+            <button id="endless-mode" class="bg-secondary hover:bg-secondary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary/50 flex-1 btn-hover dark:bg-dark-secondary">
                 <i class="fa-solid fa-infinity mr-2"></i><span class="prefix-text">无尽</span><span class="mode-text">模式</span>
             </button>
         </div>
@@ -941,13 +1186,13 @@
             <div class="options-row">
                 <span class="option-label">网格大小:</span>
                 <div class="option-buttons">
-                    <button id="grid-3x3" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-300 btn-hover">
+                    <button id="grid-3x3" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-300 btn-hover">
                         <i class="fa-solid fa-square-three"></i>3×3
                     </button>
-                    <button id="grid-4x4" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300 btn-hover active">
+                    <button id="grid-4x4" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300 btn-hover active">
                         <i class="fa-solid fa-square-four"></i>4×4
                     </button>
-                    <button id="grid-5x5" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-300 btn-hover">
+                    <button id="grid-5x5" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-300 btn-hover">
                         <i class="fa-solid fa-square-five"></i>5×5
                     </button>
                 </div>
@@ -955,13 +1200,13 @@
             <div class="options-row">
                 <span class="option-label">难度选择:</span>
                 <div class="option-buttons">
-                    <button id="easy-mode" class="bg-easy hover:bg-easy/90 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-easy/50 flex-1 btn-hover">
+                    <button id="easy-mode" class="bg-easy hover:bg-easy/90 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-easy/50 flex-1 btn-hover">
                         <i class="fa-solid fa-shield-check mr-2"></i>简单
                     </button>
-                    <button id="medium-mode" class="bg-medium hover:bg-medium/90 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-medium/50 flex-1 btn-hover active">
+                    <button id="medium-mode" class="bg-medium hover:bg-medium/90 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-medium/50 flex-1 btn-hover active">
                         <i class="fa-solid fa-shield-half mr-2"></i>中等
                     </button>
-                    <button id="hard-mode" class="bg-hard hover:bg-hard/90 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-hard/50 flex-1 btn-hover">
+                    <button id="hard-mode" class="bg-hard hover:bg-hard/90 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-hard/50 flex-1 btn-hover">
                         <i class="fa-solid fa-shield-exclamation mr-2"></i>困难
                     </button>
                 </div>
@@ -986,7 +1231,7 @@
                     当前难度：中等 - 4x4网格
                 </div>
             </div>
-            <button id="ai-analysis-button" class="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-white w-12 h-12 rounded-full shadow-md transition-all duration-200 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center justify-center">
+            <button id="ai-analysis-button" class="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-white w-12 h-12 rounded-full shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center justify-center">
                 <i class="fa-solid fa-robot dark:text-[#282828]"></i>
             </button>
         </div>
@@ -1000,23 +1245,23 @@
         </div>
         <div id="game-touch-area" class="mt-4 h-5 bg-transparent"></div>
         <div id="game-message" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="game-message-title" aria-modal="true">
-            <div class="bg-white rounded-lg p-6 max-w-md w-full text-center shadow-xl transform transition-all duration-300 scale-95 opacity-0">
+            <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0">
                 <h2 id="game-message-title" class="text-2xl font-bold text-secondary mb-4">恭喜你获胜！</h2>
                 <p id="game-message-text" class="text-secondary/80 mb-6">你达到了2048分，可以继续游戏挑战更高分数，或者重新开始。</p>
-                <button id="game-message-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50">
+                <button id="game-message-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50">
                     <i class="fa-solid fa-refresh mr-2"></i>再玩一次
                 </button>
             </div>
         </div>
         <div id="pause-menu" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="pause-menu-title" aria-modal="true">
-            <div class="bg-white rounded-lg p-6 max-w-md w-full text-center shadow-xl transform transition-all duration-300 scale-95 opacity-0">
+            <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0">
                 <h2 id="pause-menu-title" class="text-2xl font-bold text-secondary mb-4">游戏暂停</h2>
                 <div class="flex flex-col gap-3">
-                    <button id="resume-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50">
-                        <i class="fa-solid fa-play mr-2"></i><span class="text-content">继续<span class="hide-small">游戏</span></span>
+                    <button id="resume-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50">
+                        <i class="fa-solid fa-play mr-2"></i><span class="text-content">继续游戏</span>
                     </button>
-                    <button id="restart-button" class="bg-secondary hover:bg-secondary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-secondary/50">
-                        <i class="fa-solid fa-refresh mr-2"></i><span class="text-content">重<span class="hide-small">新</span>开<span class="hide-small">始</span></span>
+                    <button id="restart-button" class="bg-secondary hover:bg-secondary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary/50">
+                        <i class="fa-solid fa-refresh mr-2"></i><span class="text-content">重新开始</span>
                     </button>
                     <div class="flex justify-center gap-4 mt-2">
                         <button id="settings-button" class="text-primary hover:text-primary/80 focus:outline-none text-sm">
@@ -1041,14 +1286,14 @@
                         <span class="text-gray-700 dark:text-dark-muted">GPU加速</span>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="gpu-acceleration" class="sr-only peer" checked title="GPU加速">
-                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary transition-all duration-300 hover:scale-105 hover:shadow-md"></div>
+                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
                         </label>
                     </div>
                     <div class="flex items-center justify-between mt-2 mb-2 px-2">
                         <span class="text-gray-700 dark:text-dark-muted">滑块动画</span>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="tile-animation" class="sr-only peer" checked title="滑块动画">
-                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary transition-all duration-300 hover:scale-105 hover:shadow-md"></div>
+                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
                         </label>
                     </div>
                     <div class="border-b border-gray-200 dark:border-gray-700 mt-1"></div>
@@ -1071,9 +1316,9 @@
                             <option value="dark">&#xf186; 深色</option>
                         </select>
                     </div>
-                    <div class="text-sm text-secondary/70 mt-4">2048 v1.20.2 | by TheFurina</div>
+                    <div class="text-sm text-secondary/70 mt-4">2048 v1.20.3 | by TheFurina</div>
                     <button id="reset-settings-button" class="text-gray-500 hover:text-gray-700 focus:outline-none text-sm inline-block mx-auto">
-                        <i class="fa-solid fa-rotate-right mr-1"></i><span class="settings-text">重置所有设置</span>
+                        <i class="fa-solid fa-rotate-right mr-1"></i><span>重置所有设置</span>
                     </button>
                     <button id="close-settings-button" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl" title="关闭设置">
                         <i class="fa-solid fa-times"></i>
@@ -1083,7 +1328,7 @@
             </div>
         </div>
         <div id="help-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden modal-enter" role="dialog" aria-labelledby="help-modal-title" aria-modal="true">
-            <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-xl">
+            <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-xl transition-all duration-300 ease-in-out">
                 <div class="flex justify-between items-center mb-4">
                     <h2 id="help-modal-title" class="text-2xl font-bold text-secondary">游戏介绍</h2>
                     <button id="close-help" class="text-secondary/60 hover:text-secondary focus:outline-none" title="关闭帮助">
@@ -1133,13 +1378,13 @@
             </div>
         </div>
         <div id="data-transfer-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="data-transfer-modal-title" aria-modal="true">
-            <div class="bg-white rounded-lg p-6 max-w-md w-full text-center shadow-xl transform transition-all duration-300 scale-95 opacity-0">
+            <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0">
                 <h2 id="data-transfer-modal-title" class="text-2xl font-bold text-secondary mb-4">数据管理</h2>
                 <div class="flex flex-col gap-3 mb-4">
-                    <button id="export-data-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    <button id="export-data-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50">
                         <i class="fa-solid fa-upload mr-2"></i>导出数据
                     </button>
-                    <button id="import-data-button" class="bg-secondary hover:bg-secondary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-secondary/50">
+                    <button id="import-data-button" class="bg-secondary hover:bg-secondary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary/50">
                         <i class="fa-solid fa-download mr-2"></i>导入数据
                     </button>
                 </div>
@@ -1154,7 +1399,7 @@
                         <i class="fa-solid fa-trash-alt mr-1"></i>清除数据并退出
                     </button>
                 </div>
-                <button id="close-data-modal" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray/50">
+                <button id="close-data-modal" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray/50">
                     <i class="fa-solid fa-times mr-2"></i>关闭
                 </button>
             </div>
@@ -1346,7 +1591,7 @@
             tileElement.className = `tile tile-${tile.value} ${gameState.tileAnimationEnabled && tile.new ? 'tile-appear' : ''} ${tile.value > 32768 ? 'tile-super' : ''} ${tile.value >= 10000 ? 'tile-5digit' : ''} ${gameState.gpuAccelerationEnabled ? 'gpu-accelerated' : ''} ${animationClass}`;
             tileElement.textContent = tile.value;
             if (gameState.tileAnimationEnabled && animate) {
-                tileElement.style.transition = 'left 150ms ease-in-out, top 150ms ease-in-out, transform 150ms ease-in-out';
+                tileElement.style.transition = 'left 200ms cubic-bezier(0.34, 1.56, 0.64, 1), top 200ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1)'
             }
             tileElement.style.left = leftPos;
             tileElement.style.top = topPos;
@@ -1377,7 +1622,7 @@
                 if (!preservedPositions.has(pos)) {
                     const tile = currentTiles[pos];
                     if (gameState.tileAnimationEnabled && animate) {
-                        tile.style.transition = 'opacity 150ms ease-in-out';
+                        tile.style.transition = 'opacity 200ms cubic-bezier(0.34, 1.56, 0.64, 1)'
                         tile.style.opacity = '0';
                         setTimeout(() => {
                             if (tile.parentNode === elements.tileContainer) {
@@ -1889,7 +2134,11 @@
         function initEventListeners() {
             document.addEventListener('keydown', (e) => {
                 if (gameState.isPaused || gameState.gameOver || (gameState.gameWon && !gameState.isEndlessMode) || !elements.helpModal.classList.contains('hidden')) return;
-                if ([37, 38, 39, 40, 87, 65, 83, 68, 80, 27, 82, 78, 69, 72, 71, 76].includes(e.keyCode)) {
+                if ([37, 38, 39, 40, 87, 65, 83, 68, 80, 27, 90, 72, 76].includes(e.keyCode)) {
+                    e.preventDefault();
+                }
+                let shouldPreventDefault = false;
+                if ([82, 78, 69, 71].includes(e.keyCode)) {
                     e.preventDefault();
                 }
                 switch(e.keyCode) {
@@ -1920,17 +2169,29 @@
                         break;
                     case 82:
                         if (!e.ctrlKey && !e.metaKey && !e.altKey) {
-                            initGame(gameState.isEndlessMode, gameState.gridSize);
+                            if (gameState.score > 0 && confirm('重新开始将重置当前游戏进度，确定要继续吗？')) {
+                                initGame(gameState.isEndlessMode, gameState.gridSize);
+                            } else if (gameState.score === 0) {
+                                initGame(gameState.isEndlessMode, gameState.gridSize);
+                            }
                         }
                         break;
                     case 78:
                         if (!e.ctrlKey && !e.metaKey && !e.altKey) {
-                            initGame(false, gameState.gridSize);
+                            if (gameState.score > 0 && confirm('切换到标准模式将重置当前游戏进度，确定要继续吗？')) {
+                                initGame(false, gameState.gridSize);
+                            } else if (gameState.score === 0) {
+                                initGame(false, gameState.gridSize);
+                            }
                         }
                         break;
                     case 69:
                         if (!e.ctrlKey && !e.metaKey && !e.altKey) {
-                            initGame(true, gameState.gridSize);
+                            if (gameState.score > 0 && confirm('切换到无尽模式将重置当前游戏进度，确定要继续吗？')) {
+                                initGame(true, gameState.gridSize);
+                            } else if (gameState.score === 0) {
+                                initGame(true, gameState.gridSize);
+                            }
                         }
                         break;
                     case 72:
@@ -1945,13 +2206,23 @@
                         break;
                     case 71:
                         if (!e.ctrlKey && !e.metaKey && !e.altKey) {
-                            const currentIndex = [3, 4, 5].indexOf(gameState.gridSize);
-                            const nextIndex = (currentIndex + 1) % 3;
-                            const newGridSize = [3, 4, 5][nextIndex];
-                            gameState.gridSize = newGridSize;
-                            updateGridButtonState(newGridSize);
-                            elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
-                            initGame(gameState.isEndlessMode, newGridSize);
+                            if (gameState.score > 0 && confirm('切换棋盘大小将重置当前游戏进度，确定要继续吗？')) {
+                                const currentIndex = [3, 4, 5].indexOf(gameState.gridSize);
+                                const nextIndex = (currentIndex + 1) % 3;
+                                const newGridSize = [3, 4, 5][nextIndex];
+                                gameState.gridSize = newGridSize;
+                                updateGridButtonState(newGridSize);
+                                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
+                                initGame(gameState.isEndlessMode, newGridSize);
+                            } else if (gameState.score === 0) {
+                                const currentIndex = [3, 4, 5].indexOf(gameState.gridSize);
+                                const nextIndex = (currentIndex + 1) % 3;
+                                const newGridSize = [3, 4, 5][nextIndex];
+                                gameState.gridSize = newGridSize;
+                                updateGridButtonState(newGridSize);
+                                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
+                                initGame(gameState.isEndlessMode, newGridSize);
+                            }
                         }
                         break;
                     case 76:
@@ -1986,10 +2257,18 @@
                 }
             }, { passive: true });
             elements.newGameButton.addEventListener('click', () => {
-                initGame(false, gameState.gridSize);
+                if (gameState.score > 0 && confirm('切换到标准模式将重置当前游戏进度，确定要继续吗？')) {
+                    initGame(false, gameState.gridSize);
+                } else if (gameState.score === 0) {
+                    initGame(false, gameState.gridSize);
+                }
             });
             elements.endlessModeButton.addEventListener('click', () => {
-                initGame(true, gameState.gridSize);
+                if (gameState.score > 0 && confirm('切换到无尽模式将重置当前游戏进度，确定要继续吗？')) {
+                    initGame(true, gameState.gridSize);
+                } else if (gameState.score === 0) {
+                    initGame(true, gameState.gridSize);
+                }
             });
             elements.gameMessageButton.addEventListener('click', () => {
                 hideGameMessage();
@@ -2052,22 +2331,43 @@
                 saveGameState();
             });
             elements.grid3x3Button.addEventListener('click', () => {
-                gameState.gridSize = 3;
-                updateGridButtonState(3);
-                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
-                initGame(gameState.isEndlessMode, 3);
+                if (gameState.score > 0 && confirm('切换棋盘大小将重置当前游戏进度，确定要继续吗？')) {
+                    gameState.gridSize = 3;
+                    updateGridButtonState(3);
+                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
+                    initGame(gameState.isEndlessMode, 3);
+                } else if (gameState.score === 0) {
+                    gameState.gridSize = 3;
+                    updateGridButtonState(3);
+                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
+                    initGame(gameState.isEndlessMode, 3);
+                }
             });
             elements.grid4x4Button.addEventListener('click', () => {
-                gameState.gridSize = 4;
-                updateGridButtonState(4);
-                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
-                initGame(gameState.isEndlessMode, 4);
+                if (gameState.score > 0 && confirm('切换棋盘大小将重置当前游戏进度，确定要继续吗？')) {
+                    gameState.gridSize = 4;
+                    updateGridButtonState(4);
+                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
+                    initGame(gameState.isEndlessMode, 4);
+                } else if (gameState.score === 0) {
+                    gameState.gridSize = 4;
+                    updateGridButtonState(4);
+                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
+                    initGame(gameState.isEndlessMode, 4);
+                }
             });
             elements.grid5x5Button.addEventListener('click', () => {
-                gameState.gridSize = 5;
-                updateGridButtonState(5);
-                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
-                initGame(gameState.isEndlessMode, 5);
+                if (gameState.score > 0 && confirm('切换棋盘大小将重置当前游戏进度，确定要继续吗？')) {
+                    gameState.gridSize = 5;
+                    updateGridButtonState(5);
+                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
+                    initGame(gameState.isEndlessMode, 5);
+                } else if (gameState.score === 0) {
+                    gameState.gridSize = 5;
+                    updateGridButtonState(5);
+                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
+                    initGame(gameState.isEndlessMode, 5);
+                }
             });
             elements.dataTransferButton.addEventListener('click', () => { showModal('data-transfer-modal'); });
             elements.settingsButton.addEventListener('click', () => {
@@ -2241,7 +2541,7 @@
             });
         });
     </script>
-        <div id="ai-analysis-modal" class="ai-analysis-modal hidden" role="dialog" aria-labelledby="ai-analysis-modal-title" aria-modal="true"><div class="ai-analysis-content"><div id="ai-analysis-modal-title" class="ai-analysis-title">AI游戏分析<button id="close-ai-modal" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-0 right-4 text-xl dark:text-dark-muted dark:hover:text-white" title="关闭AI分析"><i class="fa-solid fa-times"></i></button></div><div class="analysis-item"><div class="analysis-label">当前最佳移动方向</div><div id="best-move-direction" class="analysis-value best-move">向上</div></div><div class="analysis-item"><div class="analysis-label">潜在合并机会</div><div id="merge-opportunities" class="analysis-value">2处 (右侧和下方)</div></div><div class="analysis-item"><div class="analysis-label">游戏状态评估</div><div id="game-state-assessment" class="analysis-value">良好</div></div><div class="analysis-item"><div class="analysis-label">得分潜力分析</div><div id="score-potential" class="analysis-value">高 (预计可合并2个2048方块)</div></div></div></div><script>function analyzeGameState() {const directions = ['up', 'down', 'left', 'right'];const directionNames = {up: '向上', down: '向下', left: '向左', right: '向右'};let bestScore = -1;let bestDirection = 'up';let mergeOpportunities = 0;const gridCopy = JSON.parse(JSON.stringify(gameState.grid));const originalScore = gameState.score;const gridSize = gameState.gridSize;let scoreDiffWeight, emptyCellsWeight, mergesWeight, positionWeight, maxValueWeight, continuityWeight, uniformityWeight, blockWeight, multiStepWeight, monotonicityWeight;let dangerThreshold, warningThreshold;let highPotentialThreshold, mediumPotentialThreshold;let directionPriority = {up: 1, down: 1, left: 1, right: 1};if (gridSize === 3) {scoreDiffWeight = 0.2;emptyCellsWeight = 0.18;mergesWeight = 0.15;positionWeight = 0.1;maxValueWeight = 0.1;continuityWeight = 0.05;uniformityWeight = 0.05;blockWeight = 0.05;multiStepWeight = 0.1;monotonicityWeight = 0.02;directionPriority = {up: 1.1, down: 0.9, left: 1, right: 1};dangerThreshold = 2;warningThreshold = 4;highPotentialThreshold = 2;mediumPotentialThreshold = 1;} else if (gridSize === 4) {scoreDiffWeight = 0.25;emptyCellsWeight = 0.15;mergesWeight = 0.15;positionWeight = 0.1;maxValueWeight = 0.1;continuityWeight = 0.05;uniformityWeight = 0.05;blockWeight = 0.05;multiStepWeight = 0.08;monotonicityWeight = 0.02;directionPriority = {up: 1.1, down: 0.9, left: 1, right: 1};dangerThreshold = 3;warningThreshold = 6;highPotentialThreshold = 3;mediumPotentialThreshold = 1;} else {scoreDiffWeight = 0.3;emptyCellsWeight = 0.12;mergesWeight = 0.15;positionWeight = 0.1;maxValueWeight = 0.1;continuityWeight = 0.05;uniformityWeight = 0.05;blockWeight = 0.03;multiStepWeight = 0.07;monotonicityWeight = 0.03;directionPriority = {up: 1, down: 1, left: 1, right: 1};dangerThreshold = 5;warningThreshold = 10;highPotentialThreshold = 4;mediumPotentialThreshold = 2;}directions.forEach(direction => {const simulatedState = {grid: JSON.parse(JSON.stringify(gridCopy)),score: originalScore,gridSize: gridSize};if (simulateMove(simulatedState, direction)) {const scoreDiff = simulatedState.score - originalScore;const newEmptyCells = countEmptyCells(simulatedState.grid);const newMerges = countMergeOpportunities(simulatedState.grid);const positionScore = calculatePositionScore(simulatedState.grid, gridSize);const maxValueScore = calculateMaxValueScore(simulatedState.grid);const continuityScore = calculateContinuityScore(simulatedState.grid, gridSize);const uniformityScore = calculateUniformityScore(simulatedState.grid, gridSize);const blockScore = calculateBlockScore(simulatedState.grid, gridSize, direction);const monotonicityScore = calculateMonotonicityScore(simulatedState.grid, gridSize);const multiStepScore = calculateMultiStepScore(simulatedState, direction);const compositeScore = (scoreDiff * scoreDiffWeight + newEmptyCells * emptyCellsWeight + newMerges * mergesWeight + positionScore * positionWeight + maxValueScore * maxValueWeight + continuityScore * continuityWeight + uniformityScore * uniformityWeight + blockScore * blockWeight + monotonicityScore * monotonicityWeight + multiStepScore * multiStepWeight) * directionPriority[direction];if (compositeScore > bestScore) {bestScore = compositeScore;bestDirection = direction;}}});mergeOpportunities = countMergeOpportunities(gridCopy);const emptyCells = countEmptyCells(gridCopy);let gameStateAssessment = '良好';if (emptyCells < dangerThreshold) gameStateAssessment = '危险';else if (emptyCells < warningThreshold) gameStateAssessment = '一般';let scorePotential = '低';if (mergeOpportunities >= highPotentialThreshold) scorePotential = '高';else if (mergeOpportunities >= mediumPotentialThreshold) scorePotential = '中';document.getElementById('best-move-direction').textContent = directionNames[bestDirection];
+        <div id="ai-analysis-modal" class="ai-analysis-modal hidden" role="dialog" aria-labelledby="ai-analysis-modal-title" aria-modal="true"><div class="ai-analysis-content max-h-[90vh] overflow-y-auto transition-all duration-300 ease-in-out"><div id="ai-analysis-modal-title" class="ai-analysis-title">AI游戏分析<button id="close-ai-modal" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-0 right-4 text-xl dark:text-dark-muted dark:hover:text-white" title="关闭AI分析"><i class="fa-solid fa-times"></i></button></div><div class="analysis-item"><div class="analysis-label">当前最佳移动方向</div><div id="best-move-direction" class="analysis-value best-move">向上</div></div><div class="analysis-item"><div class="analysis-label">潜在合并机会</div><div id="merge-opportunities" class="analysis-value">2处 (右侧和下方)</div></div><div class="analysis-item"><div class="analysis-label">游戏状态评估</div><div id="game-state-assessment" class="analysis-value">良好</div></div><div class="analysis-item"><div class="analysis-label">得分潜力分析</div><div id="score-potential" class="analysis-value">高 (预计可合并2个2048方块)</div></div></div></div><script>function analyzeGameState() {const directions = ['up', 'down', 'left', 'right'];const directionNames = {up: '向上', down: '向下', left: '向左', right: '向右'};let bestScore = -1;let bestDirection = 'up';let mergeOpportunities = 0;const gridCopy = JSON.parse(JSON.stringify(gameState.grid));const originalScore = gameState.score;const gridSize = gameState.gridSize;let scoreDiffWeight, emptyCellsWeight, mergesWeight, positionWeight, maxValueWeight, continuityWeight, uniformityWeight, blockWeight, multiStepWeight, monotonicityWeight;let dangerThreshold, warningThreshold;let highPotentialThreshold, mediumPotentialThreshold;let directionPriority = {up: 1, down: 1, left: 1, right: 1};if (gridSize === 3) {scoreDiffWeight = 0.2;emptyCellsWeight = 0.18;mergesWeight = 0.15;positionWeight = 0.1;maxValueWeight = 0.1;continuityWeight = 0.05;uniformityWeight = 0.05;blockWeight = 0.05;multiStepWeight = 0.1;monotonicityWeight = 0.02;directionPriority = {up: 1.1, down: 0.9, left: 1, right: 1};dangerThreshold = 2;warningThreshold = 4;highPotentialThreshold = 2;mediumPotentialThreshold = 1;} else if (gridSize === 4) {scoreDiffWeight = 0.25;emptyCellsWeight = 0.15;mergesWeight = 0.15;positionWeight = 0.1;maxValueWeight = 0.1;continuityWeight = 0.05;uniformityWeight = 0.05;blockWeight = 0.05;multiStepWeight = 0.08;monotonicityWeight = 0.02;directionPriority = {up: 1.1, down: 0.9, left: 1, right: 1};dangerThreshold = 3;warningThreshold = 6;highPotentialThreshold = 3;mediumPotentialThreshold = 1;} else {scoreDiffWeight = 0.3;emptyCellsWeight = 0.12;mergesWeight = 0.15;positionWeight = 0.1;maxValueWeight = 0.1;continuityWeight = 0.05;uniformityWeight = 0.05;blockWeight = 0.03;multiStepWeight = 0.07;monotonicityWeight = 0.03;directionPriority = {up: 1, down: 1, left: 1, right: 1};dangerThreshold = 5;warningThreshold = 10;highPotentialThreshold = 4;mediumPotentialThreshold = 2;}directions.forEach(direction => {const simulatedState = {grid: JSON.parse(JSON.stringify(gridCopy)),score: originalScore,gridSize: gridSize};if (simulateMove(simulatedState, direction)) {const scoreDiff = simulatedState.score - originalScore;const newEmptyCells = countEmptyCells(simulatedState.grid);const newMerges = countMergeOpportunities(simulatedState.grid);const positionScore = calculatePositionScore(simulatedState.grid, gridSize);const maxValueScore = calculateMaxValueScore(simulatedState.grid);const continuityScore = calculateContinuityScore(simulatedState.grid, gridSize);const uniformityScore = calculateUniformityScore(simulatedState.grid, gridSize);const blockScore = calculateBlockScore(simulatedState.grid, gridSize, direction);const monotonicityScore = calculateMonotonicityScore(simulatedState.grid, gridSize);const multiStepScore = calculateMultiStepScore(simulatedState, direction);const compositeScore = (scoreDiff * scoreDiffWeight + newEmptyCells * emptyCellsWeight + newMerges * mergesWeight + positionScore * positionWeight + maxValueScore * maxValueWeight + continuityScore * continuityWeight + uniformityScore * uniformityWeight + blockScore * blockWeight + monotonicityScore * monotonicityWeight + multiStepScore * multiStepWeight) * directionPriority[direction];if (compositeScore > bestScore) {bestScore = compositeScore;bestDirection = direction;}}});mergeOpportunities = countMergeOpportunities(gridCopy);const emptyCells = countEmptyCells(gridCopy);let gameStateAssessment = '良好';if (emptyCells < dangerThreshold) gameStateAssessment = '危险';else if (emptyCells < warningThreshold) gameStateAssessment = '一般';let scorePotential = '低';if (mergeOpportunities >= highPotentialThreshold) scorePotential = '高';else if (mergeOpportunities >= mediumPotentialThreshold) scorePotential = '中';document.getElementById('best-move-direction').textContent = directionNames[bestDirection];
             const mergeOpportunitiesElement = document.getElementById('merge-opportunities');
             mergeOpportunitiesElement.textContent = `${mergeOpportunities}处`;
             mergeOpportunitiesElement.className = 'analysis-value';
@@ -2271,7 +2571,11 @@
                 scorePotentialElement.classList.add('medium');
             } else {
                 scorePotentialElement.classList.add('low');
-            }document.getElementById('ai-analysis-modal').classList.remove('hidden');}function simulateMove(state, direction) {let moved = false;state.grid = JSON.parse(JSON.stringify(state.grid));for (let y = 0; y < state.gridSize; y++) {for (let x = 0; x < state.gridSize; x++) {if (state.grid[y][x]) {state.grid[y][x].merged = false;}}}switch (direction) {case 'up':for (let x = 0; x < state.gridSize; x++) {for (let y = 1; y < state.gridSize; y++) {if (state.grid[y][x]) {let newY = y;while (newY > 0 && state.grid[newY - 1][x] === null) newY--;if (newY > 0 && state.grid[newY - 1][x] && state.grid[newY - 1][x].value === state.grid[y][x].value && !state.grid[newY - 1][x].merged) {state.grid[newY - 1][x].value *= 2;state.grid[newY - 1][x].merged = true;state.grid[y][x] = null;state.score += state.grid[newY - 1][x].value;moved = true;} else if (newY !== y) {state.grid[newY][x] = state.grid[y][x];state.grid[y][x] = null;moved = true;}}}}break;case 'down':for (let x = 0; x < state.gridSize; x++) {for (let y = state.gridSize - 2; y >= 0; y--) {if (state.grid[y][x]) {let newY = y;while (newY < state.gridSize - 1 && state.grid[newY + 1][x] === null) newY++;if (newY < state.gridSize - 1 && state.grid[newY + 1][x] && state.grid[newY + 1][x].value === state.grid[y][x].value && !state.grid[newY + 1][x].merged) {state.grid[newY + 1][x].value *= 2;state.grid[newY + 1][x].merged = true;state.grid[y][x] = null;state.score += state.grid[newY + 1][x].value;moved = true;} else if (newY !== y) {state.grid[newY][x] = state.grid[y][x];state.grid[y][x] = null;moved = true;}}}}break;case 'left':for (let y = 0; y < state.gridSize; y++) {for (let x = 1; x < state.gridSize; x++) {if (state.grid[y][x]) {let newX = x;while (newX > 0 && state.grid[y][newX - 1] === null) newX--;if (newX > 0 && state.grid[y][newX - 1] && state.grid[y][newX - 1].value === state.grid[y][x].value && !state.grid[y][newX - 1].merged) {state.grid[y][newX - 1].value *= 2;state.grid[y][newX - 1].merged = true;state.grid[y][x] = null;state.score += state.grid[y][newX - 1].value;moved = true;} else if (newX !== x) {state.grid[y][newX] = state.grid[y][x];state.grid[y][x] = null;moved = true;}}}}break;case 'right':for (let y = 0; y < state.gridSize; y++) {for (let x = state.gridSize - 2; x >= 0; x--) {if (state.grid[y][x]) {let newX = x;while (newX < state.gridSize - 1 && state.grid[y][newX + 1] === null) newX++;if (newX < state.gridSize - 1 && state.grid[y][newX + 1] && state.grid[y][newX + 1].value === state.grid[y][x].value && !state.grid[y][newX + 1].merged) {state.grid[y][newX + 1].value *= 2;state.grid[y][newX + 1].merged = true;state.grid[y][x] = null;state.score += state.grid[y][newX + 1].value;moved = true;} else if (newX !== x) {state.grid[y][newX] = state.grid[y][x];state.grid[y][x] = null;moved = true;}}}}}return moved;}function calculatePositionScore(grid, gridSize) {let score = 0;let maxValue = 0;let maxValuePos = {x: 0, y: 0};for (let y = 0; y < gridSize; y++) {for (let x = 0; x < gridSize; x++) {if (grid[y][x] && grid[y][x].value > maxValue) {maxValue = grid[y][x].value;maxValuePos = {x, y};}}}if (maxValue > 0) {const cornerDistance = Math.min(maxValuePos.x + maxValuePos.y, (gridSize - 1 - maxValuePos.x) + maxValuePos.y, maxValuePos.x + (gridSize - 1 - maxValuePos.y), (gridSize - 1 - maxValuePos.x) + (gridSize - 1 - maxValuePos.y));score = (gridSize - cornerDistance) / gridSize * 10;}return score;}function calculateMaxValueScore(grid) {let maxValue = 0;let secondMaxValue = 0;for (let y = 0; y < grid.length; y++) {for (let x = 0; x < grid[y].length; x++) {if (grid[y][x]) {if (grid[y][x].value > maxValue) {secondMaxValue = maxValue;maxValue = grid[y][x].value;} else if (grid[y][x].value > secondMaxValue) {secondMaxValue = grid[y][x].value;}}}}if (maxValue === 0) return 0;const ratio = secondMaxValue / maxValue;return ratio * 5;}function countMergeOpportunities(grid) {let count = 0;const size = grid.length;for (let y = 0; y < size; y++) {for (let x = 0; x < size - 1; x++) {if (grid[y][x] && grid[y][x+1] && grid[y][x].value === grid[y][x+1].value) {count++;const power = Math.log2(grid[y][x].value);if (power >= 10) count += 0.5;else if (power >= 8) count += 0.3;}}}for (let x = 0; x < size; x++) {for (let y = 0; y < size - 1; y++) {if (grid[y][x] && grid[y+1][x] && grid[y][x].value === grid[y+1][x].value) {count++;const power = Math.log2(grid[y][x].value);if (power >= 10) count += 0.5;else if (power >= 8) count += 0.3;}}}return count;}function calculateContinuityScore(grid, gridSize) {let score = 0;for (let y = 0; y < gridSize; y++) {for (let x = 0; x < gridSize - 2; x++) {if (grid[y][x] && grid[y][x+1] && grid[y][x+2] && grid[y][x].value === grid[y][x+1].value && grid[y][x+1].value === grid[y][x+2].value) {score += 2;const power = Math.log2(grid[y][x].value);if (power >= 8) score += 1;}}}for (let x = 0; x < gridSize; x++) {for (let y = 0; y < gridSize - 2; y++) {if (grid[y][x] && grid[y+1][x] && grid[y+2][x] && grid[y][x].value === grid[y+1][x].value && grid[y+1][x].value === grid[y+2][x].value) {score += 2;const power = Math.log2(grid[y][x].value);if (power >= 8) score += 1;}}}return score;}function calculateUniformityScore(grid, gridSize) {let values = [];for (let y = 0; y < gridSize; y++) {for (let x = 0; x < gridSize; x++) {if (grid[y][x]) {values.push(grid[y][x].value);}}}if (values.length === 0) return 10;const avgValue = values.reduce((a, b) => a + b, 0) / values.length;const variance = values.reduce((a, b) => a + Math.pow(b - avgValue, 2), 0) / values.length;const stdDev = Math.sqrt(variance);const uniformity = 10 - Math.min(stdDev / avgValue * 10, 9);return uniformity;}function calculateBlockScore(grid, gridSize, direction) {let blockCount = 0;for (let y = 0; y < gridSize; y++) {for (let x = 0; x < gridSize; x++) {if (grid[y][x]) {switch (direction) {case 'up':if (y > 0 && grid[y-1][x] && grid[y-1][x].value > grid[y][x].value) {blockCount++;}break;case 'down':if (y < gridSize-1 && grid[y+1][x] && grid[y+1][x].value > grid[y][x].value) {blockCount++;}break;case 'left':if (x > 0 && grid[y][x-1] && grid[y][x-1].value > grid[y][x].value) {blockCount++;}break;case 'right':if (x < gridSize-1 && grid[y][x+1] && grid[y][x+1].value > grid[y][x].value) {blockCount++;}break;}}}}const maxPossibleBlocks = gridSize * (gridSize - 1);return 10 - (blockCount / maxPossibleBlocks * 10);}function calculateMultiStepScore(state, initialDirection) {return minimaxSearch(state, 3, -Infinity, Infinity, true);}function minimaxSearch(state, depth, alpha, beta, isMaximizingPlayer) {if (depth === 0) {const emptyCells = countEmptyCells(state.grid);const merges = countMergeOpportunities(state.grid);const positionScore = calculatePositionScore(state.grid, state.gridSize);const uniformityScore = calculateUniformityScore(state.grid, state.gridSize);return (emptyCells * 2 + merges * 3 + positionScore + uniformityScore) / 10;}const directions = ['up', 'down', 'left', 'right'];if (isMaximizingPlayer) {let maxScore = -Infinity;directions.forEach(direction => {const newState = {grid: JSON.parse(JSON.stringify(state.grid)),score: state.score,gridSize: state.gridSize};if (simulateMove(newState, direction)) {const score = minimaxSearch(newState, depth - 1, alpha, beta, false);maxScore = Math.max(maxScore, score);alpha = Math.max(alpha, score);if (beta <= alpha) return maxScore;}});return maxScore;} else {let minScore = Infinity;const emptyPositions = [];for (let y = 0; y < state.gridSize; y++) {for (let x = 0; x < state.gridSize; x++) {if (!state.grid[y][x]) {emptyPositions.push({x, y});}}}if (emptyPositions.length === 0) return 0;const randomPos = emptyPositions[Math.floor(Math.random() * emptyPositions.length)];const newState = {grid: JSON.parse(JSON.stringify(state.grid)),score: state.score,gridSize: state.gridSize};newState.grid[randomPos.y][randomPos.x] = {value: Math.random() < 0.9 ? 2 : 4, merged: false};const score = minimaxSearch(newState, depth - 1, alpha, beta, true);minScore = Math.min(minScore, score);beta = Math.min(beta, score);if (beta <= alpha) return minScore;return minScore;}}function calculateMonotonicityScore(grid, gridSize) {let score = 0;for (let y = 0; y < gridSize; y++) {let rowIncreasing = true;let rowDecreasing = true;for (let x = 0; x < gridSize - 1; x++) {const curr = grid[y][x] ? grid[y][x].value : 0;const next = grid[y][x+1] ? grid[y][x+1].value : 0;rowIncreasing = rowIncreasing && (curr <= next);rowDecreasing = rowDecreasing && (curr >= next);}score += rowIncreasing || rowDecreasing ? 2 : 0;}for (let x = 0; x < gridSize; x++) {let colIncreasing = true;let colDecreasing = true;for (let y = 0; y < gridSize - 1; y++) {const curr = grid[y][x] ? grid[y][x].value : 0;const next = grid[y+1][x] ? grid[y+1][x].value : 0;colIncreasing = colIncreasing && (curr <= next);colDecreasing = colDecreasing && (curr >= next);}score += colIncreasing || colDecreasing ? 2 : 0;}return score / (2 * gridSize) * 10;}function countEmptyCells(grid) {let count = 0;for (let y = 0; y < grid.length; y++) {for (let x = 0; x < grid[y].length; x++) {if (!grid[y][x]) count++;}}return count;}document.getElementById('ai-analysis-button').addEventListener('click', analyzeGameState);
+            }document.getElementById('ai-analysis-modal').classList.remove('hidden');}function simulateMove(state, direction) {let moved = false;state.grid = JSON.parse(JSON.stringify(state.grid));for (let y = 0; y < state.gridSize; y++) {for (let x = 0; x < state.gridSize; x++) {if (state.grid[y][x]) {state.grid[y][x].merged = false;}}}switch (direction) {case 'up':for (let x = 0; x < state.gridSize; x++) {for (let y = 1; y < state.gridSize; y++) {if (state.grid[y][x]) {let newY = y;while (newY > 0 && state.grid[newY - 1][x] === null) newY--;if (newY > 0 && state.grid[newY - 1][x] && state.grid[newY - 1][x].value === state.grid[y][x].value && !state.grid[newY - 1][x].merged) {state.grid[newY - 1][x].value *= 2;state.grid[newY - 1][x].merged = true;state.grid[y][x] = null;state.score += state.grid[newY - 1][x].value;moved = true;} else if (newY !== y) {state.grid[newY][x] = state.grid[y][x];state.grid[y][x] = null;moved = true;}}}}break;case 'down':for (let x = 0; x < state.gridSize; x++) {for (let y = state.gridSize - 2; y >= 0; y--) {if (state.grid[y][x]) {let newY = y;while (newY < state.gridSize - 1 && state.grid[newY + 1][x] === null) newY++;if (newY < state.gridSize - 1 && state.grid[newY + 1][x] && state.grid[newY + 1][x].value === state.grid[y][x].value && !state.grid[newY + 1][x].merged) {state.grid[newY + 1][x].value *= 2;state.grid[newY + 1][x].merged = true;state.grid[y][x] = null;state.score += state.grid[newY + 1][x].value;moved = true;} else if (newY !== y) {state.grid[newY][x] = state.grid[y][x];state.grid[y][x] = null;moved = true;}}}}break;case 'left':for (let y = 0; y < state.gridSize; y++) {for (let x = 1; x < state.gridSize; x++) {if (state.grid[y][x]) {let newX = x;while (newX > 0 && state.grid[y][newX - 1] === null) newX--;if (newX > 0 && state.grid[y][newX - 1] && state.grid[y][newX - 1].value === state.grid[y][x].value && !state.grid[y][newX - 1].merged) {state.grid[y][newX - 1].value *= 2;state.grid[y][newX - 1].merged = true;state.grid[y][x] = null;state.score += state.grid[y][newX - 1]
+.value;moved = true;} else if (newX !== x) {state.grid[y][newX] = state.grid[y][x];state.grid[y][x] = null;moved = true;}}}}break;case 'right':for (let y = 0; y < state.gridSize; y++) {for (let x = state.gridSize - 2; x >= 0; x--) {if (state.grid[y][x]) {let newX = x;while (newX < state.gridSize - 1 && state.grid[y][newX + 1] === null) newX++;if (newX < state.gridSize - 1 && state.grid[y][newX + 1] && state.grid[y][newX + 1].value === state.grid[y][x].value && !state.grid[y][newX + 1].merged) {state.grid[y][newX + 1].value *= 2;state.grid[y][newX + 1].merged = true;state.grid[y][x] = null;state.score += state.grid[y][newX + 1].value;moved = true;} else if (newX !== x) {state.grid[y][newX] = state.grid[y][x];state.grid[y][x] = null;moved = true;}}}}}return moved;}function calculatePositionScore(grid, gridSize) {let score = 0;let maxValue = 0;let maxValuePos = {x: 0, y: 0};for (let y = 0; y < gridSize; y++) {for (let x = 0; x < gridSize; x++) {if (grid[y][x] && grid[y][x].value > maxValue) {maxValue = grid[y][x].value;maxValuePos = {x, y};}}}if (maxValue > 0) {const cornerDistance = Math.min(maxValuePos.x + maxValuePos.y, (gridSize - 1 - maxValuePos.x) + maxValuePos.y, maxValuePos.x + (gridSize - 1 - maxValuePos.y), (gridSize - 1 - maxValuePos.x) + (gridSize - 1 - maxValuePos.y));score = (gridSize - cornerDistance) / gridSize * 10;}return score;}function calculateMaxValueScore(grid) {let maxValue = 0;let secondMaxValue = 0;for (let y = 0; y < grid.length; y++) {for (let x = 0; x < grid[y].length; x++) {if (grid[y][x]) {if (grid[y][x].value > maxValue) {secondMaxValue = maxValue;maxValue = grid[y][x].value;} else if (grid[y][x].value > secondMaxValue) {secondMaxValue = grid[y][x].value;}}}}if (maxValue === 0) return 0;const ratio = secondMaxValue / maxValue;return ratio * 5;}function countMergeOpportunities(grid) {let count = 0;const size = grid.length;for (let y = 0; y < size; y++) {for (let x = 0; x < size - 1; x++) {if (grid[y][x] && grid[y][x+1] && grid[y][x].value === grid[y][x+1].value) {count++;const power = 
+Math.log2(grid[y][x].value);if (power >= 10) count += 0.5;else if (power >= 8) count += 0.3;}}}for (let x = 0; x < size; x++) {for (let y = 0; y < size - 1; y++) {if (grid[y][x] && grid[y+1][x] && grid[y][x].value === grid[y+1][x].value) {count++;const power = Math.log2(grid[y][x].value);if (power >= 10) count += 0.5;else if (power >= 8) count += 0.3;}}}return count;}function calculateContinuityScore(grid, gridSize) {let score = 0;for (let y = 0; y < gridSize; y++) {for (let x = 0; x < gridSize - 2; x++) {if (grid[y][x] && grid[y][x+1] && grid[y][x+2] && grid[y][x].value === grid[y][x+1].value && grid[y][x+1].value === grid[y][x+2].value) {score += 2;const power = Math.log2(grid[y][x].value);if (power >= 8) score += 1;}}}for (let x = 0; x < gridSize; x++) {for (let y = 0; y < gridSize - 2; y++) {if (grid[y][x] && grid[y+1][x] && grid[y+2][x] && grid[y][x].value === grid[y+1][x].value && grid[y+1][x].value === grid[y+2][x].value) {score += 2;const power = Math.log2(grid[y][x].value);if (power >= 8) score += 1;}}}return score;}function calculateUniformityScore(grid, gridSize) {let values = [];for (let y = 0; y < gridSize; y++) {for (let x = 0; x < gridSize; x++) {if (grid[y][x]) {values.push(grid[y][x].value);}}}if (values.length === 0) return 10;const avgValue = values.reduce((a, b) => a + b, 0) / values.length;const variance = values.reduce((a, b) => a + Math.pow(b - avgValue, 2), 0) / values.length;const stdDev = Math.sqrt(variance);const uniformity = 10 - Math.min(stdDev / avgValue * 10, 9);return uniformity;}function calculateBlockScore(grid, gridSize, direction) {let blockCount = 0;for (let y = 0; y < gridSize; y++) {for (let x = 0; x < gridSize; x++) {if (grid[y][x]) {switch (direction) {case 'up':if (y > 0 && grid[y-1][x] && grid[y-1][x].value > grid[y][x].value) {blockCount++;}break;case 'down':if (y < gridSize-1 && grid[y+1][x] && grid[y+1][x].value > grid[y][x].value) {blockCount++;}break;case 'left':if (x > 0 && grid[y][x-1] && grid[y][x-1].value > grid[y][x].value) {blockCount++;}break;case 'right':if 
+(x < gridSize-1 && grid[y][x+1] && grid[y][x+1].value > grid[y][x].value) {blockCount++;}break;}}}}const maxPossibleBlocks = gridSize * (gridSize - 1);return 10 - (blockCount / maxPossibleBlocks * 10);}function calculateMultiStepScore(state, initialDirection) {return minimaxSearch(state, 3, -Infinity, Infinity, true);}function minimaxSearch(state, depth, alpha, beta, isMaximizingPlayer) {if (depth === 0) {const emptyCells = countEmptyCells(state.grid);const merges = countMergeOpportunities(state.grid);const positionScore = calculatePositionScore(state.grid, state.gridSize);const uniformityScore = calculateUniformityScore(state.grid, state.gridSize);return (emptyCells * 2 + merges * 3 + positionScore + uniformityScore) / 10;}const directions = ['up', 'down', 'left', 'right'];if (isMaximizingPlayer) {let maxScore = -Infinity;directions.forEach(direction => {const newState = {grid: JSON.parse(JSON.stringify(state.grid)),score: state.score,gridSize: state.gridSize};if (simulateMove(newState, direction)) {const score = minimaxSearch(newState, depth - 1, alpha, beta, false);maxScore = Math.max(maxScore, score);alpha = Math.max(alpha, score);if (beta <= alpha) return maxScore;}});return maxScore;} else {let minScore = Infinity;const emptyPositions = [];for (let y = 0; y < state.gridSize; y++) {for (let x = 0; x < state.gridSize; x++) {if (!state.grid[y][x]) {emptyPositions.push({x, y});}}}if (emptyPositions.length === 0) return 0;const randomPos = emptyPositions[Math.floor(Math.random() * emptyPositions.length)];const newState = {grid: JSON.parse(JSON.stringify(state.grid)),score: state.score,gridSize: state.gridSize};newState.grid[randomPos.y][randomPos.x] = {value: Math.random() < 0.9 ? 2 : 4, merged: false};const score = minimaxSearch(newState, depth - 1, alpha, beta, true);minScore = Math.min(minScore, score);beta = Math.min(beta, score);if (beta <= alpha) return minScore;return minScore;}}function calculateMonotonicityScore(grid, gridSize) {let score = 0;for (let y = 0; y < gridSize; y++) {let rowIncreasing = true;
+let rowDecreasing = true;for (let x = 0; x < gridSize - 1; x++) {const curr = grid[y][x] ? grid[y][x].value : 0;const next = grid[y][x+1] ? grid[y][x+1].value : 0;rowIncreasing = rowIncreasing && (curr <= next);rowDecreasing = rowDecreasing && (curr >= next);}score += rowIncreasing || rowDecreasing ? 2 : 0;}for (let x = 0; x < gridSize; x++) {let colIncreasing = true;let colDecreasing = true;for (let y = 0; y < gridSize - 1; y++) {const curr = grid[y][x] ? grid[y][x].value : 0;const next = grid[y+1][x] ? grid[y+1][x].value : 0;colIncreasing = colIncreasing && (curr <= next);colDecreasing = colDecreasing && (curr >= next);}score += colIncreasing || colDecreasing ? 2 : 0;}return score / (2 * gridSize) * 10;}function countEmptyCells(grid) {let count = 0;for (let y = 0; y < grid.length; y++) {for (let x = 0; x < grid[y].length; x++) {if (!grid[y][x]) count++;}}return count;}document.getElementById('ai-analysis-button').addEventListener('click', analyzeGameState);
         document.getElementById('close-ai-modal').addEventListener('click', function() {
             document.getElementById('ai-analysis-modal').classList.add('hidden');
         });
