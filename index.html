@@ -47,7 +47,34 @@
         }
     </script>
     <style type="text/tailwindcss">
-        .hidden { opacity: 0; visibility: hidden; transition: all 0.3s ease; } .modal-enter { opacity: 0; transform: scale(0.95); } .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 0.3s ease, transform 0.3s ease; } .modal-exit { opacity: 1; transform: scale(1); } .modal-exit-active { opacity: 0; transform: scale(0.95); transition: opacity 0.3s ease, transform 0.3s ease; } :host, html { -webkit-text-size-adjust: 100%; -moz-text-size-adjust: 100%; text-size-adjust: 100%; }
+        .hidden { 
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        } 
+        .modal-enter { 
+            opacity: 0;
+            transform: scale(0.95);
+        } 
+        .modal-enter-active { 
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        } 
+        .modal-exit { 
+            opacity: 1;
+            transform: scale(1);
+        } 
+        .modal-exit-active { 
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        } 
+        :host, html { 
+            -webkit-text-size-adjust: 100%;
+            -moz-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
         @layer utilities {
             .content-auto {
                 content-visibility: auto;
@@ -63,27 +90,34 @@
             textarea:focus,
             [tabindex]:not([tabindex="-1"]):focus {
                 outline: none;
-                box-shadow: 0 0 0 3px rgba(250, 163, 27, 0.5);
                 transform: translateY(-1px);
             }
-            .dark button:focus,
-            .dark a:focus,
-            .dark input:focus,
-            .dark select:focus,
-            .dark textarea:focus,
-            .dark [tabindex]:not([tabindex="-1"]):focus {
+            button:focus-visible,
+            a:focus-visible,
+            input:focus-visible,
+            select:focus-visible,
+            textarea:focus-visible,
+            [tabindex]:not([tabindex="-1"]):focus-visible {
+                box-shadow: 0 0 0 3px rgba(250, 163, 27, 0.5);
+            }
+            .dark button:focus-visible,
+            .dark a:focus-visible,
+            .dark input:focus-visible,
+            .dark select:focus-visible,
+            .dark textarea:focus-visible,
+            .dark [tabindex]:not([tabindex="-1"]):focus-visible {
                 box-shadow: 0 0 0 3px rgba(255, 183, 77, 0.5);
             }
-            .bg-primary:focus { box-shadow: 0 0 0 3px rgba(250, 163, 27, 0.5) !important; }
-            .bg-secondary:focus { box-shadow: 0 0 0 3px rgba(143, 122, 102, 0.5) !important; }
-            .bg-easy:focus { box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.5) !important; }
-            .bg-medium:focus { box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.5) !important; }
-            .bg-hard:focus { box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.5) !important; }
-            .dark .bg-primary:focus { box-shadow: 0 0 0 3px rgba(255, 183, 77, 0.5) !important; }
-            .dark .bg-secondary:focus { box-shadow: 0 0 0 3px rgba(161, 136, 127, 0.5) !important; }
-            .dark .bg-easy:focus { box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.5) !important; }
-            .dark .bg-medium:focus { box-shadow: 0 0 0 3px rgba(255, 143, 0, 0.5) !important; }
-            .dark .bg-hard:focus { box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.5) !important; }
+            .bg-primary:focus-visible { box-shadow: 0 0 0 3px rgba(250, 163, 27, 0.5) !important; }
+            .bg-secondary:focus-visible { box-shadow: 0 0 0 3px rgba(143, 122, 102, 0.5) !important; }
+            .bg-easy:focus-visible { box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.5) !important; }
+            .bg-medium:focus-visible { box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.5) !important; }
+            .bg-hard:focus-visible { box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.5) !important; }
+            .dark .bg-primary:focus-visible { box-shadow: 0 0 0 3px rgba(255, 183, 77, 0.5) !important; }
+            .dark .bg-secondary:focus-visible { box-shadow: 0 0 0 3px rgba(161, 136, 127, 0.5) !important; }
+            .dark .bg-easy:focus-visible { box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.5) !important; }
+            .dark .bg-medium:focus-visible { box-shadow: 0 0 0 3px rgba(255, 143, 0, 0.5) !important; }
+            .dark .bg-hard:focus-visible { box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.5) !important; }
             [disabled] {
                 cursor: not-allowed;
                 opacity: 0.6;
@@ -138,7 +172,7 @@
             }
             @keyframes merge {
                 0% { transform: scale(1); }
-                60% { transform: scale(1.15); }
+                60% { transform: scale(1.13); }
                 100% { transform: scale(1); }
             }
             .game-container {
@@ -1239,10 +1273,6 @@
             <div class="grid-container" id="grid-container"></div>
             <div class="tile-container" id="tile-container"></div>
         </div>
-        <div id="game-instructions" class="sr-only">
-            使用键盘上的方向键或WASD键移动方块。相同数字的方块相撞时会合并。尝试获得2048方块！
-            按R键重新开始游戏，按N键开始新游戏，按E键切换无尽模式，按ESC键暂停游戏。
-        </div>
         <div id="game-touch-area" class="mt-4 h-5 bg-transparent"></div>
         <div id="game-message" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="game-message-title" aria-modal="true">
             <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0">
@@ -1267,56 +1297,64 @@
                         <button id="settings-button" class="text-primary hover:text-primary/80 focus:outline-none text-sm">
                             <i class="fa-solid fa-cog mr-1"></i><span class="text-content">设置</span>
                         </button>
-                        <button id="help-button" class="text-primary hover:text-primary/80 focus:outline-none text-sm">
-                            <i class="fa-solid fa-question mr-1"></i><span class="text-content">帮助</span>
-                        </button>
                      </div>
                 </div>
             </div>
         </div>
         <div id="settings-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="settings-modal-title" aria-modal="true">
-            <div class="bg-white rounded-lg p-6 max-w-md w-full text-center shadow-xl transform transition-all duration-300 scale-95 opacity-0">
+            <div class="bg-gray-50 dark:bg-dark-surface rounded-lg p-6 max-w-md w-full text-center shadow-xl transform transition-all duration-300 scale-95 opacity-0">
                 <h2 id="settings-modal-title" class="text-2xl font-bold text-secondary mb-4">设置</h2>
                 <div class="flex flex-col gap-3">
-                    <button id="data-transfer-button" class="flex items-center w-full text-left px-2 py-3 mt-1 mb-1 text-gray-700 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-gray-800 hover:shadow-sm focus:outline-none transition-all duration-200 border-b border-gray-200 dark:border-gray-700">
-                        <span class="settings-text">数据管理</span>
-                        <i class="fa-solid fa-chevron-right text-xs ml-auto mr-2"></i>
+                    <button id="data-transfer-button" class="flex items-center justify-between w-full px-4 py-3 mt-1 mb-1 text-gray-700 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-all duration-200 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg">
+                        数据管理
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
                     </button>
-                    <div class="flex items-center justify-between mt-2 mb-2 px-2">
-                        <span class="text-gray-700 dark:text-dark-muted">GPU加速</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="gpu-acceleration" class="sr-only peer" checked title="GPU加速">
-                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
-                        </label>
-                    </div>
-                    <div class="flex items-center justify-between mt-2 mb-2 px-2">
-                        <span class="text-gray-700 dark:text-dark-muted">滑块动画</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="tile-animation" class="sr-only peer" checked title="滑块动画">
-                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
-                        </label>
-                    </div>
-                    <div class="border-b border-gray-200 dark:border-gray-700 mt-1"></div>
-                    <div class="flex items-center justify-between mt-2 mb-2 px-2">
-                        <label for="theme-toggle" class="text-gray-700 dark:text-dark-muted">主题</label>
-                        <div class="custom-select relative w-full max-w-[180px]">
-                            <div class="select-selected flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md shadow border border-gray-300 dark:border-gray-600 cursor-pointer transition-all duration-200 hover:border-primary/50">
-                                <span class="selected-value"><i class="fa-solid fa-circle-half-stroke mr-1"></i>跟随浏览器</span>
-                                <i class="fa fa-chevron-down text-xs ml-2 text-gray-500 dark:text-gray-400"></i>
-                            </div>
-                            <div class="select-items absolute mt-1 w-full bg-gray-100 dark:bg-gray-800 rounded-md shadow-lg border border-gray-300 dark:border-gray-600 z-20 max-h-0 opacity-0 overflow-y-auto transition-all duration-300 ease-in-out">
-                                <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="auto"><i class="fa-solid fa-circle-half-stroke mr-1"></i>跟随浏览器</div>
-                                <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="light"><i class="fa-solid fa-sun mr-1"></i>浅色</div>
-                                <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="dark"><i class="fa-solid fa-moon mr-1"></i>深色</div>
-                            </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 py-3 px-2">
+                        <div class="flex items-center justify-between mb-2 px-2">
+                            <span class="text-gray-700 dark:text-dark-muted">GPU加速</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="gpu-acceleration" class="sr-only peer" checked title="GPU加速">
+                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
+                            </label>
                         </div>
-                        <select id="theme-toggle" style="display: none;" class="bg-grid text-gray-800 dark:text-white p-2 rounded-md shadow-md transition-all duration-200 focus:outline-none dark:bg-dark-grid" title="选择主题">
-                            <option value="auto">&#xf042; 跟随浏览器</option>
-                            <option value="light">&#xf185; 浅色</option>
-                            <option value="dark">&#xf186; 深色</option>
-                        </select>
+                        <div class="border-b border-gray-200 dark:border-gray-700 my-3 mx-2"></div>
+                        <div class="flex items-center justify-between px-2">
+                            <span class="text-gray-700 dark:text-dark-muted">滑块动画</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="tile-animation" class="sr-only peer" checked title="滑块动画">
+                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
+                            </label>
+                        </div>
                     </div>
-                    <div class="text-sm text-secondary/70 mt-4">2048 v1.20.4 | by TheFurina</div>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-2">
+                        <div class="flex items-center justify-between mt-2 mb-2 px-2">
+                            <label for="theme-toggle" class="text-gray-700 dark:text-dark-muted">主题</label>
+                            <div class="custom-select relative w-full max-w-[180px]">
+                                <div class="select-selected flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md border border-gray-300 dark:border-gray-600 cursor-pointer transition-all duration-200 hover:border-primary/50">
+                                    <span class="selected-value"><i class="fa-solid fa-circle-half-stroke mr-1"></i>跟随浏览器</span>
+                                    <i class="fa fa-chevron-down text-xs ml-2 text-gray-500 dark:text-gray-400"></i>
+                                </div>
+                                <div class="select-items absolute mt-1 w-full bg-gray-100 dark:bg-gray-800 rounded-md shadow-lg border border-gray-300 dark:border-gray-600 z-20 max-h-0 opacity-0 overflow-y-auto transition-all duration-300 ease-in-out">
+                                    <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="auto"><i class="fa-solid fa-circle-half-stroke mr-1"></i>跟随浏览器</div>
+                                    <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="light"><i class="fa-solid fa-sun mr-1"></i>浅色</div>
+                                    <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="dark"><i class="fa-solid fa-moon mr-1"></i>深色</div>
+                                    <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="custom"><i class="fa-solid fa-palette mr-1"></i>自定义</div>
+                                </div>
+                            </div>
+                            <select id="theme-toggle" style="display: none;" class="bg-grid text-gray-800 dark:text-white p-2 rounded-md shadow-md transition-all duration-200 focus:outline-none dark:bg-dark-grid" title="选择主题">
+                                <option value="auto">&#xf042; 跟随浏览器</option>
+                                <option value="light">&#xf185; 浅色</option>
+                                <option value="dark">&#xf186; 深色</option>
+                                <option value="custom">&#xf53f; 自定义</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex justify-end px-2">
+                        <button id="custom-theme-button" style="display: none;" class="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded-md text-sm transition-all duration-200">
+                            <i class="fa-solid fa-palette mr-1"></i>自定义主题设置
+                        </button>
+                    </div>
+                    <div class="text-sm text-secondary/70 mt-4">2048 v1.20.5 | by TheFurina</div>
                     <button id="reset-settings-button" class="text-gray-500 hover:text-gray-700 focus:outline-none text-sm inline-block mx-auto">
                         <i class="fa-solid fa-rotate-right mr-1"></i><span>重置所有设置</span>
                     </button>
@@ -1324,56 +1362,6 @@
                         <i class="fa-solid fa-times"></i>
                     </button>
                     <a href="https://github.com/TheFurina/2048-game" class="text-primary hover:underline flex items-center gap-1 text-xs absolute bottom-4 right-4" target="_blank"><i class="fa-brands fa-github"></i> 项目主页</a>
-                </div>
-            </div>
-        </div>
-        <div id="help-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden modal-enter" role="dialog" aria-labelledby="help-modal-title" aria-modal="true">
-            <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-xl transition-all duration-300 ease-in-out">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 id="help-modal-title" class="text-2xl font-bold text-secondary">游戏介绍</h2>
-                    <button id="close-help" class="text-secondary/60 hover:text-secondary focus:outline-none" title="关闭帮助">
-                        <i class="fa-solid fa-times text-xl"></i>
-                    </button>
-                </div>
-                <div class="markdown-content">
-                    <p>2048 是一款流行的数字拼图游戏，玩家通过滑动数字方块来合并相同的数字，最终创建出 2048 这个数字。</p>
-                    <h2>游戏规则</h2>
-                    <ul>
-                        <li>使用键盘方向键或在触摸屏上滑动，即可移动方块</li>
-                        <li>相同数字的方块在移动后相遇会合并成它们的和</li>
-                        <li>每次移动后会随机生成一个新的 2 或 4</li>
-                        <li>当无法进行任何移动时游戏结束</li>
-                        <li>创建出 2048 方块即可获胜（标准模式）</li>
-                    </ul>
-                    <h2>游戏模式</h2>
-                    <ul>
-                        <li><strong>标准模式</strong>: 目标是创建出 2048 方块</li>
-                        <li><strong>无尽模式</strong>: 没有目标分数，可以继续游戏挑战更高分数</li>
-                    </ul>
-                    <h2>难度设置</h2>
-                    <ul>
-                        <li><strong>简单</strong>: 更容易生成 4（约 40% 的概率）</li>
-                        <li><strong>中等</strong>: 标准难度，生成 4 的概率为 10%</li>
-                        <li><strong>困难</strong>: 更难生成 4（约 5% 的概率），但合并得分更高</li>
-                    </ul>
-                    <h2>操作提示</h2>
-                    <ul>
-                        <li>按 <kbd>P</kbd> 或 <kbd>ESC</kbd> 键暂停游戏</li>
-                        <li>点击 <i class="fa-solid fa-undo"></i> 按钮或按 <code><kbd>Ctrl + Z</kbd></code> 撤销上一步操作（最多可撤销 10 步）</li>
-                        <li>支持键盘和触摸屏操作</li>
-                        <li>游戏进度会自动保存</li>
-                        <li>支持导入/导出游戏数据</li>
-                        <li>点击 <i class="fa-solid fa-robot"></i> 按钮打开AI分析面板，可以获取游戏状态评估和最佳移动建议</li>
-                    </ul>
-                    <h2>技巧与策略</h2>
-                    <ul>
-                        <li>尽量保持一个角落作为高数字的存放点</li>
-                        <li>尝试创建一个递增的数字序列</li>
-                        <li>避免在中间位置合并数字</li>
-                        <li>优先使用两个方向进行移动（例如上下或左右）</li>
-                    </ul>
-                    <p>祝你游戏愉快！ 🎮</p>
-                    <i><strong>P.S.</strong> 在2048游戏中，理论最高值分别为：3×3棋盘 <strong>4096</strong>，4×4棋盘 <strong>131072</strong>，5×5棋盘 <strong>2097152</strong>。合理规划合并路径，优先向角落累积大数，可提高达成高分的概率！</i>
                 </div>
             </div>
         </div>
@@ -1448,21 +1436,95 @@
             touchEndX: 0,
             touchEndY: 0
         };
-        let lastFocusedElement = null; const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'; function handleModalKeyDown(e) { const modalId = e.currentTarget.id; if (e.key === 'Escape') { hideModal(modalId); } else if (e.key === 'Tab') { const focusable = Array.from(e.currentTarget.querySelectorAll(focusableElements)); const currentIndex = focusable.indexOf(document.activeElement); if (focusable.length > 0) { if (e.shiftKey) { const prevIndex = (currentIndex - 1 + focusable.length) % focusable.length; focusable[prevIndex].focus(); } else { const nextIndex = (currentIndex + 1) % focusable.length; focusable[nextIndex].focus(); } e.preventDefault(); } } else if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) { const focusable = Array.from(e.currentTarget.querySelectorAll(focusableElements)); const currentIndex = focusable.indexOf(document.activeElement); if (focusable.length > 0) { let nextIndex = currentIndex; if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { nextIndex = (currentIndex + 1) % focusable.length; } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { nextIndex = (currentIndex - 1 + focusable.length) % focusable.length; } focusable[nextIndex].focus(); e.preventDefault(); } } } function showModal(modalId) { const modal = document.getElementById(modalId); if (modal) { lastFocusedElement = document.activeElement; modal.classList.remove('hidden'); setTimeout(() => { modal.querySelector('div').classList.remove('scale-95', 'opacity-0'); modal.querySelector('div').classList.add('scale-100', 'opacity-100'); const focusable = modal.querySelectorAll(focusableElements); if (focusable.length > 0) { focusable[0].focus(); } modal.addEventListener('keydown', handleModalKeyDown); }, 10); } }
-        function hideModal(modalId) { const modal = document.getElementById(modalId); if (modal) { modal.querySelector('div').classList.remove('scale-100', 'opacity-100'); modal.querySelector('div').classList.add('scale-95', 'opacity-0'); setTimeout(() => { modal.classList.add('hidden'); if (lastFocusedElement && document.contains(lastFocusedElement)) { lastFocusedElement.focus(); } modal.removeEventListener('keydown', handleModalKeyDown); }, 300); } }
+        let lastFocusedElement = null;
+        const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+        function handleModalKeyDown(e) {
+            const modalId = e.currentTarget.id;
+            if (e.key === 'Escape') {
+                hideModal(modalId);
+            } else if (e.key === 'Tab') {
+                const focusable = Array.from(e.currentTarget.querySelectorAll(focusableElements));
+                const currentIndex = focusable.indexOf(document.activeElement);
+                if (focusable.length > 0) {
+                    if (e.shiftKey) {
+                        const prevIndex = (currentIndex - 1 + focusable.length) % focusable.length;
+                        focusable[prevIndex].focus();
+                    } else {
+                        const nextIndex = (currentIndex + 1) % focusable.length;
+                        focusable[nextIndex].focus();
+                    }
+                    e.preventDefault();
+                }
+            } else if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                const focusable = Array.from(e.currentTarget.querySelectorAll(focusableElements));
+                const currentIndex = focusable.indexOf(document.activeElement);
+                if (focusable.length > 0) {
+                    let nextIndex = currentIndex;
+                    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                        nextIndex = (currentIndex + 1) % focusable.length;
+                    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                        nextIndex = (currentIndex - 1 + focusable.length) % focusable.length;
+                    }
+                    focusable[nextIndex].focus();
+                    e.preventDefault();
+                }
+            }
+        }
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                lastFocusedElement = document.activeElement;
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.querySelector('div').classList.remove('scale-95', 'opacity-0');
+                    modal.querySelector('div').classList.add('scale-100', 'opacity-100');
+                    const focusable = modal.querySelectorAll(focusableElements);
+                    if (focusable.length > 0) {
+                        focusable[0].focus();
+                    }
+                    modal.addEventListener('keydown', handleModalKeyDown);
+                }, 10);
+            }
+        }
+        function hideModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.querySelector('div').classList.remove('scale-100', 'opacity-100');
+                modal.querySelector('div').classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    if (lastFocusedElement && document.contains(lastFocusedElement)) {
+                        lastFocusedElement.focus();
+                    }
+                    modal.removeEventListener('keydown', handleModalKeyDown);
+                }, 300);
+            }
+        }
         function exportGameData() { const data = { grid: gameState.grid, score: gameState.score, bestScore: gameState.bestScore, gridSize: gameState.gridSize, difficulty: gameState.difficulty, isEndlessMode: gameState.isEndlessMode, timestamp: new Date().toISOString() }; const dataStr = btoa(JSON.stringify(data)); document.getElementById('data-textarea').value = dataStr; }
         function copyDataToClipboard() { const textarea = document.getElementById('data-textarea'); textarea.select(); document.execCommand('copy'); const copyButton = document.getElementById('copy-data-button'); const originalIcon = copyButton.innerHTML; copyButton.innerHTML = '<i class="fa-solid fa-check text-green-600 dark:text-green-400"></i>'; setTimeout(() => { copyButton.innerHTML = originalIcon; }, 2000); }
-        document.addEventListener('DOMContentLoaded', () => { const textareaContainer = document.querySelector('.relative.w-full.mb-4'); const copyButton = document.getElementById('copy-data-button'); if (textareaContainer && copyButton) { textareaContainer.addEventListener('mouseenter', () => { copyButton.classList.remove('opacity-0', 'invisible'); copyButton.classList.add('opacity-70', 'visible'); }); textareaContainer.addEventListener('mouseleave', () => { copyButton.classList.add('opacity-0', 'invisible'); copyButton.classList.remove('opacity-70', 'visible'); }); copyButton.addEventListener('click', copyDataToClipboard); } });
-        function checkGameState() { if (gameState.gameOver) { console.log('游戏已结束'); } if (gameState.gameWon) { console.log('游戏已获胜'); } } function importGameData(dataStr) { try { if (!dataStr) throw new Error('数据不能为空'); let decodedData; try { decodedData = atob(dataStr); } catch (e) { throw new Error('无效的Base64格式'); } let data; try { data = JSON.parse(decodedData); } catch (e) { throw new Error('JSON解析失败：' + e.message); } if (!data || typeof data !== 'object') throw new Error('数据必须是有效的JSON对象'); const requiredFields = ['grid', 'score', 'bestScore', 'gridSize', 'difficulty', 'isEndlessMode']; const missingFields = requiredFields.filter(field => !(field in data)); if (missingFields.length > 0) throw new Error('缺少必要字段：' + missingFields.join(', ')); if (!Array.isArray(data.grid) || data.grid.length === 0) throw new Error('无效的游戏网格数据');
-        console.log('导入数据的 grid 长度:', data.grid.length, 'gridSize:', data.gridSize);
-        if (data.grid.length !== data.gridSize || data.grid.some(row => row.length !== data.gridSize)) { console.log('网格大小检查失败，grid 长度:', data.grid.length, 'grid 行长度:', data.grid.map(row => row.length), 'gridSize:', data.gridSize);
+        document.addEventListener('DOMContentLoaded', () => { 
+            console.log('%c   ____     ___    _  _      ___                                        \n  |___ \\   / _ \\  | || |    ( _ )      __ _    __ _   _ __ ___     ___ \n    __) | | | | | | || |_   / _ \\     / _` |  / _` | | \'_ ` _ \\   / _ \\ \n   / __/  | |_| | |__   _| | (_) |   | (_| | | (_| | | | | | | | |  __/ \n  |_____|  \\___/     |_|    \\___/     \\__, |  \\__,_| |_| |_| |_|  \\___| \n                                      |___/                            ', 'color: #faa31b; font-size: 14px;');
+            console.log('\n2048 v1.20.5\n');
+            const textareaContainer = document.querySelector('.relative.w-full.mb-4'); 
+            const copyButton = document.getElementById('copy-data-button'); 
+            if (textareaContainer && copyButton) { 
+                textareaContainer.addEventListener('mouseenter', () => { 
+                    copyButton.classList.remove('opacity-0', 'invisible'); 
+                    copyButton.classList.add('opacity-70', 'visible'); 
+                }); 
+                textareaContainer.addEventListener('mouseleave', () => { 
+                    copyButton.classList.add('opacity-0', 'invisible'); 
+                    copyButton.classList.remove('opacity-70', 'visible'); 
+                }); 
+                copyButton.addEventListener('click', copyDataToClipboard); 
+            } 
+        });
+        function checkGameState() { if (gameState.gameOver) { } if (gameState.gameWon) { } } function importGameData(dataStr) { try { if (!dataStr) throw new Error('数据不能为空'); let decodedData; try { decodedData = atob(dataStr); } catch (e) { throw new Error('无效的Base64格式'); } let data; try { data = JSON.parse(decodedData); } catch (e) { throw new Error('JSON解析失败：' + e.message); } if (!data || typeof data !== 'object') throw new Error('数据必须是有效的JSON对象'); const requiredFields = ['grid', 'score', 'bestScore', 'gridSize', 'difficulty', 'isEndlessMode']; const missingFields = requiredFields.filter(field => !(field in data)); if (missingFields.length > 0) throw new Error('缺少必要字段：' + missingFields.join(', ')); if (!Array.isArray(data.grid) || data.grid.length === 0) throw new Error('无效的游戏网格数据');
+        if (data.grid.length !== data.gridSize || data.grid.some(row => row.length !== data.gridSize)) {
             throw new Error('导入的滑块数字指示的网格大小与导入数据指示的网格大小不一致');
         }
-        console.log('开始检查滑块数字是否为2的次幂');
         const invalidTiles = data.grid.flatMap(row => row.filter(tile => tile && (tile.value <= 0 || (tile.value & (tile.value - 1)) !== 0)));
-        console.log('无效的滑块数字:', invalidTiles.map(tile => tile.value));
         if (invalidTiles.length > 0) {
-            console.log('检测到无效的滑块数字');
             throw new Error('导入的滑块数字必须是2的次幂');
         }
         gameState.grid = data.grid; gameState.score = data.score; gameState.bestScore = data.bestScore; gameState.gridSize = data.gridSize; gameState.difficulty = data.difficulty; gameState.isEndlessMode = data.isEndlessMode; document.querySelector('.game-container').classList.remove('grid-3x3', 'grid-4x4', 'grid-5x5'); document.querySelector('.game-container').classList.add(`grid-${data.gridSize}x${data.gridSize}`); initGridContainer(); updateDocumentTitle(); renderAllTiles(); elements.scoreDisplay.textContent = gameState.score; elements.bestScoreDisplay.textContent = gameState.bestScore; elements.modeDescription.textContent = gameState.isEndlessMode ? "当前模式：无尽模式 - 尽可能获得高分" : "当前模式：标准模式 - 达到2048获胜"; elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`; checkGameState(); saveGameState(); gameState.history = []; updateUndoButtonState(); alert('数据导入成功！'); } catch (e) { alert('导入失败：' + e.message); } }
@@ -1495,9 +1557,6 @@
             grid5x5Button: document.getElementById('grid-5x5'),
             modeDescription: document.getElementById('mode-description'),
             difficultyDescription: document.getElementById('difficulty-description'),
-            helpButton: document.getElementById('help-button'),
-            helpModal: document.getElementById('help-modal'),
-            closeHelp: document.getElementById('close-help'),
             resetSettingsButton: document.getElementById('reset-settings-button'),
             gameHeader: document.getElementById('game-header'),
             gameTitle: document.getElementById('game-title'),
@@ -2008,14 +2067,36 @@
         elements.importDataButton = document.getElementById('import-data-button');
         elements.dataTextarea = document.getElementById('data-textarea');
         elements.closeDataModal = document.getElementById('close-data-modal');
-        function setupDataTransfer() { function handleImportClick() { const data = elements.dataTextarea.value.trim(); if (data && confirm('确定要导入数据吗？这将覆盖当前游戏状态。')) importGameData(data); } elements.dataTransferButton.addEventListener('click', () => { const modal = document.getElementById('data-transfer-modal'); modal.classList.remove('hidden'); modal.classList.add('modal-enter'); setTimeout(() => { modal.classList.add('modal-enter-active'); }, 10); }); elements.exportDataButton.addEventListener('click', () => { exportGameData(); }); elements.importDataButton.removeEventListener('click', handleImportClick); elements.importDataButton.addEventListener('click', handleImportClick); elements.closeDataModal.addEventListener('click', () => {
-            const modal = document.getElementById('data-transfer-modal');
-            modal.classList.add('modal-exit-active');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                modal.classList.remove('modal-exit-active', 'modal-enter', 'modal-enter-active');
-            }, 300);
-        }) } window.addEventListener('load', setupDataTransfer);
+        function setupDataTransfer() {
+            function handleImportClick() {
+                const data = elements.dataTextarea.value.trim();
+                if (data && confirm('确定要导入数据吗？这将覆盖当前游戏状态。')) {
+                    importGameData(data);
+                }
+            }
+            elements.dataTransferButton.addEventListener('click', () => {
+                const modal = document.getElementById('data-transfer-modal');
+                modal.classList.remove('hidden');
+                modal.classList.add('modal-enter');
+                setTimeout(() => {
+                    modal.classList.add('modal-enter-active');
+                }, 10);
+            });
+            elements.exportDataButton.addEventListener('click', () => {
+                exportGameData();
+            });
+            elements.importDataButton.removeEventListener('click', handleImportClick);
+            elements.importDataButton.addEventListener('click', handleImportClick);
+            elements.closeDataModal.addEventListener('click', () => {
+                const modal = document.getElementById('data-transfer-modal');
+                modal.classList.add('modal-exit-active');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('modal-exit-active', 'modal-enter', 'modal-enter-active');
+                }, 300);
+            });
+        }
+        window.addEventListener('load', setupDataTransfer);
         function saveGameState() {
             localStorage.setItem('2048-game-state', JSON.stringify({
                 grid: gameState.grid,
@@ -2066,6 +2147,7 @@
         function resetAllSettings() {
             if (confirm('确定要重置所有设置吗？')) {
                 localStorage.removeItem('2048-theme');
+                document.getElementById('custom-theme-button').style.display = 'none';
                 localStorage.removeItem('2048-gpu-acceleration');
                 localStorage.removeItem('2048-tile-animation');
                 gameState.gpuAccelerationEnabled = true;
@@ -2133,7 +2215,7 @@
         }
         function initEventListeners() {
             document.addEventListener('keydown', (e) => {
-                if (gameState.isPaused || gameState.gameOver || (gameState.gameWon && !gameState.isEndlessMode) || !elements.helpModal.classList.contains('hidden')) return;
+                if (gameState.isPaused || gameState.gameOver || (gameState.gameWon && !gameState.isEndlessMode)) return;
                 if ([37, 38, 39, 40, 87, 65, 83, 68, 80, 27, 90, 72, 76].includes(e.keyCode)) {
                     e.preventDefault();
                 }
@@ -2194,16 +2276,6 @@
                             }
                         }
                         break;
-                    case 72:
-                        if (!e.ctrlKey && !e.metaKey && !e.altKey) {
-                            const modal = elements.helpModal;
-                            modal.classList.remove('hidden');
-                            modal.classList.add('modal-enter');
-                            setTimeout(() => {
-                                modal.classList.add('modal-enter-active');
-                            }, 10);
-                        }
-                        break;
                     case 71:
                         if (!e.ctrlKey && !e.metaKey && !e.altKey) {
                             if (gameState.score > 0 && confirm('切换棋盘大小将重置当前游戏进度，确定要继续吗？')) {
@@ -2233,7 +2305,7 @@
                 }
             }, { passive: false });
             elements.gameContainer.addEventListener('touchstart', (e) => {
-                if (gameState.isPaused || gameState.gameOver || (gameState.gameWon && !gameState.isEndlessMode) || !elements.helpModal.classList.contains('hidden')) return;
+                if (gameState.isPaused || gameState.gameOver || (gameState.gameWon && !gameState.isEndlessMode)) return;
                 gameState.touchStartX = e.touches[0].clientX;
                 gameState.touchStartY = e.touches[0].clientY;
             }, { passive: false });
@@ -2241,7 +2313,7 @@
                 e.preventDefault();
             }, { passive: false });
             elements.gameContainer.addEventListener('touchend', (e) => {
-                if (gameState.isPaused || gameState.gameOver || (gameState.gameWon && !gameState.isEndlessMode) || !elements.helpModal.classList.contains('hidden')) return;
+                if (gameState.isPaused || gameState.gameOver || (gameState.gameWon && !gameState.isEndlessMode)) return;
                 gameState.touchEndX = e.changedTouches[0].clientX;
                 gameState.touchEndY = e.changedTouches[0].clientY;
                 const dx = gameState.touchEndX - gameState.touchStartX;
@@ -2306,7 +2378,12 @@
                         handler: updateTheme
                     };
                     localStorage.setItem('2048-theme', 'auto');
+                    document.getElementById('custom-theme-button').style.display = 'none';
+                } else if (theme === 'custom') {
+                    localStorage.setItem('2048-theme', 'custom');
+                    document.getElementById('custom-theme-button').style.display = 'block';
                 } else {
+                    document.getElementById('custom-theme-button').style.display = 'none';
                     const isDark = theme === 'dark';
                     document.documentElement.classList.toggle('dark', isDark);
                     localStorage.setItem('2048-theme', theme);
@@ -2391,35 +2468,14 @@
             elements.dataTransferButton.addEventListener('click', () => {
                 showModal('data-transfer-modal');
             });
-            elements.helpButton.addEventListener('click', () => {
-                const modal = elements.helpModal;
-                modal.classList.remove('hidden');
-                modal.classList.add('modal-enter');
-                setupDataTransfer();
-                setTimeout(() => {
-                    modal.classList.add('modal-enter-active');
-                }, 10);
-            });
-            elements.closeHelp.addEventListener('click', () => {
-                const modal = elements.helpModal;
-                modal.classList.add('modal-exit-active');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('modal-exit-active', 'modal-enter', 'modal-enter-active');
-                }, 300);
-            });
-            elements.helpModal.addEventListener('click', (e) => {
-                if (e.target === elements.helpModal) {
-                    const modal = elements.helpModal;
-                    modal.classList.add('modal-exit-active');
-                    setTimeout(() => {
-                        modal.classList.add('hidden');
-                        modal.classList.remove('modal-exit-active', 'modal-enter', 'modal-enter-active');
-                    }, 300);
-                }
-            });
             elements.resetSettingsButton.addEventListener('click', resetAllSettings);
             window.addEventListener('resize', handleResize);
+            const customThemeButton = document.getElementById('custom-theme-button');
+            if (customThemeButton) {
+                customThemeButton.addEventListener('click', function() {
+                    alert('自定义主题设置功能即将推出！');
+                });
+            }
         }
         function loadGameState() {
             const savedState = localStorage.getItem('2048-game-state');
@@ -2440,10 +2496,16 @@
                     handler: updateTheme
                 };
                 elements.themeToggle.value = 'auto';
+                document.getElementById('custom-theme-button').style.display = 'none';
+            } else if (savedTheme === 'custom') {
+                  elements.themeToggle.value = 'custom';
+                  document.getElementById('custom-theme-button').style.display = 'block';
             } else if (savedTheme === 'dark') {
                 document.documentElement.classList.add('dark');
                 elements.themeToggle.value = 'dark';
+                document.getElementById('custom-theme-button').style.display = 'none';
             } else {
+                document.getElementById('custom-theme-button').style.display = 'none';
                 const themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
                 const updateTheme = (e) => {
                     document.documentElement.classList.toggle('dark', e.matches);
