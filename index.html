@@ -664,26 +664,6 @@
                 }
             }
         }
-        @media (max-width: 180px) {
-            .button-text {
-                display: none;
-            }
-            #undo-button .mr-1, #pause-button .mr-1 {
-                margin-right: 0 !important;
-            }
-        }
-        @media (max-width: 120px) {
-            .prefix-text, .mode-text { display: none; }
-            .icon-margin { margin-right: 0; }
-        }
-        @media (max-width: 140px) {
-            .mode-text {
-                display: none;
-            }
-            #new-game .mr-2, #endless-mode .mr-2 {
-                margin-right: 0.5rem !important;
-            }
-        }
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -711,45 +691,8 @@
         .dark .setting-label {
             color: #e0e0e0;
         }
-        @media (max-width: 170px){
-            #close-settings-button{
-                right: 15px;
-            }
-        }
-        @media (max-width: 220px) {
-            #close-ai-modal {
-                right: 0.5rem !important;
-            }
-        }
-        @media (max-width: 190px) {
-            #close-ai-modal {
-                right: 0 !important;
-            }
-        }
         #mode-description, #difficulty-description {
             font-size: 0.8rem;
-        }
-        @media (max-width: 195px) {
-            .selected-value {
-                font-size: 0;
-            }
-            .selected-value i {
-                font-size: 16px;
-            }
-            .select-item {
-                font-size: 0;
-                padding: 6px;
-                text-align: center;
-            }
-            .select-item i {
-                font-size: 16px;
-                margin: 0;
-            }
-        }
-        @media (max-width: 160px){
-            .text-content{
-                display:none;
-            }
         }
         @media (max-height: 400px) {
             body {
@@ -1194,26 +1137,55 @@
                 <p class="text-[clamp(1rem,2vw,1.2rem)] text-secondary/80 dark:text-dark-muted">滑动合并方块，创建<span class="font-bold">2048</span>！</p>
             </div>
         <style>
-            .custom-select {position: relative;}
-            .select-selected {user-select: none;}.select-selected i {transition: transform 0.3s ease;}.select-selected.active i {transform: rotate(180deg);}
-            .select-items {user-select: none; overflow-y: auto; max-height: 200px;}
-            .select-item {display: flex;align-items: center;font-family: 'Font Awesome 6 Free', sans-serif;font-weight: 900;}.select-item.selected { background-color: #d1d5db; } .dark .select-item.selected { background-color: #4b5563; }.selected-value {font-family: 'Font Awesome 6 Free', sans-serif;font-weight: 900;}
+            .custom-select {
+                position: relative;
+            }
+            .select-selected {
+                user-select: none;
+            }
+            .select-selected i {
+                transition: transform 0.3s ease;
+            }
+            .select-selected.active i {
+                transform: rotate(180deg);
+            }
+            .select-items {
+                user-select: none;
+                overflow-y: auto;
+                max-height: 200px;
+            }
+            .select-item {
+                display: flex;
+                align-items: center;
+                font-family: 'Font Awesome 6 Free', sans-serif;
+                font-weight: 900;
+            }
+            .select-item.selected { 
+                background-color: #d1d5db;
+            }
+            .dark .select-item.selected { 
+                background-color: #4b5563;
+            }
+            .select-selected span {
+                font-family: 'Font Awesome 6 Free', sans-serif;
+                font-weight: 900;
+            }
         </style>
             <div class="flex gap-2 mt-4 md:mt-0">
                 <button id="undo-button" class="bg-grid hover:bg-grid/80 text-white p-2 rounded-md shadow-md transition-all duration-200 focus:outline-none dark:bg-dark-grid" title="撤销上一步">
-                    <i class="fa-solid fa-undo mr-1"></i><span class="button-text">撤销</span>
+                    <i class="fa-solid fa-undo mr-1"></i><span>撤销</span>
                 </button>
                 <button id="pause-button" class="bg-grid hover:bg-grid/80 text-white p-2 rounded-md shadow-md transition-all duration-200 focus:outline-none dark:bg-dark-grid" title="暂停游戏">
-                    <i class="fa-solid fa-pause mr-1"></i><span class="button-text">暂停</span>
+                    <i class="fa-solid fa-pause mr-1"></i><span>暂停</span>
                 </button>
             </div>
         </header>
         <div id="game-buttons" class="flex flex-wrap gap-2 mb-4">
             <button id="new-game" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 flex-1 btn-hover dark:bg-dark-primary">
-                <i class="fa-solid fa-gamepad mr-2"></i><span class="prefix-text">标准</span><span class="mode-text">模式</span>
+                <i class="fa-solid fa-gamepad mr-2"></i><span>标准模式</span>
             </button>
             <button id="endless-mode" class="bg-secondary hover:bg-secondary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary/50 flex-1 btn-hover dark:bg-dark-secondary">
-                <i class="fa-solid fa-infinity mr-2"></i><span class="prefix-text">无尽</span><span class="mode-text">模式</span>
+                <i class="fa-solid fa-infinity mr-2"></i><span>无尽模式</span>
             </button>
         </div>
         <div class="options-container mb-4">
@@ -1288,14 +1260,14 @@
                 <h2 id="pause-menu-title" class="text-2xl font-bold text-secondary mb-4">游戏暂停</h2>
                 <div class="flex flex-col gap-3">
                     <button id="resume-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50">
-                        <i class="fa-solid fa-play mr-2"></i><span class="text-content">继续游戏</span>
+                        <i class="fa-solid fa-play mr-2"></i><span>继续游戏</span>
                     </button>
                     <button id="restart-button" class="bg-secondary hover:bg-secondary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary/50">
-                        <i class="fa-solid fa-refresh mr-2"></i><span class="text-content">重新开始</span>
+                        <i class="fa-solid fa-refresh mr-2"></i><span>重新开始</span>
                     </button>
                     <div class="flex justify-center gap-4 mt-2">
                         <button id="settings-button" class="text-primary hover:text-primary/80 focus:outline-none text-sm">
-                            <i class="fa-solid fa-cog mr-1"></i><span class="text-content">设置</span>
+                            <i class="fa-solid fa-cog mr-1"></i><span>设置</span>
                         </button>
                      </div>
                 </div>
@@ -1326,35 +1298,35 @@
                             </label>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-2">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-3">
                         <div class="flex items-center justify-between mt-2 mb-2 px-2">
                             <label for="theme-toggle" class="text-gray-700 dark:text-dark-muted">主题</label>
                             <div class="custom-select relative w-full max-w-[180px]">
                                 <div class="select-selected flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md border border-gray-300 dark:border-gray-600 cursor-pointer transition-all duration-200 hover:border-primary/50">
-                                    <span class="selected-value"><i class="fa-solid fa-circle-half-stroke mr-1"></i>跟随浏览器</span>
+                                    <span><i class="fa-solid fa-desktop mr-1"></i>跟随浏览器</span>
                                     <i class="fa fa-chevron-down text-xs ml-2 text-gray-500 dark:text-gray-400"></i>
                                 </div>
                                 <div class="select-items absolute mt-1 w-full bg-gray-100 dark:bg-gray-800 rounded-md shadow-lg border border-gray-300 dark:border-gray-600 z-20 max-h-0 opacity-0 overflow-y-auto transition-all duration-300 ease-in-out">
-                                    <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="auto"><i class="fa-solid fa-circle-half-stroke mr-1"></i>跟随浏览器</div>
+                                    <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="auto"><i class="fa-solid fa-desktop mr-1"></i>跟随浏览器</div>
                                     <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="light"><i class="fa-solid fa-sun mr-1"></i>浅色</div>
                                     <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="dark"><i class="fa-solid fa-moon mr-1"></i>深色</div>
                                     <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="custom"><i class="fa-solid fa-palette mr-1"></i>自定义</div>
                                 </div>
                             </div>
                             <select id="theme-toggle" style="display: none;" class="bg-grid text-gray-800 dark:text-white p-2 rounded-md shadow-md transition-all duration-200 focus:outline-none dark:bg-dark-grid" title="选择主题">
-                                <option value="auto">&#xf042; 跟随浏览器</option>
+                                <option value="auto">&#xf108; 跟随浏览器</option>
                                 <option value="light">&#xf185; 浅色</option>
                                 <option value="dark">&#xf186; 深色</option>
                                 <option value="custom">&#xf53f; 自定义</option>
                             </select>
                         </div>
+                        <div id="custom-theme-button-container" class="flex justify-end px-2 mt-1">
+                            <button id="custom-theme-button" style="display: none;" class="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded-md text-sm transition-all duration-200">
+                                <i class="fa-solid fa-palette mr-1"></i>自定义主题设置
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex justify-end px-2">
-                        <button id="custom-theme-button" style="display: none;" class="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded-md text-sm transition-all duration-200">
-                            <i class="fa-solid fa-palette mr-1"></i>自定义主题设置
-                        </button>
-                    </div>
-                    <div class="text-sm text-secondary/70 mt-4">2048 v1.20.5 | by TheFurina</div>
+                    <div class="text-sm text-secondary/70 mt-4">2048 v1.21.0 | by TheFurina</div>
                     <button id="reset-settings-button" class="text-gray-500 hover:text-gray-700 focus:outline-none text-sm inline-block mx-auto">
                         <i class="fa-solid fa-rotate-right mr-1"></i><span>重置所有设置</span>
                     </button>
@@ -1363,6 +1335,306 @@
                     </button>
                     <a href="https://github.com/TheFurina/2048-game" class="text-primary hover:underline flex items-center gap-1 text-xs absolute bottom-4 right-4" target="_blank"><i class="fa-brands fa-github"></i> 项目主页</a>
                 </div>
+            </div>
+        </div>
+        <div id="custom-theme-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="custom-theme-modal-title" aria-modal="true">
+            <div class="bg-gray-50 dark:bg-dark-surface rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl transform transition-all duration-300 scale-95 opacity-0">
+                <h2 id="custom-theme-modal-title" class="text-2xl font-bold text-secondary mb-4">自定义主题</h2>
+                <div class="flex flex-col gap-4">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+                        <h3 class="text-lg font-semibold text-gray-700 dark:text-dark-text mb-3">基础颜色</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">主背景色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-bg-color" value="#faf8ef" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-bg-color-text" value="#faf8ef" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">主色调</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-primary-color" value="#faa31b" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-primary-color-text" value="#faa31b" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">次色调</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-secondary-color" value="#8f7a66" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-secondary-color-text" value="#8f7a66" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">网格颜色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-grid-color" value="#bbada0" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-grid-color-text" value="#bbada0" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+                        <h3 class="text-lg font-semibold text-gray-700 dark:text-dark-text mb-3">模态框颜色</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">模态框背景色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-modal-bg" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-modal-bg-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">模态框文字颜色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-modal-text" value="#333333" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-modal-text-text" value="#333333" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+                        <h3 class="text-lg font-semibold text-gray-700 dark:text-dark-text mb-3">滑块颜色</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 2 背景色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-2-bg" value="#eee4da" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-2-bg-text" value="#eee4da" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 2 文字颜色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-2-text" value="#776e65" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-2-text-text" value="#776e65" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 4 背景色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-4-bg" value="#ede0c8" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-4-bg-text" value="#ede0c8" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 4 文字颜色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-4-text" value="#776e65" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-4-text-text" value="#776e65" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 8 背景色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-8-bg" value="#f2b179" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-8-bg-text" value="#f2b179" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 8 文字颜色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-8-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-8-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 16 背景色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-16-bg" value="#f59563" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-16-bg-text" value="#f59563" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 16 文字颜色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-16-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-16-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 32 背景色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-32-bg" value="#f67c5f" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-32-bg-text" value="#f67c5f" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 32 文字颜色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-32-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-32-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 64 背景色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-64-bg" value="#f65e3b" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-64-bg-text" value="#f65e3b" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 64 文字颜色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-64-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-64-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 128 背景色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-128-bg" value="#edcf72" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-128-bg-text" value="#edcf72" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 128 文字颜色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-128-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-128-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 256 背景色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-256-bg" value="#edcc61" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-256-bg-text" value="#edcc61" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 256 文字颜色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-256-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-256-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 512 背景色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-512-bg" value="#edc850" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-512-bg-text" value="#edc850" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 512 文字颜色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-512-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-512-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 1024 背景色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-1024-bg" value="#edc53f" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-1024-bg-text" value="#edc53f" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 1024 文字颜色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-1024-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-1024-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 2048 背景色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-2048-bg" value="#edc22e" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-2048-bg-text" value="#edc22e" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 2048 文字颜色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-2048-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-2048-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 4096 背景色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-4096-bg" value="#e65100" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-4096-bg-text" value="#e65100" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 4096 文字颜色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-4096-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-4096-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 8192 背景色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-8192-bg" value="#bf360c" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-8192-bg-text" value="#bf360c" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 8192 文字颜色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-8192-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-8192-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 16384 背景色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-16384-bg" value="#880e4f" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-16384-bg-text" value="#880e4f" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 16384 文字颜色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-16384-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-16384-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 32768 背景色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-32768-bg" value="#4a148c" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-32768-bg-text" value="#4a148c" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 32768 文字颜色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-32768-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-32768-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">更大数字 背景色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-super-bg" value="#311b92" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-super-bg-text" value="#311b92" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">更大数字 文字颜色</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="custom-tile-super-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-super-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-3 justify-center mt-4">
+                        <button id="save-custom-theme" class="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-md transition-all duration-200 flex-1 sm:flex-none sm:min-w-[120px]">
+                            <i class="fa-solid fa-save mr-1"></i>保存主题
+                        </button>
+                        <button id="reset-custom-theme" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-md transition-all duration-200 flex-1 sm:flex-none sm:min-w-[120px]">
+                            <i class="fa-solid fa-rotate-right mr-1"></i>重置
+                        </button>
+                    </div>
+                </div>
+                <button id="close-custom-theme-modal" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl" title="关闭">
+                    <i class="fa-solid fa-times"></i>
+                </button>
             </div>
         </div>
         <div id="data-transfer-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="data-transfer-modal-title" aria-modal="true">
@@ -1504,7 +1776,7 @@
         function copyDataToClipboard() { const textarea = document.getElementById('data-textarea'); textarea.select(); document.execCommand('copy'); const copyButton = document.getElementById('copy-data-button'); const originalIcon = copyButton.innerHTML; copyButton.innerHTML = '<i class="fa-solid fa-check text-green-600 dark:text-green-400"></i>'; setTimeout(() => { copyButton.innerHTML = originalIcon; }, 2000); }
         document.addEventListener('DOMContentLoaded', () => { 
             console.log('%c   ____     ___    _  _      ___                                        \n  |___ \\   / _ \\  | || |    ( _ )      __ _    __ _   _ __ ___     ___ \n    __) | | | | | | || |_   / _ \\     / _` |  / _` | | \'_ ` _ \\   / _ \\ \n   / __/  | |_| | |__   _| | (_) |   | (_| | | (_| | | | | | | | |  __/ \n  |_____|  \\___/     |_|    \\___/     \\__, |  \\__,_| |_| |_| |_|  \\___| \n                                      |___/                            ', 'color: #faa31b; font-size: 14px;');
-            console.log('\n2048 v1.20.5\n');
+            console.log('2048 v1.21.0');
             const textareaContainer = document.querySelector('.relative.w-full.mb-4'); 
             const copyButton = document.getElementById('copy-data-button'); 
             if (textareaContainer && copyButton) { 
@@ -1519,7 +1791,26 @@
                 copyButton.addEventListener('click', copyDataToClipboard); 
             } 
         });
-        function checkGameState() { if (gameState.gameOver) { } if (gameState.gameWon) { } } function importGameData(dataStr) { try { if (!dataStr) throw new Error('数据不能为空'); let decodedData; try { decodedData = atob(dataStr); } catch (e) { throw new Error('无效的Base64格式'); } let data; try { data = JSON.parse(decodedData); } catch (e) { throw new Error('JSON解析失败：' + e.message); } if (!data || typeof data !== 'object') throw new Error('数据必须是有效的JSON对象'); const requiredFields = ['grid', 'score', 'bestScore', 'gridSize', 'difficulty', 'isEndlessMode']; const missingFields = requiredFields.filter(field => !(field in data)); if (missingFields.length > 0) throw new Error('缺少必要字段：' + missingFields.join(', ')); if (!Array.isArray(data.grid) || data.grid.length === 0) throw new Error('无效的游戏网格数据');
+        function importGameData(dataStr) { 
+            try { 
+                if (!dataStr) throw new Error('数据不能为空');
+                let decodedData;
+                try { 
+                    decodedData = atob(dataStr);
+                } catch (e) { 
+                    throw new Error('无效的Base64格式');
+                } 
+                let data;
+                try { 
+                    data = JSON.parse(decodedData);
+                } catch (e) { 
+                    throw new Error('JSON解析失败：' + e.message);
+                } 
+                if (!data || typeof data !== 'object') throw new Error('数据必须是有效的JSON对象');
+                const requiredFields = ['grid', 'score', 'bestScore', 'gridSize', 'difficulty', 'isEndlessMode'];
+                const missingFields = requiredFields.filter(field => !(field in data));
+                if (missingFields.length > 0) throw new Error('缺少必要字段：' + missingFields.join(', '));
+                if (!Array.isArray(data.grid) || data.grid.length === 0) throw new Error('无效的游戏网格数据');
         if (data.grid.length !== data.gridSize || data.grid.some(row => row.length !== data.gridSize)) {
             throw new Error('导入的滑块数字指示的网格大小与导入数据指示的网格大小不一致');
         }
@@ -1527,7 +1818,29 @@
         if (invalidTiles.length > 0) {
             throw new Error('导入的滑块数字必须是2的次幂');
         }
-        gameState.grid = data.grid; gameState.score = data.score; gameState.bestScore = data.bestScore; gameState.gridSize = data.gridSize; gameState.difficulty = data.difficulty; gameState.isEndlessMode = data.isEndlessMode; document.querySelector('.game-container').classList.remove('grid-3x3', 'grid-4x4', 'grid-5x5'); document.querySelector('.game-container').classList.add(`grid-${data.gridSize}x${data.gridSize}`); initGridContainer(); updateDocumentTitle(); renderAllTiles(); elements.scoreDisplay.textContent = gameState.score; elements.bestScoreDisplay.textContent = gameState.bestScore; elements.modeDescription.textContent = gameState.isEndlessMode ? "当前模式：无尽模式 - 尽可能获得高分" : "当前模式：标准模式 - 达到2048获胜"; elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`; checkGameState(); saveGameState(); gameState.history = []; updateUndoButtonState(); alert('数据导入成功！'); } catch (e) { alert('导入失败：' + e.message); } }
+                gameState.grid = data.grid;
+                gameState.score = data.score;
+                gameState.bestScore = data.bestScore;
+                gameState.gridSize = data.gridSize;
+                gameState.difficulty = data.difficulty;
+                gameState.isEndlessMode = data.isEndlessMode;
+                document.querySelector('.game-container').classList.remove('grid-3x3', 'grid-4x4', 'grid-5x5');
+                document.querySelector('.game-container').classList.add(`grid-${data.gridSize}x${data.gridSize}`);
+                initGridContainer();
+                updateDocumentTitle();
+                renderAllTiles();
+                elements.scoreDisplay.textContent = gameState.score;
+                elements.bestScoreDisplay.textContent = gameState.bestScore;
+                elements.modeDescription.textContent = gameState.isEndlessMode ? "当前模式：无尽模式 - 尽可能获得高分" : "当前模式：标准模式 - 达到2048获胜";
+                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`; 
+                saveGameState();
+                gameState.history = [];
+                updateUndoButtonState();
+                alert('数据导入成功！');
+            } catch (e) { 
+                alert('导入失败：' + e.message);
+            } 
+        }
         const elements = {
             gridContainer: document.getElementById('grid-container'),
             tileContainer: document.getElementById('tile-container'),
@@ -2140,34 +2453,60 @@
             saveGameState();
         }
         function toggleTheme() {
-            const isDark = document.documentElement.classList.toggle('dark');
-            localStorage.setItem('2048-theme', isDark ? 'dark' : 'light');
-            elements.themeToggle.querySelector('i').className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            const currentTheme = localStorage.getItem('2048-theme') || 'light';
+            const styleElement = document.getElementById('custom-theme-styles');
+            if (styleElement) {
+                styleElement.remove();
+            }
+            document.body.removeAttribute('data-theme');
+            let newTheme;
+            if (currentTheme === 'light') {
+                document.documentElement.classList.add('dark');
+                newTheme = 'dark';
+                elements.themeToggle.querySelector('i').className = 'fa-solid fa-sun';
+            } else if (currentTheme === 'dark' || currentTheme === 'auto') {
+                const hasCustomTheme = localStorage.getItem('customTheme') !== null;
+                if (hasCustomTheme) {
+                    loadCustomTheme();
+                    newTheme = 'custom';
+                    elements.themeToggle.querySelector('i').className = 'fa-solid fa-palette';
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    newTheme = 'light';
+                    elements.themeToggle.querySelector('i').className = 'fa-solid fa-moon';
+                }
+            } else if (currentTheme === 'custom') {
+                document.documentElement.classList.remove('dark');
+                newTheme = 'light';
+                elements.themeToggle.querySelector('i').className = 'fa-solid fa-moon';
+            }
+            localStorage.setItem('2048-theme', newTheme);
         }
         function resetAllSettings() {
             if (confirm('确定要重置所有设置吗？')) {
                 localStorage.removeItem('2048-theme');
+                localStorage.removeItem('customTheme');
                 document.getElementById('custom-theme-button').style.display = 'none';
+                document.getElementById('custom-theme-button-container').classList.remove('mb-2');
                 localStorage.removeItem('2048-gpu-acceleration');
                 localStorage.removeItem('2048-tile-animation');
                 gameState.gpuAccelerationEnabled = true;
                 gameState.tileAnimationEnabled = true;
                 gameState.difficulty = 'medium';
                 document.documentElement.classList.remove('dark');
-                const themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-                const updateTheme = (e) => {
-                    const isDark = e ? e.matches : window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    document.documentElement.classList.toggle('dark', isDark);
-                };
-                themeMediaQuery.addEventListener('change', updateTheme);
-                updateTheme(themeMediaQuery);
-                window.themeMediaQueryListener = {
-                    mediaQuery: themeMediaQuery,
-                    handler: updateTheme
-                };
+                const styleElement = document.getElementById('custom-theme-styles');
+                if (styleElement) {
+                    styleElement.remove();
+                }
+                document.body.removeAttribute('data-theme');
+                resetCustomTheme();
+                if (window.themeMediaQueryListener) {
+                    window.themeMediaQueryListener.mediaQuery.removeEventListener('change', window.themeMediaQueryListener.handler);
+                    window.themeMediaQueryListener = null;
+                }
                 localStorage.setItem('2048-theme', 'auto');
                 elements.themeToggle.value = 'auto';
-                const selectedValue = document.querySelector('.selected-value');
+                const selectedValue = document.querySelector('.select-selected span');
                 const selectOptions = document.querySelectorAll('.select-item');
                 if (selectedValue && selectOptions.length > 0) {
                     const nativeSelect = elements.themeToggle;
@@ -2360,6 +2699,11 @@
                 document.documentElement.classList.toggle('dark', isDark);
             };
             elements.themeToggle.addEventListener('change', function() {
+                const styleElement = document.getElementById('custom-theme-styles');
+                if (styleElement) {
+                    styleElement.remove();
+                }
+                document.body.removeAttribute('data-theme');
                 if (window.themeMediaQueryListener) {
                     window.themeMediaQueryListener.mediaQuery.removeEventListener('change', window.themeMediaQueryListener.handler);
                     window.themeMediaQueryListener = null;
@@ -2379,9 +2723,15 @@
                     };
                     localStorage.setItem('2048-theme', 'auto');
                     document.getElementById('custom-theme-button').style.display = 'none';
+                    document.getElementById('custom-theme-button-container').classList.remove('mb-2');
+                    document.getElementById('custom-theme-button-container').classList.remove('mb-2');
                 } else if (theme === 'custom') {
                     localStorage.setItem('2048-theme', 'custom');
                     document.getElementById('custom-theme-button').style.display = 'block';
+                    document.getElementById('custom-theme-button-container').classList.add('mb-2');
+                    document.documentElement.classList.remove('dark');
+                    loadCustomTheme();
+                    document.body.setAttribute('data-theme', 'custom');
                 } else {
                     document.getElementById('custom-theme-button').style.display = 'none';
                     const isDark = theme === 'dark';
@@ -2473,8 +2823,593 @@
             const customThemeButton = document.getElementById('custom-theme-button');
             if (customThemeButton) {
                 customThemeButton.addEventListener('click', function() {
-                    alert('自定义主题设置功能即将推出！');
+                    showModal('custom-theme-modal');
                 });
+            }
+            setupThemeCustomizer();
+            applySavedTheme();
+        } false;
+        function setupThemeCustomizer() {
+            const customThemeModal = document.getElementById('custom-theme-modal');
+            if (!customThemeModal) return;
+            const closeButton = document.getElementById('close-custom-theme-modal');
+            if (closeButton) {
+                closeButton.addEventListener('click', function() {
+                    hideModal('custom-theme-modal');
+                    removePreviewStyles();
+                });
+            }
+            const colorInputs = document.querySelectorAll('input[type="color"]');
+            const textInputs = document.querySelectorAll('input[type="text"]');
+            colorInputs.forEach(colorInput => {
+                const textInputId = colorInput.id + '-text';
+                const textInput = document.getElementById(textInputId);
+                if (textInput) {
+                    colorInput.addEventListener('input', function() {
+                        textInput.value = this.value;
+                        previewCustomTheme();
+                    });
+                    textInput.addEventListener('input', function() {
+                        if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(this.value)) {
+                            colorInput.value = this.value;
+                            previewCustomTheme();
+                        }
+                    });
+                }
+            });
+            const resetButton = document.getElementById('reset-custom-theme');
+            if (resetButton) {
+                resetButton.addEventListener('click', function() {
+                    resetCustomTheme();
+                    previewCustomTheme();
+                });
+            }
+            const saveButton = document.getElementById('save-custom-theme');
+            if (saveButton) {
+                saveButton.addEventListener('click', function() {
+                    saveCustomTheme();
+                });
+            }
+        }
+        function previewCustomTheme() {
+            const bgColor = document.getElementById('custom-bg-color').value;
+            const primaryColor = document.getElementById('custom-primary-color').value;
+            const secondaryColor = document.getElementById('custom-secondary-color').value;
+            const gridColor = document.getElementById('custom-grid-color').value;
+            const modalBgColor = document.getElementById('custom-modal-bg').value;
+            const modalTextColor = document.getElementById('custom-modal-text').value;
+            const tile2Bg = document.getElementById('custom-tile-2-bg').value;
+            const tile2Text = document.getElementById('custom-tile-2-text').value;
+            const tile4Bg = document.getElementById('custom-tile-4-bg').value;
+            const tile4Text = document.getElementById('custom-tile-4-text').value;
+            const tile8Bg = document.getElementById('custom-tile-8-bg').value;
+            const tile8Text = document.getElementById('custom-tile-8-text').value;
+            const tile16Bg = document.getElementById('custom-tile-16-bg').value;
+            const tile16Text = document.getElementById('custom-tile-16-text').value;
+            const tile32Bg = document.getElementById('custom-tile-32-bg').value;
+            const tile32Text = document.getElementById('custom-tile-32-text').value;
+            const tile64Bg = document.getElementById('custom-tile-64-bg').value;
+            const tile64Text = document.getElementById('custom-tile-64-text').value;
+            const tile128Bg = document.getElementById('custom-tile-128-bg').value;
+            const tile128Text = document.getElementById('custom-tile-128-text').value;
+            const tile256Bg = document.getElementById('custom-tile-256-bg').value;
+            const tile256Text = document.getElementById('custom-tile-256-text').value;
+            const tile512Bg = document.getElementById('custom-tile-512-bg').value;
+            const tile512Text = document.getElementById('custom-tile-512-text').value;
+            const tile1024Bg = document.getElementById('custom-tile-1024-bg').value;
+            const tile1024Text = document.getElementById('custom-tile-1024-text').value;
+            const tile2048Bg = document.getElementById('custom-tile-2048-bg').value;
+            const tile2048Text = document.getElementById('custom-tile-2048-text').value;
+            const tile4096Bg = document.getElementById('custom-tile-4096-bg').value;
+            const tile4096Text = document.getElementById('custom-tile-4096-text').value;
+            const tile8192Bg = document.getElementById('custom-tile-8192-bg').value;
+            const tile8192Text = document.getElementById('custom-tile-8192-text').value;
+            const tile16384Bg = document.getElementById('custom-tile-16384-bg').value;
+            const tile16384Text = document.getElementById('custom-tile-16384-text').value;
+            const tile32768Bg = document.getElementById('custom-tile-32768-bg').value;
+            const tile32768Text = document.getElementById('custom-tile-32768-text').value;
+            const tileSuperBg = document.getElementById('custom-tile-super-bg').value;
+            const tileSuperText = document.getElementById('custom-tile-super-text').value;
+            let previewStyleElement = document.getElementById('preview-theme-styles');
+            if (!previewStyleElement) {
+                previewStyleElement = document.createElement('style');
+                previewStyleElement.id = 'preview-theme-styles';
+                document.head.appendChild(previewStyleElement);
+            }
+            const previewStyles = `
+                body[data-preview="true"] {
+                    background-color: ${bgColor} !important;
+                    color: ${secondaryColor} !important;
+                }
+                body[data-preview="true"] .game-header,
+                body[data-preview="true"] .game-footer {
+                    color: ${secondaryColor} !important;
+                }
+                body[data-preview="true"] .primary {
+                    background-color: ${primaryColor} !important;
+                }
+                body[data-preview="true"] .secondary {
+                    color: ${secondaryColor} !important;
+                }
+                body[data-preview="true"] .game-container {
+                    background-color: ${gridColor} !important;
+                }
+                body[data-preview="true"] .tile-2 {
+                    background-color: ${tile2Bg} !important;
+                    color: ${tile2Text} !important;
+                }
+                body[data-preview="true"] .tile-4 {
+                    background-color: ${tile4Bg} !important;
+                    color: ${tile4Text} !important;
+                }
+                body[data-preview="true"] .tile-8 {
+                    background-color: ${tile8Bg} !important;
+                    color: ${tile8Text} !important;
+                }
+                body[data-preview="true"] .tile-16 {
+                    background-color: ${tile16Bg} !important;
+                    color: ${tile16Text} !important;
+                }
+                body[data-preview="true"] .tile-32 {
+                    background-color: ${tile32Bg} !important;
+                    color: ${tile32Text} !important;
+                }
+                body[data-preview="true"] .tile-64 {
+                    background-color: ${tile64Bg} !important;
+                    color: ${tile64Text} !important;
+                }
+                body[data-preview="true"] .tile-128 {
+                    background-color: ${tile128Bg} !important;
+                    color: ${tile128Text} !important;
+                }
+                body[data-preview="true"] .tile-256 {
+                    background-color: ${tile256Bg} !important;
+                    color: ${tile256Text} !important;
+                }
+                body[data-preview="true"] .tile-512 {
+                    background-color: ${tile512Bg} !important;
+                    color: ${tile512Text} !important;
+                }
+                body[data-preview="true"] .tile-1024 {
+                    background-color: ${tile1024Bg} !important;
+                    color: ${tile1024Text} !important;
+                }
+                body[data-preview="true"] .tile-2048 {
+                    background-color: ${tile2048Bg} !important;
+                    color: ${tile2048Text} !important;
+                }
+                body[data-preview="true"] .tile-4096 {
+                    background-color: ${tile4096Bg} !important;
+                    color: ${tile4096Text} !important;
+                }
+                body[data-preview="true"] .tile-8192 {
+                    background-color: ${tile8192Bg} !important;
+                    color: ${tile8192Text} !important;
+                }
+                body[data-preview="true"] .tile-16384 {
+                    background-color: ${tile16384Bg} !important;
+                    color: ${tile16384Text} !important;
+                }
+                body[data-preview="true"] .tile-32768 {
+                    background-color: ${tile32768Bg} !important;
+                    color: ${tile32768Text} !important;
+                }
+                body[data-preview="true"] .tile-super {
+                    background-color: ${tileSuperBg} !important;
+                    color: ${tileSuperText} !important;
+                }
+                body[data-preview="true"] [role="dialog"] > div {
+                    background-color: ${modalBgColor} !important;
+                    color: ${modalTextColor} !important;
+                }
+            `;
+            previewStyleElement.textContent = previewStyles;
+            document.body.setAttribute('data-preview', 'true');
+        }
+        function removePreviewStyles() {
+            const previewStyleElement = document.getElementById('preview-theme-styles');
+            if (previewStyleElement) {
+                previewStyleElement.remove();
+            }
+            document.body.removeAttribute('data-preview');
+            const currentTheme = localStorage.getItem('2048-theme');
+            if (currentTheme === 'custom') {
+                loadCustomTheme();
+            }
+        }
+        function applySavedTheme() {
+            const savedTheme = localStorage.getItem('2048-theme');
+            if (savedTheme === 'custom') {
+                loadCustomTheme();
+                const customThemeButton = document.getElementById('custom-theme-button');
+                const customThemeButtonContainer = document.getElementById('custom-theme-button-container');
+                if (customThemeButton && customThemeButtonContainer) {
+                    customThemeButton.style.display = 'block';
+                    customThemeButtonContainer.classList.add('mb-2');
+                }
+            } else if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                if (elements && elements.themeToggle && elements.themeToggle.querySelector('i')) {
+                    elements.themeToggle.querySelector('i').className = 'fa-solid fa-sun';
+                }
+            } else if (savedTheme === 'light') {
+                document.documentElement.classList.remove('dark');
+                if (elements && elements.themeToggle && elements.themeToggle.querySelector('i')) {
+                    elements.themeToggle.querySelector('i').className = 'fa-solid fa-moon';
+                }
+            } else if (savedTheme === 'auto') {
+                const themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                const updateTheme = (e) => {
+                    const isDark = e ? e.matches : window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    document.documentElement.classList.toggle('dark', isDark);
+                    if (elements && elements.themeToggle && elements.themeToggle.querySelector('i')) {
+                        elements.themeToggle.querySelector('i').className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+                    }
+                };
+                if (window.themeMediaQueryListener) {
+                    window.themeMediaQueryListener.mediaQuery.removeEventListener('change', window.themeMediaQueryListener.handler);
+                }
+                themeMediaQuery.addEventListener('change', updateTheme);
+                updateTheme(themeMediaQuery);
+                window.themeMediaQueryListener = {
+                    mediaQuery: themeMediaQuery,
+                    handler: updateTheme
+                };
+            }
+        }
+        function resetCustomTheme() {
+            document.getElementById('custom-bg-color').value = '#faf8ef';
+            document.getElementById('custom-bg-color-text').value = '#faf8ef';
+            document.getElementById('custom-primary-color').value = '#faa31b';
+            document.getElementById('custom-primary-color-text').value = '#faa31b';
+            document.getElementById('custom-secondary-color').value = '#8f7a66';
+            document.getElementById('custom-secondary-color-text').value = '#8f7a66';
+            document.getElementById('custom-grid-color').value = '#bbada0';
+            document.getElementById('custom-grid-color-text').value = '#bbada0';
+            document.getElementById('custom-modal-bg').value = '#ffffff';
+            document.getElementById('custom-modal-bg-text').value = '#ffffff';
+            document.getElementById('custom-modal-text').value = '#333333';
+            document.getElementById('custom-modal-text-text').value = '#333333';
+            document.getElementById('custom-tile-2-bg').value = '#eee4da';
+            document.getElementById('custom-tile-2-bg-text').value = '#eee4da';
+            document.getElementById('custom-tile-2-text').value = '#776e65';
+            document.getElementById('custom-tile-2-text-text').value = '#776e65';
+            document.getElementById('custom-tile-4-bg').value = '#ede0c8';
+            document.getElementById('custom-tile-4-bg-text').value = '#ede0c8';
+            document.getElementById('custom-tile-4-text').value = '#776e65';
+            document.getElementById('custom-tile-4-text-text').value = '#776e65';
+            document.getElementById('custom-tile-8-bg').value = '#f2b179';
+            document.getElementById('custom-tile-8-bg-text').value = '#f2b179';
+            document.getElementById('custom-tile-8-text').value = '#f9f6f2';
+            document.getElementById('custom-tile-8-text-text').value = '#f9f6f2';
+            document.getElementById('custom-tile-16-bg').value = '#f59563';
+            document.getElementById('custom-tile-16-bg-text').value = '#f59563';
+            document.getElementById('custom-tile-16-text').value = '#f9f6f2';
+            document.getElementById('custom-tile-16-text-text').value = '#f9f6f2';
+            document.getElementById('custom-tile-32-bg').value = '#f67c5f';
+            document.getElementById('custom-tile-32-bg-text').value = '#f67c5f';
+            document.getElementById('custom-tile-32-text').value = '#f9f6f2';
+            document.getElementById('custom-tile-32-text-text').value = '#f9f6f2';
+            document.getElementById('custom-tile-64-bg').value = '#f65e3b';
+            document.getElementById('custom-tile-64-bg-text').value = '#f65e3b';
+            document.getElementById('custom-tile-64-text').value = '#f9f6f2';
+            document.getElementById('custom-tile-64-text-text').value = '#f9f6f2';
+            document.getElementById('custom-tile-128-bg').value = '#edcf72';
+            document.getElementById('custom-tile-128-bg-text').value = '#edcf72';
+            document.getElementById('custom-tile-128-text').value = '#f9f6f2';
+            document.getElementById('custom-tile-128-text-text').value = '#f9f6f2';
+            document.getElementById('custom-tile-256-bg').value = '#edcc61';
+            document.getElementById('custom-tile-256-bg-text').value = '#edcc61';
+            document.getElementById('custom-tile-256-text').value = '#f9f6f2';
+            document.getElementById('custom-tile-256-text-text').value = '#f9f6f2';
+            document.getElementById('custom-tile-512-bg').value = '#edc850';
+            document.getElementById('custom-tile-512-bg-text').value = '#edc850';
+            document.getElementById('custom-tile-512-text').value = '#f9f6f2';
+            document.getElementById('custom-tile-512-text-text').value = '#f9f6f2';
+            document.getElementById('custom-tile-1024-bg').value = '#edc53f';
+            document.getElementById('custom-tile-1024-bg-text').value = '#edc53f';
+            document.getElementById('custom-tile-1024-text').value = '#f9f6f2';
+            document.getElementById('custom-tile-1024-text-text').value = '#f9f6f2';
+            document.getElementById('custom-tile-2048-bg').value = '#edc22e';
+            document.getElementById('custom-tile-2048-bg-text').value = '#edc22e';
+            document.getElementById('custom-tile-2048-text').value = '#f9f6f2';
+            document.getElementById('custom-tile-2048-text-text').value = '#f9f6f2';
+            document.getElementById('custom-tile-4096-bg').value = '#e65100';
+            document.getElementById('custom-tile-4096-bg-text').value = '#e65100';
+            document.getElementById('custom-tile-4096-text').value = '#ffffff';
+            document.getElementById('custom-tile-4096-text-text').value = '#ffffff';
+            document.getElementById('custom-tile-8192-bg').value = '#bf360c';
+            document.getElementById('custom-tile-8192-bg-text').value = '#bf360c';
+            document.getElementById('custom-tile-8192-text').value = '#ffffff';
+            document.getElementById('custom-tile-8192-text-text').value = '#ffffff';
+            document.getElementById('custom-tile-16384-bg').value = '#880e4f';
+            document.getElementById('custom-tile-16384-bg-text').value = '#880e4f';
+            document.getElementById('custom-tile-16384-text').value = '#ffffff';
+            document.getElementById('custom-tile-16384-text-text').value = '#ffffff';
+            document.getElementById('custom-tile-32768-bg').value = '#4a148c';
+            document.getElementById('custom-tile-32768-bg-text').value = '#4a148c';
+            document.getElementById('custom-tile-32768-text').value = '#ffffff';
+            document.getElementById('custom-tile-32768-text-text').value = '#ffffff';
+            document.getElementById('custom-tile-super-bg').value = '#311b92';
+            document.getElementById('custom-tile-super-bg-text').value = '#311b92';
+            document.getElementById('custom-tile-super-text').value = '#ffffff';
+            document.getElementById('custom-tile-super-text-text').value = '#ffffff';
+        }
+        function saveCustomTheme() {
+            const themeData = {
+                bgColor: document.getElementById('custom-bg-color').value,
+                primaryColor: document.getElementById('custom-primary-color').value,
+                secondaryColor: document.getElementById('custom-secondary-color').value,
+                gridColor: document.getElementById('custom-grid-color').value,
+                modalBgColor: document.getElementById('custom-modal-bg').value,
+                modalTextColor: document.getElementById('custom-modal-text').value,
+                tile2Bg: document.getElementById('custom-tile-2-bg').value,
+                tile2Text: document.getElementById('custom-tile-2-text').value,
+                tile4Bg: document.getElementById('custom-tile-4-bg').value,
+                tile4Text: document.getElementById('custom-tile-4-text').value,
+                tile8Bg: document.getElementById('custom-tile-8-bg').value,
+                tile8Text: document.getElementById('custom-tile-8-text').value,
+                tile16Bg: document.getElementById('custom-tile-16-bg').value,
+                tile16Text: document.getElementById('custom-tile-16-text').value,
+                tile32Bg: document.getElementById('custom-tile-32-bg').value,
+                tile32Text: document.getElementById('custom-tile-32-text').value,
+                tile64Bg: document.getElementById('custom-tile-64-bg').value,
+                tile64Text: document.getElementById('custom-tile-64-text').value,
+                tile128Bg: document.getElementById('custom-tile-128-bg').value,
+                tile128Text: document.getElementById('custom-tile-128-text').value,
+                tile256Bg: document.getElementById('custom-tile-256-bg').value,
+                tile256Text: document.getElementById('custom-tile-256-text').value,
+                tile512Bg: document.getElementById('custom-tile-512-bg').value,
+                tile512Text: document.getElementById('custom-tile-512-text').value,
+                tile1024Bg: document.getElementById('custom-tile-1024-bg').value,
+                tile1024Text: document.getElementById('custom-tile-1024-text').value,
+                tile2048Bg: document.getElementById('custom-tile-2048-bg').value,
+                tile2048Text: document.getElementById('custom-tile-2048-text').value,
+                tile4096Bg: document.getElementById('custom-tile-4096-bg').value,
+                tile4096Text: document.getElementById('custom-tile-4096-text').value,
+                tile8192Bg: document.getElementById('custom-tile-8192-bg').value,
+                tile8192Text: document.getElementById('custom-tile-8192-text').value,
+                tile16384Bg: document.getElementById('custom-tile-16384-bg').value,
+                tile16384Text: document.getElementById('custom-tile-16384-text').value,
+                tile32768Bg: document.getElementById('custom-tile-32768-bg').value,
+                tile32768Text: document.getElementById('custom-tile-32768-text').value,
+                tileSuperBg: document.getElementById('custom-tile-super-bg').value,
+                tileSuperText: document.getElementById('custom-tile-super-text').value,
+                timestamp: new Date().getTime()
+            };
+            localStorage.setItem('customTheme', JSON.stringify(themeData));
+            localStorage.setItem('2048-theme', 'custom');
+            alert('主题保存成功！');
+        }
+        function loadCustomTheme() {
+            try {
+                const savedTheme = localStorage.getItem('customTheme');
+                if (savedTheme) {
+                    const themeData = JSON.parse(savedTheme);
+                    applyCustomThemeFromData(themeData);
+                    if (document.getElementById('custom-bg-color')) {
+                        document.getElementById('custom-bg-color').value = themeData.bgColor;
+                        document.getElementById('custom-bg-color-text').value = themeData.bgColor;
+                        document.getElementById('custom-primary-color').value = themeData.primaryColor;
+                        document.getElementById('custom-primary-color-text').value = themeData.primaryColor;
+                        document.getElementById('custom-secondary-color').value = themeData.secondaryColor;
+                        document.getElementById('custom-secondary-color-text').value = themeData.secondaryColor;
+                        document.getElementById('custom-grid-color').value = themeData.gridColor;
+                        document.getElementById('custom-grid-color-text').value = themeData.gridColor;
+                        document.getElementById('custom-modal-bg').value = themeData.modalBgColor || '#ffffff';
+                        document.getElementById('custom-modal-bg-text').value = themeData.modalBgColor || '#ffffff';
+                        document.getElementById('custom-modal-text').value = themeData.modalTextColor || '#333333';
+                        document.getElementById('custom-modal-text-text').value = themeData.modalTextColor || '#333333';
+                        document.getElementById('custom-tile-2-bg').value = themeData.tile2Bg;
+                        document.getElementById('custom-tile-2-bg-text').value = themeData.tile2Bg;
+                        document.getElementById('custom-tile-2-text').value = themeData.tile2Text;
+                        document.getElementById('custom-tile-2-text-text').value = themeData.tile2Text;
+                        document.getElementById('custom-tile-4-bg').value = themeData.tile4Bg;
+                        document.getElementById('custom-tile-4-bg-text').value = themeData.tile4Bg;
+                        document.getElementById('custom-tile-4-text').value = themeData.tile4Text;
+                        document.getElementById('custom-tile-4-text-text').value = themeData.tile4Text;
+                        document.getElementById('custom-tile-8-bg').value = themeData.tile8Bg || '#f2b179';
+                        document.getElementById('custom-tile-8-bg-text').value = themeData.tile8Bg || '#f2b179';
+                        document.getElementById('custom-tile-8-text').value = themeData.tile8Text || '#f9f6f2';
+                        document.getElementById('custom-tile-8-text-text').value = themeData.tile8Text || '#f9f6f2';
+                        document.getElementById('custom-tile-16-bg').value = themeData.tile16Bg || '#f59563';
+                        document.getElementById('custom-tile-16-bg-text').value = themeData.tile16Bg || '#f59563';
+                        document.getElementById('custom-tile-16-text').value = themeData.tile16Text || '#f9f6f2';
+                        document.getElementById('custom-tile-16-text-text').value = themeData.tile16Text || '#f9f6f2';
+                        document.getElementById('custom-tile-32-bg').value = themeData.tile32Bg || '#f67c5f';
+                        document.getElementById('custom-tile-32-bg-text').value = themeData.tile32Bg || '#f67c5f';
+                        document.getElementById('custom-tile-32-text').value = themeData.tile32Text || '#f9f6f2';
+                        document.getElementById('custom-tile-32-text-text').value = themeData.tile32Text || '#f9f6f2';
+                        document.getElementById('custom-tile-64-bg').value = themeData.tile64Bg || '#f65e3b';
+                        document.getElementById('custom-tile-64-bg-text').value = themeData.tile64Bg || '#f65e3b';
+                        document.getElementById('custom-tile-64-text').value = themeData.tile64Text || '#f9f6f2';
+                        document.getElementById('custom-tile-64-text-text').value = themeData.tile64Text || '#f9f6f2';
+                        document.getElementById('custom-tile-128-bg').value = themeData.tile128Bg || '#edcf72';
+                        document.getElementById('custom-tile-128-bg-text').value = themeData.tile128Bg || '#edcf72';
+                        document.getElementById('custom-tile-128-text').value = themeData.tile128Text || '#f9f6f2';
+                        document.getElementById('custom-tile-128-text-text').value = themeData.tile128Text || '#f9f6f2';
+                        document.getElementById('custom-tile-256-bg').value = themeData.tile256Bg || '#edcc61';
+                        document.getElementById('custom-tile-256-bg-text').value = themeData.tile256Bg || '#edcc61';
+                        document.getElementById('custom-tile-256-text').value = themeData.tile256Text || '#f9f6f2';
+                        document.getElementById('custom-tile-256-text-text').value = themeData.tile256Text || '#f9f6f2';
+                        document.getElementById('custom-tile-512-bg').value = themeData.tile512Bg || '#edc850';
+                        document.getElementById('custom-tile-512-bg-text').value = themeData.tile512Bg || '#edc850';
+                        document.getElementById('custom-tile-512-text').value = themeData.tile512Text || '#f9f6f2';
+                        document.getElementById('custom-tile-512-text-text').value = themeData.tile512Text || '#f9f6f2';
+                        document.getElementById('custom-tile-1024-bg').value = themeData.tile1024Bg || '#edc53f';
+                        document.getElementById('custom-tile-1024-bg-text').value = themeData.tile1024Bg || '#edc53f';
+                        document.getElementById('custom-tile-1024-text').value = themeData.tile1024Text || '#f9f6f2';
+                        document.getElementById('custom-tile-1024-text-text').value = themeData.tile1024Text || '#f9f6f2';
+                        document.getElementById('custom-tile-2048-bg').value = themeData.tile2048Bg || '#edc22e';
+                        document.getElementById('custom-tile-2048-bg-text').value = themeData.tile2048Bg || '#edc22e';
+                        document.getElementById('custom-tile-2048-text').value = themeData.tile2048Text || '#f9f6f2';
+                        document.getElementById('custom-tile-2048-text-text').value = themeData.tile2048Text || '#f9f6f2';
+                        document.getElementById('custom-tile-4096-bg').value = themeData.tile4096Bg || '#e65100';
+                        document.getElementById('custom-tile-4096-bg-text').value = themeData.tile4096Bg || '#e65100';
+                        document.getElementById('custom-tile-4096-text').value = themeData.tile4096Text || '#ffffff';
+                        document.getElementById('custom-tile-4096-text-text').value = themeData.tile4096Text || '#ffffff';
+                        document.getElementById('custom-tile-8192-bg').value = themeData.tile8192Bg || '#bf360c';
+                        document.getElementById('custom-tile-8192-bg-text').value = themeData.tile8192Bg || '#bf360c';
+                        document.getElementById('custom-tile-8192-text').value = themeData.tile8192Text || '#ffffff';
+                        document.getElementById('custom-tile-8192-text-text').value = themeData.tile8192Text || '#ffffff';
+                        document.getElementById('custom-tile-16384-bg').value = themeData.tile16384Bg || '#880e4f';
+                        document.getElementById('custom-tile-16384-bg-text').value = themeData.tile16384Bg || '#880e4f';
+                        document.getElementById('custom-tile-16384-text').value = themeData.tile16384Text || '#ffffff';
+                        document.getElementById('custom-tile-16384-text-text').value = themeData.tile16384Text || '#ffffff';
+                        document.getElementById('custom-tile-32768-bg').value = themeData.tile32768Bg || '#4a148c';
+                        document.getElementById('custom-tile-32768-bg-text').value = themeData.tile32768Bg || '#4a148c';
+                        document.getElementById('custom-tile-32768-text').value = themeData.tile32768Text || '#ffffff';
+                        document.getElementById('custom-tile-32768-text-text').value = themeData.tile32768Text || '#ffffff';
+                        document.getElementById('custom-tile-super-bg').value = themeData.tileSuperBg || '#311b92';
+                        document.getElementById('custom-tile-super-bg-text').value = themeData.tileSuperBg || '#311b92';
+                        document.getElementById('custom-tile-super-text').value = themeData.tileSuperText || '#ffffff';
+                        document.getElementById('custom-tile-super-text-text').value = themeData.tileSuperText || '#ffffff';
+                    }
+                    return true;
+                }
+            } catch (e) {
+                console.error('加载自定义主题失败:', e);
+            }
+            return false;
+        }
+        function applyCustomThemeFromData(themeData) {
+            let styleElement = document.getElementById('custom-theme-styles');
+            if (!styleElement) {
+                styleElement = document.createElement('style');
+                styleElement.id = 'custom-theme-styles';
+                document.head.appendChild(styleElement);
+            }
+            const customStyles = `
+                :root {
+                    --custom-bg-color: ${themeData.bgColor};
+                    --custom-primary-color: ${themeData.primaryColor};
+                    --custom-secondary-color: ${themeData.secondaryColor};
+                    --custom-grid-color: ${themeData.gridColor};
+                    --custom-modal-bg-color: ${themeData.modalBgColor};
+                    --custom-modal-text-color: ${themeData.modalTextColor};
+                    --custom-tile-2-bg: ${themeData.tile2Bg};
+                    --custom-tile-2-text: ${themeData.tile2Text};
+                    --custom-tile-4-bg: ${themeData.tile4Bg};
+                    --custom-tile-4-text: ${themeData.tile4Text};
+                    --custom-tile-8-bg: ${themeData.tile8Bg};
+                    --custom-tile-8-text: ${themeData.tile8Text};
+                    --custom-tile-16-bg: ${themeData.tile16Bg};
+                    --custom-tile-16-text: ${themeData.tile16Text};
+                    --custom-tile-32-bg: ${themeData.tile32Bg};
+                    --custom-tile-32-text: ${themeData.tile32Text};
+                    --custom-tile-64-bg: ${themeData.tile64Bg};
+                    --custom-tile-64-text: ${themeData.tile64Text};
+                    --custom-tile-128-bg: ${themeData.tile128Bg};
+                    --custom-tile-128-text: ${themeData.tile128Text};
+                    --custom-tile-256-bg: ${themeData.tile256Bg};
+                    --custom-tile-256-text: ${themeData.tile256Text};
+                    --custom-tile-512-bg: ${themeData.tile512Bg};
+                    --custom-tile-512-text: ${themeData.tile512Text};
+                    --custom-tile-1024-bg: ${themeData.tile1024Bg};
+                    --custom-tile-1024-text: ${themeData.tile1024Text};
+                    --custom-tile-2048-bg: ${themeData.tile2048Bg};
+                    --custom-tile-2048-text: ${themeData.tile2048Text};
+                    --custom-tile-4096-bg: ${themeData.tile4096Bg};
+                    --custom-tile-4096-text: ${themeData.tile4096Text};
+                    --custom-tile-8192-bg: ${themeData.tile8192Bg};
+                    --custom-tile-8192-text: ${themeData.tile8192Text};
+                    --custom-tile-16384-bg: ${themeData.tile16384Bg};
+                    --custom-tile-16384-text: ${themeData.tile16384Text};
+                    --custom-tile-32768-bg: ${themeData.tile32768Bg};
+                    --custom-tile-32768-text: ${themeData.tile32768Text};
+                    --custom-tile-super-bg: ${themeData.tileSuperBg};
+                    --custom-tile-super-text: ${themeData.tileSuperText};
+                }
+                body[data-theme="custom"] {
+                    background-color: var(--custom-bg-color);
+                    color: var(--custom-secondary-color);
+                }
+                body[data-theme="custom"] .game-header, 
+                body[data-theme="custom"] .game-footer {
+                    color: var(--custom-secondary-color);
+                }
+                body[data-theme="custom"] .primary {
+                    background-color: var(--custom-primary-color);
+                }
+                body[data-theme="custom"] .secondary {
+                    color: var(--custom-secondary-color);
+                }
+                body[data-theme="custom"] .game-container {
+                    background-color: var(--custom-grid-color);
+                }
+                body[data-theme="custom"] [role="dialog"] > div {
+                    background-color: var(--custom-modal-bg-color) !important;
+                    color: var(--custom-modal-text-color) !important;
+                }
+                body[data-theme="custom"] .tile-2 {
+                    background-color: var(--custom-tile-2-bg);
+                    color: var(--custom-tile-2-text);
+                }
+                body[data-theme="custom"] .tile-4 {
+                    background-color: var(--custom-tile-4-bg);
+                    color: var(--custom-tile-4-text);
+                }
+                body[data-theme="custom"] .tile-8 {
+                    background-color: var(--custom-tile-8-bg);
+                    color: var(--custom-tile-8-text);
+                }
+                body[data-theme="custom"] .tile-16 {
+                    background-color: var(--custom-tile-16-bg);
+                    color: var(--custom-tile-16-text);
+                }
+                body[data-theme="custom"] .tile-32 {
+                    background-color: var(--custom-tile-32-bg);
+                    color: var(--custom-tile-32-text);
+                }
+                body[data-theme="custom"] .tile-64 {
+                    background-color: var(--custom-tile-64-bg);
+                    color: var(--custom-tile-64-text);
+                }
+                body[data-theme="custom"] .tile-128 {
+                    background-color: var(--custom-tile-128-bg);
+                    color: var(--custom-tile-128-text);
+                }
+                body[data-theme="custom"] .tile-256 {
+                    background-color: var(--custom-tile-256-bg);
+                    color: var(--custom-tile-256-text);
+                }
+                body[data-theme="custom"] .tile-512 {
+                    background-color: var(--custom-tile-512-bg);
+                    color: var(--custom-tile-512-text);
+                }
+                body[data-theme="custom"] .tile-1024 {
+                    background-color: var(--custom-tile-1024-bg);
+                    color: var(--custom-tile-1024-text);
+                }
+                body[data-theme="custom"] .tile-2048 {
+                    background-color: var(--custom-tile-2048-bg);
+                    color: var(--custom-tile-2048-text);
+                }
+                body[data-theme="custom"] .tile-4096 {
+                    background-color: var(--custom-tile-4096-bg);
+                    color: var(--custom-tile-4096-text);
+                }
+                body[data-theme="custom"] .tile-8192 {
+                    background-color: var(--custom-tile-8192-bg);
+                    color: var(--custom-tile-8192-text);
+                }
+                body[data-theme="custom"] .tile-16384 {
+                    background-color: var(--custom-tile-16384-bg);
+                    color: var(--custom-tile-16384-text);
+                }
+                body[data-theme="custom"] .tile-32768 {
+                    background-color: var(--custom-tile-32768-bg);
+                    color: var(--custom-tile-32768-text);
+                }
+                body[data-theme="custom"] .tile-super {
+                    background-color: var(--custom-tile-super-bg);
+                    color: var(--custom-tile-super-text);
+                }
+            `;
+            styleElement.textContent = customStyles;
+            document.body.setAttribute('data-theme', 'custom');
+            if (elements && elements.themeToggle && elements.themeToggle.querySelector('i')) {
+                elements.themeToggle.querySelector('i').className = 'fa-solid fa-palette';
             }
         }
         function loadGameState() {
@@ -2497,13 +3432,16 @@
                 };
                 elements.themeToggle.value = 'auto';
                 document.getElementById('custom-theme-button').style.display = 'none';
+                document.getElementById('custom-theme-button-container').classList.remove('mb-2');
             } else if (savedTheme === 'custom') {
-                  elements.themeToggle.value = 'custom';
-                  document.getElementById('custom-theme-button').style.display = 'block';
+                elements.themeToggle.value = 'custom';
+                document.getElementById('custom-theme-button').style.display = 'block';
+                document.getElementById('custom-theme-button-container').classList.add('mb-2');
             } else if (savedTheme === 'dark') {
                 document.documentElement.classList.add('dark');
                 elements.themeToggle.value = 'dark';
                 document.getElementById('custom-theme-button').style.display = 'none';
+                document.getElementById('custom-theme-button-container').classList.remove('mb-2');
             } else {
                 document.getElementById('custom-theme-button').style.display = 'none';
                 const themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -2567,7 +3505,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const customSelect = document.querySelector('.custom-select');
-            const selectedValue = document.querySelector('.selected-value');
+            const selectedValue = document.querySelector('.select-selected span');
             const selectItems = document.querySelector('.select-items');
             const selectOptions = document.querySelectorAll('.select-item');
             const nativeSelect = document.getElementById('theme-toggle');
