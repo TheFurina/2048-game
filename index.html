@@ -1258,7 +1258,7 @@
         <div id="pause-menu" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="pause-menu-title" aria-modal="true">
             <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0">
                 <h2 id="pause-menu-title" class="text-2xl font-bold text-secondary mb-4">游戏暂停</h2>
-                <div class="flex flex-col gap-3">
+                <div class="flex flex-col gap-4">
                     <button id="resume-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50">
                         <i class="fa-solid fa-play mr-2"></i><span>继续游戏</span>
                     </button>
@@ -1274,59 +1274,76 @@
             </div>
         </div>
         <div id="settings-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="settings-modal-title" aria-modal="true">
-            <div class="bg-gray-50 dark:bg-dark-surface rounded-lg p-6 max-w-md w-full text-center shadow-xl transform transition-all duration-300 scale-95 opacity-0">
+            <div class="bg-gray-50 dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 scale-95 opacity-0">
                 <h2 id="settings-modal-title" class="text-2xl font-bold text-secondary mb-4">设置</h2>
                 <div class="flex flex-col gap-3">
-                    <button id="data-transfer-button" class="flex items-center justify-between w-full px-4 py-3 mt-1 mb-1 text-gray-700 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-all duration-200 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg">
-                        数据管理
-                        <i class="fa-solid fa-chevron-right text-xs"></i>
-                    </button>
-                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 py-3 px-2">
-                        <div class="flex items-center justify-between mb-2 px-2">
-                            <span class="text-gray-700 dark:text-dark-muted">GPU加速</span>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="gpu-acceleration" class="sr-only peer" checked title="GPU加速">
-                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
-                            </label>
-                        </div>
-                        <div class="border-b border-gray-200 dark:border-gray-700 my-3 mx-2"></div>
-                        <div class="flex items-center justify-between px-2">
-                            <span class="text-gray-700 dark:text-dark-muted">滑块动画</span>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="tile-animation" class="sr-only peer" checked title="滑块动画">
-                                <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
-                            </label>
+                    <div class="setting-category">
+                        <h3 class="text-base font-semibold text-secondary mb-2 text-left category-title flex items-center">
+                            <i class="fa-solid fa-gauge-high mr-2"></i>游戏性能
+                        </h3>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 py-3 px-2 shadow-sm">
+                            <div class="flex items-center justify-between mb-2 px-2">
+                                <span class="text-gray-700 dark:text-dark-muted">GPU加速</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="gpu-acceleration" class="sr-only peer" checked title="GPU加速">
+                                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
+                                </label>
+                            </div>
+                            <div class="border-b border-gray-200 dark:border-gray-700 my-3 mx-2"></div>
+                            <div class="flex items-center justify-between px-2">
+                                <span class="text-gray-700 dark:text-dark-muted">滑块动画</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="tile-animation" class="sr-only peer" checked title="滑块动画">
+                                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
+                                </label>
+                            </div>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-3">
-                        <div class="flex items-center justify-between mt-2 mb-2 px-2">
-                            <label for="theme-toggle" class="text-gray-700 dark:text-dark-muted">主题</label>
-                            <div class="custom-select relative w-full max-w-[180px]">
-                                <div class="select-selected flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md border border-gray-300 dark:border-gray-600 cursor-pointer transition-all duration-200 hover:border-primary/50">
-                                    <span><i class="fa-solid fa-desktop mr-1"></i>跟随浏览器</span>
-                                    <i class="fa fa-chevron-down text-xs ml-2 text-gray-500 dark:text-gray-400"></i>
+                    <div class="setting-category">
+                        <h3 class="text-base font-semibold text-secondary mb-2 text-left category-title flex items-center">
+                            <i class="fa-solid fa-paint-roller mr-2"></i>外观设置
+                        </h3>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-3 shadow-sm">
+                            <div class="flex items-center justify-between mt-2 mb-2 px-2">
+                                <label for="theme-toggle" class="text-gray-700 dark:text-dark-muted">主题</label>
+                                <div class="custom-select relative w-full max-w-[180px]">
+                                    <div class="select-selected flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md border border-gray-300 dark:border-gray-600 cursor-pointer transition-all duration-200 hover:border-primary/50">
+                                        <span><i class="fa-solid fa-desktop mr-1"></i>跟随浏览器</span>
+                                        <i class="fa fa-chevron-down text-xs ml-2 text-gray-500 dark:text-gray-400"></i>
+                                    </div>
+                                    <div class="select-items absolute mt-1 w-full bg-gray-100 dark:bg-gray-800 rounded-md shadow-lg border border-gray-300 dark:border-gray-600 z-20 max-h-0 opacity-0 overflow-y-auto transition-all duration-300 ease-in-out">
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="auto"><i class="fa-solid fa-desktop mr-1"></i>跟随浏览器</div>
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="light"><i class="fa-solid fa-sun mr-1"></i>浅色</div>
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="dark"><i class="fa-solid fa-moon mr-1"></i>深色</div>
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="custom"><i class="fa-solid fa-palette mr-1"></i>自定义</div>
+                                    </div>
                                 </div>
-                                <div class="select-items absolute mt-1 w-full bg-gray-100 dark:bg-gray-800 rounded-md shadow-lg border border-gray-300 dark:border-gray-600 z-20 max-h-0 opacity-0 overflow-y-auto transition-all duration-300 ease-in-out">
-                                    <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="auto"><i class="fa-solid fa-desktop mr-1"></i>跟随浏览器</div>
-                                    <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="light"><i class="fa-solid fa-sun mr-1"></i>浅色</div>
-                                    <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="dark"><i class="fa-solid fa-moon mr-1"></i>深色</div>
-                                    <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="custom"><i class="fa-solid fa-palette mr-1"></i>自定义</div>
-                                </div>
+                                <select id="theme-toggle" style="display: none;" class="bg-grid text-gray-800 dark:text-white p-2 rounded-md shadow-md transition-all duration-200 focus:outline-none dark:bg-dark-grid" title="选择主题">
+                                    <option value="auto">&#xf108; 跟随浏览器</option>
+                                    <option value="light">&#xf185; 浅色</option>
+                                    <option value="dark">&#xf186; 深色</option>
+                                    <option value="custom">&#xf53f; 自定义</option>
+                                </select>
                             </div>
-                            <select id="theme-toggle" style="display: none;" class="bg-grid text-gray-800 dark:text-white p-2 rounded-md shadow-md transition-all duration-200 focus:outline-none dark:bg-dark-grid" title="选择主题">
-                                <option value="auto">&#xf108; 跟随浏览器</option>
-                                <option value="light">&#xf185; 浅色</option>
-                                <option value="dark">&#xf186; 深色</option>
-                                <option value="custom">&#xf53f; 自定义</option>
-                            </select>
+                            <div id="custom-theme-button-container" class="flex justify-end px-2 mt-1">
+                                <button id="custom-theme-button" style="display: none;" class="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded-md text-sm transition-all duration-200">
+                                    <i class="fa-solid fa-palette mr-1"></i>自定义主题设置
+                                </button>
+                            </div>
                         </div>
-                        <div id="custom-theme-button-container" class="flex justify-end px-2 mt-1">
-                            <button id="custom-theme-button" style="display: none;" class="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded-md text-sm transition-all duration-200">
-                                <i class="fa-solid fa-palette mr-1"></i>自定义主题设置
+                    </div>
+                    <div class="setting-category">
+                        <h3 class="text-base font-semibold text-secondary mb-2 text-left category-title flex items-center">
+                            <i class="fa-solid fa-database mr-2"></i>数据与管理
+                        </h3>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-2 shadow-sm">
+                            <button id="data-transfer-button" class="flex items-center justify-between w-full px-4 py-3 text-gray-700 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-all duration-200 rounded-lg">
+                                数据管理
+                                <i class="fa-solid fa-chevron-right text-xs"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="text-sm text-secondary/70 mt-4">2048 v1.21.0 | by TheFurina</div>
+                    <div class="text-sm text-secondary/70 mt-4">2048 v1.21.1 | by TheFurina</div>
                     <button id="reset-settings-button" class="text-gray-500 hover:text-gray-700 focus:outline-none text-sm inline-block mx-auto">
                         <i class="fa-solid fa-rotate-right mr-1"></i><span>重置所有设置</span>
                     </button>
@@ -1338,28 +1355,34 @@
             </div>
         </div>
         <div id="custom-theme-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="custom-theme-modal-title" aria-modal="true">
-            <div class="bg-gray-50 dark:bg-dark-surface rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl transform transition-all duration-300 scale-95 opacity-0">
-                <h2 id="custom-theme-modal-title" class="text-2xl font-bold text-secondary mb-4">自定义主题</h2>
+            <div class="bg-gray-50 dark:bg-dark-surface rounded-lg max-w-2xl w-full max-h-[90vh] shadow-xl transform transition-all duration-300 scale-95 opacity-0 flex flex-col">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <h2 id="custom-theme-modal-title" class="text-2xl font-bold text-secondary">自定义主题</h2>
+                    <button id="close-custom-theme-modal" class="text-secondary/60 hover:text-secondary focus:outline-none text-xl" title="关闭">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            <div class="flex-1 p-6 overflow-y-auto">
                 <div class="flex flex-col gap-4">
-                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
-                        <h3 class="text-lg font-semibold text-gray-700 dark:text-dark-text mb-3">基础颜色</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">主背景色</label>
-                                <div class="flex items-center gap-2">
-                                    <input type="color" id="custom-bg-color" value="#faf8ef" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-bg-color-text" value="#faf8ef" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
-                                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+                    <h3 class="text-lg font-semibold text-gray-700 dark:text-dark-text mb-3">基础颜色</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="flex flex-col">
+                            <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">主背景色</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color" id="custom-bg-color" value="#faf8ef" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                <input type="text" id="custom-bg-color-text" value="#faf8ef" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                             </div>
-                            <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">主色调</label>
-                                <div class="flex items-center gap-2">
-                                    <input type="color" id="custom-primary-color" value="#faa31b" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-primary-color-text" value="#faa31b" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
-                                </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">主色调</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color" id="custom-primary-color" value="#faa31b" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                <input type="text" id="custom-primary-color-text" value="#faa31b" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                             </div>
-                            <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">次色调</label>
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">次色调</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-secondary-color" value="#8f7a66" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-secondary-color-text" value="#8f7a66" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
@@ -1435,8 +1458,8 @@
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 8 文字颜色</label>
                                 <div class="flex items-center gap-2">
-                                    <input type="color" id="custom-tile-8-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-8-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="color" id="custom-tile-8-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-8-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
@@ -1449,8 +1472,8 @@
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 16 文字颜色</label>
                                 <div class="flex items-center gap-2">
-                                    <input type="color" id="custom-tile-16-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-16-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="color" id="custom-tile-16-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-16-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
@@ -1463,8 +1486,8 @@
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 32 文字颜色</label>
                                 <div class="flex items-center gap-2">
-                                    <input type="color" id="custom-tile-32-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-32-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="color" id="custom-tile-32-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-32-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
@@ -1477,8 +1500,8 @@
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 64 文字颜色</label>
                                 <div class="flex items-center gap-2">
-                                    <input type="color" id="custom-tile-64-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-64-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="color" id="custom-tile-64-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-64-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
@@ -1491,8 +1514,8 @@
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 128 文字颜色</label>
                                 <div class="flex items-center gap-2">
-                                    <input type="color" id="custom-tile-128-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-128-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="color" id="custom-tile-128-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-128-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
@@ -1505,8 +1528,8 @@
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 256 文字颜色</label>
                                 <div class="flex items-center gap-2">
-                                    <input type="color" id="custom-tile-256-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-256-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="color" id="custom-tile-256-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-256-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
@@ -1519,8 +1542,8 @@
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 512 文字颜色</label>
                                 <div class="flex items-center gap-2">
-                                    <input type="color" id="custom-tile-512-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-512-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="color" id="custom-tile-512-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-512-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
@@ -1533,8 +1556,8 @@
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 1024 文字颜色</label>
                                 <div class="flex items-center gap-2">
-                                    <input type="color" id="custom-tile-1024-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-1024-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="color" id="custom-tile-1024-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-1024-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
@@ -1547,8 +1570,8 @@
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 2048 文字颜色</label>
                                 <div class="flex items-center gap-2">
-                                    <input type="color" id="custom-tile-2048-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-2048-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="color" id="custom-tile-2048-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                    <input type="text" id="custom-tile-2048-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
@@ -1623,20 +1646,20 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flex flex-wrap gap-3 justify-center mt-4">
-                        <button id="save-custom-theme" class="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-md transition-all duration-200 flex-1 sm:flex-none sm:min-w-[120px]">
-                            <i class="fa-solid fa-save mr-1"></i>保存主题
-                        </button>
-                        <button id="reset-custom-theme" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-md transition-all duration-200 flex-1 sm:flex-none sm:min-w-[120px]">
-                            <i class="fa-solid fa-rotate-right mr-1"></i>重置
-                        </button>
-                    </div>
                 </div>
-                <button id="close-custom-theme-modal" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl" title="关闭">
-                    <i class="fa-solid fa-times"></i>
-                </button>
+            </div>
+            <div class="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-dark-surface rounded-b-lg">
+                <div class="flex flex-wrap gap-3 justify-center">
+                    <button id="save-custom-theme" class="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-md transition-all duration-200 flex-1 sm:flex-none sm:min-w-[120px]">
+                        <i class="fa-solid fa-save mr-1"></i>保存主题
+                    </button>
+                    <button id="reset-custom-theme" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-md transition-all duration-200 flex-1 sm:flex-none sm:min-w-[120px]">
+                        <i class="fa-solid fa-rotate-right mr-1"></i>重置
+                    </button>
+                </div>
             </div>
         </div>
+    </div>
         <div id="data-transfer-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="data-transfer-modal-title" aria-modal="true">
             <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0">
                 <h2 id="data-transfer-modal-title" class="text-2xl font-bold text-secondary mb-4">数据管理</h2>
@@ -1776,7 +1799,7 @@
         function copyDataToClipboard() { const textarea = document.getElementById('data-textarea'); textarea.select(); document.execCommand('copy'); const copyButton = document.getElementById('copy-data-button'); const originalIcon = copyButton.innerHTML; copyButton.innerHTML = '<i class="fa-solid fa-check text-green-600 dark:text-green-400"></i>'; setTimeout(() => { copyButton.innerHTML = originalIcon; }, 2000); }
         document.addEventListener('DOMContentLoaded', () => { 
             console.log('%c   ____     ___    _  _      ___                                        \n  |___ \\   / _ \\  | || |    ( _ )      __ _    __ _   _ __ ___     ___ \n    __) | | | | | | || |_   / _ \\     / _` |  / _` | | \'_ ` _ \\   / _ \\ \n   / __/  | |_| | |__   _| | (_) |   | (_| | | (_| | | | | | | | |  __/ \n  |_____|  \\___/     |_|    \\___/     \\__, |  \\__,_| |_| |_| |_|  \\___| \n                                      |___/                            ', 'color: #faa31b; font-size: 14px;');
-            console.log('2048 v1.21.0');
+            console.log('2048 v1.21.1');
             const textareaContainer = document.querySelector('.relative.w-full.mb-4'); 
             const copyButton = document.getElementById('copy-data-button'); 
             if (textareaContainer && copyButton) { 
@@ -2667,18 +2690,74 @@
                     }
                 }
             }, { passive: true });
+            const modeButtonStates = {
+                'new-game': { needsConfirm: false, originalText: elements.newGameButton.textContent },
+                'endless-mode': { needsConfirm: false, originalText: elements.endlessModeButton.textContent }
+            };
+            const modeButtonClasses = {
+                'new-game': elements.newGameButton.className,
+                'endless-mode': elements.endlessModeButton.className
+            };
+            function resetModeButtonStates() {
+                modeButtonStates['new-game'].needsConfirm = false;
+                const newGameSpan = elements.newGameButton.querySelector('span');
+                if (newGameSpan) {
+                    newGameSpan.textContent = '标准模式';
+                }
+                const newGameIcon = elements.newGameButton.querySelector('i');
+                if (newGameIcon) {
+                    newGameIcon.style.display = '';
+                }
+                elements.newGameButton.className = modeButtonClasses['new-game'];
+                modeButtonStates['endless-mode'].needsConfirm = false;
+                const endlessModeSpan = elements.endlessModeButton.querySelector('span');
+                if (endlessModeSpan) {
+                    endlessModeSpan.textContent = '无尽模式';
+                }
+                const endlessModeIcon = elements.endlessModeButton.querySelector('i');
+                if (endlessModeIcon) {
+                    endlessModeIcon.style.display = '';
+                }
+                elements.endlessModeButton.className = modeButtonClasses['endless-mode'];
+            }
+            function handleModeButtonClick(buttonId, isEndlessMode) {
+                const button = document.getElementById(buttonId);
+                const state = modeButtonStates[buttonId];
+                if (state.needsConfirm) {
+                    initGame(isEndlessMode, gameState.gridSize);
+                    resetModeButtonStates();
+                } else {
+                    if (gameState.score > 0) {
+                        resetModeButtonStates();
+                        state.needsConfirm = true;
+                        const spanElement = button.querySelector('span');
+                        if (spanElement) {
+                            spanElement.textContent = '确认';
+                        }
+                        const iconElement = button.querySelector('i');
+                        if (iconElement) {
+                            iconElement.style.display = 'none';
+                        }
+                        button.classList.add('bg-red-500', 'hover:bg-red-600');
+                    } else {
+                        initGame(isEndlessMode, gameState.gridSize);
+                    }
+                }
+            }
             elements.newGameButton.addEventListener('click', () => {
-                if (gameState.score > 0 && confirm('切换到标准模式将重置当前游戏进度，确定要继续吗？')) {
-                    initGame(false, gameState.gridSize);
-                } else if (gameState.score === 0) {
-                    initGame(false, gameState.gridSize);
+                handleModeButtonClick('new-game', false);
+            });
+            elements.newGameButton.addEventListener('blur', () => {
+                if (modeButtonStates['new-game'].needsConfirm) {
+                    resetModeButtonStates();
                 }
             });
             elements.endlessModeButton.addEventListener('click', () => {
-                if (gameState.score > 0 && confirm('切换到无尽模式将重置当前游戏进度，确定要继续吗？')) {
-                    initGame(true, gameState.gridSize);
-                } else if (gameState.score === 0) {
-                    initGame(true, gameState.gridSize);
+                handleModeButtonClick('endless-mode', true);
+            });
+            elements.endlessModeButton.addEventListener('blur', () => {
+                if (modeButtonStates['endless-mode'].needsConfirm) {
+                    resetModeButtonStates();
                 }
             });
             elements.gameMessageButton.addEventListener('click', () => {
@@ -2757,45 +2836,80 @@
                 elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
                 saveGameState();
             });
+            const buttonStates = {
+                'grid-3x3': { needsConfirm: false, originalText: elements.grid3x3Button.textContent },
+                'grid-4x4': { needsConfirm: false, originalText: elements.grid4x4Button.textContent },
+                'grid-5x5': { needsConfirm: false, originalText: elements.grid5x5Button.textContent }
+            };
+            const buttonClasses = {
+                'grid-3x3': elements.grid3x3Button.className,
+                'grid-4x4': elements.grid4x4Button.className,
+                'grid-5x5': elements.grid5x5Button.className
+            };
+            function resetButtonStates() {
+                buttonStates['grid-3x3'].needsConfirm = false;
+                elements.grid3x3Button.textContent = buttonStates['grid-3x3'].originalText;
+                elements.grid3x3Button.className = buttonClasses['grid-3x3'];
+                buttonStates['grid-4x4'].needsConfirm = false;
+                elements.grid4x4Button.textContent = buttonStates['grid-4x4'].originalText;
+                elements.grid4x4Button.className = buttonClasses['grid-4x4'];
+                buttonStates['grid-5x5'].needsConfirm = false;
+                elements.grid5x5Button.textContent = buttonStates['grid-5x5'].originalText;
+                elements.grid5x5Button.className = buttonClasses['grid-5x5'];
+            }
+            function handleGridButtonClick(buttonId, gridSize) {
+                const button = document.getElementById(buttonId);
+                const state = buttonStates[buttonId];
+                if (state.needsConfirm) {
+                    gameState.gridSize = gridSize;
+                    updateGridButtonState(gridSize);
+                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
+                    initGame(gameState.isEndlessMode, gridSize);
+                    resetButtonStates();
+                } else {
+                    if (gameState.score > 0) {
+                        resetButtonStates();
+                        state.needsConfirm = true;
+                        button.textContent = '确认';
+                        button.classList.add('bg-red-500', 'hover:bg-red-600');
+                    } else {
+                        gameState.gridSize = gridSize;
+                        updateGridButtonState(gridSize);
+                        elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
+                        initGame(gameState.isEndlessMode, gridSize);
+                    }
+                }
+            }
             elements.grid3x3Button.addEventListener('click', () => {
-                if (gameState.score > 0 && confirm('切换棋盘大小将重置当前游戏进度，确定要继续吗？')) {
-                    gameState.gridSize = 3;
-                    updateGridButtonState(3);
-                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
-                    initGame(gameState.isEndlessMode, 3);
-                } else if (gameState.score === 0) {
-                    gameState.gridSize = 3;
-                    updateGridButtonState(3);
-                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
-                    initGame(gameState.isEndlessMode, 3);
+                handleGridButtonClick('grid-3x3', 3);
+            });
+            elements.grid3x3Button.addEventListener('blur', () => {
+                if (buttonStates['grid-3x3'].needsConfirm) {
+                    resetButtonStates();
                 }
             });
             elements.grid4x4Button.addEventListener('click', () => {
-                if (gameState.score > 0 && confirm('切换棋盘大小将重置当前游戏进度，确定要继续吗？')) {
-                    gameState.gridSize = 4;
-                    updateGridButtonState(4);
-                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
-                    initGame(gameState.isEndlessMode, 4);
-                } else if (gameState.score === 0) {
-                    gameState.gridSize = 4;
-                    updateGridButtonState(4);
-                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
-                    initGame(gameState.isEndlessMode, 4);
+                handleGridButtonClick('grid-4x4', 4);
+            });
+            elements.grid4x4Button.addEventListener('blur', () => {
+                if (buttonStates['grid-4x4'].needsConfirm) {
+                    resetButtonStates();
                 }
             });
             elements.grid5x5Button.addEventListener('click', () => {
-                if (gameState.score > 0 && confirm('切换棋盘大小将重置当前游戏进度，确定要继续吗？')) {
-                    gameState.gridSize = 5;
-                    updateGridButtonState(5);
-                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
-                    initGame(gameState.isEndlessMode, 5);
-                } else if (gameState.score === 0) {
-                    gameState.gridSize = 5;
-                    updateGridButtonState(5);
-                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
-                    initGame(gameState.isEndlessMode, 5);
+                handleGridButtonClick('grid-5x5', 5);
+            });
+            elements.grid5x5Button.addEventListener('blur', () => {
+                if (buttonStates['grid-5x5'].needsConfirm) {
+                    resetButtonStates();
                 }
             });
+            const originalInitGame = initGame;
+            initGame = function(...args) {
+                resetButtonStates();
+                resetModeButtonStates()
+                return originalInitGame.apply(this, args);
+            };
             elements.dataTransferButton.addEventListener('click', () => { showModal('data-transfer-modal'); });
             elements.settingsButton.addEventListener('click', () => {
                 showModal('settings-modal');
