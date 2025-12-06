@@ -1064,6 +1064,23 @@
         .dark .best-move {
             background: #48bb78;color: #f0fff4;
         }
+        .blur-sm {
+            filter: blur(5px);
+            transition: filter 0.3s ease;
+        }
+        .best-move-text {
+            transition: filter 0.3s ease;
+        }
+        #toggle-best-move {
+            width: 24px;
+            text-align: center;
+            padding: 0;
+        }
+        .custom-select .select-selected i, .custom-select .select-item i {
+            width: 20px;
+            display: inline-block;
+            text-align: center;
+        }
         #game-state-assessment {
             font-weight: bold;
         }
@@ -1343,14 +1360,16 @@
                             </button>
                         </div>
                     </div>
-                    <div class="text-sm text-secondary/70 mt-4">2048 v1.21.1 | by TheFurina</div>
+                    <div class="text-sm text-secondary/70 mt-4">2048 v1.21.2 | by TheFurina</div>
                     <button id="reset-settings-button" class="text-gray-500 hover:text-gray-700 focus:outline-none text-sm inline-block mx-auto">
                         <i class="fa-solid fa-rotate-right mr-1"></i><span>重置所有设置</span>
                     </button>
                     <button id="close-settings-button" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl" title="关闭设置">
                         <i class="fa-solid fa-times"></i>
                     </button>
-                    <a href="https://github.com/TheFurina/2048-game" class="text-primary hover:underline flex items-center gap-1 text-xs absolute bottom-4 right-4" target="_blank"><i class="fa-brands fa-github"></i> 项目主页</a>
+                    <div class="flex justify-end">
+                        <a href="https://github.com/TheFurina/2048-game" class="text-primary hover:underline flex items-center gap-1 text-xs" target="_blank"><i class="fa-brands fa-github"></i> 项目主页</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1799,7 +1818,7 @@
         function copyDataToClipboard() { const textarea = document.getElementById('data-textarea'); textarea.select(); document.execCommand('copy'); const copyButton = document.getElementById('copy-data-button'); const originalIcon = copyButton.innerHTML; copyButton.innerHTML = '<i class="fa-solid fa-check text-green-600 dark:text-green-400"></i>'; setTimeout(() => { copyButton.innerHTML = originalIcon; }, 2000); }
         document.addEventListener('DOMContentLoaded', () => { 
             console.log('%c   ____     ___    _  _      ___                                        \n  |___ \\   / _ \\  | || |    ( _ )      __ _    __ _   _ __ ___     ___ \n    __) | | | | | | || |_   / _ \\     / _` |  / _` | | \'_ ` _ \\   / _ \\ \n   / __/  | |_| | |__   _| | (_) |   | (_| | | (_| | | | | | | | |  __/ \n  |_____|  \\___/     |_|    \\___/     \\__, |  \\__,_| |_| |_| |_|  \\___| \n                                      |___/                            ', 'color: #faa31b; font-size: 14px;');
-            console.log('2048 v1.21.1');
+            console.log('2048 v1.21.2');
             const textareaContainer = document.querySelector('.relative.w-full.mb-4'); 
             const copyButton = document.getElementById('copy-data-button'); 
             if (textareaContainer && copyButton) { 
@@ -3686,20 +3705,29 @@
                     </button>
                 </div>
                 <div class="analysis-item">
-                    <div class="analysis-label">当前最佳移动方向</div>
-                    <div id="best-move-direction" class="analysis-value best-move">向上</div>
+                    <div class="flex items-center justify-between">
+                        <div class="analysis-label flex items-center">
+                            当前最佳移动方向
+                            <button id="toggle-best-move" class="text-secondary/60 hover:text-secondary focus:outline-none text-sm ml-2 dark:text-dark-muted dark:hover:text-white" title="隐藏/显示最佳移动方向">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="best-move-direction" class="analysis-value best-move w-full">
+                        <span class="best-move-text">--</span>
+                    </div>
                 </div>
                 <div class="analysis-item">
                     <div class="analysis-label">潜在合并机会</div>
-                    <div id="merge-opportunities" class="analysis-value">2处 (右侧和下方)</div>
+                    <div id="merge-opportunities" class="analysis-value">--</div>
                 </div>
                 <div class="analysis-item">
                     <div class="analysis-label">游戏状态评估</div>
-                    <div id="game-state-assessment" class="analysis-value">良好</div>
+                    <div id="game-state-assessment" class="analysis-value">--</div>
                 </div>
                 <div class="analysis-item">
                     <div class="analysis-label">得分潜力分析</div>
-                    <div id="score-potential" class="analysis-value">高 (预计可合并2个2048方块)</div>
+                    <div id="score-potential" class="analysis-value">--</div>
                 </div>
             </div>
         </div>
@@ -3803,7 +3831,12 @@
             let scorePotential = '低';
             if (mergeOpportunities >= highPotentialThreshold) scorePotential = '高';
             else if (mergeOpportunities >= mediumPotentialThreshold) scorePotential = '中';
-            document.getElementById('best-move-direction').textContent = directionNames[bestDirection];
+            const bestMoveText = document.querySelector('#best-move-direction .best-move-text');
+            if (bestMoveText) {
+                bestMoveText.textContent = directionNames[bestDirection];
+            } else {
+                document.getElementById('best-move-direction').innerHTML = `<span class="best-move-text">${directionNames[bestDirection]}</span>`;
+            }
             const mergeOpportunitiesElement = document.getElementById('merge-opportunities');
             mergeOpportunitiesElement.textContent = `${mergeOpportunities}处`;
             mergeOpportunitiesElement.className = 'analysis-value';
@@ -4181,6 +4214,32 @@
     document.getElementById('ai-analysis-button').addEventListener('click', analyzeGameState);
         document.getElementById('close-ai-modal').addEventListener('click', function() {
             document.getElementById('ai-analysis-modal').classList.add('hidden');
+        });
+        const bestMoveText = document.querySelector('#best-move-direction .best-move-text');
+        const toggleButton = document.getElementById('toggle-best-move');
+        const iconElement = toggleButton.querySelector('i');
+        const isBestMoveHidden = localStorage.getItem('bestMoveHidden') === 'true';
+        if (isBestMoveHidden) {
+            bestMoveText.classList.add('blur-sm');
+            iconElement.className = 'fa-solid fa-eye-slash';
+            toggleButton.setAttribute('title', '显示最佳移动方向');
+        } else {
+            bestMoveText.classList.remove('blur-sm');
+            iconElement.className = 'fa-solid fa-eye';
+            toggleButton.setAttribute('title', '隐藏最佳移动方向');
+        }
+        toggleButton.addEventListener('click', function() {
+            if (bestMoveText.classList.contains('blur-sm')) {
+                bestMoveText.classList.remove('blur-sm');
+                iconElement.className = 'fa-solid fa-eye';
+                this.setAttribute('title', '隐藏最佳移动方向');
+                localStorage.setItem('bestMoveHidden', 'false');
+            } else {
+                bestMoveText.classList.add('blur-sm');
+                iconElement.className = 'fa-solid fa-eye-slash';
+                this.setAttribute('title', '显示最佳移动方向');
+                localStorage.setItem('bestMoveHidden', 'true');
+            }
         });
         document.getElementById('ai-analysis-modal').addEventListener('click', function(e) {
             if (e.target === this) this.classList.add('hidden');
