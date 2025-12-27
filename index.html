@@ -4,7 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="https://cdn.jsdelivr.net/gh/TheFurina/2048-game@main/icon.png">
-    <title>2048 游戏</title>
+    <title>2048 Game</title>
+    <meta name="description" content="玩2048游戏，一款流行的在线益智数字游戏。通过滑动合并相同数字，挑战达到2048方块。支持多种难度和网格大小。">
+    <meta name="keywords" content="2048游戏,2048,数字游戏,益智游戏,在线游戏,免费游戏,脑力游戏,滑动游戏,合并游戏,挑战游戏">
+    <meta name="author" content="2048 Game">
+    <meta name="language" content="zh-CN">
+    <link rel="canonical" href="https://thefurina.github.io/2048-game">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta property="og:title" content="2048 Game">
+    <meta property="og:description" content="玩2048游戏，一款流行的在线益智数字游戏。通过滑动合并相同数字，挑战达到2048方块。支持多种难度和网格大小。">
+    <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheFurina/2048-game@main/icon.png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+    <meta property="og:url" content="https://thefurina.github.io/2048-game">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="2048 Game">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="2048 Game">
+    <meta name="twitter:description" content="玩2048游戏，一款流行的在线益智数字游戏。通过滑动合并相同数字，挑战达到2048方块。支持多种难度和网格大小。">
+    <meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/TheFurina/2048-game@main/icon.png">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Game",
+        "name": "2048游戏",
+        "alternateName": "2048",
+        "description": "一款流行的在线益智数字游戏。通过滑动合并相同数字，挑战达到2048方块。",
+        "url": "https://thefurina.github.io/2048-game">",
+        "image": "https://cdn.jsdelivr.net/gh/TheFurina/2048-game@main/icon.png",
+        "inLanguage": "zh-CN",
+        "isFamilyFriendly": "true",
+        "genre": ["益智游戏", "数字游戏", "脑力游戏"],
+        "gamePlatform": "Web浏览器",
+        "applicationCategory": "Game",
+        "operatingSystem": "任何",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "CNY",
+            "availability": "https://schema.org/InStock"
+        },
+        "author": {
+            "@type": "Person",
+            "name": "TheFurina",
+            "url": "https://github.com/TheFurina"
+        },
+        "publisher": {
+            "@type": "Person",
+            "name": "TheFurina",
+            "url": "https://github.com/TheFurina"
+        }
+    }
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
     <script>
@@ -90,7 +142,6 @@
             textarea:focus,
             [tabindex]:not([tabindex="-1"]):focus {
                 outline: none;
-                transform: translateY(-1px);
             }
             button:focus-visible,
             a:focus-visible,
@@ -372,9 +423,6 @@
             .btn-hover {
                 transition: all 0.2s ease-in-out;
                 will-change: transform, box-shadow;
-            }
-            .btn-hover:hover, .btn-hover:focus {
-                transform: translateY(-1px);
             }
             .btn-hover:active, .btn-hover:focus:active {
                 transform: translateY(0);
@@ -989,15 +1037,15 @@
                 min-width: 32px;
             }
             .game-container {
-                padding: 2px;
+                padding: clamp(2px, 1.5vw, 4px);
                 border-radius: 2px;
             }
             .grid-cell {
-                margin-right: 1px;
+                margin-right: clamp(2px, 1.5vw, 4px);
                 border-radius: 1px;
             }
             .grid-row {
-                margin-bottom: 1px;
+                margin-bottom: clamp(2px, 1.5vw, 4px);
             }
             .tile {
                 border-radius: 1px;
@@ -1032,7 +1080,7 @@
             opacity: 1; transform: scale(1); visibility: visible; 
         }
         .ai-analysis-content {
-            background: white;padding: 20px;border-radius: 8px;max-width: 500px;width: 90%;max-height: 80vh;overflow-y: auto;
+            background: white;padding: 20px;border-radius: 8px;max-width: 500px;width: 90%;max-height: 80vh;overflow-y: auto;position: relative;
         }
         .dark .ai-analysis-content {
             background: #2d3748;color: white;
@@ -1147,7 +1195,7 @@
     </style>
 </head>
 <body class="bg-bg font-game min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300">
-    <div class="max-w-md w-full mx-auto">
+    <main class="max-w-md w-full mx-auto">
         <header id="game-header" class="flex flex-col md:flex-row justify-between items-center mb-6">
             <div>
                 <h1 id="game-title" class="text-[clamp(2.5rem,5vw,3.5rem)] font-bold text-secondary dark:text-dark-text mb-1 tracking-tight">2048</h1>
@@ -1189,10 +1237,10 @@
             }
         </style>
             <div class="flex gap-2 mt-4 md:mt-0">
-                <button id="undo-button" class="bg-grid hover:bg-grid/80 text-white p-2 rounded-md shadow-md transition-all duration-200 focus:outline-none dark:bg-dark-grid" title="撤销上一步">
+                <button id="undo-button" class="bg-grid hover:bg-grid/80 text-white p-2 rounded-md shadow-md transition-all duration-200 focus:outline-none dark:bg-dark-grid w-[72px]" title="撤销上一步">
                     <i class="fa-solid fa-undo mr-1"></i><span>撤销</span>
                 </button>
-                <button id="pause-button" class="bg-grid hover:bg-grid/80 text-white p-2 rounded-md shadow-md transition-all duration-200 focus:outline-none dark:bg-dark-grid" title="暂停游戏">
+                <button id="pause-button" class="bg-grid hover:bg-grid/80 text-white p-2 rounded-md shadow-md transition-all duration-200 focus:outline-none dark:bg-dark-grid w-[72px]" title="暂停游戏">
                     <i class="fa-solid fa-pause mr-1"></i><span>暂停</span>
                 </button>
             </div>
@@ -1209,14 +1257,17 @@
             <div class="options-row">
                 <span class="option-label">网格大小:</span>
                 <div class="option-buttons">
-                    <button id="grid-3x3" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-300 btn-hover">
+                    <button id="grid-3x3" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-300 btn-hover w-16">
                         <i class="fa-solid fa-square-three"></i>3×3
                     </button>
-                    <button id="grid-4x4" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300 btn-hover active">
+                    <button id="grid-4x4" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300 btn-hover active w-16">
                         <i class="fa-solid fa-square-four"></i>4×4
                     </button>
-                    <button id="grid-5x5" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-300 btn-hover">
+                    <button id="grid-5x5" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-300 btn-hover w-16">
                         <i class="fa-solid fa-square-five"></i>5×5
+                    </button>
+                    <button id="custom-grid" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-300 btn-hover w-20" title="自定义网格大小">
+                        自定义
                     </button>
                 </div>
             </div>
@@ -1224,13 +1275,13 @@
                 <span class="option-label">难度选择:</span>
                 <div class="option-buttons">
                     <button id="easy-mode" class="bg-easy hover:bg-easy/90 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-easy/50 flex-1 btn-hover">
-                        <i class="fa-solid fa-shield-check mr-2"></i>简单
+                        <i class="fa-solid fa-shield-check"></i>简单
                     </button>
                     <button id="medium-mode" class="bg-medium hover:bg-medium/90 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-medium/50 flex-1 btn-hover active">
-                        <i class="fa-solid fa-shield-half mr-2"></i>中等
+                        <i class="fa-solid fa-shield-half"></i>中等
                     </button>
                     <button id="hard-mode" class="bg-hard hover:bg-hard/90 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-hard/50 flex-1 btn-hover">
-                        <i class="fa-solid fa-shield-exclamation mr-2"></i>困难
+                        <i class="fa-solid fa-shield-exclamation"></i>困难
                     </button>
                 </div>
             </div>
@@ -1360,7 +1411,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="text-sm text-secondary/70 mt-4">2048 v1.21.2 | by TheFurina</div>
+                    <div class="text-sm text-secondary/70 mt-4">2048 v1.22.0 | by TheFurina</div>
                     <button id="reset-settings-button" class="text-gray-500 hover:text-gray-700 focus:outline-none text-sm inline-block mx-auto">
                         <i class="fa-solid fa-rotate-right mr-1"></i><span>重置所有设置</span>
                     </button>
@@ -1670,7 +1721,7 @@
             <div class="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-dark-surface rounded-b-lg">
                 <div class="flex flex-wrap gap-3 justify-center">
                     <button id="save-custom-theme" class="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-md transition-all duration-200 flex-1 sm:flex-none sm:min-w-[120px]">
-                        <i class="fa-solid fa-save mr-1"></i>保存主题
+                        <i class="fa-solid fa-save mr-1"></i>保存
                     </button>
                     <button id="reset-custom-theme" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-md transition-all duration-200 flex-1 sm:flex-none sm:min-w-[120px]">
                         <i class="fa-solid fa-rotate-right mr-1"></i>重置
@@ -1706,6 +1757,33 @@
                 </button>
             </div>
         </div>
+        <div id="custom-grid-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="custom-grid-modal-title" aria-modal="true">
+            <div class="bg-white dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0">
+                <h2 id="custom-grid-modal-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4">自定义网格大小</h2>
+                <div class="mb-4">
+                    <label for="grid-size-input" class="block text-sm font-medium text-gray-700 dark:text-dark-muted mb-2">请输入网格大小 (3-10):</label>
+                    <div class="flex items-center justify-center gap-2">
+                        <input type="number" id="grid-size-input" min="3" max="10" value="4" class="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-center dark:bg-dark-surface dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <span class="text-gray-600 dark:text-dark-muted">×</span>
+                        <input type="number" id="grid-size-input-2" min="3" max="10" value="4" class="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-center dark:bg-dark-surface dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="mt-2">
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" id="square-grid" checked class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <span class="ml-2 text-sm text-gray-700 dark:text-dark-muted">正方形网格 (锁定宽高比)</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3 justify-center">
+                    <button id="apply-custom-grid" class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-md transition-all duration-200 flex-1 sm:flex-none sm:min-w-[120px]">
+                        <i class="fa-solid fa-check mr-1"></i>应用
+                    </button>
+                    <button id="cancel-custom-grid" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-md transition-all duration-200 flex-1 sm:flex-none sm:min-w-[120px]">
+                        <i class="fa-solid fa-times mr-1"></i>取消
+                    </button>
+                </div>
+            </div>
+        </div>
         <footer class="mt-6 py-3 text-center text-secondary/50 dark:text-dark-muted/50 text-base">
             <p><i class="fa-solid fa-cube mr-2"></i>滑动之间 数字新生</p>
         </footer>
@@ -1737,6 +1815,8 @@
             tileAnimationEnabled: localStorage.getItem('2048-tile-animation') !== 'false',
             grid: [],
             gridSize: 4,
+            gridRows: 4,
+            gridCols: 4,
             score: 0,
             bestScore: 0,
             gameOver: false,
@@ -1814,11 +1894,11 @@
                 }, 300);
             }
         }
-        function exportGameData() { const data = { grid: gameState.grid, score: gameState.score, bestScore: gameState.bestScore, gridSize: gameState.gridSize, difficulty: gameState.difficulty, isEndlessMode: gameState.isEndlessMode, timestamp: new Date().toISOString() }; const dataStr = btoa(JSON.stringify(data)); document.getElementById('data-textarea').value = dataStr; }
+        function exportGameData() { const data = { grid: gameState.grid, score: gameState.score, bestScore: gameState.bestScore, gridSize: gameState.gridSize, gridRows: gameState.gridRows, gridCols: gameState.gridCols, difficulty: gameState.difficulty, isEndlessMode: gameState.isEndlessMode, timestamp: new Date().toISOString() }; const dataStr = btoa(JSON.stringify(data)); document.getElementById('data-textarea').value = dataStr; }
         function copyDataToClipboard() { const textarea = document.getElementById('data-textarea'); textarea.select(); document.execCommand('copy'); const copyButton = document.getElementById('copy-data-button'); const originalIcon = copyButton.innerHTML; copyButton.innerHTML = '<i class="fa-solid fa-check text-green-600 dark:text-green-400"></i>'; setTimeout(() => { copyButton.innerHTML = originalIcon; }, 2000); }
         document.addEventListener('DOMContentLoaded', () => { 
             console.log('%c   ____     ___    _  _      ___                                        \n  |___ \\   / _ \\  | || |    ( _ )      __ _    __ _   _ __ ___     ___ \n    __) | | | | | | || |_   / _ \\     / _` |  / _` | | \'_ ` _ \\   / _ \\ \n   / __/  | |_| | |__   _| | (_) |   | (_| | | (_| | | | | | | | |  __/ \n  |_____|  \\___/     |_|    \\___/     \\__, |  \\__,_| |_| |_| |_|  \\___| \n                                      |___/                            ', 'color: #faa31b; font-size: 14px;');
-            console.log('2048 v1.21.2');
+            console.log('2048 v1.22.0');
             const textareaContainer = document.querySelector('.relative.w-full.mb-4'); 
             const copyButton = document.getElementById('copy-data-button'); 
             if (textareaContainer && copyButton) { 
@@ -1853,9 +1933,11 @@
                 const missingFields = requiredFields.filter(field => !(field in data));
                 if (missingFields.length > 0) throw new Error('缺少必要字段：' + missingFields.join(', '));
                 if (!Array.isArray(data.grid) || data.grid.length === 0) throw new Error('无效的游戏网格数据');
-        if (data.grid.length !== data.gridSize || data.grid.some(row => row.length !== data.gridSize)) {
-            throw new Error('导入的滑块数字指示的网格大小与导入数据指示的网格大小不一致');
-        }
+                const gridRows = data.gridRows || data.gridSize;
+                const gridCols = data.gridCols || data.gridSize;
+                if (data.grid.length !== gridRows || data.grid.some(row => row.length !== gridCols)) {
+                    throw new Error(`导入的滑块数字指示的网格大小(${data.grid.length}x${data.grid[0]?.length || 0})与导入数据指示的网格大小(${gridRows}x${gridCols})不一致`);
+                }
         const invalidTiles = data.grid.flatMap(row => row.filter(tile => tile && (tile.value <= 0 || (tile.value & (tile.value - 1)) !== 0)));
         if (invalidTiles.length > 0) {
             throw new Error('导入的滑块数字必须是2的次幂');
@@ -1864,17 +1946,20 @@
                 gameState.score = data.score;
                 gameState.bestScore = data.bestScore;
                 gameState.gridSize = data.gridSize;
+                gameState.gridRows = gridRows;
+                gameState.gridCols = gridCols;
                 gameState.difficulty = data.difficulty;
                 gameState.isEndlessMode = data.isEndlessMode;
                 document.querySelector('.game-container').classList.remove('grid-3x3', 'grid-4x4', 'grid-5x5');
-                document.querySelector('.game-container').classList.add(`grid-${data.gridSize}x${data.gridSize}`);
+                document.querySelector('.game-container').classList.add(`grid-${gridRows}x${gridCols}`);
+                generateGridStyles(null, gridRows, gridCols);
                 initGridContainer();
                 updateDocumentTitle();
                 renderAllTiles();
                 elements.scoreDisplay.textContent = gameState.score;
                 elements.bestScoreDisplay.textContent = gameState.bestScore;
                 elements.modeDescription.textContent = gameState.isEndlessMode ? "当前模式：无尽模式 - 尽可能获得高分" : "当前模式：标准模式 - 达到2048获胜";
-                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`; 
+                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gridRows}×${gridCols}网格`; 
                 saveGameState();
                 gameState.history = [];
                 updateUndoButtonState();
@@ -1910,6 +1995,13 @@
             grid3x3Button: document.getElementById('grid-3x3'),
             grid4x4Button: document.getElementById('grid-4x4'),
             grid5x5Button: document.getElementById('grid-5x5'),
+            customGridButton: document.getElementById('custom-grid'),
+            customGridModal: document.getElementById('custom-grid-modal'),
+            gridSizeInput: document.getElementById('grid-size-input'),
+            gridSizeInput2: document.getElementById('grid-size-input-2'),
+            squareGridCheckbox: document.getElementById('square-grid'),
+            applyCustomGridButton: document.getElementById('apply-custom-grid'),
+            cancelCustomGridButton: document.getElementById('cancel-custom-grid'),
             modeDescription: document.getElementById('mode-description'),
             difficultyDescription: document.getElementById('difficulty-description'),
             resetSettingsButton: document.getElementById('reset-settings-button'),
@@ -1926,24 +2018,93 @@
         function updateDocumentTitle() {
             const mode = gameState.isEndlessMode ? '无尽模式' : '标准模式';
             const difficulty = getDifficultyName();
-            document.title = `2048 | ${mode} | ${difficulty} | ${gameState.gridSize}×${gameState.gridSize} | 分数: ${gameState.score}`;
+            document.title = `2048 | ${mode} | ${difficulty} | ${gameState.gridRows}×${gameState.gridCols} | 分数: ${gameState.score}`;
         }
         function createEmptyGrid() {
             const grid = [];
-            for (let y = 0; y < gameState.gridSize; y++) {
+            for (let y = 0; y < gameState.gridRows; y++) {
                 grid[y] = [];
-                for (let x = 0; x < gameState.gridSize; x++) {
+                for (let x = 0; x < gameState.gridCols; x++) {
                     grid[y][x] = null;
                 }
             }
             return grid;
         }
+        function generateGridStyles(gridSize, gridRows, gridCols) {
+            for (let i = 3; i <= 10; i++) {
+                for (let j = 3; j <= 10; j++) {
+                    const customStyleId = `grid-${i}x${j}-styles`;
+                    const existingCustomStyle = document.getElementById(customStyleId);
+                    if (existingCustomStyle) {
+                        existingCustomStyle.remove();
+                    }
+                }
+            }
+            if (gridRows === gridCols && (gridRows === 3 || gridRows === 4 || gridRows === 5)) {
+                return;
+            }
+            const styleId = `grid-${gridRows}x${gridCols}-styles`;
+            const existingStyle = document.getElementById(styleId);
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+            const style = document.createElement('style');
+            style.id = styleId;
+            const isSmallScreen = window.matchMedia('(max-width: 400px) and (max-height: 400px)').matches;
+            const gapSize = isSmallScreen ? 'clamp(2px, 1.5vw, 4px)' : 'clamp(8px, 3vw, 16px)';
+            const totalHorizontalGap = `(${gridCols} - 1) * ${gapSize}`;
+            const totalVerticalGap = `(${gridRows} - 1) * ${gapSize}`;
+            const mediaQuery = isSmallScreen ? 
+                `@media (max-width: 400px) and (max-height: 400px)` : 
+                `@media (min-width: 401px), (min-height: 401px)`;
+            style.textContent = `
+                ${mediaQuery} {
+                    .grid-${gridRows}x${gridCols} .grid-row {
+                        height: calc((100% - ${totalVerticalGap}) / ${gridRows});
+                        margin-bottom: ${gapSize} !important;
+                    }
+                    .grid-${gridRows}x${gridCols} .grid-row:last-child {
+                        margin-bottom: 0 !important;
+                    }
+                    .grid-${gridRows}x${gridCols} .grid-cell {
+                        width: calc((100% - ${totalHorizontalGap}) / ${gridCols});
+                        margin-right: ${gapSize} !important;
+                    }
+                    .grid-${gridRows}x${gridCols} .grid-cell:last-child {
+                        margin-right: 0 !important;
+                    }
+                    .grid-${gridRows}x${gridCols} .tile {
+                        width: calc((100% - ${totalHorizontalGap}) / ${gridCols});
+                        height: calc((100% - ${totalVerticalGap}) / ${gridRows});
+                        font-size: ${Math.max(0.6, 2.5 - Math.max(gridRows, gridCols) * 0.2)}rem;
+                    }
+                    ${generateTilePositions(gridRows, gridCols, isSmallScreen)}
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        function generateTilePositions(gridRows, gridCols, isSmallScreen = false) {
+            let styles = '';
+            const gapSize = isSmallScreen ? 'clamp(2px, 1.5vw, 4px)' : 'clamp(8px, 3vw, 16px)';
+            const totalHorizontalGap = `(${gridCols} - 1) * ${gapSize}`;
+            const totalVerticalGap = `(${gridRows} - 1) * ${gapSize}`;
+            const tileSize = `calc((100% - ${totalHorizontalGap}) / ${gridCols})`;
+            const tileHeight = `calc((100% - ${totalVerticalGap}) / ${gridRows})`;
+            for (let y = 0; y < gridRows; y++) {
+                for (let x = 0; x < gridCols; x++) {
+                    const leftPos = `calc(${x} * (${tileSize} + ${gapSize}))`;
+                    const topPos = `calc(${y} * (${tileHeight} + ${gapSize}))`;
+                    styles += `.grid-${gridRows}x${gridCols} .tile[data-pos="${x}-${y}"] { left: ${leftPos}; top: ${topPos}; }\n`;
+                }
+            }
+            return styles;
+        }
         function initGridContainer() {
             elements.gridContainer.innerHTML = '';
-            for (let y = 0; y < gameState.gridSize; y++) {
+            for (let y = 0; y < gameState.gridRows; y++) {
                 const gridRow = document.createElement('div');
                 gridRow.className = 'grid-row';
-                for (let x = 0; x < gameState.gridSize; x++) {
+                for (let x = 0; x < gameState.gridCols; x++) {
                     const gridCell = document.createElement('div');
                     gridCell.className = 'grid-cell';
                     gridRow.appendChild(gridCell);
@@ -1953,8 +2114,8 @@
         }
         function generateRandomTile() {
             const availableCells = [];
-            for (let y = 0; y < gameState.gridSize; y++) {
-                for (let x = 0; x < gameState.gridSize; x++) {
+            for (let y = 0; y < gameState.gridRows; y++) {
+                for (let x = 0; x < gameState.gridCols; x++) {
                     if (gameState.grid[y][x] === null) {
                         availableCells.push({ x, y });
                     }
@@ -1977,20 +2138,14 @@
         function renderTile(x, y, animate = true) {
             const tile = gameState.grid[y][x];
             if (!tile) return;
-            let tileSize = '';
-            let gapValue = '';
-            if (gameState.gridSize === 3) {
-                tileSize = `calc((100% - clamp(16px, 6vw, 32px)) / 3)`;
-                gapValue = `clamp(8px, 3vw, 16px)`;
-            } else if (gameState.gridSize === 4) {
-                tileSize = `calc((100% - clamp(24px, 9vw, 48px)) / 4)`;
-                gapValue = `clamp(8px, 3vw, 16px)`;
-            } else {
-                tileSize = `calc((100% - clamp(32px, 12vw, 64px)) / 5)`;
-                gapValue = `clamp(8px, 3vw, 16px)`;
-            }
-            const leftPos = `calc((${tileSize} + ${gapValue}) * ${x})`;
-            const topPos = `calc((${tileSize} + ${gapValue}) * ${y})`;
+            const isSmallScreen = window.matchMedia('(max-width: 400px) and (max-height: 400px)').matches;
+            const gapSize = isSmallScreen ? 'clamp(2px, 1.5vw, 4px)' : 'clamp(8px, 3vw, 16px)';
+            const totalHorizontalGap = `(${gameState.gridCols} - 1) * ${gapSize}`;
+            const totalVerticalGap = `(${gameState.gridRows} - 1) * ${gapSize}`;
+            const tileSize = `calc((100% - ${totalHorizontalGap}) / ${gameState.gridCols})`;
+            const tileHeight = `calc((100% - ${totalVerticalGap}) / ${gameState.gridRows})`;
+            const leftPos = `calc(${x} * (${tileSize} + ${gapSize}))`;
+            const topPos = `calc(${y} * (${tileHeight} + ${gapSize}))`;
             let tileElement = elements.tileContainer.querySelector(`.tile[data-pos="${x}-${y}"]`);
             if (!tileElement) {
                 tileElement = document.createElement('div');
@@ -2023,8 +2178,8 @@
                 currentTiles[pos] = tile;
             });
             const preservedPositions = new Set();
-            for (let y = 0; y < gameState.gridSize; y++) {
-                for (let x = 0; x < gameState.gridSize; x++) {
+            for (let y = 0; y < gameState.gridRows; y++) {
+                for (let x = 0; x < gameState.gridCols; x++) {
                     if (gameState.grid[y][x]) {
                         const posKey = `${x}-${y}`;
                         preservedPositions.add(posKey);
@@ -2057,8 +2212,8 @@
             saveHistory();
             let moved = false;
             const moveLog = [];
-            for (let y = 0; y < gameState.gridSize; y++) {
-                for (let x = 0; x < gameState.gridSize; x++) {
+            for (let y = 0; y < gameState.gridRows; y++) {
+                for (let x = 0; x < gameState.gridCols; x++) {
                     if (gameState.grid[y][x]) {
                         gameState.grid[y][x].merged = false;
                         moveLog.push({
@@ -2072,8 +2227,8 @@
             }
             switch(direction) {
                 case 'up':
-                    for (let x = 0; x < gameState.gridSize; x++) {
-                        for (let y = 1; y < gameState.gridSize; y++) {
+                    for (let x = 0; x < gameState.gridCols; x++) {
+                        for (let y = 1; y < gameState.gridRows; y++) {
                             if (gameState.grid[y][x]) {
                                 let newY = y;
                                 while (newY > 0 && gameState.grid[newY - 1][x] === null) {
@@ -2106,14 +2261,14 @@
                     }
                     break;
                 case 'down':
-                    for (let x = 0; x < gameState.gridSize; x++) {
-                        for (let y = gameState.gridSize - 2; y >= 0; y--) {
+                    for (let x = 0; x < gameState.gridCols; x++) {
+                        for (let y = gameState.gridRows - 2; y >= 0; y--) {
                             if (gameState.grid[y][x]) {
                                 let newY = y;
-                                while (newY < gameState.gridSize - 1 && gameState.grid[newY + 1][x] === null) {
+                                while (newY < gameState.gridRows - 1 && gameState.grid[newY + 1][x] === null) {
                                     newY++;
                                 }
-                                if (newY < gameState.gridSize - 1 && gameState.grid[newY + 1][x] && 
+                                if (newY < gameState.gridRows - 1 && gameState.grid[newY + 1][x] && 
                                     gameState.grid[newY + 1][x].value === gameState.grid[y][x].value &&
                                     !gameState.grid[newY + 1][x].merged) {
                                     gameState.grid[newY + 1][x].value *= 2;
@@ -2140,8 +2295,8 @@
                     }
                     break;
                 case 'left':
-                    for (let y = 0; y < gameState.gridSize; y++) {
-                        for (let x = 1; x < gameState.gridSize; x++) {
+                    for (let y = 0; y < gameState.gridRows; y++) {
+                        for (let x = 1; x < gameState.gridCols; x++) {
                             if (gameState.grid[y][x]) {
                                 let newX = x;
                                 while (newX > 0 && gameState.grid[y][newX - 1] === null) {
@@ -2174,14 +2329,14 @@
                     }
                     break;
                 case 'right':
-                    for (let y = 0; y < gameState.gridSize; y++) {
-                        for (let x = gameState.gridSize - 2; x >= 0; x--) {
+                    for (let y = 0; y < gameState.gridRows; y++) {
+                        for (let x = gameState.gridCols - 2; x >= 0; x--) {
                             if (gameState.grid[y][x]) {
                                 let newX = x;
-                                while (newX < gameState.gridSize - 1 && gameState.grid[y][newX + 1] === null) {
+                                while (newX < gameState.gridCols - 1 && gameState.grid[y][newX + 1] === null) {
                                     newX++;
                                 }
-                                if (newX < gameState.gridSize - 1 && gameState.grid[y][newX + 1] && 
+                                if (newX < gameState.gridCols - 1 && gameState.grid[y][newX + 1] && 
                                     gameState.grid[y][newX + 1].value === gameState.grid[y][x].value &&
                                     !gameState.grid[y][newX + 1].merged) {
                                     gameState.grid[y][newX + 1].value *= 2;
@@ -2213,8 +2368,8 @@
                     renderAllTiles(true);
                     setTimeout(() => {
                         if (gameState.tileAnimationEnabled) {
-                            for (let y = 0; y < gameState.gridSize; y++) {
-                                for (let x = 0; x < gameState.gridSize; x++) {
+                            for (let y = 0; y < gameState.gridRows; y++) {
+                                for (let x = 0; x < gameState.gridCols; x++) {
                                     if (gameState.grid[y][x] && gameState.grid[y][x].mergedAnimation) {
                                         const tileElement = elements.tileContainer.querySelector(`.tile[data-pos="${x}-${y}"]`);
                                         if (tileElement) {
@@ -2229,8 +2384,8 @@
                                 }
                             }
                         } else {
-                            for (let y = 0; y < gameState.gridSize; y++) {
-                                for (let x = 0; x < gameState.gridSize; x++) {
+                            for (let y = 0; y < gameState.gridRows; y++) {
+                                for (let x = 0; x < gameState.gridCols; x++) {
                                     if (gameState.grid[y][x]) {
                                         gameState.grid[y][x].mergedAnimation = false;
                                     }
@@ -2262,8 +2417,8 @@
             return moved;
         }
         function checkWin() {
-            for (let y = 0; y < gameState.gridSize; y++) {
-                for (let x = 0; x < gameState.gridSize; x++) {
+            for (let y = 0; y < gameState.gridRows; y++) {
+                for (let x = 0; x < gameState.gridCols; x++) {
                     if (gameState.grid[y][x] && gameState.grid[y][x].value >= config.winningValue) {
                         gameState.gameWon = true;
                         if (!gameState.isEndlessMode) {
@@ -2276,20 +2431,20 @@
             return false;
         }
         function checkGameOver() {
-            for (let y = 0; y < gameState.gridSize; y++) {
-                for (let x = 0; x < gameState.gridSize; x++) {
+            for (let y = 0; y < gameState.gridRows; y++) {
+                for (let x = 0; x < gameState.gridCols; x++) {
                     if (gameState.grid[y][x] === null) {
                         return false;
                     }
                 }
             }
-            for (let y = 0; y < gameState.gridSize; y++) {
-                for (let x = 0; x < gameState.gridSize; x++) {
+            for (let y = 0; y < gameState.gridRows; y++) {
+                for (let x = 0; x < gameState.gridCols; x++) {
                     const value = gameState.grid[y][x].value;
-                    if (x < gameState.gridSize - 1 && gameState.grid[y][x + 1] && gameState.grid[y][x + 1].value === value) {
+                    if (x < gameState.gridCols - 1 && gameState.grid[y][x + 1] && gameState.grid[y][x + 1].value === value) {
                         return false;
                     }
-                    if (y < gameState.gridSize - 1 && gameState.grid[y + 1][x] && gameState.grid[y + 1][x].value === value) {
+                    if (y < gameState.gridRows - 1 && gameState.grid[y + 1][x] && gameState.grid[y + 1][x].value === value) {
                         return false;
                     }
                 }
@@ -2456,6 +2611,8 @@
             localStorage.setItem('2048-game-state', JSON.stringify({
                 grid: gameState.grid,
                 gridSize: gameState.gridSize,
+                gridRows: gameState.gridRows,
+                gridCols: gameState.gridCols,
                 score: gameState.score,
                 bestScore: gameState.bestScore,
                 gameOver: gameState.gameOver,
@@ -2465,10 +2622,13 @@
                 history: gameState.history
             }));
         }
-        function initGame(isEndlessMode = false, gridSize = gameState.gridSize) {
+        function initGame(isEndlessMode = false, gridRows = gameState.gridRows, gridCols = gameState.gridCols) {
+            generateGridStyles(null, gridRows, gridCols);
             const previousBestScore = gameState.bestScore;
+            gameState.gridRows = gridRows;
+            gameState.gridCols = gridCols;
+            gameState.gridSize = Math.max(gridRows, gridCols);
             gameState.grid = createEmptyGrid();
-            gameState.gridSize = gridSize;
             gameState.score = 0;
             gameState.gameOver = false;
             gameState.gameWon = false;
@@ -2477,18 +2637,18 @@
             elements.scoreDisplay.textContent = gameState.score;
             elements.bestScoreDisplay.textContent = previousBestScore;
             document.querySelector('.game-container').classList.remove('grid-3x3', 'grid-4x4', 'grid-5x5');
-            document.querySelector('.game-container').classList.add(`grid-${gridSize}x${gridSize}`);
+            document.querySelector('.game-container').classList.add(`grid-${gridRows}x${gridCols}`);
             initGridContainer();
             elements.tileContainer.innerHTML = '';
             for (let i = 0; i < config.initialTiles; i++) {
                 generateRandomTile();
             }
             updateDifficultyButtons();
-            updateGridButtonState(gridSize);
+            updateGridButtonState(Math.max(gridRows, gridCols));
             elements.modeDescription.textContent = isEndlessMode 
                 ? "当前模式：无尽模式 - 尽可能获得高分" 
                 : "当前模式：标准模式 - 达到2048获胜";
-            elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
+            elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gridRows}×${gridCols}网格`;
             hideGameMessage();
             updateDocumentTitle();
             updateUndoButtonState();
@@ -2569,7 +2729,7 @@
                 elements.gpuAccelerationToggle.checked = true;
                 elements.tileAnimation.checked = true;
                 updateDifficultyButtons();
-                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
+                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
                 renderAllTiles();
                 saveGameState();
             }
@@ -2593,6 +2753,8 @@
                 elements.gameDescription && elements.gameDescription.classList.remove('compact-description');
                 elements.gameMessage && elements.gameMessage.classList.remove('compact-message');
             }
+            generateGridStyles(gameState.gridSize, gameState.gridRows, gameState.gridCols);
+            renderAllTiles(false);
         }
         function initEventListeners() {
             document.addEventListener('keydown', (e) => {
@@ -2633,27 +2795,27 @@
                     case 82:
                         if (!e.ctrlKey && !e.metaKey && !e.altKey) {
                             if (gameState.score > 0 && confirm('重新开始将重置当前游戏进度，确定要继续吗？')) {
-                                initGame(gameState.isEndlessMode, gameState.gridSize);
+                                initGame(gameState.isEndlessMode, gameState.gridRows, gameState.gridCols);
                             } else if (gameState.score === 0) {
-                                initGame(gameState.isEndlessMode, gameState.gridSize);
+                                initGame(gameState.isEndlessMode, gameState.gridRows, gameState.gridCols);
                             }
                         }
                         break;
                     case 78:
                         if (!e.ctrlKey && !e.metaKey && !e.altKey) {
                             if (gameState.score > 0 && confirm('切换到标准模式将重置当前游戏进度，确定要继续吗？')) {
-                                initGame(false, gameState.gridSize);
+                                initGame(false, gameState.gridRows, gameState.gridCols);
                             } else if (gameState.score === 0) {
-                                initGame(false, gameState.gridSize);
+                                initGame(false, gameState.gridRows, gameState.gridCols);
                             }
                         }
                         break;
                     case 69:
                         if (!e.ctrlKey && !e.metaKey && !e.altKey) {
                             if (gameState.score > 0 && confirm('切换到无尽模式将重置当前游戏进度，确定要继续吗？')) {
-                                initGame(true, gameState.gridSize);
+                                initGame(true, gameState.gridRows, gameState.gridCols);
                             } else if (gameState.score === 0) {
-                                initGame(true, gameState.gridSize);
+                                initGame(true, gameState.gridRows, gameState.gridCols);
                             }
                         }
                         break;
@@ -2664,17 +2826,21 @@
                                 const nextIndex = (currentIndex + 1) % 3;
                                 const newGridSize = [3, 4, 5][nextIndex];
                                 gameState.gridSize = newGridSize;
+                                gameState.gridRows = newGridSize;
+                                gameState.gridCols = newGridSize;
                                 updateGridButtonState(newGridSize);
-                                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
-                                initGame(gameState.isEndlessMode, newGridSize);
+                                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
+                                initGame(gameState.isEndlessMode, newGridSize, newGridSize);
                             } else if (gameState.score === 0) {
                                 const currentIndex = [3, 4, 5].indexOf(gameState.gridSize);
                                 const nextIndex = (currentIndex + 1) % 3;
                                 const newGridSize = [3, 4, 5][nextIndex];
                                 gameState.gridSize = newGridSize;
+                                gameState.gridRows = newGridSize;
+                                gameState.gridCols = newGridSize;
                                 updateGridButtonState(newGridSize);
-                                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
-                                initGame(gameState.isEndlessMode, newGridSize);
+                                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
+                                initGame(gameState.isEndlessMode, newGridSize, newGridSize);
                             }
                         }
                         break;
@@ -2717,6 +2883,10 @@
                 'new-game': elements.newGameButton.className,
                 'endless-mode': elements.endlessModeButton.className
             };
+            const modeButtonIconClasses = {
+                'new-game': elements.newGameButton.querySelector('i').className,
+                'endless-mode': elements.endlessModeButton.querySelector('i').className
+            };
             function resetModeButtonStates() {
                 modeButtonStates['new-game'].needsConfirm = false;
                 const newGameSpan = elements.newGameButton.querySelector('span');
@@ -2725,6 +2895,7 @@
                 }
                 const newGameIcon = elements.newGameButton.querySelector('i');
                 if (newGameIcon) {
+                    newGameIcon.className = modeButtonIconClasses['new-game'];
                     newGameIcon.style.display = '';
                 }
                 elements.newGameButton.className = modeButtonClasses['new-game'];
@@ -2735,6 +2906,7 @@
                 }
                 const endlessModeIcon = elements.endlessModeButton.querySelector('i');
                 if (endlessModeIcon) {
+                    endlessModeIcon.className = modeButtonIconClasses['endless-mode'];
                     endlessModeIcon.style.display = '';
                 }
                 elements.endlessModeButton.className = modeButtonClasses['endless-mode'];
@@ -2743,7 +2915,7 @@
                 const button = document.getElementById(buttonId);
                 const state = modeButtonStates[buttonId];
                 if (state.needsConfirm) {
-                    initGame(isEndlessMode, gameState.gridSize);
+                    initGame(isEndlessMode, gameState.gridRows, gameState.gridCols);
                     resetModeButtonStates();
                 } else {
                     if (gameState.score > 0) {
@@ -2755,11 +2927,12 @@
                         }
                         const iconElement = button.querySelector('i');
                         if (iconElement) {
-                            iconElement.style.display = 'none';
+                            iconElement.className = 'fa-solid fa-exclamation-triangle mr-2';
+                            iconElement.style.display = '';
                         }
                         button.classList.add('bg-red-500', 'hover:bg-red-600');
                     } else {
-                        initGame(isEndlessMode, gameState.gridSize);
+                        initGame(isEndlessMode, gameState.gridRows, gameState.gridCols);
                     }
                 }
             }
@@ -2781,14 +2954,14 @@
             });
             elements.gameMessageButton.addEventListener('click', () => {
                 hideGameMessage();
-                initGame(gameState.isEndlessMode, gameState.gridSize);
+                initGame(gameState.isEndlessMode, gameState.gridRows, gameState.gridCols);
             });
             elements.pauseButton.addEventListener('click', togglePause);
             elements.resumeButton.addEventListener('click', togglePause);
             elements.restartButton.addEventListener('click', () => {
                 gameState.isPaused = false;
                 elements.pauseMenu.classList.add('hidden');
-                initGame(gameState.isEndlessMode, gameState.gridSize);
+                initGame(gameState.isEndlessMode, gameState.gridRows, gameState.gridCols);
             });
             elements.undoButton.addEventListener('click', undoMove);
             let themeMediaQuery;
@@ -2840,30 +3013,32 @@
             elements.easyModeButton.addEventListener('click', () => {
                 gameState.difficulty = 'easy';
                 updateDifficultyButtons();
-                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
+                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
                 saveGameState();
             });
             elements.mediumModeButton.addEventListener('click', () => {
                 gameState.difficulty = 'medium';
                 updateDifficultyButtons();
-                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
+                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
                 saveGameState();
             });
             elements.hardModeButton.addEventListener('click', () => {
                 gameState.difficulty = 'hard';
                 updateDifficultyButtons();
-                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
+                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
                 saveGameState();
             });
             const buttonStates = {
                 'grid-3x3': { needsConfirm: false, originalText: elements.grid3x3Button.textContent },
                 'grid-4x4': { needsConfirm: false, originalText: elements.grid4x4Button.textContent },
-                'grid-5x5': { needsConfirm: false, originalText: elements.grid5x5Button.textContent }
+                'grid-5x5': { needsConfirm: false, originalText: elements.grid5x5Button.textContent },
+                'custom-grid': { needsConfirm: false, originalHTML: elements.applyCustomGridButton.innerHTML }
             };
             const buttonClasses = {
                 'grid-3x3': elements.grid3x3Button.className,
                 'grid-4x4': elements.grid4x4Button.className,
-                'grid-5x5': elements.grid5x5Button.className
+                'grid-5x5': elements.grid5x5Button.className,
+                'custom-grid': elements.applyCustomGridButton.className
             };
             function resetButtonStates() {
                 buttonStates['grid-3x3'].needsConfirm = false;
@@ -2875,27 +3050,36 @@
                 buttonStates['grid-5x5'].needsConfirm = false;
                 elements.grid5x5Button.textContent = buttonStates['grid-5x5'].originalText;
                 elements.grid5x5Button.className = buttonClasses['grid-5x5'];
+                buttonStates['custom-grid'].needsConfirm = false;
+                elements.applyCustomGridButton.innerHTML = buttonStates['custom-grid'].originalHTML;
+                elements.applyCustomGridButton.className = buttonClasses['custom-grid'];
             }
             function handleGridButtonClick(buttonId, gridSize) {
                 const button = document.getElementById(buttonId);
                 const state = buttonStates[buttonId];
                 if (state.needsConfirm) {
+                    const rows = gridSize;
+                    const cols = gridSize;
                     gameState.gridSize = gridSize;
+                    gameState.gridRows = rows;
+                    gameState.gridCols = cols;
                     updateGridButtonState(gridSize);
-                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
-                    initGame(gameState.isEndlessMode, gridSize);
+                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${rows}×${cols}网格`;
+                    initGame(gameState.isEndlessMode, rows, cols);
                     resetButtonStates();
                 } else {
                     if (gameState.score > 0) {
                         resetButtonStates();
                         state.needsConfirm = true;
-                        button.textContent = '确认';
+                        button.innerHTML = '<i class="fa-solid fa-exclamation-triangle mr-1"></i>确认';
                         button.classList.add('bg-red-500', 'hover:bg-red-600');
                     } else {
                         gameState.gridSize = gridSize;
+                        gameState.gridRows = gridSize;
+                        gameState.gridCols = gridSize;
                         updateGridButtonState(gridSize);
-                        elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
-                        initGame(gameState.isEndlessMode, gridSize);
+                        elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
+                        initGame(gameState.isEndlessMode, gridSize, gridSize);
                     }
                 }
             }
@@ -2920,6 +3104,75 @@
             });
             elements.grid5x5Button.addEventListener('blur', () => {
                 if (buttonStates['grid-5x5'].needsConfirm) {
+                    resetButtonStates();
+                }
+            });
+            elements.customGridButton.addEventListener('click', () => {
+                elements.gridSizeInput.value = gameState.gridRows;
+                elements.gridSizeInput2.value = gameState.gridCols;
+                const savedSquareGridState = localStorage.getItem('2048-square-grid-locked');
+                const isSquareGrid = savedSquareGridState !== null 
+                    ? savedSquareGridState === 'true' 
+                    : gameState.gridRows === gameState.gridCols;
+                elements.squareGridCheckbox.checked = isSquareGrid;
+                elements.gridSizeInput2.disabled = isSquareGrid;
+                resetButtonStates();
+                showModal('custom-grid-modal');
+            });
+            elements.squareGridCheckbox.addEventListener('change', () => {
+                localStorage.setItem('2048-square-grid-locked', elements.squareGridCheckbox.checked);
+                elements.gridSizeInput2.disabled = elements.squareGridCheckbox.checked;
+                if (elements.squareGridCheckbox.checked) {
+                    elements.gridSizeInput2.value = elements.gridSizeInput.value;
+                }
+            });
+            elements.gridSizeInput.addEventListener('input', () => {
+                if (elements.squareGridCheckbox.checked) {
+                    elements.gridSizeInput2.value = elements.gridSizeInput.value;
+                }
+            });
+            elements.applyCustomGridButton.addEventListener('click', () => {
+                const buttonId = 'custom-grid';
+                const button = elements.applyCustomGridButton;
+                const state = buttonStates[buttonId];
+                
+                if (state.needsConfirm) {
+                    const rows = parseInt(elements.gridSizeInput.value);
+                    const cols = elements.squareGridCheckbox.checked ? rows : parseInt(elements.gridSizeInput2.value);
+                    if (isNaN(rows) || isNaN(cols) || rows < 3 || rows > 10 || cols < 3 || cols > 10) {
+                        alert('请输入3到10之间的有效数字');
+                        return;
+                    }
+                    updateGridButtonState(Math.max(rows, cols));
+                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${rows}×${cols}网格`;
+                    initGame(gameState.isEndlessMode, rows, cols);
+                    hideModal('custom-grid-modal');
+                    resetButtonStates();
+                } else {
+                    const rows = parseInt(elements.gridSizeInput.value);
+                    const cols = elements.squareGridCheckbox.checked ? rows : parseInt(elements.gridSizeInput2.value);
+                    if (isNaN(rows) || isNaN(cols) || rows < 3 || rows > 10 || cols < 3 || cols > 10) {
+                        alert('请输入3到10之间的有效数字');
+                        return;
+                    }
+                    if (gameState.score > 0) {
+                        state.needsConfirm = true;
+                        button.innerHTML = '<i class="fa-solid fa-exclamation-triangle mr-1"></i>确认';
+                        button.classList.add('bg-red-500', 'hover:bg-red-600');
+                    } else {
+                        updateGridButtonState(Math.max(rows, cols));
+                        elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${rows}×${cols}网格`;
+                        initGame(gameState.isEndlessMode, rows, cols);
+                        hideModal('custom-grid-modal');
+                    }
+                }
+            });
+            elements.cancelCustomGridButton.addEventListener('click', () => {
+                hideModal('custom-grid-modal');
+                resetButtonStates();
+            });
+            elements.applyCustomGridButton.addEventListener('blur', () => {
+                if (buttonStates['custom-grid'].needsConfirm) {
                     resetButtonStates();
                 }
             });
@@ -3594,6 +3847,8 @@
                     const state = JSON.parse(savedState);
                     gameState.grid = state.grid || createEmptyGrid();
                     gameState.gridSize = state.gridSize || 4;
+                    gameState.gridRows = state.gridRows || state.gridSize || 4;
+                    gameState.gridCols = state.gridCols || state.gridSize || 4;
                     gameState.score = state.score || 0;
                     gameState.bestScore = state.bestScore || 0;
                     gameState.gameOver = state.gameOver || false;
@@ -3604,15 +3859,16 @@
                     elements.scoreDisplay.textContent = gameState.score;
                     elements.bestScoreDisplay.textContent = gameState.bestScore;
                     document.querySelector('.game-container').classList.remove('grid-3x3', 'grid-4x4', 'grid-5x5');
-                    document.querySelector('.game-container').classList.add(`grid-${gameState.gridSize}x${gameState.gridSize}`);
+                    document.querySelector('.game-container').classList.add(`grid-${gameState.gridRows}x${gameState.gridCols}`);
+                    generateGridStyles(null, gameState.gridRows, gameState.gridCols);
                     initGridContainer();
                     renderAllTiles();
                     updateDifficultyButtons();
-                    updateGridButtonState(gameState.gridSize);
+                    updateGridButtonState(Math.max(gameState.gridRows, gameState.gridCols));
                     elements.modeDescription.textContent = gameState.isEndlessMode 
                         ? "当前模式：无尽模式 - 尽可能获得高分" 
                         : "当前模式：标准模式 - 达到2048获胜";
-                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridSize}×${gameState.gridSize}网格`;
+                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
                     if (gameState.gameOver) {
                         showGameMessage("游戏结束！", "无法进行任何移动。");
                     } else if (gameState.gameWon && !gameState.isEndlessMode) {
@@ -3620,10 +3876,10 @@
                     }
                 } catch (e) {
                     console.error("Failed to load saved game state:", e);
-                    initGame();
+                    initGame(false, 4, 4);
                 }
             } else {
-                initGame();
+                initGame(false, 4, 4);
             }
             updateDocumentTitle();
             updateUndoButtonState();
@@ -3729,10 +3985,31 @@
                     <div class="analysis-label">得分潜力分析</div>
                     <div id="score-potential" class="analysis-value">--</div>
                 </div>
+                <div id="ai-analysis-overlay" class="hidden absolute inset-x-0 top-16 bottom-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm flex items-center justify-center rounded-b-lg">
+                    <div class="text-center">
+                        <i class="fa-solid fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
+                        <p class="text-lg font-semibold text-gray-800 dark:text-gray-200">暂不支持</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">AI分析功能仅支持3×3、4×4、5×5网格</p>
+                    </div>
+                </div>
             </div>
-        </div>
+        </main>
         <script>
         function analyzeGameState() {
+            const modal = document.getElementById('ai-analysis-modal');
+            const overlay = document.getElementById('ai-analysis-overlay');
+            const isStandardGrid = (gameState.gridRows === gameState.gridCols) && 
+                                   (gameState.gridRows >= 3 && gameState.gridRows <= 5);
+            if (!isStandardGrid) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.add('opacity-100', 'scale-100');
+                    modal.classList.remove('opacity-0', 'scale-95');
+                }, 10);
+                overlay.classList.remove('hidden');
+                return;
+            }
+            overlay.classList.add('hidden');
             const directions = ['up', 'down', 'left', 'right'];
             const directionNames = {
                 up: '向上', 
