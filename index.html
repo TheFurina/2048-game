@@ -1235,6 +1235,22 @@
                 font-family: 'Font Awesome 6 Free', sans-serif;
                 font-weight: 900;
             }
+            #controls-container {
+                overflow: hidden;
+                transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+                max-height: 500px;
+            }
+            #controls-container.collapsed {
+                max-height: 0;
+                opacity: 0;
+                margin-bottom: 0;
+            }
+            #toggle-icon {
+                transition: transform 0.3s ease;
+            }
+            #toggle-icon.rotated {
+                transform: rotate(180deg);
+            }
         </style>
             <div class="flex gap-2 mt-4 md:mt-0">
                 <button id="undo-button" class="bg-grid hover:bg-grid/80 text-white p-2 rounded-md shadow-md transition-all duration-200 focus:outline-none dark:bg-dark-grid w-[72px]" title="撤销上一步">
@@ -1245,44 +1261,52 @@
                 </button>
             </div>
         </header>
-        <div id="game-buttons" class="flex flex-wrap gap-2 mb-4">
-            <button id="new-game" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 flex-1 btn-hover dark:bg-dark-primary">
-                <i class="fa-solid fa-gamepad mr-2"></i><span>标准模式</span>
-            </button>
-            <button id="endless-mode" class="bg-secondary hover:bg-secondary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary/50 flex-1 btn-hover dark:bg-dark-secondary">
-                <i class="fa-solid fa-infinity mr-2"></i><span>无尽模式</span>
+        <div class="flex justify-between items-center mb-4">
+            <button id="toggle-controls" class="text-secondary dark:text-dark-muted hover:text-secondary/80 dark:hover:text-dark-muted/80 px-4 rounded transition-all duration-200 focus:outline-none flex items-center text-sm">
+                <i class="fa-solid fa-chevron-up mr-2" id="toggle-icon"></i>
+                <span id="toggle-text">收起控制</span>
             </button>
         </div>
-        <div class="options-container mb-4">
-            <div class="options-row">
-                <span class="option-label">网格大小:</span>
-                <div class="option-buttons">
-                    <button id="grid-3x3" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-300 btn-hover w-16">
-                        <i class="fa-solid fa-square-three"></i>3×3
-                    </button>
-                    <button id="grid-4x4" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300 btn-hover active w-16">
-                        <i class="fa-solid fa-square-four"></i>4×4
-                    </button>
-                    <button id="grid-5x5" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-300 btn-hover w-16">
-                        <i class="fa-solid fa-square-five"></i>5×5
-                    </button>
-                    <button id="custom-grid" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-300 btn-hover w-20" title="自定义网格大小">
-                        自定义
-                    </button>
-                </div>
+        <div id="controls-container" class="transition-all duration-300 ease-in-out">
+            <div id="game-buttons" class="flex flex-wrap gap-2 mb-4">
+                <button id="new-game" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 flex-1 btn-hover dark:bg-dark-primary">
+                    <i class="fa-solid fa-gamepad mr-2"></i><span>标准模式</span>
+                </button>
+                <button id="endless-mode" class="bg-secondary hover:bg-secondary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary/50 flex-1 btn-hover dark:bg-dark-secondary">
+                    <i class="fa-solid fa-infinity mr-2"></i><span>无尽模式</span>
+                </button>
             </div>
-            <div class="options-row">
-                <span class="option-label">难度选择:</span>
-                <div class="option-buttons">
-                    <button id="easy-mode" class="bg-easy hover:bg-easy/90 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-easy/50 flex-1 btn-hover">
-                        <i class="fa-solid fa-shield-check"></i>简单
-                    </button>
-                    <button id="medium-mode" class="bg-medium hover:bg-medium/90 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-medium/50 flex-1 btn-hover active">
-                        <i class="fa-solid fa-shield-half"></i>中等
-                    </button>
-                    <button id="hard-mode" class="bg-hard hover:bg-hard/90 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-hard/50 flex-1 btn-hover">
-                        <i class="fa-solid fa-shield-exclamation"></i>困难
-                    </button>
+            <div class="options-container mb-4">
+                <div class="options-row">
+                    <span class="option-label">网格大小:</span>
+                    <div class="option-buttons">
+                        <button id="grid-3x3" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-300 btn-hover w-16">
+                            <i class="fa-solid fa-square-three"></i>3×3
+                        </button>
+                        <button id="grid-4x4" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300 btn-hover active w-16">
+                            <i class="fa-solid fa-square-four"></i>4×4
+                        </button>
+                        <button id="grid-5x5" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-300 btn-hover w-16">
+                            <i class="fa-solid fa-square-five"></i>5×5
+                        </button>
+                        <button id="custom-grid" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-300 btn-hover w-20" title="自定义网格大小">
+                            自定义
+                        </button>
+                    </div>
+                </div>
+                <div class="options-row">
+                    <span class="option-label">难度选择:</span>
+                    <div class="option-buttons">
+                        <button id="easy-mode" class="bg-easy hover:bg-easy/90 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-easy/50 flex-1 btn-hover">
+                            <i class="fa-solid fa-shield-check"></i>简单
+                        </button>
+                        <button id="medium-mode" class="bg-medium hover:bg-medium/90 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-medium/50 flex-1 btn-hover active">
+                            <i class="fa-solid fa-shield-half"></i>中等
+                        </button>
+                        <button id="hard-mode" class="bg-hard hover:bg-hard/90 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-hard/50 flex-1 btn-hover">
+                            <i class="fa-solid fa-shield-exclamation"></i>困难
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2013,7 +2037,11 @@
             gameDescription: document.querySelector('.text-secondary\\/80.dark\\:text-dark-muted.mb-2'),
             gameTouchArea: document.getElementById('game-touch-area'),
             gameContainer: document.querySelector('.game-container'),
-            tileAnimation: document.getElementById('tile-animation')
+            tileAnimation: document.getElementById('tile-animation'),
+            toggleControlsButton: document.getElementById('toggle-controls'),
+            controlsContainer: document.getElementById('controls-container'),
+            toggleIcon: document.getElementById('toggle-icon'),
+            toggleText: document.getElementById('toggle-text')
         };
         function updateDocumentTitle() {
             const mode = gameState.isEndlessMode ? '无尽模式' : '标准模式';
@@ -2964,6 +2992,27 @@
                 initGame(gameState.isEndlessMode, gameState.gridRows, gameState.gridCols);
             });
             elements.undoButton.addEventListener('click', undoMove);
+            let isControlsCollapsed = false;
+            function toggleControls() {
+                isControlsCollapsed = !isControlsCollapsed;
+                if (isControlsCollapsed) {
+                    elements.controlsContainer.classList.add('collapsed');
+                    elements.toggleIcon.classList.add('rotated');
+                    elements.toggleText.textContent = '展开控制';
+                    localStorage.setItem('controlsCollapsed', 'true');
+                } else {
+                    elements.controlsContainer.classList.remove('collapsed');
+                    elements.toggleIcon.classList.remove('rotated');
+                    elements.toggleText.textContent = '收起控制';
+                    localStorage.setItem('controlsCollapsed', 'false');
+                }
+            }
+            const savedCollapsedState = localStorage.getItem('controlsCollapsed');
+            if (savedCollapsedState === 'true') {
+                isControlsCollapsed = false;
+                toggleControls();
+            }
+            elements.toggleControlsButton.addEventListener('click', toggleControls);
             let themeMediaQuery;
             const updateTheme = (e) => {
                 const isDark = e ? e.matches : window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -3071,7 +3120,7 @@
                     if (gameState.score > 0) {
                         resetButtonStates();
                         state.needsConfirm = true;
-                        button.innerHTML = '<i class="fa-solid fa-exclamation-triangle mr-1"></i>确认';
+                        button.innerHTML = '确认';
                         button.classList.add('bg-red-500', 'hover:bg-red-600');
                     } else {
                         gameState.gridSize = gridSize;
