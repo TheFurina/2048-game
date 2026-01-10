@@ -467,6 +467,10 @@
             .dark #endless-mode { background-color: #4527a0; }
             .dark #new-game:hover { background-color: #e65100; }
             .dark #endless-mode:hover { background-color: #311b92; }
+            .dark #new-game.bg-red-500 { background-color: #d32f2f; }
+            .dark #new-game.bg-red-500:hover { background-color: #b71c1c; }
+            .dark #endless-mode.bg-red-500 { background-color: #d32f2f; }
+            .dark #endless-mode.bg-red-500:hover { background-color: #b71c1c; }
             .dark .bg-easy {
                 background-color: theme('colors.easy');
             }
@@ -482,6 +486,14 @@
             .dark #grid-3x3:hover { background-color: #1b5e20; }
             .dark #grid-4x4:hover { background-color: #0d47a1; }
             .dark #grid-5x5:hover { background-color: #4a148c; }
+            .dark #grid-3x3.bg-red-500 { background-color: #d32f2f; }
+            .dark #grid-3x3.bg-red-500:hover { background-color: #b71c1c; }
+            .dark #grid-4x4.bg-red-500 { background-color: #d32f2f; }
+            .dark #grid-4x4.bg-red-500:hover { background-color: #b71c1c; }
+            .dark #grid-5x5.bg-red-500 { background-color: #d32f2f; }
+            .dark #grid-5x5.bg-red-500:hover { background-color: #b71c1c; }
+            .dark #custom-grid.bg-red-500 { background-color: #d32f2f; }
+            .dark #custom-grid.bg-red-500:hover { background-color: #b71c1c; }
             .dark .bg-easy { background-color: #2e7d32; }
             .dark .bg-medium { background-color: #ff8f00; }
             .dark .bg-hard { background-color: #c62828; }
@@ -737,11 +749,22 @@
             background: #888;
         }
         .dark .setting-label {
-            color: #e0e0e0;
-        }
-        #mode-description, #difficulty-description {
-            font-size: 0.8rem;
-        }
+                color: #e0e0e0;
+            }
+            #mode-description, #difficulty-description {
+                font-size: 0.8rem;
+            }
+            #animation-details {
+                max-height: 200px;
+                overflow: hidden;
+                transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+                margin-top: 12px;
+            }
+            #animation-details.collapsed {
+                max-height: 0;
+                opacity: 0;
+                margin: 0;
+            }
         @media (max-height: 400px) {
             body {
                 padding: 4px;
@@ -1389,6 +1412,29 @@
                                     <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
                                 </label>
                             </div>
+                            <div id="animation-details" class="ml-6 mt-1 space-y-2">
+                                <div class="flex items-center justify-between px-2">
+                                    <span class="text-gray-600 dark:text-dark-muted text-sm">新滑块出现动画</span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="tile-appear-animation" class="sr-only peer" checked title="新滑块出现动画">
+                                        <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
+                                    </label>
+                                </div>
+                                <div class="flex items-center justify-between px-2">
+                                    <span class="text-gray-600 dark:text-dark-muted text-sm">滑块移动动画</span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="tile-move-animation" class="sr-only peer" checked title="滑块移动动画">
+                                        <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
+                                    </label>
+                                </div>
+                                <div class="flex items-center justify-between px-2">
+                                    <span class="text-gray-600 dark:text-dark-muted text-sm">滑块合并动画</span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="tile-merge-animation" class="sr-only peer" checked title="滑块合并动画">
+                                        <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="setting-category">
@@ -1435,7 +1481,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="text-sm text-secondary/70 mt-4">2048 v1.22.0 | by TheFurina</div>
+                    <div class="text-sm text-secondary/70 mt-4">2048 v1.23.0 | by TheFurina</div>
                     <button id="reset-settings-button" class="text-gray-500 hover:text-gray-700 focus:outline-none text-sm inline-block mx-auto">
                         <i class="fa-solid fa-rotate-right mr-1"></i><span>重置所有设置</span>
                     </button>
@@ -1837,6 +1883,9 @@
         const gameState = {
             gpuAccelerationEnabled: localStorage.getItem('2048-gpu-acceleration') !== 'false',
             tileAnimationEnabled: localStorage.getItem('2048-tile-animation') !== 'false',
+            tileAppearAnimationEnabled: localStorage.getItem('2048-tile-appear-animation') !== 'false',
+            tileMoveAnimationEnabled: localStorage.getItem('2048-tile-move-animation') !== 'false',
+            tileMergeAnimationEnabled: localStorage.getItem('2048-tile-merge-animation') !== 'false',
             grid: [],
             gridSize: 4,
             gridRows: 4,
@@ -1918,11 +1967,53 @@
                 }, 300);
             }
         }
-        function exportGameData() { const data = { grid: gameState.grid, score: gameState.score, bestScore: gameState.bestScore, gridSize: gameState.gridSize, gridRows: gameState.gridRows, gridCols: gameState.gridCols, difficulty: gameState.difficulty, isEndlessMode: gameState.isEndlessMode, timestamp: new Date().toISOString() }; const dataStr = btoa(JSON.stringify(data)); document.getElementById('data-textarea').value = dataStr; }
-        function copyDataToClipboard() { const textarea = document.getElementById('data-textarea'); textarea.select(); document.execCommand('copy'); const copyButton = document.getElementById('copy-data-button'); const originalIcon = copyButton.innerHTML; copyButton.innerHTML = '<i class="fa-solid fa-check text-green-600 dark:text-green-400"></i>'; setTimeout(() => { copyButton.innerHTML = originalIcon; }, 2000); }
+        function exportGameData() {
+            try {
+                const data = {
+                    grid: gameState.grid,
+                    score: gameState.score,
+                    bestScore: gameState.bestScore,
+                    gridSize: gameState.gridSize,
+                    gridRows: gameState.gridRows,
+                    gridCols: gameState.gridCols,
+                    difficulty: gameState.difficulty,
+                    isEndlessMode: gameState.isEndlessMode,
+                    timestamp: new Date().toISOString()
+                };
+                const dataStr = btoa(JSON.stringify(data));
+                document.getElementById('data-textarea').value = dataStr;
+                return dataStr;
+            } catch (error) {
+                console.error('导出游戏数据失败:', error);
+                alert('导出游戏数据失败: ' + error.message);
+                return null;
+            }
+        }
+        function copyDataToClipboard() {
+            try {
+                const textarea = document.getElementById('data-textarea');
+                if (!textarea.value) {
+                    alert('没有可复制的数据');
+                    return;
+                }
+                textarea.select();
+                document.execCommand('copy');
+                const copyButton = document.getElementById('copy-data-button');
+                const originalIcon = copyButton.innerHTML;
+                copyButton.innerHTML = '<i class="fa-solid fa-check text-green-600 dark:text-green-400"></i>';
+                copyButton.setAttribute('title', '已复制');
+                setTimeout(() => {
+                    copyButton.innerHTML = originalIcon;
+                    copyButton.setAttribute('title', '复制数据');
+                }, 2000);
+            } catch (error) {
+                console.error('复制数据失败:', error);
+                alert('复制数据失败: ' + error.message);
+            }
+        }
         document.addEventListener('DOMContentLoaded', () => { 
             console.log('%c   ____     ___    _  _      ___                                        \n  |___ \\   / _ \\  | || |    ( _ )      __ _    __ _   _ __ ___     ___ \n    __) | | | | | | || |_   / _ \\     / _` |  / _` | | \'_ ` _ \\   / _ \\ \n   / __/  | |_| | |__   _| | (_) |   | (_| | | (_| | | | | | | | |  __/ \n  |_____|  \\___/     |_|    \\___/     \\__, |  \\__,_| |_| |_| |_|  \\___| \n                                      |___/                            ', 'color: #faa31b; font-size: 14px;');
-            console.log('2048 v1.22.0');
+            console.log('2048 v1.23.0');
             const textareaContainer = document.querySelector('.relative.w-full.mb-4'); 
             const copyButton = document.getElementById('copy-data-button'); 
             if (textareaContainer && copyButton) { 
@@ -1937,35 +2028,43 @@
                 copyButton.addEventListener('click', copyDataToClipboard); 
             } 
         });
-        function importGameData(dataStr) { 
-            try { 
-                if (!dataStr) throw new Error('数据不能为空');
+        function importGameData(dataStr) {
+            try {
+                if (!dataStr) {
+                    throw new Error('数据不能为空');
+                }
                 let decodedData;
-                try { 
+                try {
                     decodedData = atob(dataStr);
-                } catch (e) { 
+                } catch (e) {
                     throw new Error('无效的Base64格式');
-                } 
+                }
                 let data;
-                try { 
+                try {
                     data = JSON.parse(decodedData);
-                } catch (e) { 
+                } catch (e) {
                     throw new Error('JSON解析失败：' + e.message);
-                } 
-                if (!data || typeof data !== 'object') throw new Error('数据必须是有效的JSON对象');
+                }
+                if (!data || typeof data !== 'object') {
+                    throw new Error('数据必须是有效的JSON对象');
+                }
                 const requiredFields = ['grid', 'score', 'bestScore', 'gridSize', 'difficulty', 'isEndlessMode'];
                 const missingFields = requiredFields.filter(field => !(field in data));
-                if (missingFields.length > 0) throw new Error('缺少必要字段：' + missingFields.join(', '));
-                if (!Array.isArray(data.grid) || data.grid.length === 0) throw new Error('无效的游戏网格数据');
+                if (missingFields.length > 0) {
+                    throw new Error('缺少必要字段：' + missingFields.join(', '));
+                }
+                if (!Array.isArray(data.grid) || data.grid.length === 0) {
+                    throw new Error('无效的游戏网格数据');
+                }
                 const gridRows = data.gridRows || data.gridSize;
                 const gridCols = data.gridCols || data.gridSize;
                 if (data.grid.length !== gridRows || data.grid.some(row => row.length !== gridCols)) {
                     throw new Error(`导入的滑块数字指示的网格大小(${data.grid.length}x${data.grid[0]?.length || 0})与导入数据指示的网格大小(${gridRows}x${gridCols})不一致`);
                 }
-        const invalidTiles = data.grid.flatMap(row => row.filter(tile => tile && (tile.value <= 0 || (tile.value & (tile.value - 1)) !== 0)));
-        if (invalidTiles.length > 0) {
-            throw new Error('导入的滑块数字必须是2的次幂');
-        }
+                const invalidTiles = data.grid.flatMap(row => row.filter(tile => tile && (tile.value <= 0 || (tile.value & (tile.value - 1)) !== 0)));
+                if (invalidTiles.length > 0) {
+                    throw new Error('导入的滑块数字必须是2的次幂');
+                }
                 gameState.grid = data.grid;
                 gameState.score = data.score;
                 gameState.bestScore = data.bestScore;
@@ -1974,8 +2073,9 @@
                 gameState.gridCols = gridCols;
                 gameState.difficulty = data.difficulty;
                 gameState.isEndlessMode = data.isEndlessMode;
-                document.querySelector('.game-container').classList.remove('grid-3x3', 'grid-4x4', 'grid-5x5');
-                document.querySelector('.game-container').classList.add(`grid-${gridRows}x${gridCols}`);
+                const gameContainer = document.querySelector('.game-container');
+                gameContainer.classList.remove('grid-3x3', 'grid-4x4', 'grid-5x5');
+                gameContainer.classList.add(`grid-${gridRows}x${gridCols}`);
                 generateGridStyles(null, gridRows, gridCols);
                 initGridContainer();
                 updateDocumentTitle();
@@ -1983,14 +2083,17 @@
                 elements.scoreDisplay.textContent = gameState.score;
                 elements.bestScoreDisplay.textContent = gameState.bestScore;
                 elements.modeDescription.textContent = gameState.isEndlessMode ? "当前模式：无尽模式 - 尽可能获得高分" : "当前模式：标准模式 - 达到2048获胜";
-                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gridRows}×${gridCols}网格`; 
+                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gridRows}×${gridCols}网格`;
                 saveGameState();
                 gameState.history = [];
                 updateUndoButtonState();
                 alert('数据导入成功！');
-            } catch (e) { 
+                return true;
+            } catch (e) {
+                console.error('导入失败:', e);
                 alert('导入失败：' + e.message);
-            } 
+                return false;
+            }
         }
         const elements = {
             gridContainer: document.getElementById('grid-container'),
@@ -2038,6 +2141,9 @@
             gameTouchArea: document.getElementById('game-touch-area'),
             gameContainer: document.querySelector('.game-container'),
             tileAnimation: document.getElementById('tile-animation'),
+            tileAppearAnimation: document.getElementById('tile-appear-animation'),
+            tileMoveAnimation: document.getElementById('tile-move-animation'),
+            tileMergeAnimation: document.getElementById('tile-merge-animation'),
             toggleControlsButton: document.getElementById('toggle-controls'),
             controlsContainer: document.getElementById('controls-container'),
             toggleIcon: document.getElementById('toggle-icon'),
@@ -2184,10 +2290,10 @@
                 tileElement.style.top = topPos;
                 void tileElement.offsetWidth;
             }
-            const animationClass = gameState.tileAnimationEnabled && animate ? 'transition-all duration-150' : '';
-            tileElement.className = `tile tile-${tile.value} ${gameState.tileAnimationEnabled && tile.new ? 'tile-appear' : ''} ${tile.value > 32768 ? 'tile-super' : ''} ${tile.value >= 10000 ? 'tile-5digit' : ''} ${gameState.gpuAccelerationEnabled ? 'gpu-accelerated' : ''} ${animationClass}`;
+            const animationClass = gameState.tileAnimationEnabled && gameState.tileMoveAnimationEnabled && animate ? 'transition-all duration-150' : '';
+            tileElement.className = `tile tile-${tile.value} ${gameState.tileAnimationEnabled && gameState.tileAppearAnimationEnabled && tile.new ? 'tile-appear' : ''} ${tile.value > 32768 ? 'tile-super' : ''} ${tile.value >= 10000 ? 'tile-5digit' : ''} ${gameState.gpuAccelerationEnabled ? 'gpu-accelerated' : ''} ${animationClass}`;
             tileElement.textContent = tile.value;
-            if (gameState.tileAnimationEnabled && animate) {
+            if (gameState.tileAnimationEnabled && gameState.tileMoveAnimationEnabled && animate) {
                 tileElement.style.transition = 'left 200ms cubic-bezier(0.34, 1.56, 0.64, 1), top 200ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1)'
             }
             tileElement.style.left = leftPos;
@@ -2218,7 +2324,7 @@
             Object.keys(currentTiles).forEach(pos => {
                 if (!preservedPositions.has(pos)) {
                     const tile = currentTiles[pos];
-                    if (gameState.tileAnimationEnabled && animate) {
+                    if (gameState.tileAnimationEnabled && gameState.tileMoveAnimationEnabled && animate) {
                         tile.style.transition = 'opacity 200ms cubic-bezier(0.34, 1.56, 0.64, 1)'
                         tile.style.opacity = '0';
                         setTimeout(() => {
@@ -2265,19 +2371,7 @@
                                 if (newY > 0 && gameState.grid[newY - 1][x] && 
                                     gameState.grid[newY - 1][x].value === gameState.grid[y][x].value &&
                                     !gameState.grid[newY - 1][x].merged) {
-                                    gameState.grid[newY - 1][x].value *= 2;
-                                    gameState.grid[newY - 1][x].merged = true;
-                                    const mergedTile = gameState.grid[newY - 1][x];
-                                    mergedTile.mergedAnimation = true;
-                                    gameState.grid[y][x] = null;
-                                    const difficulty = config.difficultySettings[gameState.difficulty] || { scoreMultiplier: 1 };
-                                    gameState.score += gameState.grid[newY - 1][x].value * difficulty.scoreMultiplier;
-                                    if (gameState.score > gameState.bestScore) {
-                                        gameState.bestScore = gameState.score;
-                                        elements.bestScoreDisplay.textContent = gameState.bestScore;
-                                    }
-                                    elements.scoreDisplay.textContent = gameState.score;
-                                    updateDocumentTitle();
+                                    handleTileMerge(newY - 1, x, y, x);
                                     moved = true;
                                 } else if (newY !== y) {
                                     gameState.grid[newY][x] = gameState.grid[y][x];
@@ -2299,19 +2393,7 @@
                                 if (newY < gameState.gridRows - 1 && gameState.grid[newY + 1][x] && 
                                     gameState.grid[newY + 1][x].value === gameState.grid[y][x].value &&
                                     !gameState.grid[newY + 1][x].merged) {
-                                    gameState.grid[newY + 1][x].value *= 2;
-                                    gameState.grid[newY + 1][x].merged = true;
-                                    const mergedTile = gameState.grid[newY + 1][x];
-                                    mergedTile.mergedAnimation = true;
-                                    gameState.grid[y][x] = null;
-                                    const difficulty = config.difficultySettings[gameState.difficulty] || { scoreMultiplier: 1 };
-                                    gameState.score += gameState.grid[newY + 1][x].value * difficulty.scoreMultiplier;
-                                    if (gameState.score > gameState.bestScore) {
-                                        gameState.bestScore = gameState.score;
-                                        elements.bestScoreDisplay.textContent = gameState.bestScore;
-                                    }
-                                    elements.scoreDisplay.textContent = gameState.score;
-                                    updateDocumentTitle();
+                                    handleTileMerge(newY + 1, x, y, x);
                                     moved = true;
                                 } else if (newY !== y) {
                                     gameState.grid[newY][x] = gameState.grid[y][x];
@@ -2333,19 +2415,7 @@
                                 if (newX > 0 && gameState.grid[y][newX - 1] && 
                                     gameState.grid[y][newX - 1].value === gameState.grid[y][x].value &&
                                     !gameState.grid[y][newX - 1].merged) {
-                                    gameState.grid[y][newX - 1].value *= 2;
-                                    gameState.grid[y][newX - 1].merged = true;
-                                    const mergedTile = gameState.grid[y][newX - 1];
-                                    mergedTile.mergedAnimation = true;
-                                    gameState.grid[y][x] = null;
-                                    const difficulty = config.difficultySettings[gameState.difficulty] || { scoreMultiplier: 1 };
-                                    gameState.score += gameState.grid[y][newX - 1].value * difficulty.scoreMultiplier;
-                                    if (gameState.score > gameState.bestScore) {
-                                        gameState.bestScore = gameState.score;
-                                        elements.bestScoreDisplay.textContent = gameState.bestScore;
-                                    }
-                                    elements.scoreDisplay.textContent = gameState.score;
-                                    updateDocumentTitle();
+                                    handleTileMerge(y, newX - 1, y, x);
                                     moved = true;
                                 } else if (newX !== x) {
                                     gameState.grid[y][newX] = gameState.grid[y][x];
@@ -2367,19 +2437,7 @@
                                 if (newX < gameState.gridCols - 1 && gameState.grid[y][newX + 1] && 
                                     gameState.grid[y][newX + 1].value === gameState.grid[y][x].value &&
                                     !gameState.grid[y][newX + 1].merged) {
-                                    gameState.grid[y][newX + 1].value *= 2;
-                                    gameState.grid[y][newX + 1].merged = true;
-                                    const mergedTile = gameState.grid[y][newX + 1];
-                                    mergedTile.mergedAnimation = true;
-                                    gameState.grid[y][x] = null;
-                                    const difficulty = config.difficultySettings[gameState.difficulty] || { scoreMultiplier: 1 };
-                                    gameState.score += gameState.grid[y][newX + 1].value * difficulty.scoreMultiplier;
-                                    if (gameState.score > gameState.bestScore) {
-                                        gameState.bestScore = gameState.score;
-                                        elements.bestScoreDisplay.textContent = gameState.bestScore;
-                                    }
-                                    elements.scoreDisplay.textContent = gameState.score;
-                                    updateDocumentTitle();
+                                    handleTileMerge(y, newX + 1, y, x);
                                     moved = true;
                                 } else if (newX !== x) {
                                     gameState.grid[y][newX] = gameState.grid[y][x];
@@ -2395,7 +2453,7 @@
                 if (gameState.tileAnimationEnabled) {
                     renderAllTiles(true);
                     setTimeout(() => {
-                        if (gameState.tileAnimationEnabled) {
+                        if (gameState.tileAnimationEnabled && gameState.tileMergeAnimationEnabled) {
                             for (let y = 0; y < gameState.gridRows; y++) {
                                 for (let x = 0; x < gameState.gridCols; x++) {
                                     if (gameState.grid[y][x] && gameState.grid[y][x].mergedAnimation) {
@@ -2443,6 +2501,21 @@
             }
             updateUndoButtonState();
             return moved;
+        }
+        function handleTileMerge(targetY, targetX, sourceY, sourceX) {
+            gameState.grid[targetY][targetX].value *= 2;
+            gameState.grid[targetY][targetX].merged = true;
+            const mergedTile = gameState.grid[targetY][targetX];
+            mergedTile.mergedAnimation = true;
+            gameState.grid[sourceY][sourceX] = null;
+            const difficulty = config.difficultySettings[gameState.difficulty] || { scoreMultiplier: 1 };
+            gameState.score += gameState.grid[targetY][targetX].value * difficulty.scoreMultiplier;
+            if (gameState.score > gameState.bestScore) {
+                gameState.bestScore = gameState.score;
+                elements.bestScoreDisplay.textContent = gameState.bestScore;
+            }
+            elements.scoreDisplay.textContent = gameState.score;
+            updateDocumentTitle();
         }
         function checkWin() {
             for (let y = 0; y < gameState.gridRows; y++) {
@@ -2636,19 +2709,26 @@
         }
         window.addEventListener('load', setupDataTransfer);
         function saveGameState() {
-            localStorage.setItem('2048-game-state', JSON.stringify({
-                grid: gameState.grid,
-                gridSize: gameState.gridSize,
-                gridRows: gameState.gridRows,
-                gridCols: gameState.gridCols,
-                score: gameState.score,
-                bestScore: gameState.bestScore,
-                gameOver: gameState.gameOver,
-                gameWon: gameState.gameWon,
-                isEndlessMode: gameState.isEndlessMode,
-                difficulty: gameState.difficulty,
-                history: gameState.history
-            }));
+            try {
+                const gameStateToSave = {
+                    grid: gameState.grid,
+                    gridSize: gameState.gridSize,
+                    gridRows: gameState.gridRows,
+                    gridCols: gameState.gridCols,
+                    score: gameState.score,
+                    bestScore: gameState.bestScore,
+                    gameOver: gameState.gameOver,
+                    gameWon: gameState.gameWon,
+                    isEndlessMode: gameState.isEndlessMode,
+                    difficulty: gameState.difficulty,
+                    history: gameState.history
+                };
+                localStorage.setItem('2048-game-state', JSON.stringify(gameStateToSave));
+                return true;
+            } catch (error) {
+                console.error('保存游戏状态失败:', error);
+                return false;
+            }
         }
         function initGame(isEndlessMode = false, gridRows = gameState.gridRows, gridCols = gameState.gridCols) {
             generateGridStyles(null, gridRows, gridCols);
@@ -2720,8 +2800,14 @@
                 document.getElementById('custom-theme-button-container').classList.remove('mb-2');
                 localStorage.removeItem('2048-gpu-acceleration');
                 localStorage.removeItem('2048-tile-animation');
+                localStorage.removeItem('2048-tile-appear-animation');
+                localStorage.removeItem('2048-tile-move-animation');
+                localStorage.removeItem('2048-tile-merge-animation');
                 gameState.gpuAccelerationEnabled = true;
                 gameState.tileAnimationEnabled = true;
+                gameState.tileAppearAnimationEnabled = true;
+                gameState.tileMoveAnimationEnabled = true;
+                gameState.tileMergeAnimationEnabled = true;
                 gameState.difficulty = 'medium';
                 document.documentElement.classList.remove('dark');
                 const styleElement = document.getElementById('custom-theme-styles');
@@ -2756,6 +2842,9 @@
                 }
                 elements.gpuAccelerationToggle.checked = true;
                 elements.tileAnimation.checked = true;
+                elements.tileAppearAnimation.checked = true;
+                elements.tileMoveAnimation.checked = true;
+                elements.tileMergeAnimation.checked = true;
                 updateDifficultyButtons();
                 elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
                 renderAllTiles();
@@ -2785,6 +2874,16 @@
             renderAllTiles(false);
         }
         function initEventListeners() {
+            setupKeyboardListeners();
+            setupTouchListeners();
+            setupModeButtons();
+            setupGridButtons();
+            setupDifficultyButtons();
+            setupSettingsButtons();
+            setupThemeListeners();
+            setupOtherListeners();
+        }
+        function setupKeyboardListeners() {
             document.addEventListener('keydown', (e) => {
                 if (gameState.isPaused || gameState.gameOver || (gameState.gameWon && !gameState.isEndlessMode)) return;
                 if ([37, 38, 39, 40, 87, 65, 83, 68, 80, 27, 90, 72, 76].includes(e.keyCode)) {
@@ -2879,6 +2978,8 @@
                         break;
                 }
             }, { passive: false });
+        }
+        function setupTouchListeners() {
             elements.gameContainer.addEventListener('touchstart', (e) => {
                 if (gameState.isPaused || gameState.gameOver || (gameState.gameWon && !gameState.isEndlessMode)) return;
                 gameState.touchStartX = e.touches[0].clientX;
@@ -2903,6 +3004,8 @@
                     }
                 }
             }, { passive: true });
+        }
+        function setupModeButtons() {
             const modeButtonStates = {
                 'new-game': { needsConfirm: false, originalText: elements.newGameButton.textContent },
                 'endless-mode': { needsConfirm: false, originalText: elements.endlessModeButton.textContent }
@@ -2980,103 +3083,9 @@
                     resetModeButtonStates();
                 }
             });
-            elements.gameMessageButton.addEventListener('click', () => {
-                hideGameMessage();
-                initGame(gameState.isEndlessMode, gameState.gridRows, gameState.gridCols);
-            });
-            elements.pauseButton.addEventListener('click', togglePause);
-            elements.resumeButton.addEventListener('click', togglePause);
-            elements.restartButton.addEventListener('click', () => {
-                gameState.isPaused = false;
-                elements.pauseMenu.classList.add('hidden');
-                initGame(gameState.isEndlessMode, gameState.gridRows, gameState.gridCols);
-            });
-            elements.undoButton.addEventListener('click', undoMove);
-            let isControlsCollapsed = false;
-            function toggleControls() {
-                isControlsCollapsed = !isControlsCollapsed;
-                if (isControlsCollapsed) {
-                    elements.controlsContainer.classList.add('collapsed');
-                    elements.toggleIcon.classList.add('rotated');
-                    elements.toggleText.textContent = '展开控制';
-                    localStorage.setItem('controlsCollapsed', 'true');
-                } else {
-                    elements.controlsContainer.classList.remove('collapsed');
-                    elements.toggleIcon.classList.remove('rotated');
-                    elements.toggleText.textContent = '收起控制';
-                    localStorage.setItem('controlsCollapsed', 'false');
-                }
-            }
-            const savedCollapsedState = localStorage.getItem('controlsCollapsed');
-            if (savedCollapsedState === 'true') {
-                isControlsCollapsed = false;
-                toggleControls();
-            }
-            elements.toggleControlsButton.addEventListener('click', toggleControls);
-            let themeMediaQuery;
-            const updateTheme = (e) => {
-                const isDark = e ? e.matches : window.matchMedia('(prefers-color-scheme: dark)').matches;
-                document.documentElement.classList.toggle('dark', isDark);
-            };
-            elements.themeToggle.addEventListener('change', function() {
-                const styleElement = document.getElementById('custom-theme-styles');
-                if (styleElement) {
-                    styleElement.remove();
-                }
-                document.body.removeAttribute('data-theme');
-                if (window.themeMediaQueryListener) {
-                    window.themeMediaQueryListener.mediaQuery.removeEventListener('change', window.themeMediaQueryListener.handler);
-                    window.themeMediaQueryListener = null;
-                }
-                const theme = this.value;
-                if (theme === 'auto') {
-                    const themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-                    const updateTheme = (e) => {
-                        const isDark = e ? e.matches : window.matchMedia('(prefers-color-scheme: dark)').matches;
-                        document.documentElement.classList.toggle('dark', isDark);
-                    };
-                    themeMediaQuery.addEventListener('change', updateTheme);
-                    updateTheme(themeMediaQuery);
-                    window.themeMediaQueryListener = {
-                        mediaQuery: themeMediaQuery,
-                        handler: updateTheme
-                    };
-                    localStorage.setItem('2048-theme', 'auto');
-                    document.getElementById('custom-theme-button').style.display = 'none';
-                    document.getElementById('custom-theme-button-container').classList.remove('mb-2');
-                    document.getElementById('custom-theme-button-container').classList.remove('mb-2');
-                } else if (theme === 'custom') {
-                    localStorage.setItem('2048-theme', 'custom');
-                    document.getElementById('custom-theme-button').style.display = 'block';
-                    document.getElementById('custom-theme-button-container').classList.add('mb-2');
-                    document.documentElement.classList.remove('dark');
-                    loadCustomTheme();
-                    document.body.setAttribute('data-theme', 'custom');
-                } else {
-                    document.getElementById('custom-theme-button').style.display = 'none';
-                    const isDark = theme === 'dark';
-                    document.documentElement.classList.toggle('dark', isDark);
-                    localStorage.setItem('2048-theme', theme);
-                }
-            });
-            elements.easyModeButton.addEventListener('click', () => {
-                gameState.difficulty = 'easy';
-                updateDifficultyButtons();
-                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
-                saveGameState();
-            });
-            elements.mediumModeButton.addEventListener('click', () => {
-                gameState.difficulty = 'medium';
-                updateDifficultyButtons();
-                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
-                saveGameState();
-            });
-            elements.hardModeButton.addEventListener('click', () => {
-                gameState.difficulty = 'hard';
-                updateDifficultyButtons();
-                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
-                saveGameState();
-            });
+            window.resetModeButtonStates = resetModeButtonStates;
+        }
+        function setupGridButtons() {
             const buttonStates = {
                 'grid-3x3': { needsConfirm: false, originalText: elements.grid3x3Button.textContent },
                 'grid-4x4': { needsConfirm: false, originalText: elements.grid4x4Button.textContent },
@@ -3225,13 +3234,65 @@
                     resetButtonStates();
                 }
             });
-            const originalInitGame = initGame;
-            initGame = function(...args) {
-                resetButtonStates();
-                resetModeButtonStates()
-                return originalInitGame.apply(this, args);
-            };
-            elements.dataTransferButton.addEventListener('click', () => { showModal('data-transfer-modal'); });
+            window.resetButtonStates = resetButtonStates;
+        }
+        function setupDifficultyButtons() {
+            elements.easyModeButton.addEventListener('click', () => {
+                gameState.difficulty = 'easy';
+                updateDifficultyButtons();
+                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
+                saveGameState();
+            });
+            elements.mediumModeButton.addEventListener('click', () => {
+                gameState.difficulty = 'medium';
+                updateDifficultyButtons();
+                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
+                saveGameState();
+            });
+            elements.hardModeButton.addEventListener('click', () => {
+                gameState.difficulty = 'hard';
+                updateDifficultyButtons();
+                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
+                saveGameState();
+            });
+        }
+        function setupSettingsButtons() {
+            elements.gameMessageButton.addEventListener('click', () => {
+                hideGameMessage();
+                initGame(gameState.isEndlessMode, gameState.gridRows, gameState.gridCols);
+            });
+            elements.pauseButton.addEventListener('click', togglePause);
+            elements.resumeButton.addEventListener('click', togglePause);
+            elements.restartButton.addEventListener('click', () => {
+                gameState.isPaused = false;
+                elements.pauseMenu.classList.add('hidden');
+                initGame(gameState.isEndlessMode, gameState.gridRows, gameState.gridCols);
+            });
+            elements.undoButton.addEventListener('click', undoMove);
+            let isControlsCollapsed = false;
+            function toggleControls() {
+                isControlsCollapsed = !isControlsCollapsed;
+                if (isControlsCollapsed) {
+                    elements.controlsContainer.classList.add('collapsed');
+                    elements.toggleIcon.classList.add('rotated');
+                    elements.toggleText.textContent = '展开控制';
+                    localStorage.setItem('controlsCollapsed', 'true');
+                } else {
+                    elements.controlsContainer.classList.remove('collapsed');
+                    elements.toggleIcon.classList.remove('rotated');
+                    elements.toggleText.textContent = '收起控制';
+                    localStorage.setItem('controlsCollapsed', 'false');
+                }
+            }
+            const savedCollapsedState = localStorage.getItem('controlsCollapsed');
+            if (savedCollapsedState === 'true') {
+                isControlsCollapsed = false;
+                toggleControls();
+            }
+            elements.toggleControlsButton.addEventListener('click', toggleControls);
+            elements.dataTransferButton.addEventListener('click', () => { 
+                showModal('data-transfer-modal'); 
+            });
             elements.settingsButton.addEventListener('click', () => {
                 showModal('settings-modal');
             });
@@ -3249,21 +3310,101 @@
             elements.tileAnimation.addEventListener('change', (e) => {
                 gameState.tileAnimationEnabled = e.target.checked;
                 localStorage.setItem('2048-tile-animation', gameState.tileAnimationEnabled);
+                const animationDetails = document.getElementById('animation-details');
+                if (animationDetails) {
+                    if (e.target.checked) {
+                        animationDetails.classList.remove('collapsed');
+                    } else {
+                        animationDetails.classList.add('collapsed');
+                    }
+                }
             });
-            elements.dataTransferButton.addEventListener('click', () => {
-                showModal('data-transfer-modal');
+            const animationDetails = document.getElementById('animation-details');
+            if (animationDetails) {
+                if (!gameState.tileAnimationEnabled) {
+                    animationDetails.classList.add('collapsed');
+                }
+            }
+            elements.tileAppearAnimation.checked = gameState.tileAppearAnimationEnabled;
+            elements.tileAppearAnimation.addEventListener('change', (e) => {
+                gameState.tileAppearAnimationEnabled = e.target.checked;
+                localStorage.setItem('2048-tile-appear-animation', gameState.tileAppearAnimationEnabled);
+            });
+            elements.tileMoveAnimation.checked = gameState.tileMoveAnimationEnabled;
+            elements.tileMoveAnimation.addEventListener('change', (e) => {
+                gameState.tileMoveAnimationEnabled = e.target.checked;
+                localStorage.setItem('2048-tile-move-animation', gameState.tileMoveAnimationEnabled);
+            });
+            elements.tileMergeAnimation.checked = gameState.tileMergeAnimationEnabled;
+            elements.tileMergeAnimation.addEventListener('change', (e) => {
+                gameState.tileMergeAnimationEnabled = e.target.checked;
+                localStorage.setItem('2048-tile-merge-animation', gameState.tileMergeAnimationEnabled);
             });
             elements.resetSettingsButton.addEventListener('click', resetAllSettings);
-            window.addEventListener('resize', handleResize);
+        }
+        function setupThemeListeners() {
+            elements.themeToggle.addEventListener('change', function() {
+                const styleElement = document.getElementById('custom-theme-styles');
+                if (styleElement) {
+                    styleElement.remove();
+                }
+                document.body.removeAttribute('data-theme');
+                if (window.themeMediaQueryListener) {
+                    window.themeMediaQueryListener.mediaQuery.removeEventListener('change', window.themeMediaQueryListener.handler);
+                    window.themeMediaQueryListener = null;
+                }
+                const theme = this.value;
+                if (theme === 'auto') {
+                    const themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                    const updateTheme = (e) => {
+                        const isDark = e ? e.matches : window.matchMedia('(prefers-color-scheme: dark)').matches;
+                        document.documentElement.classList.toggle('dark', isDark);
+                    };
+                    themeMediaQuery.addEventListener('change', updateTheme);
+                    updateTheme(themeMediaQuery);
+                    window.themeMediaQueryListener = {
+                        mediaQuery: themeMediaQuery,
+                        handler: updateTheme
+                    };
+                    localStorage.setItem('2048-theme', 'auto');
+                    document.getElementById('custom-theme-button').style.display = 'none';
+                    document.getElementById('custom-theme-button-container').classList.remove('mb-2');
+                } else if (theme === 'custom') {
+                    localStorage.setItem('2048-theme', 'custom');
+                    document.getElementById('custom-theme-button').style.display = 'block';
+                    document.getElementById('custom-theme-button-container').classList.add('mb-2');
+                    document.documentElement.classList.remove('dark');
+                    loadCustomTheme();
+                    document.body.setAttribute('data-theme', 'custom');
+                } else {
+                    document.getElementById('custom-theme-button').style.display = 'none';
+                    const isDark = theme === 'dark';
+                    document.documentElement.classList.toggle('dark', isDark);
+                    localStorage.setItem('2048-theme', theme);
+                }
+            });
             const customThemeButton = document.getElementById('custom-theme-button');
             if (customThemeButton) {
                 customThemeButton.addEventListener('click', function() {
                     showModal('custom-theme-modal');
                 });
             }
+        }
+        function setupOtherListeners() {
+            window.addEventListener('resize', handleResize);
             setupThemeCustomizer();
             applySavedTheme();
-        } false;
+            const originalInitGame = initGame;
+            initGame = function(...args) {
+                if (window.resetButtonStates) {
+                    window.resetButtonStates();
+                }
+                if (window.resetModeButtonStates) {
+                    window.resetModeButtonStates();
+                }
+                return originalInitGame.apply(this, args);
+            };
+        }
         function setupThemeCustomizer() {
             const customThemeModal = document.getElementById('custom-theme-modal');
             if (!customThemeModal) return;
