@@ -733,20 +733,20 @@
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb {
-            background: #bbb;
+            background: #bbbbbb;
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #999;
+            background: #999999;
         }
         .dark ::-webkit-scrollbar-track {
-            background: #333;
+            background: #333333;
         }
         .dark ::-webkit-scrollbar-thumb {
-            background: #666;
+            background: #666666;
         }
         .dark ::-webkit-scrollbar-thumb:hover {
-            background: #888;
+            background: #888888;
         }
         .dark .setting-label {
                 color: #e0e0e0;
@@ -1109,7 +1109,7 @@
             background: #2d3748;color: white;
         }
         .ai-analysis-title {
-            font-size: 18px;font-weight: bold;margin-bottom: 15px;padding-bottom: 10px;border-bottom: 1px solid #eee;position: relative;
+            font-size: 18px;font-weight: bold;margin-bottom: 15px;padding-bottom: 10px;border-bottom: 1px solid #eeeeee;position: relative;
         }
         .dark .ai-analysis-title {
             border-bottom: 1px solid #4a5568;
@@ -1118,7 +1118,7 @@
             margin-bottom: 15px;
         }
         .analysis-label {
-            font-weight: bold;margin-bottom: 5px;color: #666;
+            font-weight: bold;margin-bottom: 5px;color: #666666;
         }
         .dark .analysis-label {
             color: #a0aec0;
@@ -1481,7 +1481,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="text-sm text-secondary/70 mt-4">2048 v1.23.0 | by TheFurina</div>
+                    <div class="text-sm text-secondary/70 mt-4">2048 v1.23.1 | by TheFurina</div>
                     <button id="reset-settings-button" class="text-gray-500 hover:text-gray-700 focus:outline-none text-sm inline-block mx-auto">
                         <i class="fa-solid fa-rotate-right mr-1"></i><span>重置所有设置</span>
                     </button>
@@ -1509,32 +1509,76 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div class="flex flex-col">
                             <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">主背景色</label>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 mb-2">
                                 <input type="color" id="custom-bg-color" value="#faf8ef" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                 <input type="text" id="custom-bg-color-text" value="#faf8ef" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs text-gray-500 dark:text-gray-400 w-12">不透明度</label>
+                                <input type="range" id="custom-bg-opacity" min="0" max="100" value="100" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                <span id="custom-bg-opacity-value" class="text-xs text-gray-500 dark:text-gray-400 w-8 text-center">100%</span>
                             </div>
                         </div>
                         <div class="flex flex-col">
                             <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">主色调</label>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 mb-2">
                                 <input type="color" id="custom-primary-color" value="#faa31b" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                 <input type="text" id="custom-primary-color-text" value="#faa31b" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs text-gray-500 dark:text-gray-400 w-12">不透明度</label>
+                                <input type="range" id="custom-primary-opacity" min="0" max="100" value="100" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                <span id="custom-primary-opacity-value" class="text-xs text-gray-500 dark:text-gray-400 w-8 text-center">100%</span>
                             </div>
                         </div>
                         <div class="flex flex-col">
                             <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">次色调</label>
-                                <div class="flex items-center gap-2">
-                                    <input type="color" id="custom-secondary-color" value="#8f7a66" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-secondary-color-text" value="#8f7a66" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
-                                </div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <input type="color" id="custom-secondary-color" value="#8f7a66" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                <input type="text" id="custom-secondary-color-text" value="#8f7a66" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                             </div>
-                            <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">网格颜色</label>
-                                <div class="flex items-center gap-2">
-                                    <input type="color" id="custom-grid-color" value="#bbada0" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-grid-color-text" value="#bbada0" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
-                                </div>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs text-gray-500 dark:text-gray-400 w-12">不透明度</label>
+                                <input type="range" id="custom-secondary-opacity" min="0" max="100" value="100" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                <span id="custom-secondary-opacity-value" class="text-xs text-gray-500 dark:text-gray-400 w-8 text-center">100%</span>
                             </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">网格颜色</label>
+                            <div class="flex items-center gap-2 mb-2">
+                                <input type="color" id="custom-grid-color" value="#bbada0" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                <input type="text" id="custom-grid-color-text" value="#bbada0" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs text-gray-500 dark:text-gray-400 w-12">不透明度</label>
+                                <input type="range" id="custom-grid-opacity" min="0" max="100" value="100" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                <span id="custom-grid-opacity-value" class="text-xs text-gray-500 dark:text-gray-400 w-8 text-center">100%</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">空单元格颜色</label>
+                            <div class="flex items-center gap-2 mb-2">
+                                <input type="color" id="custom-cell-empty-color" value="#cdc1b4" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                <input type="text" id="custom-cell-empty-color-text" value="#cdc1b4" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs text-gray-500 dark:text-gray-400 w-12">不透明度</label>
+                                <input type="range" id="custom-cell-empty-opacity" min="0" max="100" value="100" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                <span id="custom-cell-empty-opacity-value" class="text-xs text-gray-500 dark:text-gray-400 w-8 text-center">100%</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">滚动条颜色</label>
+                            <div class="flex items-center gap-2 mb-2">
+                                <input type="color" id="custom-scrollbar-color" value="#bbbbbb" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
+                                <input type="text" id="custom-scrollbar-color-text" value="#bbbbbb" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs text-gray-500 dark:text-gray-400 w-12">不透明度</label>
+                                <input type="range" id="custom-scrollbar-opacity" min="0" max="100" value="20" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                <span id="custom-scrollbar-opacity-value" class="text-xs text-gray-500 dark:text-gray-400 w-8 text-center">20%</span>
+                            </div>
+                        </div>
                         </div>
                     </div>
                     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
@@ -1542,19 +1586,28 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">模态框背景色</label>
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 mb-2">
                                     <input type="color" id="custom-modal-bg" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-modal-bg-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <label class="text-xs text-gray-500 dark:text-gray-400 w-12">不透明度</label>
+                                    <input type="range" id="custom-modal-bg-opacity" min="0" max="100" value="100" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                    <span id="custom-modal-bg-opacity-value" class="text-xs text-gray-500 dark:text-gray-400 w-8 text-center">100%</span>
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">模态框文字颜色</label>
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 mb-2">
                                     <input type="color" id="custom-modal-text" value="#333333" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-modal-text-text" value="#333333" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
+                                <div class="flex items-center gap-2">
+                                    <label class="text-xs text-gray-500 dark:text-gray-400 w-12">不透明度</label>
+                                    <input type="range" id="custom-modal-text-opacity" min="0" max="100" value="100" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                    <span id="custom-modal-text-opacity-value" class="text-xs text-gray-500 dark:text-gray-400 w-8 text-center">100%</span>
+                                </div>
                             </div>
-
                         </div>
                     </div>
                     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
@@ -1788,7 +1841,23 @@
                     </div>
                 </div>
             </div>
-            <div class="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-dark-surface rounded-b-lg">
+            <div class="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-dark-surface rounded-b-lg relative">
+                <div class="absolute left-6 bottom-6">
+                    <div class="relative">
+                        <button id="theme-actions-btn" class="p-2 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 focus:outline-none">
+                            <i class="fa-solid fa-ellipsis-vertical text-gray-600 dark:text-gray-300"></i>
+                        </button>
+                        <div id="theme-actions-bubble" class="absolute bottom-14 left-[-10px] bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 opacity-0 invisible transition-all duration-200 transform translate-y-2 z-30 flex flex-col gap-2 min-w-[110px]">
+                            <button id="export-custom-theme" class="px-4 py-2 bg-secondary hover:bg-secondary/90 text-white rounded-md transition-all duration-200 text-sm flex items-center justify-center min-w-[110px]">
+                                <i class="fa-solid fa-upload mr-1"></i>导出主题
+                            </button>
+                            <button id="import-custom-theme" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md transition-all duration-200 text-sm flex items-center justify-center min-w-[110px]">
+                                <i class="fa-solid fa-download mr-1"></i>导入主题
+                            </button>
+                            <div class="absolute bottom-[-8px] left-3 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white dark:border-t-gray-800"></div>
+                        </div>
+                    </div>
+                </div>
                 <div class="flex flex-wrap gap-3 justify-center">
                     <button id="save-custom-theme" class="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-md transition-all duration-200 flex-1 sm:flex-none sm:min-w-[120px]">
                         <i class="fa-solid fa-save mr-1"></i>保存
@@ -1801,8 +1870,11 @@
         </div>
     </div>
         <div id="data-transfer-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="data-transfer-modal-title" aria-modal="true">
-            <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0">
+            <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0 relative">
                 <h2 id="data-transfer-modal-title" class="text-2xl font-bold text-secondary mb-4">数据管理</h2>
+                <button id="close-data-modal" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl dark:text-dark-muted dark:hover:text-white" title="关闭数据管理">
+                    <i class="fa-solid fa-times"></i>
+                </button>
                 <div class="flex flex-col gap-3 mb-4">
                     <button id="export-data-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50">
                         <i class="fa-solid fa-upload mr-2"></i>导出数据
@@ -1811,20 +1883,16 @@
                         <i class="fa-solid fa-download mr-2"></i>导入数据
                     </button>
                 </div>
-                <div class="relative w-full mb-4">
+                <div class="relative w-full mb-0.5">
                     <textarea id="data-textarea" class="w-full p-3 border border-gray-300 rounded-md h-32 text-sm dark:bg-dark-surface dark:border-dark-muted dark:text-dark-text" placeholder="在此复制导出的数据或输入要导入的数据..."></textarea>
                     <button id="copy-data-button" class="absolute top-2 right-2 p-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md opacity-0 invisible transition-all duration-200 focus:outline-none" title="复制数据">
                         <i class="fa-solid fa-copy text-gray-600 dark:text-gray-300"></i>
                     </button>
                 </div>
-                <div class="mb-2">
-                    <button id="clear-data-exit-button" class="text-red-500 hover:text-red-700 font-normal py-0 px-1 transition-all duration-200 focus:outline-none" onclick="if(confirm('确定要清除所有数据并退出吗？')) { localStorage.clear(); window.close(); }">
-                        <i class="fa-solid fa-trash-alt mr-1"></i>清除数据并退出
-                    </button>
+                <div class="flex items-center gap-2 mb-4">
+                    <input type="checkbox" id="export-settings-checkbox" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:bg-dark-surface dark:border-dark-muted">
+                    <label for="export-settings-checkbox" class="text-sm text-gray-700 dark:text-dark-text">包含设置数据</label>
                 </div>
-                <button id="close-data-modal" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray/50">
-                    <i class="fa-solid fa-times mr-2"></i>关闭
-                </button>
             </div>
         </div>
         <div id="custom-grid-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="custom-grid-modal-title" aria-modal="true">
@@ -1969,6 +2037,7 @@
         }
         function exportGameData() {
             try {
+                const includeSettings = document.getElementById('export-settings-checkbox')?.checked || false;
                 const data = {
                     grid: gameState.grid,
                     score: gameState.score,
@@ -1980,6 +2049,20 @@
                     isEndlessMode: gameState.isEndlessMode,
                     timestamp: new Date().toISOString()
                 };
+                if (includeSettings) {
+                    data.settings = {
+                        '2048-theme': localStorage.getItem('2048-theme'),
+                        'customTheme': localStorage.getItem('customTheme'),
+                        '2048-gpu-acceleration': localStorage.getItem('2048-gpu-acceleration'),
+                        '2048-tile-animation': localStorage.getItem('2048-tile-animation'),
+                        '2048-tile-appear-animation': localStorage.getItem('2048-tile-appear-animation'),
+                        '2048-tile-move-animation': localStorage.getItem('2048-tile-move-animation'),
+                        '2048-tile-merge-animation': localStorage.getItem('2048-tile-merge-animation'),
+                        '2048-square-grid-locked': localStorage.getItem('2048-square-grid-locked'),
+                        'controlsCollapsed': localStorage.getItem('controlsCollapsed'),
+                        'bestMoveHidden': localStorage.getItem('bestMoveHidden')
+                    };
+                }
                 const dataStr = btoa(JSON.stringify(data));
                 document.getElementById('data-textarea').value = dataStr;
                 return dataStr;
@@ -1993,7 +2076,6 @@
             try {
                 const textarea = document.getElementById('data-textarea');
                 if (!textarea.value) {
-                    alert('没有可复制的数据');
                     return;
                 }
                 textarea.select();
@@ -2013,8 +2095,9 @@
         }
         document.addEventListener('DOMContentLoaded', () => { 
             console.log('%c   ____     ___    _  _      ___                                        \n  |___ \\   / _ \\  | || |    ( _ )      __ _    __ _   _ __ ___     ___ \n    __) | | | | | | || |_   / _ \\     / _` |  / _` | | \'_ ` _ \\   / _ \\ \n   / __/  | |_| | |__   _| | (_) |   | (_| | | (_| | | | | | | | |  __/ \n  |_____|  \\___/     |_|    \\___/     \\__, |  \\__,_| |_| |_| |_|  \\___| \n                                      |___/                            ', 'color: #faa31b; font-size: 14px;');
-            console.log('2048 v1.23.0');
-            const textareaContainer = document.querySelector('.relative.w-full.mb-4'); 
+            console.log('2048 v1.23.1');
+            const textarea = document.getElementById('data-textarea');
+            const textareaContainer = textarea ? textarea.closest('.relative') : null;
             const copyButton = document.getElementById('copy-data-button'); 
             if (textareaContainer && copyButton) { 
                 textareaContainer.addEventListener('mouseenter', () => { 
@@ -2065,6 +2148,7 @@
                 if (invalidTiles.length > 0) {
                     throw new Error('导入的滑块数字必须是2的次幂');
                 }
+                const shouldImportSettings = data.settings && confirm('导入的数据包含设置信息，是否覆盖当前设置？');
                 gameState.grid = data.grid;
                 gameState.score = data.score;
                 gameState.bestScore = data.bestScore;
@@ -2087,6 +2171,63 @@
                 saveGameState();
                 gameState.history = [];
                 updateUndoButtonState();
+                if (shouldImportSettings) {
+                    for (const [key, value] of Object.entries(data.settings)) {
+                        if (value !== null && value !== undefined) {
+                            localStorage.setItem(key, value);
+                        }
+                    }
+                    gameState.gpuAccelerationEnabled = localStorage.getItem('2048-gpu-acceleration') !== 'false';
+                    gameState.tileAnimationEnabled = localStorage.getItem('2048-tile-animation') !== 'false';
+                    gameState.tileAppearAnimationEnabled = localStorage.getItem('2048-tile-appear-animation') !== 'false';
+                    gameState.tileMoveAnimationEnabled = localStorage.getItem('2048-tile-move-animation') !== 'false';
+                    gameState.tileMergeAnimationEnabled = localStorage.getItem('2048-tile-merge-animation') !== 'false';
+                    const importedTheme = data.settings['2048-theme'];
+                    if (importedTheme) {
+                        if (importedTheme === 'auto') {
+                            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                            document.documentElement.classList.toggle('dark', prefersDark);
+                        } else if (importedTheme === 'dark') {
+                            document.documentElement.classList.add('dark');
+                        } else {
+                            document.documentElement.classList.remove('dark');
+                        }
+                        const themeToggle = document.getElementById('theme-toggle');
+                        if (themeToggle) {
+                            themeToggle.value = importedTheme;
+                        }
+                        const selectSelected = document.querySelector('.select-selected span');
+                        const selectItems = document.querySelectorAll('.select-item');
+                        if (selectSelected) {
+                            selectItems.forEach(item => {
+                                if (item.getAttribute('data-value') === importedTheme) {
+                                    selectSelected.innerHTML = item.innerHTML;
+                                }
+                            });
+                        }
+                    }
+                    const gpuAccelCheckbox = document.getElementById('gpu-acceleration');
+                    if (gpuAccelCheckbox) {
+                        gpuAccelCheckbox.checked = localStorage.getItem('2048-gpu-acceleration') !== 'false';
+                    }
+                    const tileAnimationCheckbox = document.getElementById('tile-animation');
+                    if (tileAnimationCheckbox) {
+                        tileAnimationCheckbox.checked = localStorage.getItem('2048-tile-animation') !== 'false';
+                    }
+                    const appearAnimationCheckbox = document.getElementById('tile-appear-animation');
+                    if (appearAnimationCheckbox) {
+                        appearAnimationCheckbox.checked = localStorage.getItem('2048-tile-appear-animation') !== 'false';
+                    }
+                    const moveAnimationCheckbox = document.getElementById('tile-move-animation');
+                    if (moveAnimationCheckbox) {
+                        moveAnimationCheckbox.checked = localStorage.getItem('2048-tile-move-animation') !== 'false';
+                    }
+                    const mergeAnimationCheckbox = document.getElementById('tile-merge-animation');
+                    if (mergeAnimationCheckbox) {
+                        mergeAnimationCheckbox.checked = localStorage.getItem('2048-tile-merge-animation') !== 'false';
+                    }
+                    return;
+                }
                 alert('数据导入成功！');
                 return true;
             } catch (e) {
@@ -3423,13 +3564,25 @@
                 if (textInput) {
                     colorInput.addEventListener('input', function() {
                         textInput.value = this.value;
+                        parseOpacityFromColor(this.value, this.id.replace('custom-', 'custom-').replace('-color', '-opacity'));
                         previewCustomTheme();
                     });
                     textInput.addEventListener('input', function() {
-                        if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(this.value)) {
+                        if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3}|[A-Fa-f0-9]{8})$/.test(this.value)) {
                             colorInput.value = this.value;
+                            parseOpacityFromColor(this.value, colorInput.id.replace('-color', '-opacity'));
                             previewCustomTheme();
                         }
+                    });
+                }
+            });
+            const rangeInputs = document.querySelectorAll('input[type="range"]');
+            rangeInputs.forEach(rangeInput => {
+                const valueDisplay = document.getElementById(rangeInput.id + '-value');
+                if (valueDisplay) {
+                    rangeInput.addEventListener('input', function() {
+                        valueDisplay.textContent = this.value + '%';
+                        previewCustomTheme();
                     });
                 }
             });
@@ -3446,14 +3599,72 @@
                     saveCustomTheme();
                 });
             }
+            const exportButton = document.getElementById('export-custom-theme');
+            if (exportButton) {
+                exportButton.addEventListener('click', function() {
+                    exportCustomTheme();
+                });
+            }
+            const importButton = document.getElementById('import-custom-theme');
+            if (importButton) {
+                importButton.addEventListener('click', function() {
+                    importCustomTheme();
+                });
+            }
+            const actionsBtn = document.getElementById('theme-actions-btn');
+            const actionsBubble = document.getElementById('theme-actions-bubble');
+            let isBubbleVisible = false;
+            actionsBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                isBubbleVisible = !isBubbleVisible;
+                if (isBubbleVisible) {
+                    actionsBubble.classList.remove('opacity-0', 'invisible', 'translate-y-2');
+                    actionsBubble.classList.add('opacity-100', 'visible', 'translate-y-0');
+                } else {
+                    actionsBubble.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                    actionsBubble.classList.add('opacity-0', 'invisible', 'translate-y-2');
+                }
+            });
+            customThemeModal.addEventListener('click', function(e) {
+                if (e.target !== actionsBtn && !actionsBtn.contains(e.target) && e.target !== actionsBubble && !actionsBubble.contains(e.target)) {
+                    isBubbleVisible = false;
+                    actionsBubble.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                    actionsBubble.classList.add('opacity-0', 'invisible', 'translate-y-2');
+                }
+            });
+            actionsBubble.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    isBubbleVisible = false;
+                    actionsBubble.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                    actionsBubble.classList.add('opacity-0', 'invisible', 'translate-y-2');
+                });
+            });
         }
         function previewCustomTheme() {
-            const bgColor = document.getElementById('custom-bg-color').value;
-            const primaryColor = document.getElementById('custom-primary-color').value;
-            const secondaryColor = document.getElementById('custom-secondary-color').value;
-            const gridColor = document.getElementById('custom-grid-color').value;
-            const modalBgColor = document.getElementById('custom-modal-bg').value;
-            const modalTextColor = document.getElementById('custom-modal-text').value;
+            const bgColorInput = document.getElementById('custom-bg-color');
+            const bgColor = bgColorInput.value;
+            const bgOpacity = parseOpacityFromColor(bgColor, 'custom-bg-opacity');
+            const primaryColorInput = document.getElementById('custom-primary-color');
+            const primaryColor = primaryColorInput.value;
+            const primaryOpacity = parseOpacityFromColor(primaryColor, 'custom-primary-opacity');
+            const secondaryColorInput = document.getElementById('custom-secondary-color');
+            const secondaryColor = secondaryColorInput.value;
+            const secondaryOpacity = parseOpacityFromColor(secondaryColor, 'custom-secondary-opacity');
+            const gridColorInput = document.getElementById('custom-grid-color');
+            const gridColor = gridColorInput.value;
+            const gridOpacity = parseOpacityFromColor(gridColor, 'custom-grid-opacity');
+            const cellEmptyColorInput = document.getElementById('custom-cell-empty-color');
+            const cellEmptyColor = cellEmptyColorInput.value;
+            const cellEmptyOpacity = parseOpacityFromColor(cellEmptyColor, 'custom-cell-empty-opacity');
+            const scrollbarColorInput = document.getElementById('custom-scrollbar-color');
+            const scrollbarColor = scrollbarColorInput.value;
+            const scrollbarOpacity = parseOpacityFromColor(scrollbarColor, 'custom-scrollbar-opacity');
+            const modalBgColorInput = document.getElementById('custom-modal-bg');
+            const modalBgColor = modalBgColorInput.value;
+            const modalBgOpacity = parseOpacityFromColor(modalBgColor, 'custom-modal-bg-opacity');
+            const modalTextColorInput = document.getElementById('custom-modal-text');
+            const modalTextColor = modalTextColorInput.value;
+            const modalTextOpacity = parseOpacityFromColor(modalTextColor, 'custom-modal-text-opacity');
             const tile2Bg = document.getElementById('custom-tile-2-bg').value;
             const tile2Text = document.getElementById('custom-tile-2-text').value;
             const tile4Bg = document.getElementById('custom-tile-4-bg').value;
@@ -3494,21 +3705,55 @@
             }
             const previewStyles = `
                 body[data-preview="true"] {
-                    background-color: ${bgColor} !important;
-                    color: ${secondaryColor} !important;
+                    background-color: ${bgColor}${Math.floor(bgOpacity * 2.55).toString(16).padStart(2, '0')} !important;
+                    color: ${secondaryColor}${Math.floor(secondaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
+                }
+                body[data-preview="true"] .bg-bg {
+                    background-color: ${bgColor}${Math.floor(bgOpacity * 2.55).toString(16).padStart(2, '0')} !important;
+                }
+                body[data-preview="true"] .text-secondary {
+                    color: ${secondaryColor}${Math.floor(secondaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
+                }
+                body[data-preview="true"] .text-secondary\\/80 {
+                    color: ${secondaryColor}${Math.floor(secondaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
+                }
+                body[data-preview="true"] .bg-grid {
+                    background-color: ${gridColor}${Math.floor(gridOpacity * 2.55).toString(16).padStart(2, '0')} !important;
+                }
+                body[data-preview="true"] .bg-primary {
+                    background-color: ${primaryColor}${Math.floor(primaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
+                }
+                body[data-preview="true"] .bg-secondary {
+                    background-color: ${secondaryColor}${Math.floor(secondaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
+                }
+                body[data-preview="true"] .bg-easy {
+                    background-color: #4CAF50 !important;
+                }
+                body[data-preview="true"] .bg-medium {
+                    background-color: #FFC107 !important;
+                }
+                body[data-preview="true"] .bg-hard {
+                    background-color: #F44336 !important;
+                }
+                body[data-preview="true"] .grid-cell {
+                    background-color: ${cellEmptyColor}${Math.floor(cellEmptyOpacity * 2.55).toString(16).padStart(2, '0')} !important;
                 }
                 body[data-preview="true"] .game-header,
                 body[data-preview="true"] .game-footer {
-                    color: ${secondaryColor} !important;
+                    color: ${secondaryColor}${Math.floor(secondaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
                 }
                 body[data-preview="true"] .primary {
-                    background-color: ${primaryColor} !important;
+                    background-color: ${primaryColor}${Math.floor(primaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
                 }
                 body[data-preview="true"] .secondary {
-                    color: ${secondaryColor} !important;
+                    color: ${secondaryColor}${Math.floor(secondaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
                 }
                 body[data-preview="true"] .game-container {
-                    background-color: ${gridColor} !important;
+                    background-color: ${gridColor}${Math.floor(gridOpacity * 2.55).toString(16).padStart(2, '0')} !important;
+                }
+                body[data-preview="true"] [role="dialog"] > div {
+                    background-color: ${modalBgColor}${Math.floor(modalBgOpacity * 2.55).toString(16).padStart(2, '0')} !important;
+                    color: ${modalTextColor}${Math.floor(modalTextOpacity * 2.55).toString(16).padStart(2, '0')} !important;
                 }
                 body[data-preview="true"] .tile-2 {
                     background-color: ${tile2Bg} !important;
@@ -3574,9 +3819,37 @@
                     background-color: ${tileSuperBg} !important;
                     color: ${tileSuperText} !important;
                 }
-                body[data-preview="true"] [role="dialog"] > div {
-                    background-color: ${modalBgColor} !important;
-                    color: ${modalTextColor} !important;
+                body[data-preview="true"] ::-webkit-scrollbar-track {
+                    background: ${bgColor}${Math.floor(bgOpacity * 2.55).toString(16).padStart(2, '0')} !important;
+                }
+                body[data-preview="true"] ::-webkit-scrollbar-thumb {
+                    background: ${scrollbarColor}${Math.floor(scrollbarOpacity * 2.55).toString(16).padStart(2, '0')} !important;
+                }
+                body[data-preview="true"] ::-webkit-scrollbar-thumb:hover {
+                    background: ${primaryColor}${Math.floor(primaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
+                }
+                body[data-preview="true"] .bg-primary:focus-visible {
+                    box-shadow: 0 0 0 3px rgba(250, 163, 27, 0.5) !important;
+                }
+                body[data-preview="true"] .bg-secondary:focus-visible {
+                    box-shadow: 0 0 0 3px rgba(143, 122, 102, 0.5) !important;
+                }
+                body[data-preview="true"] .bg-easy:focus-visible {
+                    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.5) !important;
+                }
+                body[data-preview="true"] .bg-medium:focus-visible {
+                    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.5) !important;
+                }
+                body[data-preview="true"] .bg-hard:focus-visible {
+                    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.5) !important;
+                }
+                body[data-preview="true"] button:focus-visible,
+                body[data-preview="true"] a:focus-visible,
+                body[data-preview="true"] input:focus-visible,
+                body[data-preview="true"] select:focus-visible,
+                body[data-preview="true"] textarea:focus-visible,
+                body[data-preview="true"] [tabindex]:not([tabindex="-1"]):focus-visible {
+                    box-shadow: 0 0 0 3px rgba(250, 163, 27, 0.5) !important;
                 }
             `;
             previewStyleElement.textContent = previewStyles;
@@ -3591,6 +3864,23 @@
             const currentTheme = localStorage.getItem('2048-theme');
             if (currentTheme === 'custom') {
                 loadCustomTheme();
+            }
+        }
+        function parseOpacityFromColor(color, opacityInputId) {
+            if (color.length === 9) {
+                const alphaHex = color.slice(7, 9);
+                const alphaValue = parseInt(alphaHex, 16);
+                const opacityPercent = Math.round((alphaValue / 255) * 100);
+                const opacityInput = document.getElementById(opacityInputId);
+                const opacityValueDisplay = document.getElementById(opacityInputId + '-value');
+                if (opacityInput && opacityValueDisplay) {
+                    opacityInput.value = opacityPercent;
+                    opacityValueDisplay.textContent = opacityPercent + '%';
+                }
+                return opacityPercent;
+            } else {
+                const opacityInput = document.getElementById(opacityInputId);
+                return opacityInput ? opacityInput.value : 100;
             }
         }
         function applySavedTheme() {
@@ -3636,16 +3926,36 @@
         function resetCustomTheme() {
             document.getElementById('custom-bg-color').value = '#faf8ef';
             document.getElementById('custom-bg-color-text').value = '#faf8ef';
+            document.getElementById('custom-bg-opacity').value = '100';
+            document.getElementById('custom-bg-opacity-value').textContent = '100%';
             document.getElementById('custom-primary-color').value = '#faa31b';
             document.getElementById('custom-primary-color-text').value = '#faa31b';
+            document.getElementById('custom-primary-opacity').value = '100';
+            document.getElementById('custom-primary-opacity-value').textContent = '100%';
             document.getElementById('custom-secondary-color').value = '#8f7a66';
             document.getElementById('custom-secondary-color-text').value = '#8f7a66';
+            document.getElementById('custom-secondary-opacity').value = '100';
+            document.getElementById('custom-secondary-opacity-value').textContent = '100%';
             document.getElementById('custom-grid-color').value = '#bbada0';
             document.getElementById('custom-grid-color-text').value = '#bbada0';
+            document.getElementById('custom-grid-opacity').value = '100';
+            document.getElementById('custom-grid-opacity-value').textContent = '100%';
+            document.getElementById('custom-cell-empty-color').value = '#cdc1b4';
+            document.getElementById('custom-cell-empty-color-text').value = '#cdc1b4';
+            document.getElementById('custom-cell-empty-opacity').value = '100';
+            document.getElementById('custom-cell-empty-opacity-value').textContent = '100%';
+            document.getElementById('custom-scrollbar-color').value = '#bbbbbb';
+            document.getElementById('custom-scrollbar-color-text').value = '#bbbbbb';
+            document.getElementById('custom-scrollbar-opacity').value = '20';
+            document.getElementById('custom-scrollbar-opacity-value').textContent = '20%';
             document.getElementById('custom-modal-bg').value = '#ffffff';
             document.getElementById('custom-modal-bg-text').value = '#ffffff';
+            document.getElementById('custom-modal-bg-opacity').value = '100';
+            document.getElementById('custom-modal-bg-opacity-value').textContent = '100%';
             document.getElementById('custom-modal-text').value = '#333333';
             document.getElementById('custom-modal-text-text').value = '#333333';
+            document.getElementById('custom-modal-text-opacity').value = '100';
+            document.getElementById('custom-modal-text-opacity-value').textContent = '100%';
             document.getElementById('custom-tile-2-bg').value = '#eee4da';
             document.getElementById('custom-tile-2-bg-text').value = '#eee4da';
             document.getElementById('custom-tile-2-text').value = '#776e65';
@@ -3714,11 +4024,21 @@
         function saveCustomTheme() {
             const themeData = {
                 bgColor: document.getElementById('custom-bg-color').value,
+                bgOpacity: document.getElementById('custom-bg-opacity').value,
                 primaryColor: document.getElementById('custom-primary-color').value,
+                primaryOpacity: document.getElementById('custom-primary-opacity').value,
                 secondaryColor: document.getElementById('custom-secondary-color').value,
+                secondaryOpacity: document.getElementById('custom-secondary-opacity').value,
                 gridColor: document.getElementById('custom-grid-color').value,
+                gridOpacity: document.getElementById('custom-grid-opacity').value,
+                cellEmptyColor: document.getElementById('custom-cell-empty-color').value,
+                cellEmptyOpacity: document.getElementById('custom-cell-empty-opacity').value,
+                scrollbarColor: document.getElementById('custom-scrollbar-color').value,
+                scrollbarOpacity: document.getElementById('custom-scrollbar-opacity').value,
                 modalBgColor: document.getElementById('custom-modal-bg').value,
+                modalBgOpacity: document.getElementById('custom-modal-bg-opacity').value,
                 modalTextColor: document.getElementById('custom-modal-text').value,
+                modalTextOpacity: document.getElementById('custom-modal-text-opacity').value,
                 tile2Bg: document.getElementById('custom-tile-2-bg').value,
                 tile2Text: document.getElementById('custom-tile-2-text').value,
                 tile4Bg: document.getElementById('custom-tile-4-bg').value,
@@ -3757,6 +4077,178 @@
             localStorage.setItem('2048-theme', 'custom');
             alert('主题保存成功！');
         }
+        function exportCustomTheme() {
+            try {
+                const themeData = {
+                    bgColor: document.getElementById('custom-bg-color').value,
+                    bgOpacity: document.getElementById('custom-bg-opacity').value,
+                    primaryColor: document.getElementById('custom-primary-color').value,
+                    primaryOpacity: document.getElementById('custom-primary-opacity').value,
+                    secondaryColor: document.getElementById('custom-secondary-color').value,
+                    secondaryOpacity: document.getElementById('custom-secondary-opacity').value,
+                    gridColor: document.getElementById('custom-grid-color').value,
+                    gridOpacity: document.getElementById('custom-grid-opacity').value,
+                    cellEmptyColor: document.getElementById('custom-cell-empty-color').value,
+                    cellEmptyOpacity: document.getElementById('custom-cell-empty-opacity').value,
+                    scrollbarColor: document.getElementById('custom-scrollbar-color').value,
+                    scrollbarOpacity: document.getElementById('custom-scrollbar-opacity').value,
+                    modalBgColor: document.getElementById('custom-modal-bg').value,
+                    modalBgOpacity: document.getElementById('custom-modal-bg-opacity').value,
+                    modalTextColor: document.getElementById('custom-modal-text').value,
+                    modalTextOpacity: document.getElementById('custom-modal-text-opacity').value,
+                    tile2Bg: document.getElementById('custom-tile-2-bg').value,
+                    tile2Text: document.getElementById('custom-tile-2-text').value,
+                    tile4Bg: document.getElementById('custom-tile-4-bg').value,
+                    tile4Text: document.getElementById('custom-tile-4-text').value,
+                    tile8Bg: document.getElementById('custom-tile-8-bg').value,
+                    tile8Text: document.getElementById('custom-tile-8-text').value,
+                    tile16Bg: document.getElementById('custom-tile-16-bg').value,
+                    tile16Text: document.getElementById('custom-tile-16-text').value,
+                    tile32Bg: document.getElementById('custom-tile-32-bg').value,
+                    tile32Text: document.getElementById('custom-tile-32-text').value,
+                    tile64Bg: document.getElementById('custom-tile-64-bg').value,
+                    tile64Text: document.getElementById('custom-tile-64-text').value,
+                    tile128Bg: document.getElementById('custom-tile-128-bg').value,
+                    tile128Text: document.getElementById('custom-tile-128-text').value,
+                    tile256Bg: document.getElementById('custom-tile-256-bg').value,
+                    tile256Text: document.getElementById('custom-tile-256-text').value,
+                    tile512Bg: document.getElementById('custom-tile-512-bg').value,
+                    tile512Text: document.getElementById('custom-tile-512-text').value,
+                    tile1024Bg: document.getElementById('custom-tile-1024-bg').value,
+                    tile1024Text: document.getElementById('custom-tile-1024-text').value,
+                    tile2048Bg: document.getElementById('custom-tile-2048-bg').value,
+                    tile2048Text: document.getElementById('custom-tile-2048-text').value,
+                    tile4096Bg: document.getElementById('custom-tile-4096-bg').value,
+                    tile4096Text: document.getElementById('custom-tile-4096-text').value,
+                    tile8192Bg: document.getElementById('custom-tile-8192-bg').value,
+                    tile8192Text: document.getElementById('custom-tile-8192-text').value,
+                    tile16384Bg: document.getElementById('custom-tile-16384-bg').value,
+                    tile16384Text: document.getElementById('custom-tile-16384-text').value,
+                    tile32768Bg: document.getElementById('custom-tile-32768-bg').value,
+                    tile32768Text: document.getElementById('custom-tile-32768-text').value,
+                    tileSuperBg: document.getElementById('custom-tile-super-bg').value,
+                    tileSuperText: document.getElementById('custom-tile-super-text').value,
+                    timestamp: new Date().getTime()
+                };
+                const themeJson = JSON.stringify(themeData, null, 2);
+                const blob = new Blob([themeJson], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `2048-theme-${new Date().getTime()}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('导出主题失败:', error);
+                alert('导出主题失败: ' + error.message);
+            }
+        }
+        function importCustomTheme() {
+            try {
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = '.json';
+                fileInput.style.display = 'none';
+                fileInput.addEventListener('change', function(event) {
+                    const file = event.target.files[0];
+                    if (!file) {
+                        document.body.removeChild(fileInput);
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const themeData = JSON.parse(e.target.result);
+                            document.getElementById('custom-bg-color').value = themeData.bgColor;
+                            document.getElementById('custom-bg-opacity').value = themeData.bgOpacity;
+                            document.getElementById('custom-bg-opacity-value').textContent = themeData.bgOpacity + '%';
+                            document.getElementById('custom-primary-color').value = themeData.primaryColor;
+                            document.getElementById('custom-primary-opacity').value = themeData.primaryOpacity;
+                            document.getElementById('custom-primary-opacity-value').textContent = themeData.primaryOpacity + '%';
+                            document.getElementById('custom-secondary-color').value = themeData.secondaryColor;
+                            document.getElementById('custom-secondary-opacity').value = themeData.secondaryOpacity;
+                            document.getElementById('custom-secondary-opacity-value').textContent = themeData.secondaryOpacity + '%';
+                            document.getElementById('custom-grid-color').value = themeData.gridColor;
+                            document.getElementById('custom-grid-opacity').value = themeData.gridOpacity;
+                            document.getElementById('custom-grid-opacity-value').textContent = themeData.gridOpacity + '%';
+                            document.getElementById('custom-cell-empty-color').value = themeData.cellEmptyColor;
+                            document.getElementById('custom-cell-empty-opacity').value = themeData.cellEmptyOpacity;
+                            document.getElementById('custom-cell-empty-opacity-value').textContent = themeData.cellEmptyOpacity + '%';
+                            document.getElementById('custom-scrollbar-color').value = themeData.scrollbarColor;
+                            document.getElementById('custom-scrollbar-opacity').value = themeData.scrollbarOpacity;
+                            document.getElementById('custom-scrollbar-opacity-value').textContent = themeData.scrollbarOpacity + '%';
+                            document.getElementById('custom-modal-bg').value = themeData.modalBgColor;
+                            document.getElementById('custom-modal-bg-opacity').value = themeData.modalBgOpacity;
+                            document.getElementById('custom-modal-bg-opacity-value').textContent = themeData.modalBgOpacity + '%';
+                            document.getElementById('custom-modal-text').value = themeData.modalTextColor;
+                            document.getElementById('custom-modal-text-opacity').value = themeData.modalTextOpacity;
+                            document.getElementById('custom-modal-text-opacity-value').textContent = themeData.modalTextOpacity + '%';
+                            document.getElementById('custom-tile-2-bg').value = themeData.tile2Bg;
+                            document.getElementById('custom-tile-2-text').value = themeData.tile2Text;
+                            document.getElementById('custom-tile-4-bg').value = themeData.tile4Bg;
+                            document.getElementById('custom-tile-4-text').value = themeData.tile4Text;
+                            document.getElementById('custom-tile-8-bg').value = themeData.tile8Bg;
+                            document.getElementById('custom-tile-8-text').value = themeData.tile8Text;
+                            document.getElementById('custom-tile-16-bg').value = themeData.tile16Bg;
+                            document.getElementById('custom-tile-16-text').value = themeData.tile16Text;
+                            document.getElementById('custom-tile-32-bg').value = themeData.tile32Bg;
+                            document.getElementById('custom-tile-32-text').value = themeData.tile32Text;
+                            document.getElementById('custom-tile-64-bg').value = themeData.tile64Bg;
+                            document.getElementById('custom-tile-64-text').value = themeData.tile64Text;
+                            document.getElementById('custom-tile-128-bg').value = themeData.tile128Bg;
+                            document.getElementById('custom-tile-128-text').value = themeData.tile128Text;
+                            document.getElementById('custom-tile-256-bg').value = themeData.tile256Bg;
+                            document.getElementById('custom-tile-256-text').value = themeData.tile256Text;
+                            document.getElementById('custom-tile-512-bg').value = themeData.tile512Bg;
+                            document.getElementById('custom-tile-512-text').value = themeData.tile512Text;
+                            document.getElementById('custom-tile-1024-bg').value = themeData.tile1024Bg;
+                            document.getElementById('custom-tile-1024-text').value = themeData.tile1024Text;
+                            document.getElementById('custom-tile-2048-bg').value = themeData.tile2048Bg;
+                            document.getElementById('custom-tile-2048-text').value = themeData.tile2048Text;
+                            document.getElementById('custom-tile-4096-bg').value = themeData.tile4096Bg;
+                            document.getElementById('custom-tile-4096-text').value = themeData.tile4096Text;
+                            document.getElementById('custom-tile-8192-bg').value = themeData.tile8192Bg;
+                            document.getElementById('custom-tile-8192-text').value = themeData.tile8192Text;
+                            document.getElementById('custom-tile-16384-bg').value = themeData.tile16384Bg;
+                            document.getElementById('custom-tile-16384-text').value = themeData.tile16384Text;
+                            document.getElementById('custom-tile-32768-bg').value = themeData.tile32768Bg;
+                            document.getElementById('custom-tile-32768-text').value = themeData.tile32768Text;
+                            document.getElementById('custom-tile-super-bg').value = themeData.tileSuperBg;
+                            document.getElementById('custom-tile-super-text').value = themeData.tileSuperText;
+                            updateColorTextInputs();
+                            previewCustomTheme();
+                            alert('主题导入成功！');
+                        } catch (parseError) {
+                            console.error('解析主题文件失败:', parseError);
+                            alert('解析主题文件失败: ' + parseError.message);
+                        } finally {
+                            document.body.removeChild(fileInput);
+                        }
+                    };
+                    reader.onerror = function() {
+                        alert('读取文件失败，请重试！');
+                        document.body.removeChild(fileInput);
+                    };
+                    reader.readAsText(file);
+                });
+                document.body.appendChild(fileInput);
+                fileInput.click();
+            } catch (error) {
+                console.error('导入主题失败:', error);
+                alert('导入主题失败: ' + error.message);
+            }
+        }
+        function updateColorTextInputs() {
+            const colorInputs = document.querySelectorAll('input[type="color"]');
+            colorInputs.forEach(input => {
+                const textInput = document.getElementById(input.id + '-text');
+                if (textInput) {
+                    textInput.value = input.value;
+                }
+            });
+        }
         function loadCustomTheme() {
             try {
                 const savedTheme = localStorage.getItem('customTheme');
@@ -3766,16 +4258,36 @@
                     if (document.getElementById('custom-bg-color')) {
                         document.getElementById('custom-bg-color').value = themeData.bgColor;
                         document.getElementById('custom-bg-color-text').value = themeData.bgColor;
+                        document.getElementById('custom-bg-opacity').value = themeData.bgOpacity;
+                        document.getElementById('custom-bg-opacity-value').textContent = themeData.bgOpacity + '%';
                         document.getElementById('custom-primary-color').value = themeData.primaryColor;
                         document.getElementById('custom-primary-color-text').value = themeData.primaryColor;
+                        document.getElementById('custom-primary-opacity').value = themeData.primaryOpacity;
+                        document.getElementById('custom-primary-opacity-value').textContent = themeData.primaryOpacity + '%';
                         document.getElementById('custom-secondary-color').value = themeData.secondaryColor;
                         document.getElementById('custom-secondary-color-text').value = themeData.secondaryColor;
+                        document.getElementById('custom-secondary-opacity').value = themeData.secondaryOpacity;
+                        document.getElementById('custom-secondary-opacity-value').textContent = themeData.secondaryOpacity + '%';
                         document.getElementById('custom-grid-color').value = themeData.gridColor;
                         document.getElementById('custom-grid-color-text').value = themeData.gridColor;
-                        document.getElementById('custom-modal-bg').value = themeData.modalBgColor || '#ffffff';
-                        document.getElementById('custom-modal-bg-text').value = themeData.modalBgColor || '#ffffff';
-                        document.getElementById('custom-modal-text').value = themeData.modalTextColor || '#333333';
-                        document.getElementById('custom-modal-text-text').value = themeData.modalTextColor || '#333333';
+                        document.getElementById('custom-grid-opacity').value = themeData.gridOpacity;
+                        document.getElementById('custom-grid-opacity-value').textContent = themeData.gridOpacity + '%';
+                        document.getElementById('custom-cell-empty-color').value = themeData.cellEmptyColor;
+                        document.getElementById('custom-cell-empty-color-text').value = themeData.cellEmptyColor;
+                        document.getElementById('custom-cell-empty-opacity').value = themeData.cellEmptyOpacity;
+                        document.getElementById('custom-cell-empty-opacity-value').textContent = themeData.cellEmptyOpacity + '%';
+                        document.getElementById('custom-scrollbar-color').value = themeData.scrollbarColor;
+                        document.getElementById('custom-scrollbar-color-text').value = themeData.scrollbarColor;
+                        document.getElementById('custom-scrollbar-opacity').value = themeData.scrollbarOpacity;
+                        document.getElementById('custom-scrollbar-opacity-value').textContent = themeData.scrollbarOpacity + '%';
+                        document.getElementById('custom-modal-bg').value = themeData.modalBgColor;
+                        document.getElementById('custom-modal-bg-text').value = themeData.modalBgColor;
+                        document.getElementById('custom-modal-bg-opacity').value = themeData.modalBgOpacity;
+                        document.getElementById('custom-modal-bg-opacity-value').textContent = themeData.modalBgOpacity + '%';
+                        document.getElementById('custom-modal-text').value = themeData.modalTextColor;
+                        document.getElementById('custom-modal-text-text').value = themeData.modalTextColor;
+                        document.getElementById('custom-modal-text-opacity').value = themeData.modalTextOpacity;
+                        document.getElementById('custom-modal-text-opacity-value').textContent = themeData.modalTextOpacity + '%';
                         document.getElementById('custom-tile-2-bg').value = themeData.tile2Bg;
                         document.getElementById('custom-tile-2-bg-text').value = themeData.tile2Bg;
                         document.getElementById('custom-tile-2-text').value = themeData.tile2Text;
@@ -3784,62 +4296,62 @@
                         document.getElementById('custom-tile-4-bg-text').value = themeData.tile4Bg;
                         document.getElementById('custom-tile-4-text').value = themeData.tile4Text;
                         document.getElementById('custom-tile-4-text-text').value = themeData.tile4Text;
-                        document.getElementById('custom-tile-8-bg').value = themeData.tile8Bg || '#f2b179';
-                        document.getElementById('custom-tile-8-bg-text').value = themeData.tile8Bg || '#f2b179';
-                        document.getElementById('custom-tile-8-text').value = themeData.tile8Text || '#f9f6f2';
-                        document.getElementById('custom-tile-8-text-text').value = themeData.tile8Text || '#f9f6f2';
-                        document.getElementById('custom-tile-16-bg').value = themeData.tile16Bg || '#f59563';
-                        document.getElementById('custom-tile-16-bg-text').value = themeData.tile16Bg || '#f59563';
-                        document.getElementById('custom-tile-16-text').value = themeData.tile16Text || '#f9f6f2';
-                        document.getElementById('custom-tile-16-text-text').value = themeData.tile16Text || '#f9f6f2';
-                        document.getElementById('custom-tile-32-bg').value = themeData.tile32Bg || '#f67c5f';
-                        document.getElementById('custom-tile-32-bg-text').value = themeData.tile32Bg || '#f67c5f';
-                        document.getElementById('custom-tile-32-text').value = themeData.tile32Text || '#f9f6f2';
-                        document.getElementById('custom-tile-32-text-text').value = themeData.tile32Text || '#f9f6f2';
-                        document.getElementById('custom-tile-64-bg').value = themeData.tile64Bg || '#f65e3b';
-                        document.getElementById('custom-tile-64-bg-text').value = themeData.tile64Bg || '#f65e3b';
-                        document.getElementById('custom-tile-64-text').value = themeData.tile64Text || '#f9f6f2';
-                        document.getElementById('custom-tile-64-text-text').value = themeData.tile64Text || '#f9f6f2';
-                        document.getElementById('custom-tile-128-bg').value = themeData.tile128Bg || '#edcf72';
-                        document.getElementById('custom-tile-128-bg-text').value = themeData.tile128Bg || '#edcf72';
-                        document.getElementById('custom-tile-128-text').value = themeData.tile128Text || '#f9f6f2';
-                        document.getElementById('custom-tile-128-text-text').value = themeData.tile128Text || '#f9f6f2';
-                        document.getElementById('custom-tile-256-bg').value = themeData.tile256Bg || '#edcc61';
-                        document.getElementById('custom-tile-256-bg-text').value = themeData.tile256Bg || '#edcc61';
-                        document.getElementById('custom-tile-256-text').value = themeData.tile256Text || '#f9f6f2';
-                        document.getElementById('custom-tile-256-text-text').value = themeData.tile256Text || '#f9f6f2';
-                        document.getElementById('custom-tile-512-bg').value = themeData.tile512Bg || '#edc850';
-                        document.getElementById('custom-tile-512-bg-text').value = themeData.tile512Bg || '#edc850';
-                        document.getElementById('custom-tile-512-text').value = themeData.tile512Text || '#f9f6f2';
-                        document.getElementById('custom-tile-512-text-text').value = themeData.tile512Text || '#f9f6f2';
-                        document.getElementById('custom-tile-1024-bg').value = themeData.tile1024Bg || '#edc53f';
-                        document.getElementById('custom-tile-1024-bg-text').value = themeData.tile1024Bg || '#edc53f';
-                        document.getElementById('custom-tile-1024-text').value = themeData.tile1024Text || '#f9f6f2';
-                        document.getElementById('custom-tile-1024-text-text').value = themeData.tile1024Text || '#f9f6f2';
-                        document.getElementById('custom-tile-2048-bg').value = themeData.tile2048Bg || '#edc22e';
-                        document.getElementById('custom-tile-2048-bg-text').value = themeData.tile2048Bg || '#edc22e';
-                        document.getElementById('custom-tile-2048-text').value = themeData.tile2048Text || '#f9f6f2';
-                        document.getElementById('custom-tile-2048-text-text').value = themeData.tile2048Text || '#f9f6f2';
-                        document.getElementById('custom-tile-4096-bg').value = themeData.tile4096Bg || '#e65100';
-                        document.getElementById('custom-tile-4096-bg-text').value = themeData.tile4096Bg || '#e65100';
-                        document.getElementById('custom-tile-4096-text').value = themeData.tile4096Text || '#ffffff';
-                        document.getElementById('custom-tile-4096-text-text').value = themeData.tile4096Text || '#ffffff';
-                        document.getElementById('custom-tile-8192-bg').value = themeData.tile8192Bg || '#bf360c';
-                        document.getElementById('custom-tile-8192-bg-text').value = themeData.tile8192Bg || '#bf360c';
-                        document.getElementById('custom-tile-8192-text').value = themeData.tile8192Text || '#ffffff';
-                        document.getElementById('custom-tile-8192-text-text').value = themeData.tile8192Text || '#ffffff';
-                        document.getElementById('custom-tile-16384-bg').value = themeData.tile16384Bg || '#880e4f';
-                        document.getElementById('custom-tile-16384-bg-text').value = themeData.tile16384Bg || '#880e4f';
-                        document.getElementById('custom-tile-16384-text').value = themeData.tile16384Text || '#ffffff';
-                        document.getElementById('custom-tile-16384-text-text').value = themeData.tile16384Text || '#ffffff';
-                        document.getElementById('custom-tile-32768-bg').value = themeData.tile32768Bg || '#4a148c';
-                        document.getElementById('custom-tile-32768-bg-text').value = themeData.tile32768Bg || '#4a148c';
-                        document.getElementById('custom-tile-32768-text').value = themeData.tile32768Text || '#ffffff';
-                        document.getElementById('custom-tile-32768-text-text').value = themeData.tile32768Text || '#ffffff';
-                        document.getElementById('custom-tile-super-bg').value = themeData.tileSuperBg || '#311b92';
-                        document.getElementById('custom-tile-super-bg-text').value = themeData.tileSuperBg || '#311b92';
-                        document.getElementById('custom-tile-super-text').value = themeData.tileSuperText || '#ffffff';
-                        document.getElementById('custom-tile-super-text-text').value = themeData.tileSuperText || '#ffffff';
+                        document.getElementById('custom-tile-8-bg').value = themeData.tile8Bg;
+                        document.getElementById('custom-tile-8-bg-text').value = themeData.tile8Bg;
+                        document.getElementById('custom-tile-8-text').value = themeData.tile8Text;
+                        document.getElementById('custom-tile-8-text-text').value = themeData.tile8Text;
+                        document.getElementById('custom-tile-16-bg').value = themeData.tile16Bg;
+                        document.getElementById('custom-tile-16-bg-text').value = themeData.tile16Bg;
+                        document.getElementById('custom-tile-16-text').value = themeData.tile16Text;
+                        document.getElementById('custom-tile-16-text-text').value = themeData.tile16Text;
+                        document.getElementById('custom-tile-32-bg').value = themeData.tile32Bg;
+                        document.getElementById('custom-tile-32-bg-text').value = themeData.tile32Bg;
+                        document.getElementById('custom-tile-32-text').value = themeData.tile32Text;
+                        document.getElementById('custom-tile-32-text-text').value = themeData.tile32Text;
+                        document.getElementById('custom-tile-64-bg').value = themeData.tile64Bg;
+                        document.getElementById('custom-tile-64-bg-text').value = themeData.tile64Bg;
+                        document.getElementById('custom-tile-64-text').value = themeData.tile64Text;
+                        document.getElementById('custom-tile-64-text-text').value = themeData.tile64Text;
+                        document.getElementById('custom-tile-128-bg').value = themeData.tile128Bg;
+                        document.getElementById('custom-tile-128-bg-text').value = themeData.tile128Bg;
+                        document.getElementById('custom-tile-128-text').value = themeData.tile128Text;
+                        document.getElementById('custom-tile-128-text-text').value = themeData.tile128Text;
+                        document.getElementById('custom-tile-256-bg').value = themeData.tile256Bg;
+                        document.getElementById('custom-tile-256-bg-text').value = themeData.tile256Bg;
+                        document.getElementById('custom-tile-256-text').value = themeData.tile256Text;
+                        document.getElementById('custom-tile-256-text-text').value = themeData.tile256Text;
+                        document.getElementById('custom-tile-512-bg').value = themeData.tile512Bg;
+                        document.getElementById('custom-tile-512-bg-text').value = themeData.tile512Bg;
+                        document.getElementById('custom-tile-512-text').value = themeData.tile512Text;
+                        document.getElementById('custom-tile-512-text-text').value = themeData.tile512Text;
+                        document.getElementById('custom-tile-1024-bg').value = themeData.tile1024Bg;
+                        document.getElementById('custom-tile-1024-bg-text').value = themeData.tile1024Bg;
+                        document.getElementById('custom-tile-1024-text').value = themeData.tile1024Text;
+                        document.getElementById('custom-tile-1024-text-text').value = themeData.tile1024Text;
+                        document.getElementById('custom-tile-2048-bg').value = themeData.tile2048Bg;
+                        document.getElementById('custom-tile-2048-bg-text').value = themeData.tile2048Bg;
+                        document.getElementById('custom-tile-2048-text').value = themeData.tile2048Text;
+                        document.getElementById('custom-tile-2048-text-text').value = themeData.tile2048Text;
+                        document.getElementById('custom-tile-4096-bg').value = themeData.tile4096Bg;
+                        document.getElementById('custom-tile-4096-bg-text').value = themeData.tile4096Bg;
+                        document.getElementById('custom-tile-4096-text').value = themeData.tile4096Text;
+                        document.getElementById('custom-tile-4096-text-text').value = themeData.tile4096Text;
+                        document.getElementById('custom-tile-8192-bg').value = themeData.tile8192Bg;
+                        document.getElementById('custom-tile-8192-bg-text').value = themeData.tile8192Bg;
+                        document.getElementById('custom-tile-8192-text').value = themeData.tile8192Text;
+                        document.getElementById('custom-tile-8192-text-text').value = themeData.tile8192Text;
+                        document.getElementById('custom-tile-16384-bg').value = themeData.tile16384Bg;
+                        document.getElementById('custom-tile-16384-bg-text').value = themeData.tile16384Bg;
+                        document.getElementById('custom-tile-16384-text').value = themeData.tile16384Text;
+                        document.getElementById('custom-tile-16384-text-text').value = themeData.tile16384Text;
+                        document.getElementById('custom-tile-32768-bg').value = themeData.tile32768Bg;
+                        document.getElementById('custom-tile-32768-bg-text').value = themeData.tile32768Bg;
+                        document.getElementById('custom-tile-32768-text').value = themeData.tile32768Text;
+                        document.getElementById('custom-tile-32768-text-text').value = themeData.tile32768Text;
+                        document.getElementById('custom-tile-super-bg').value = themeData.tileSuperBg;
+                        document.getElementById('custom-tile-super-bg-text').value = themeData.tileSuperBg;
+                        document.getElementById('custom-tile-super-text').value = themeData.tileSuperText;
+                        document.getElementById('custom-tile-super-text-text').value = themeData.tileSuperText;
                     }
                     return true;
                 }
@@ -3858,11 +4370,21 @@
             const customStyles = `
                 :root {
                     --custom-bg-color: ${themeData.bgColor};
+                    --custom-bg-opacity: ${themeData.bgOpacity};
                     --custom-primary-color: ${themeData.primaryColor};
+                    --custom-primary-opacity: ${themeData.primaryOpacity};
                     --custom-secondary-color: ${themeData.secondaryColor};
+                    --custom-secondary-opacity: ${themeData.secondaryOpacity};
                     --custom-grid-color: ${themeData.gridColor};
+                    --custom-grid-opacity: ${themeData.gridOpacity};
+                    --custom-cell-empty-color: ${themeData.cellEmptyColor};
+                    --custom-cell-empty-opacity: ${themeData.cellEmptyOpacity};
+                    --custom-scrollbar-color: ${themeData.scrollbarColor};
+                    --custom-scrollbar-opacity: ${themeData.scrollbarOpacity};
                     --custom-modal-bg-color: ${themeData.modalBgColor};
+                    --custom-modal-bg-opacity: ${themeData.modalBgOpacity};
                     --custom-modal-text-color: ${themeData.modalTextColor};
+                    --custom-modal-text-opacity: ${themeData.modalTextOpacity};
                     --custom-tile-2-bg: ${themeData.tile2Bg};
                     --custom-tile-2-text: ${themeData.tile2Text};
                     --custom-tile-4-bg: ${themeData.tile4Bg};
@@ -3897,25 +4419,54 @@
                     --custom-tile-super-text: ${themeData.tileSuperText};
                 }
                 body[data-theme="custom"] {
-                    background-color: var(--custom-bg-color);
-                    color: var(--custom-secondary-color);
+                    background-color: ${themeData.bgColor}${Math.floor(themeData.bgOpacity * 2.55).toString(16).padStart(2, '0')};
+                    color: ${themeData.secondaryColor}${Math.floor(themeData.secondaryOpacity * 2.55).toString(16).padStart(2, '0')};
                 }
-                body[data-theme="custom"] .game-header, 
-                body[data-theme="custom"] .game-footer {
-                    color: var(--custom-secondary-color);
+                body[data-theme="custom"] .bg-bg {
+                    background-color: ${themeData.bgColor}${Math.floor(themeData.bgOpacity * 2.55).toString(16).padStart(2, '0')};
                 }
-                body[data-theme="custom"] .primary {
-                    background-color: var(--custom-primary-color);
+                body[data-theme="custom"] .text-secondary {
+                    color: ${themeData.secondaryColor}${Math.floor(themeData.secondaryOpacity * 2.55).toString(16).padStart(2, '0')};
                 }
-                body[data-theme="custom"] .secondary {
-                    color: var(--custom-secondary-color);
+                body[data-theme="custom"] .text-secondary\\/80 {
+                    color: ${themeData.secondaryColor}${Math.floor(themeData.secondaryOpacity * 2.55).toString(16).padStart(2, '0')};
+                }
+                body[data-theme="custom"] .bg-grid {
+                    background-color: ${themeData.gridColor}${Math.floor(themeData.gridOpacity * 2.55).toString(16).padStart(2, '0')};
+                }
+                body[data-theme="custom"] .grid-cell {
+                    background-color: ${themeData.cellEmptyColor}${Math.floor(themeData.cellEmptyOpacity * 2.55).toString(16).padStart(2, '0')};
+                }
+                body[data-theme="custom"] .bg-primary {
+                    background-color: ${themeData.primaryColor}${Math.floor(themeData.primaryOpacity * 2.55).toString(16).padStart(2, '0')};
+                }
+                body[data-theme="custom"] .bg-secondary {
+                    background-color: ${themeData.secondaryColor}${Math.floor(themeData.secondaryOpacity * 2.55).toString(16).padStart(2, '0')};
+                }
+                body[data-theme="custom"] .bg-easy {
+                    background-color: #4CAF50;
+                }
+                body[data-theme="custom"] .bg-medium {
+                    background-color: #FFC107;
+                }
+                body[data-theme="custom"] .bg-hard {
+                    background-color: #F44336;
                 }
                 body[data-theme="custom"] .game-container {
-                    background-color: var(--custom-grid-color);
+                    background-color: ${themeData.gridColor}${Math.floor(themeData.gridOpacity * 2.55).toString(16).padStart(2, '0')};
                 }
                 body[data-theme="custom"] [role="dialog"] > div {
-                    background-color: var(--custom-modal-bg-color) !important;
-                    color: var(--custom-modal-text-color) !important;
+                    background-color: ${themeData.modalBgColor}${Math.floor(themeData.modalBgOpacity * 2.55).toString(16).padStart(2, '0')} !important;
+                    color: ${themeData.modalTextColor}${Math.floor(themeData.modalTextOpacity * 2.55).toString(16).padStart(2, '0')} !important;
+                }
+                body[data-theme="custom"] ::-webkit-scrollbar-track {
+                    background: ${themeData.bgColor}${Math.floor(themeData.bgOpacity * 2.55).toString(16).padStart(2, '0')};
+                }
+                body[data-theme="custom"] ::-webkit-scrollbar-thumb {
+                    background-color: ${themeData.scrollbarColor}${Math.floor(themeData.scrollbarOpacity * 2.55).toString(16).padStart(2, '0')};
+                }
+                body[data-theme="custom"] ::-webkit-scrollbar-thumb:hover {
+                    background-color: ${themeData.scrollbarColor}${Math.floor(themeData.scrollbarOpacity * 2.55).toString(16).padStart(2, '0')};
                 }
                 body[data-theme="custom"] .tile-2 {
                     background-color: var(--custom-tile-2-bg);
@@ -3980,6 +4531,29 @@
                 body[data-theme="custom"] .tile-super {
                     background-color: var(--custom-tile-super-bg);
                     color: var(--custom-tile-super-text);
+                }
+                body[data-theme="custom"] .bg-primary:focus-visible {
+                    box-shadow: 0 0 0 3px rgba(250, 163, 27, 0.5) !important;
+                }
+                body[data-theme="custom"] .bg-secondary:focus-visible {
+                    box-shadow: 0 0 0 3px rgba(143, 122, 102, 0.5) !important;
+                }
+                body[data-theme="custom"] .bg-easy:focus-visible {
+                    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.5) !important;
+                }
+                body[data-theme="custom"] .bg-medium:focus-visible {
+                    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.5) !important;
+                }
+                body[data-theme="custom"] .bg-hard:focus-visible {
+                    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.5) !important;
+                }
+                body[data-theme="custom"] button:focus-visible,
+                body[data-theme="custom"] a:focus-visible,
+                body[data-theme="custom"] input:focus-visible,
+                body[data-theme="custom"] select:focus-visible,
+                body[data-theme="custom"] textarea:focus-visible,
+                body[data-theme="custom"] [tabindex]:not([tabindex="-1"]):focus-visible {
+                    box-shadow: 0 0 0 3px rgba(250, 163, 27, 0.5);
                 }
             `;
             styleElement.textContent = customStyles;
