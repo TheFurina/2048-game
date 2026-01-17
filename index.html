@@ -1481,7 +1481,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="text-sm text-secondary/70 mt-4">2048 v1.23.1 | by TheFurina</div>
+                    <div class="text-sm text-secondary/70 mt-4">2048 v1.23.2 | by TheFurina</div>
                     <button id="reset-settings-button" class="text-gray-500 hover:text-gray-700 focus:outline-none text-sm inline-block mx-auto">
                         <i class="fa-solid fa-rotate-right mr-1"></i><span>重置所有设置</span>
                     </button>
@@ -1842,7 +1842,7 @@
                 </div>
             </div>
             <div class="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-dark-surface rounded-b-lg relative">
-                <div class="absolute left-6 bottom-6">
+                <div class="absolute left-6 bottom-6 z-10">
                     <div class="relative">
                         <button id="theme-actions-btn" class="p-2 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 focus:outline-none">
                             <i class="fa-solid fa-ellipsis-vertical text-gray-600 dark:text-gray-300"></i>
@@ -2095,7 +2095,7 @@
         }
         document.addEventListener('DOMContentLoaded', () => { 
             console.log('%c   ____     ___    _  _      ___                                        \n  |___ \\   / _ \\  | || |    ( _ )      __ _    __ _   _ __ ___     ___ \n    __) | | | | | | || |_   / _ \\     / _` |  / _` | | \'_ ` _ \\   / _ \\ \n   / __/  | |_| | |__   _| | (_) |   | (_| | | (_| | | | | | | | |  __/ \n  |_____|  \\___/     |_|    \\___/     \\__, |  \\__,_| |_| |_| |_|  \\___| \n                                      |___/                            ', 'color: #faa31b; font-size: 14px;');
-            console.log('2048 v1.23.1');
+            console.log('2048 v1.23.2');
             const textarea = document.getElementById('data-textarea');
             const textareaContainer = textarea ? textarea.closest('.relative') : null;
             const copyButton = document.getElementById('copy-data-button'); 
