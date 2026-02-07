@@ -59,6 +59,60 @@
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script src="./features/custom-theme.js"></script>
+    <script src="./features/ai-analysis.js"></script>
+    <script>
+        (function() {
+            try {
+                window.setupThemeCustomizer = setupThemeCustomizer;
+                window.loadCustomTheme = loadCustomTheme;
+                window.resetCustomTheme = resetCustomTheme;
+                window.customThemeModuleLoaded = true;
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', setupThemeCustomizer);
+                } else {
+                    setupThemeCustomizer();
+                }
+            } catch (error) {
+                console.warn('自定义主题模块加载失败:', error);
+                window.customThemeModuleLoaded = false;
+                window.setupThemeCustomizer = function() { alert('自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); };
+                window.loadCustomTheme = function() { alert('自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); };
+                window.resetCustomTheme = function() { alert('自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); };
+            }
+        })();
+    </script>
+    <script>
+        (function() {
+            try {
+                window.setupAiAnalysis = setupAiAnalysis;
+                window.analyzeGameState = analyzeGameState;
+                window.aiAnalysisModuleLoaded = true;
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', setupAiAnalysis);
+                } else {
+                    setupAiAnalysis();
+                }
+            } catch (error) {
+                console.warn('AI分析模块加载失败:', error);
+                window.aiAnalysisModuleLoaded = false;
+                window.setupAiAnalysis = function() {
+                    const aiAnalysisButton = document.getElementById('ai-analysis-button');
+                    if (aiAnalysisButton) {
+                        aiAnalysisButton.addEventListener('click', function() {
+                            alert('AI分析模块未找到，请确保 features/ai-analysis.js 文件存在。');
+                        });
+                    }
+                };
+                window.analyzeGameState = function() { alert('AI分析模块未找到，请确保 features/ai-analysis.js 文件存在。'); };
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', window.setupAiAnalysis);
+                } else {
+                    window.setupAiAnalysis();
+                }
+            }
+        })();
+    </script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -1481,7 +1535,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="text-sm text-secondary/70 mt-4">2048 v1.23.3 | by TheFurina</div>
+                    <div class="text-sm text-secondary/70 mt-4">2048 v1.24.0 | by TheFurina</div>
                     <button id="reset-settings-button" class="text-gray-500 hover:text-gray-700 focus:outline-none text-sm inline-block mx-auto">
                         <i class="fa-solid fa-rotate-right mr-1"></i><span>重置所有设置</span>
                     </button>
@@ -1577,8 +1631,8 @@
                             </div>
                             <div class="flex items-center gap-2">
                                 <label class="text-xs text-gray-500 dark:text-gray-400 w-12">不透明度</label>
-                                <input type="range" id="custom-scrollbar-opacity" min="0" max="100" value="20" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
-                                <span id="custom-scrollbar-opacity-value" class="text-xs text-gray-500 dark:text-gray-400 w-8 text-center">20%</span>
+                                <input type="range" id="custom-scrollbar-opacity" min="0" max="100" value="100" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                <span id="custom-scrollbar-opacity-value" class="text-xs text-gray-500 dark:text-gray-400 w-8 text-center">100%</span>
                             </div>
                         </div>
                         </div>
@@ -2097,7 +2151,7 @@
         }
         document.addEventListener('DOMContentLoaded', () => { 
             console.log('%c   ____     ___    _  _      ___                                        \n  |___ \\   / _ \\  | || |    ( _ )      __ _    __ _   _ __ ___     ___ \n    __) | | | | | | || |_   / _ \\     / _` |  / _` | | \'_ ` _ \\   / _ \\ \n   / __/  | |_| | |__   _| | (_) |   | (_| | | (_| | | | | | | | |  __/ \n  |_____|  \\___/     |_|    \\___/     \\__, |  \\__,_| |_| |_| |_|  \\___| \n                                      |___/                            ', 'color: #faa31b; font-size: 14px;');
-            console.log('2048 v1.23.3');
+            console.log('2048 v1.24.0\n自定义主题 ' + (window.customThemeVersion ? 'v' + window.customThemeVersion : '未找到') + '\nAI分析 ' + (window.aiAnalysisVersion ? 'v' + window.aiAnalysisVersion : '未找到'));
             const textarea = document.getElementById('data-textarea');
             const textareaContainer = textarea ? textarea.closest('.relative') : null;
             const copyButton = document.getElementById('copy-data-button'); 
@@ -3528,6 +3582,11 @@
                     document.getElementById('custom-theme-button').style.display = 'none';
                     document.getElementById('custom-theme-button-container').classList.remove('mb-2');
                 } else if (theme === 'custom') {
+                    if (!window.customThemeModuleLoaded) {
+                        alert('自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。');
+                        this.value = localStorage.getItem('2048-theme');
+                        return;
+                    }
                     localStorage.setItem('2048-theme', 'custom');
                     document.getElementById('custom-theme-button').style.display = 'block';
                     document.getElementById('custom-theme-button-container').classList.add('mb-2');
@@ -3544,14 +3603,22 @@
             const customThemeButton = document.getElementById('custom-theme-button');
             if (customThemeButton) {
                 customThemeButton.addEventListener('click', function() {
+                    if (!window.customThemeModuleLoaded) {
+                        alert('自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。');
+                        return;
+                    }
                     showModal('custom-theme-modal');
                 });
             }
         }
         function setupOtherListeners() {
             window.addEventListener('resize', handleResize);
-            setupThemeCustomizer();
-            applySavedTheme();
+            if (typeof window.setupThemeCustomizer === 'function') {
+                window.setupThemeCustomizer();
+            }
+            if (typeof applySavedTheme === 'function') {
+                applySavedTheme();
+            }
             const originalInitGame = initGame;
             initGame = function(...args) {
                 if (window.resetButtonStates) {
@@ -3562,1022 +3629,6 @@
                 }
                 return originalInitGame.apply(this, args);
             };
-        }
-        function setupThemeCustomizer() {
-            const customThemeModal = document.getElementById('custom-theme-modal');
-            if (!customThemeModal) return;
-            const closeButton = document.getElementById('close-custom-theme-modal');
-            if (closeButton) {
-                closeButton.addEventListener('click', function() {
-                    hideModal('custom-theme-modal');
-                    removePreviewStyles();
-                });
-            }
-            const colorInputs = document.querySelectorAll('input[type="color"]');
-            const textInputs = document.querySelectorAll('input[type="text"]');
-            colorInputs.forEach(colorInput => {
-                const textInputId = colorInput.id + '-text';
-                const textInput = document.getElementById(textInputId);
-                if (textInput) {
-                    colorInput.addEventListener('input', function() {
-                        textInput.value = this.value;
-                        parseOpacityFromColor(this.value, this.id.replace('custom-', 'custom-').replace('-color', '-opacity'));
-                        previewCustomTheme();
-                    });
-                    textInput.addEventListener('input', function() {
-                        if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3}|[A-Fa-f0-9]{8})$/.test(this.value)) {
-                            colorInput.value = this.value;
-                            parseOpacityFromColor(this.value, colorInput.id.replace('-color', '-opacity'));
-                            previewCustomTheme();
-                        }
-                    });
-                }
-            });
-            const rangeInputs = document.querySelectorAll('input[type="range"]');
-            rangeInputs.forEach(rangeInput => {
-                const valueDisplay = document.getElementById(rangeInput.id + '-value');
-                if (valueDisplay) {
-                    rangeInput.addEventListener('input', function() {
-                        valueDisplay.textContent = this.value + '%';
-                        previewCustomTheme();
-                    });
-                }
-            });
-            const resetButton = document.getElementById('reset-custom-theme');
-            if (resetButton) {
-                resetButton.addEventListener('click', function() {
-                    resetCustomTheme();
-                    previewCustomTheme();
-                });
-            }
-            const saveButton = document.getElementById('save-custom-theme');
-            if (saveButton) {
-                saveButton.addEventListener('click', function() {
-                    saveCustomTheme();
-                });
-            }
-            const exportButton = document.getElementById('export-custom-theme');
-            if (exportButton) {
-                exportButton.addEventListener('click', function() {
-                    exportCustomTheme();
-                });
-            }
-            const importButton = document.getElementById('import-custom-theme');
-            if (importButton) {
-                importButton.addEventListener('click', function() {
-                    importCustomTheme();
-                });
-            }
-            const actionsBtn = document.getElementById('theme-actions-btn');
-            const actionsBubble = document.getElementById('theme-actions-bubble');
-            let isBubbleVisible = false;
-            actionsBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                isBubbleVisible = !isBubbleVisible;
-                if (isBubbleVisible) {
-                    actionsBubble.classList.remove('opacity-0', 'invisible', 'translate-y-2');
-                    actionsBubble.classList.add('opacity-100', 'visible', 'translate-y-0');
-                } else {
-                    actionsBubble.classList.remove('opacity-100', 'visible', 'translate-y-0');
-                    actionsBubble.classList.add('opacity-0', 'invisible', 'translate-y-2');
-                }
-            });
-            customThemeModal.addEventListener('click', function(e) {
-                if (e.target !== actionsBtn && !actionsBtn.contains(e.target) && e.target !== actionsBubble && !actionsBubble.contains(e.target)) {
-                    isBubbleVisible = false;
-                    actionsBubble.classList.remove('opacity-100', 'visible', 'translate-y-0');
-                    actionsBubble.classList.add('opacity-0', 'invisible', 'translate-y-2');
-                }
-            });
-            actionsBubble.querySelectorAll('button').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    isBubbleVisible = false;
-                    actionsBubble.classList.remove('opacity-100', 'visible', 'translate-y-0');
-                    actionsBubble.classList.add('opacity-0', 'invisible', 'translate-y-2');
-                });
-            });
-        }
-        function previewCustomTheme() {
-            const bgColorInput = document.getElementById('custom-bg-color');
-            const bgColor = bgColorInput.value;
-            const bgOpacity = parseOpacityFromColor(bgColor, 'custom-bg-opacity');
-            const primaryColorInput = document.getElementById('custom-primary-color');
-            const primaryColor = primaryColorInput.value;
-            const primaryOpacity = parseOpacityFromColor(primaryColor, 'custom-primary-opacity');
-            const secondaryColorInput = document.getElementById('custom-secondary-color');
-            const secondaryColor = secondaryColorInput.value;
-            const secondaryOpacity = parseOpacityFromColor(secondaryColor, 'custom-secondary-opacity');
-            const gridColorInput = document.getElementById('custom-grid-color');
-            const gridColor = gridColorInput.value;
-            const gridOpacity = parseOpacityFromColor(gridColor, 'custom-grid-opacity');
-            const cellEmptyColorInput = document.getElementById('custom-cell-empty-color');
-            const cellEmptyColor = cellEmptyColorInput.value;
-            const cellEmptyOpacity = parseOpacityFromColor(cellEmptyColor, 'custom-cell-empty-opacity');
-            const scrollbarColorInput = document.getElementById('custom-scrollbar-color');
-            const scrollbarColor = scrollbarColorInput.value;
-            const scrollbarOpacity = parseOpacityFromColor(scrollbarColor, 'custom-scrollbar-opacity');
-            const modalBgColorInput = document.getElementById('custom-modal-bg');
-            const modalBgColor = modalBgColorInput.value;
-            const modalBgOpacity = parseOpacityFromColor(modalBgColor, 'custom-modal-bg-opacity');
-            const modalTextColorInput = document.getElementById('custom-modal-text');
-            const modalTextColor = modalTextColorInput.value;
-            const modalTextOpacity = parseOpacityFromColor(modalTextColor, 'custom-modal-text-opacity');
-            const tile2Bg = document.getElementById('custom-tile-2-bg').value;
-            const tile2Text = document.getElementById('custom-tile-2-text').value;
-            const tile4Bg = document.getElementById('custom-tile-4-bg').value;
-            const tile4Text = document.getElementById('custom-tile-4-text').value;
-            const tile8Bg = document.getElementById('custom-tile-8-bg').value;
-            const tile8Text = document.getElementById('custom-tile-8-text').value;
-            const tile16Bg = document.getElementById('custom-tile-16-bg').value;
-            const tile16Text = document.getElementById('custom-tile-16-text').value;
-            const tile32Bg = document.getElementById('custom-tile-32-bg').value;
-            const tile32Text = document.getElementById('custom-tile-32-text').value;
-            const tile64Bg = document.getElementById('custom-tile-64-bg').value;
-            const tile64Text = document.getElementById('custom-tile-64-text').value;
-            const tile128Bg = document.getElementById('custom-tile-128-bg').value;
-            const tile128Text = document.getElementById('custom-tile-128-text').value;
-            const tile256Bg = document.getElementById('custom-tile-256-bg').value;
-            const tile256Text = document.getElementById('custom-tile-256-text').value;
-            const tile512Bg = document.getElementById('custom-tile-512-bg').value;
-            const tile512Text = document.getElementById('custom-tile-512-text').value;
-            const tile1024Bg = document.getElementById('custom-tile-1024-bg').value;
-            const tile1024Text = document.getElementById('custom-tile-1024-text').value;
-            const tile2048Bg = document.getElementById('custom-tile-2048-bg').value;
-            const tile2048Text = document.getElementById('custom-tile-2048-text').value;
-            const tile4096Bg = document.getElementById('custom-tile-4096-bg').value;
-            const tile4096Text = document.getElementById('custom-tile-4096-text').value;
-            const tile8192Bg = document.getElementById('custom-tile-8192-bg').value;
-            const tile8192Text = document.getElementById('custom-tile-8192-text').value;
-            const tile16384Bg = document.getElementById('custom-tile-16384-bg').value;
-            const tile16384Text = document.getElementById('custom-tile-16384-text').value;
-            const tile32768Bg = document.getElementById('custom-tile-32768-bg').value;
-            const tile32768Text = document.getElementById('custom-tile-32768-text').value;
-            const tileSuperBg = document.getElementById('custom-tile-super-bg').value;
-            const tileSuperText = document.getElementById('custom-tile-super-text').value;
-            let previewStyleElement = document.getElementById('preview-theme-styles');
-            if (!previewStyleElement) {
-                previewStyleElement = document.createElement('style');
-                previewStyleElement.id = 'preview-theme-styles';
-                document.head.appendChild(previewStyleElement);
-            }
-            const previewStyles = `
-                body[data-preview="true"] {
-                    background-color: ${bgColor}${Math.floor(bgOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                    color: ${secondaryColor}${Math.floor(secondaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                }
-                body[data-preview="true"] .bg-bg {
-                    background-color: ${bgColor}${Math.floor(bgOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                }
-                body[data-preview="true"] .text-secondary {
-                    color: ${secondaryColor}${Math.floor(secondaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                }
-                body[data-preview="true"] .text-secondary\\/80 {
-                    color: ${secondaryColor}${Math.floor(secondaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                }
-                body[data-preview="true"] .bg-grid {
-                    background-color: ${gridColor}${Math.floor(gridOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                }
-                body[data-preview="true"] .bg-primary {
-                    background-color: ${primaryColor}${Math.floor(primaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                }
-                body[data-preview="true"] .bg-secondary {
-                    background-color: ${secondaryColor}${Math.floor(secondaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                }
-                body[data-preview="true"] .bg-easy {
-                    background-color: #4CAF50 !important;
-                }
-                body[data-preview="true"] .bg-medium {
-                    background-color: #FFC107 !important;
-                }
-                body[data-preview="true"] .bg-hard {
-                    background-color: #F44336 !important;
-                }
-                body[data-preview="true"] .grid-cell {
-                    background-color: ${cellEmptyColor}${Math.floor(cellEmptyOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                }
-                body[data-preview="true"] .game-header,
-                body[data-preview="true"] .game-footer {
-                    color: ${secondaryColor}${Math.floor(secondaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                }
-                body[data-preview="true"] .primary {
-                    background-color: ${primaryColor}${Math.floor(primaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                }
-                body[data-preview="true"] .secondary {
-                    color: ${secondaryColor}${Math.floor(secondaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                }
-                body[data-preview="true"] .game-container {
-                    background-color: ${gridColor}${Math.floor(gridOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                }
-                body[data-preview="true"] [role="dialog"] > div {
-                    background-color: ${modalBgColor}${Math.floor(modalBgOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                    color: ${modalTextColor}${Math.floor(modalTextOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                }
-                body[data-preview="true"] .tile-2 {
-                    background-color: ${tile2Bg} !important;
-                    color: ${tile2Text} !important;
-                }
-                body[data-preview="true"] .tile-4 {
-                    background-color: ${tile4Bg} !important;
-                    color: ${tile4Text} !important;
-                }
-                body[data-preview="true"] .tile-8 {
-                    background-color: ${tile8Bg} !important;
-                    color: ${tile8Text} !important;
-                }
-                body[data-preview="true"] .tile-16 {
-                    background-color: ${tile16Bg} !important;
-                    color: ${tile16Text} !important;
-                }
-                body[data-preview="true"] .tile-32 {
-                    background-color: ${tile32Bg} !important;
-                    color: ${tile32Text} !important;
-                }
-                body[data-preview="true"] .tile-64 {
-                    background-color: ${tile64Bg} !important;
-                    color: ${tile64Text} !important;
-                }
-                body[data-preview="true"] .tile-128 {
-                    background-color: ${tile128Bg} !important;
-                    color: ${tile128Text} !important;
-                }
-                body[data-preview="true"] .tile-256 {
-                    background-color: ${tile256Bg} !important;
-                    color: ${tile256Text} !important;
-                }
-                body[data-preview="true"] .tile-512 {
-                    background-color: ${tile512Bg} !important;
-                    color: ${tile512Text} !important;
-                }
-                body[data-preview="true"] .tile-1024 {
-                    background-color: ${tile1024Bg} !important;
-                    color: ${tile1024Text} !important;
-                }
-                body[data-preview="true"] .tile-2048 {
-                    background-color: ${tile2048Bg} !important;
-                    color: ${tile2048Text} !important;
-                }
-                body[data-preview="true"] .tile-4096 {
-                    background-color: ${tile4096Bg} !important;
-                    color: ${tile4096Text} !important;
-                }
-                body[data-preview="true"] .tile-8192 {
-                    background-color: ${tile8192Bg} !important;
-                    color: ${tile8192Text} !important;
-                }
-                body[data-preview="true"] .tile-16384 {
-                    background-color: ${tile16384Bg} !important;
-                    color: ${tile16384Text} !important;
-                }
-                body[data-preview="true"] .tile-32768 {
-                    background-color: ${tile32768Bg} !important;
-                    color: ${tile32768Text} !important;
-                }
-                body[data-preview="true"] .tile-super {
-                    background-color: ${tileSuperBg} !important;
-                    color: ${tileSuperText} !important;
-                }
-                body[data-preview="true"] ::-webkit-scrollbar-track {
-                    background: ${bgColor}${Math.floor(bgOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                }
-                body[data-preview="true"] ::-webkit-scrollbar-thumb {
-                    background: ${scrollbarColor}${Math.floor(scrollbarOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                }
-                body[data-preview="true"] ::-webkit-scrollbar-thumb:hover {
-                    background: ${primaryColor}${Math.floor(primaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                }
-                body[data-preview="true"] .bg-primary:focus-visible {
-                    box-shadow: 0 0 0 3px rgba(250, 163, 27, 0.5) !important;
-                }
-                body[data-preview="true"] .bg-secondary:focus-visible {
-                    box-shadow: 0 0 0 3px rgba(143, 122, 102, 0.5) !important;
-                }
-                body[data-preview="true"] .bg-easy:focus-visible {
-                    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.5) !important;
-                }
-                body[data-preview="true"] .bg-medium:focus-visible {
-                    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.5) !important;
-                }
-                body[data-preview="true"] .bg-hard:focus-visible {
-                    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.5) !important;
-                }
-                body[data-preview="true"] button:focus-visible,
-                body[data-preview="true"] a:focus-visible,
-                body[data-preview="true"] input:focus-visible,
-                body[data-preview="true"] select:focus-visible,
-                body[data-preview="true"] textarea:focus-visible,
-                body[data-preview="true"] [tabindex]:not([tabindex="-1"]):focus-visible {
-                    box-shadow: 0 0 0 3px rgba(250, 163, 27, 0.5) !important;
-                }
-            `;
-            previewStyleElement.textContent = previewStyles;
-            document.body.setAttribute('data-preview', 'true');
-        }
-        function removePreviewStyles() {
-            const previewStyleElement = document.getElementById('preview-theme-styles');
-            if (previewStyleElement) {
-                previewStyleElement.remove();
-            }
-            document.body.removeAttribute('data-preview');
-            const currentTheme = localStorage.getItem('2048-theme');
-            if (currentTheme === 'custom') {
-                loadCustomTheme();
-            }
-        }
-        function parseOpacityFromColor(color, opacityInputId) {
-            if (color.length === 9) {
-                const alphaHex = color.slice(7, 9);
-                const alphaValue = parseInt(alphaHex, 16);
-                const opacityPercent = Math.round((alphaValue / 255) * 100);
-                const opacityInput = document.getElementById(opacityInputId);
-                const opacityValueDisplay = document.getElementById(opacityInputId + '-value');
-                if (opacityInput && opacityValueDisplay) {
-                    opacityInput.value = opacityPercent;
-                    opacityValueDisplay.textContent = opacityPercent + '%';
-                }
-                return opacityPercent;
-            } else {
-                const opacityInput = document.getElementById(opacityInputId);
-                return opacityInput ? opacityInput.value : 100;
-            }
-        }
-        function applySavedTheme() {
-            const savedTheme = localStorage.getItem('2048-theme');
-            if (savedTheme === 'custom') {
-                loadCustomTheme();
-                const customThemeButton = document.getElementById('custom-theme-button');
-                const customThemeButtonContainer = document.getElementById('custom-theme-button-container');
-                if (customThemeButton && customThemeButtonContainer) {
-                    customThemeButton.style.display = 'block';
-                    customThemeButtonContainer.classList.add('mb-2');
-                }
-            } else if (savedTheme === 'dark') {
-                document.documentElement.classList.add('dark');
-                if (elements && elements.themeToggle && elements.themeToggle.querySelector('i')) {
-                    elements.themeToggle.querySelector('i').className = 'fa-solid fa-sun';
-                }
-            } else if (savedTheme === 'light') {
-                document.documentElement.classList.remove('dark');
-                if (elements && elements.themeToggle && elements.themeToggle.querySelector('i')) {
-                    elements.themeToggle.querySelector('i').className = 'fa-solid fa-moon';
-                }
-            } else if (savedTheme === 'auto') {
-                const themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-                const updateTheme = (e) => {
-                    const isDark = e ? e.matches : window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    document.documentElement.classList.toggle('dark', isDark);
-                    if (elements && elements.themeToggle && elements.themeToggle.querySelector('i')) {
-                        elements.themeToggle.querySelector('i').className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-                    }
-                };
-                if (window.themeMediaQueryListener) {
-                    window.themeMediaQueryListener.mediaQuery.removeEventListener('change', window.themeMediaQueryListener.handler);
-                }
-                themeMediaQuery.addEventListener('change', updateTheme);
-                updateTheme(themeMediaQuery);
-                window.themeMediaQueryListener = {
-                    mediaQuery: themeMediaQuery,
-                    handler: updateTheme
-                };
-            }
-        }
-        function resetCustomTheme() {
-            document.getElementById('custom-bg-color').value = '#faf8ef';
-            document.getElementById('custom-bg-color-text').value = '#faf8ef';
-            document.getElementById('custom-bg-opacity').value = '100';
-            document.getElementById('custom-bg-opacity-value').textContent = '100%';
-            document.getElementById('custom-primary-color').value = '#faa31b';
-            document.getElementById('custom-primary-color-text').value = '#faa31b';
-            document.getElementById('custom-primary-opacity').value = '100';
-            document.getElementById('custom-primary-opacity-value').textContent = '100%';
-            document.getElementById('custom-secondary-color').value = '#8f7a66';
-            document.getElementById('custom-secondary-color-text').value = '#8f7a66';
-            document.getElementById('custom-secondary-opacity').value = '100';
-            document.getElementById('custom-secondary-opacity-value').textContent = '100%';
-            document.getElementById('custom-grid-color').value = '#bbada0';
-            document.getElementById('custom-grid-color-text').value = '#bbada0';
-            document.getElementById('custom-grid-opacity').value = '100';
-            document.getElementById('custom-grid-opacity-value').textContent = '100%';
-            document.getElementById('custom-cell-empty-color').value = '#cdc1b4';
-            document.getElementById('custom-cell-empty-color-text').value = '#cdc1b4';
-            document.getElementById('custom-cell-empty-opacity').value = '100';
-            document.getElementById('custom-cell-empty-opacity-value').textContent = '100%';
-            document.getElementById('custom-scrollbar-color').value = '#bbbbbb';
-            document.getElementById('custom-scrollbar-color-text').value = '#bbbbbb';
-            document.getElementById('custom-scrollbar-opacity').value = '20';
-            document.getElementById('custom-scrollbar-opacity-value').textContent = '20%';
-            document.getElementById('custom-modal-bg').value = '#ffffff';
-            document.getElementById('custom-modal-bg-text').value = '#ffffff';
-            document.getElementById('custom-modal-bg-opacity').value = '100';
-            document.getElementById('custom-modal-bg-opacity-value').textContent = '100%';
-            document.getElementById('custom-modal-text').value = '#333333';
-            document.getElementById('custom-modal-text-text').value = '#333333';
-            document.getElementById('custom-modal-text-opacity').value = '100';
-            document.getElementById('custom-modal-text-opacity-value').textContent = '100%';
-            document.getElementById('custom-tile-2-bg').value = '#eee4da';
-            document.getElementById('custom-tile-2-bg-text').value = '#eee4da';
-            document.getElementById('custom-tile-2-text').value = '#776e65';
-            document.getElementById('custom-tile-2-text-text').value = '#776e65';
-            document.getElementById('custom-tile-4-bg').value = '#ede0c8';
-            document.getElementById('custom-tile-4-bg-text').value = '#ede0c8';
-            document.getElementById('custom-tile-4-text').value = '#776e65';
-            document.getElementById('custom-tile-4-text-text').value = '#776e65';
-            document.getElementById('custom-tile-8-bg').value = '#f2b179';
-            document.getElementById('custom-tile-8-bg-text').value = '#f2b179';
-            document.getElementById('custom-tile-8-text').value = '#f9f6f2';
-            document.getElementById('custom-tile-8-text-text').value = '#f9f6f2';
-            document.getElementById('custom-tile-16-bg').value = '#f59563';
-            document.getElementById('custom-tile-16-bg-text').value = '#f59563';
-            document.getElementById('custom-tile-16-text').value = '#f9f6f2';
-            document.getElementById('custom-tile-16-text-text').value = '#f9f6f2';
-            document.getElementById('custom-tile-32-bg').value = '#f67c5f';
-            document.getElementById('custom-tile-32-bg-text').value = '#f67c5f';
-            document.getElementById('custom-tile-32-text').value = '#f9f6f2';
-            document.getElementById('custom-tile-32-text-text').value = '#f9f6f2';
-            document.getElementById('custom-tile-64-bg').value = '#f65e3b';
-            document.getElementById('custom-tile-64-bg-text').value = '#f65e3b';
-            document.getElementById('custom-tile-64-text').value = '#f9f6f2';
-            document.getElementById('custom-tile-64-text-text').value = '#f9f6f2';
-            document.getElementById('custom-tile-128-bg').value = '#edcf72';
-            document.getElementById('custom-tile-128-bg-text').value = '#edcf72';
-            document.getElementById('custom-tile-128-text').value = '#f9f6f2';
-            document.getElementById('custom-tile-128-text-text').value = '#f9f6f2';
-            document.getElementById('custom-tile-256-bg').value = '#edcc61';
-            document.getElementById('custom-tile-256-bg-text').value = '#edcc61';
-            document.getElementById('custom-tile-256-text').value = '#f9f6f2';
-            document.getElementById('custom-tile-256-text-text').value = '#f9f6f2';
-            document.getElementById('custom-tile-512-bg').value = '#edc850';
-            document.getElementById('custom-tile-512-bg-text').value = '#edc850';
-            document.getElementById('custom-tile-512-text').value = '#f9f6f2';
-            document.getElementById('custom-tile-512-text-text').value = '#f9f6f2';
-            document.getElementById('custom-tile-1024-bg').value = '#edc53f';
-            document.getElementById('custom-tile-1024-bg-text').value = '#edc53f';
-            document.getElementById('custom-tile-1024-text').value = '#f9f6f2';
-            document.getElementById('custom-tile-1024-text-text').value = '#f9f6f2';
-            document.getElementById('custom-tile-2048-bg').value = '#edc22e';
-            document.getElementById('custom-tile-2048-bg-text').value = '#edc22e';
-            document.getElementById('custom-tile-2048-text').value = '#f9f6f2';
-            document.getElementById('custom-tile-2048-text-text').value = '#f9f6f2';
-            document.getElementById('custom-tile-4096-bg').value = '#e65100';
-            document.getElementById('custom-tile-4096-bg-text').value = '#e65100';
-            document.getElementById('custom-tile-4096-text').value = '#ffffff';
-            document.getElementById('custom-tile-4096-text-text').value = '#ffffff';
-            document.getElementById('custom-tile-8192-bg').value = '#bf360c';
-            document.getElementById('custom-tile-8192-bg-text').value = '#bf360c';
-            document.getElementById('custom-tile-8192-text').value = '#ffffff';
-            document.getElementById('custom-tile-8192-text-text').value = '#ffffff';
-            document.getElementById('custom-tile-16384-bg').value = '#880e4f';
-            document.getElementById('custom-tile-16384-bg-text').value = '#880e4f';
-            document.getElementById('custom-tile-16384-text').value = '#ffffff';
-            document.getElementById('custom-tile-16384-text-text').value = '#ffffff';
-            document.getElementById('custom-tile-32768-bg').value = '#4a148c';
-            document.getElementById('custom-tile-32768-bg-text').value = '#4a148c';
-            document.getElementById('custom-tile-32768-text').value = '#ffffff';
-            document.getElementById('custom-tile-32768-text-text').value = '#ffffff';
-            document.getElementById('custom-tile-super-bg').value = '#311b92';
-            document.getElementById('custom-tile-super-bg-text').value = '#311b92';
-            document.getElementById('custom-tile-super-text').value = '#ffffff';
-            document.getElementById('custom-tile-super-text-text').value = '#ffffff';
-        }
-        function saveCustomTheme() {
-            const themeData = {
-                bgColor: document.getElementById('custom-bg-color').value,
-                bgOpacity: document.getElementById('custom-bg-opacity').value,
-                primaryColor: document.getElementById('custom-primary-color').value,
-                primaryOpacity: document.getElementById('custom-primary-opacity').value,
-                secondaryColor: document.getElementById('custom-secondary-color').value,
-                secondaryOpacity: document.getElementById('custom-secondary-opacity').value,
-                gridColor: document.getElementById('custom-grid-color').value,
-                gridOpacity: document.getElementById('custom-grid-opacity').value,
-                cellEmptyColor: document.getElementById('custom-cell-empty-color').value,
-                cellEmptyOpacity: document.getElementById('custom-cell-empty-opacity').value,
-                scrollbarColor: document.getElementById('custom-scrollbar-color').value,
-                scrollbarOpacity: document.getElementById('custom-scrollbar-opacity').value,
-                modalBgColor: document.getElementById('custom-modal-bg').value,
-                modalBgOpacity: document.getElementById('custom-modal-bg-opacity').value,
-                modalTextColor: document.getElementById('custom-modal-text').value,
-                modalTextOpacity: document.getElementById('custom-modal-text-opacity').value,
-                tile2Bg: document.getElementById('custom-tile-2-bg').value,
-                tile2Text: document.getElementById('custom-tile-2-text').value,
-                tile4Bg: document.getElementById('custom-tile-4-bg').value,
-                tile4Text: document.getElementById('custom-tile-4-text').value,
-                tile8Bg: document.getElementById('custom-tile-8-bg').value,
-                tile8Text: document.getElementById('custom-tile-8-text').value,
-                tile16Bg: document.getElementById('custom-tile-16-bg').value,
-                tile16Text: document.getElementById('custom-tile-16-text').value,
-                tile32Bg: document.getElementById('custom-tile-32-bg').value,
-                tile32Text: document.getElementById('custom-tile-32-text').value,
-                tile64Bg: document.getElementById('custom-tile-64-bg').value,
-                tile64Text: document.getElementById('custom-tile-64-text').value,
-                tile128Bg: document.getElementById('custom-tile-128-bg').value,
-                tile128Text: document.getElementById('custom-tile-128-text').value,
-                tile256Bg: document.getElementById('custom-tile-256-bg').value,
-                tile256Text: document.getElementById('custom-tile-256-text').value,
-                tile512Bg: document.getElementById('custom-tile-512-bg').value,
-                tile512Text: document.getElementById('custom-tile-512-text').value,
-                tile1024Bg: document.getElementById('custom-tile-1024-bg').value,
-                tile1024Text: document.getElementById('custom-tile-1024-text').value,
-                tile2048Bg: document.getElementById('custom-tile-2048-bg').value,
-                tile2048Text: document.getElementById('custom-tile-2048-text').value,
-                tile4096Bg: document.getElementById('custom-tile-4096-bg').value,
-                tile4096Text: document.getElementById('custom-tile-4096-text').value,
-                tile8192Bg: document.getElementById('custom-tile-8192-bg').value,
-                tile8192Text: document.getElementById('custom-tile-8192-text').value,
-                tile16384Bg: document.getElementById('custom-tile-16384-bg').value,
-                tile16384Text: document.getElementById('custom-tile-16384-text').value,
-                tile32768Bg: document.getElementById('custom-tile-32768-bg').value,
-                tile32768Text: document.getElementById('custom-tile-32768-text').value,
-                tileSuperBg: document.getElementById('custom-tile-super-bg').value,
-                tileSuperText: document.getElementById('custom-tile-super-text').value,
-                timestamp: new Date().getTime()
-            };
-            localStorage.setItem('customTheme', JSON.stringify(themeData));
-            localStorage.setItem('2048-theme', 'custom');
-            alert('主题保存成功！');
-        }
-        function exportCustomTheme() {
-            try {
-                const themeData = {
-                    bgColor: document.getElementById('custom-bg-color').value,
-                    bgOpacity: document.getElementById('custom-bg-opacity').value,
-                    primaryColor: document.getElementById('custom-primary-color').value,
-                    primaryOpacity: document.getElementById('custom-primary-opacity').value,
-                    secondaryColor: document.getElementById('custom-secondary-color').value,
-                    secondaryOpacity: document.getElementById('custom-secondary-opacity').value,
-                    gridColor: document.getElementById('custom-grid-color').value,
-                    gridOpacity: document.getElementById('custom-grid-opacity').value,
-                    cellEmptyColor: document.getElementById('custom-cell-empty-color').value,
-                    cellEmptyOpacity: document.getElementById('custom-cell-empty-opacity').value,
-                    scrollbarColor: document.getElementById('custom-scrollbar-color').value,
-                    scrollbarOpacity: document.getElementById('custom-scrollbar-opacity').value,
-                    modalBgColor: document.getElementById('custom-modal-bg').value,
-                    modalBgOpacity: document.getElementById('custom-modal-bg-opacity').value,
-                    modalTextColor: document.getElementById('custom-modal-text').value,
-                    modalTextOpacity: document.getElementById('custom-modal-text-opacity').value,
-                    tile2Bg: document.getElementById('custom-tile-2-bg').value,
-                    tile2Text: document.getElementById('custom-tile-2-text').value,
-                    tile4Bg: document.getElementById('custom-tile-4-bg').value,
-                    tile4Text: document.getElementById('custom-tile-4-text').value,
-                    tile8Bg: document.getElementById('custom-tile-8-bg').value,
-                    tile8Text: document.getElementById('custom-tile-8-text').value,
-                    tile16Bg: document.getElementById('custom-tile-16-bg').value,
-                    tile16Text: document.getElementById('custom-tile-16-text').value,
-                    tile32Bg: document.getElementById('custom-tile-32-bg').value,
-                    tile32Text: document.getElementById('custom-tile-32-text').value,
-                    tile64Bg: document.getElementById('custom-tile-64-bg').value,
-                    tile64Text: document.getElementById('custom-tile-64-text').value,
-                    tile128Bg: document.getElementById('custom-tile-128-bg').value,
-                    tile128Text: document.getElementById('custom-tile-128-text').value,
-                    tile256Bg: document.getElementById('custom-tile-256-bg').value,
-                    tile256Text: document.getElementById('custom-tile-256-text').value,
-                    tile512Bg: document.getElementById('custom-tile-512-bg').value,
-                    tile512Text: document.getElementById('custom-tile-512-text').value,
-                    tile1024Bg: document.getElementById('custom-tile-1024-bg').value,
-                    tile1024Text: document.getElementById('custom-tile-1024-text').value,
-                    tile2048Bg: document.getElementById('custom-tile-2048-bg').value,
-                    tile2048Text: document.getElementById('custom-tile-2048-text').value,
-                    tile4096Bg: document.getElementById('custom-tile-4096-bg').value,
-                    tile4096Text: document.getElementById('custom-tile-4096-text').value,
-                    tile8192Bg: document.getElementById('custom-tile-8192-bg').value,
-                    tile8192Text: document.getElementById('custom-tile-8192-text').value,
-                    tile16384Bg: document.getElementById('custom-tile-16384-bg').value,
-                    tile16384Text: document.getElementById('custom-tile-16384-text').value,
-                    tile32768Bg: document.getElementById('custom-tile-32768-bg').value,
-                    tile32768Text: document.getElementById('custom-tile-32768-text').value,
-                    tileSuperBg: document.getElementById('custom-tile-super-bg').value,
-                    tileSuperText: document.getElementById('custom-tile-super-text').value,
-                    timestamp: new Date().getTime()
-                };
-                const themeJson = JSON.stringify(themeData, null, 2);
-                const blob = new Blob([themeJson], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `2048-theme-${new Date().getTime()}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            } catch (error) {
-                console.error('导出主题失败:', error);
-                alert('导出主题失败: ' + error.message);
-            }
-        }
-        function importCustomTheme() {
-            try {
-                const fileInput = document.createElement('input');
-                fileInput.type = 'file';
-                fileInput.accept = '.json';
-                fileInput.style.display = 'none';
-                fileInput.addEventListener('change', function(event) {
-                    const file = event.target.files[0];
-                    if (!file) {
-                        document.body.removeChild(fileInput);
-                        return;
-                    }
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        try {
-                            const themeData = JSON.parse(e.target.result);
-                            document.getElementById('custom-bg-color').value = themeData.bgColor;
-                            document.getElementById('custom-bg-opacity').value = themeData.bgOpacity;
-                            document.getElementById('custom-bg-opacity-value').textContent = themeData.bgOpacity + '%';
-                            document.getElementById('custom-primary-color').value = themeData.primaryColor;
-                            document.getElementById('custom-primary-opacity').value = themeData.primaryOpacity;
-                            document.getElementById('custom-primary-opacity-value').textContent = themeData.primaryOpacity + '%';
-                            document.getElementById('custom-secondary-color').value = themeData.secondaryColor;
-                            document.getElementById('custom-secondary-opacity').value = themeData.secondaryOpacity;
-                            document.getElementById('custom-secondary-opacity-value').textContent = themeData.secondaryOpacity + '%';
-                            document.getElementById('custom-grid-color').value = themeData.gridColor;
-                            document.getElementById('custom-grid-opacity').value = themeData.gridOpacity;
-                            document.getElementById('custom-grid-opacity-value').textContent = themeData.gridOpacity + '%';
-                            document.getElementById('custom-cell-empty-color').value = themeData.cellEmptyColor;
-                            document.getElementById('custom-cell-empty-opacity').value = themeData.cellEmptyOpacity;
-                            document.getElementById('custom-cell-empty-opacity-value').textContent = themeData.cellEmptyOpacity + '%';
-                            document.getElementById('custom-scrollbar-color').value = themeData.scrollbarColor;
-                            document.getElementById('custom-scrollbar-opacity').value = themeData.scrollbarOpacity;
-                            document.getElementById('custom-scrollbar-opacity-value').textContent = themeData.scrollbarOpacity + '%';
-                            document.getElementById('custom-modal-bg').value = themeData.modalBgColor;
-                            document.getElementById('custom-modal-bg-opacity').value = themeData.modalBgOpacity;
-                            document.getElementById('custom-modal-bg-opacity-value').textContent = themeData.modalBgOpacity + '%';
-                            document.getElementById('custom-modal-text').value = themeData.modalTextColor;
-                            document.getElementById('custom-modal-text-opacity').value = themeData.modalTextOpacity;
-                            document.getElementById('custom-modal-text-opacity-value').textContent = themeData.modalTextOpacity + '%';
-                            document.getElementById('custom-tile-2-bg').value = themeData.tile2Bg;
-                            document.getElementById('custom-tile-2-text').value = themeData.tile2Text;
-                            document.getElementById('custom-tile-4-bg').value = themeData.tile4Bg;
-                            document.getElementById('custom-tile-4-text').value = themeData.tile4Text;
-                            document.getElementById('custom-tile-8-bg').value = themeData.tile8Bg;
-                            document.getElementById('custom-tile-8-text').value = themeData.tile8Text;
-                            document.getElementById('custom-tile-16-bg').value = themeData.tile16Bg;
-                            document.getElementById('custom-tile-16-text').value = themeData.tile16Text;
-                            document.getElementById('custom-tile-32-bg').value = themeData.tile32Bg;
-                            document.getElementById('custom-tile-32-text').value = themeData.tile32Text;
-                            document.getElementById('custom-tile-64-bg').value = themeData.tile64Bg;
-                            document.getElementById('custom-tile-64-text').value = themeData.tile64Text;
-                            document.getElementById('custom-tile-128-bg').value = themeData.tile128Bg;
-                            document.getElementById('custom-tile-128-text').value = themeData.tile128Text;
-                            document.getElementById('custom-tile-256-bg').value = themeData.tile256Bg;
-                            document.getElementById('custom-tile-256-text').value = themeData.tile256Text;
-                            document.getElementById('custom-tile-512-bg').value = themeData.tile512Bg;
-                            document.getElementById('custom-tile-512-text').value = themeData.tile512Text;
-                            document.getElementById('custom-tile-1024-bg').value = themeData.tile1024Bg;
-                            document.getElementById('custom-tile-1024-text').value = themeData.tile1024Text;
-                            document.getElementById('custom-tile-2048-bg').value = themeData.tile2048Bg;
-                            document.getElementById('custom-tile-2048-text').value = themeData.tile2048Text;
-                            document.getElementById('custom-tile-4096-bg').value = themeData.tile4096Bg;
-                            document.getElementById('custom-tile-4096-text').value = themeData.tile4096Text;
-                            document.getElementById('custom-tile-8192-bg').value = themeData.tile8192Bg;
-                            document.getElementById('custom-tile-8192-text').value = themeData.tile8192Text;
-                            document.getElementById('custom-tile-16384-bg').value = themeData.tile16384Bg;
-                            document.getElementById('custom-tile-16384-text').value = themeData.tile16384Text;
-                            document.getElementById('custom-tile-32768-bg').value = themeData.tile32768Bg;
-                            document.getElementById('custom-tile-32768-text').value = themeData.tile32768Text;
-                            document.getElementById('custom-tile-super-bg').value = themeData.tileSuperBg;
-                            document.getElementById('custom-tile-super-text').value = themeData.tileSuperText;
-                            updateColorTextInputs();
-                            previewCustomTheme();
-                            alert('主题导入成功！');
-                        } catch (parseError) {
-                            console.error('解析主题文件失败:', parseError);
-                            alert('解析主题文件失败: ' + parseError.message);
-                        } finally {
-                            document.body.removeChild(fileInput);
-                        }
-                    };
-                    reader.onerror = function() {
-                        alert('读取文件失败，请重试！');
-                        document.body.removeChild(fileInput);
-                    };
-                    reader.readAsText(file);
-                });
-                document.body.appendChild(fileInput);
-                fileInput.click();
-            } catch (error) {
-                console.error('导入主题失败:', error);
-                alert('导入主题失败: ' + error.message);
-            }
-        }
-        function updateColorTextInputs() {
-            const colorInputs = document.querySelectorAll('input[type="color"]');
-            colorInputs.forEach(input => {
-                const textInput = document.getElementById(input.id + '-text');
-                if (textInput) {
-                    textInput.value = input.value;
-                }
-            });
-        }
-        function loadCustomTheme() {
-            try {
-                const savedTheme = localStorage.getItem('customTheme');
-                if (savedTheme) {
-                    const themeData = JSON.parse(savedTheme);
-                    applyCustomThemeFromData(themeData);
-                    if (document.getElementById('custom-bg-color')) {
-                        document.getElementById('custom-bg-color').value = themeData.bgColor;
-                        document.getElementById('custom-bg-color-text').value = themeData.bgColor;
-                        document.getElementById('custom-bg-opacity').value = themeData.bgOpacity;
-                        document.getElementById('custom-bg-opacity-value').textContent = themeData.bgOpacity + '%';
-                        document.getElementById('custom-primary-color').value = themeData.primaryColor;
-                        document.getElementById('custom-primary-color-text').value = themeData.primaryColor;
-                        document.getElementById('custom-primary-opacity').value = themeData.primaryOpacity;
-                        document.getElementById('custom-primary-opacity-value').textContent = themeData.primaryOpacity + '%';
-                        document.getElementById('custom-secondary-color').value = themeData.secondaryColor;
-                        document.getElementById('custom-secondary-color-text').value = themeData.secondaryColor;
-                        document.getElementById('custom-secondary-opacity').value = themeData.secondaryOpacity;
-                        document.getElementById('custom-secondary-opacity-value').textContent = themeData.secondaryOpacity + '%';
-                        document.getElementById('custom-grid-color').value = themeData.gridColor;
-                        document.getElementById('custom-grid-color-text').value = themeData.gridColor;
-                        document.getElementById('custom-grid-opacity').value = themeData.gridOpacity;
-                        document.getElementById('custom-grid-opacity-value').textContent = themeData.gridOpacity + '%';
-                        document.getElementById('custom-cell-empty-color').value = themeData.cellEmptyColor;
-                        document.getElementById('custom-cell-empty-color-text').value = themeData.cellEmptyColor;
-                        document.getElementById('custom-cell-empty-opacity').value = themeData.cellEmptyOpacity;
-                        document.getElementById('custom-cell-empty-opacity-value').textContent = themeData.cellEmptyOpacity + '%';
-                        document.getElementById('custom-scrollbar-color').value = themeData.scrollbarColor;
-                        document.getElementById('custom-scrollbar-color-text').value = themeData.scrollbarColor;
-                        document.getElementById('custom-scrollbar-opacity').value = themeData.scrollbarOpacity;
-                        document.getElementById('custom-scrollbar-opacity-value').textContent = themeData.scrollbarOpacity + '%';
-                        document.getElementById('custom-modal-bg').value = themeData.modalBgColor;
-                        document.getElementById('custom-modal-bg-text').value = themeData.modalBgColor;
-                        document.getElementById('custom-modal-bg-opacity').value = themeData.modalBgOpacity;
-                        document.getElementById('custom-modal-bg-opacity-value').textContent = themeData.modalBgOpacity + '%';
-                        document.getElementById('custom-modal-text').value = themeData.modalTextColor;
-                        document.getElementById('custom-modal-text-text').value = themeData.modalTextColor;
-                        document.getElementById('custom-modal-text-opacity').value = themeData.modalTextOpacity;
-                        document.getElementById('custom-modal-text-opacity-value').textContent = themeData.modalTextOpacity + '%';
-                        document.getElementById('custom-tile-2-bg').value = themeData.tile2Bg;
-                        document.getElementById('custom-tile-2-bg-text').value = themeData.tile2Bg;
-                        document.getElementById('custom-tile-2-text').value = themeData.tile2Text;
-                        document.getElementById('custom-tile-2-text-text').value = themeData.tile2Text;
-                        document.getElementById('custom-tile-4-bg').value = themeData.tile4Bg;
-                        document.getElementById('custom-tile-4-bg-text').value = themeData.tile4Bg;
-                        document.getElementById('custom-tile-4-text').value = themeData.tile4Text;
-                        document.getElementById('custom-tile-4-text-text').value = themeData.tile4Text;
-                        document.getElementById('custom-tile-8-bg').value = themeData.tile8Bg;
-                        document.getElementById('custom-tile-8-bg-text').value = themeData.tile8Bg;
-                        document.getElementById('custom-tile-8-text').value = themeData.tile8Text;
-                        document.getElementById('custom-tile-8-text-text').value = themeData.tile8Text;
-                        document.getElementById('custom-tile-16-bg').value = themeData.tile16Bg;
-                        document.getElementById('custom-tile-16-bg-text').value = themeData.tile16Bg;
-                        document.getElementById('custom-tile-16-text').value = themeData.tile16Text;
-                        document.getElementById('custom-tile-16-text-text').value = themeData.tile16Text;
-                        document.getElementById('custom-tile-32-bg').value = themeData.tile32Bg;
-                        document.getElementById('custom-tile-32-bg-text').value = themeData.tile32Bg;
-                        document.getElementById('custom-tile-32-text').value = themeData.tile32Text;
-                        document.getElementById('custom-tile-32-text-text').value = themeData.tile32Text;
-                        document.getElementById('custom-tile-64-bg').value = themeData.tile64Bg;
-                        document.getElementById('custom-tile-64-bg-text').value = themeData.tile64Bg;
-                        document.getElementById('custom-tile-64-text').value = themeData.tile64Text;
-                        document.getElementById('custom-tile-64-text-text').value = themeData.tile64Text;
-                        document.getElementById('custom-tile-128-bg').value = themeData.tile128Bg;
-                        document.getElementById('custom-tile-128-bg-text').value = themeData.tile128Bg;
-                        document.getElementById('custom-tile-128-text').value = themeData.tile128Text;
-                        document.getElementById('custom-tile-128-text-text').value = themeData.tile128Text;
-                        document.getElementById('custom-tile-256-bg').value = themeData.tile256Bg;
-                        document.getElementById('custom-tile-256-bg-text').value = themeData.tile256Bg;
-                        document.getElementById('custom-tile-256-text').value = themeData.tile256Text;
-                        document.getElementById('custom-tile-256-text-text').value = themeData.tile256Text;
-                        document.getElementById('custom-tile-512-bg').value = themeData.tile512Bg;
-                        document.getElementById('custom-tile-512-bg-text').value = themeData.tile512Bg;
-                        document.getElementById('custom-tile-512-text').value = themeData.tile512Text;
-                        document.getElementById('custom-tile-512-text-text').value = themeData.tile512Text;
-                        document.getElementById('custom-tile-1024-bg').value = themeData.tile1024Bg;
-                        document.getElementById('custom-tile-1024-bg-text').value = themeData.tile1024Bg;
-                        document.getElementById('custom-tile-1024-text').value = themeData.tile1024Text;
-                        document.getElementById('custom-tile-1024-text-text').value = themeData.tile1024Text;
-                        document.getElementById('custom-tile-2048-bg').value = themeData.tile2048Bg;
-                        document.getElementById('custom-tile-2048-bg-text').value = themeData.tile2048Bg;
-                        document.getElementById('custom-tile-2048-text').value = themeData.tile2048Text;
-                        document.getElementById('custom-tile-2048-text-text').value = themeData.tile2048Text;
-                        document.getElementById('custom-tile-4096-bg').value = themeData.tile4096Bg;
-                        document.getElementById('custom-tile-4096-bg-text').value = themeData.tile4096Bg;
-                        document.getElementById('custom-tile-4096-text').value = themeData.tile4096Text;
-                        document.getElementById('custom-tile-4096-text-text').value = themeData.tile4096Text;
-                        document.getElementById('custom-tile-8192-bg').value = themeData.tile8192Bg;
-                        document.getElementById('custom-tile-8192-bg-text').value = themeData.tile8192Bg;
-                        document.getElementById('custom-tile-8192-text').value = themeData.tile8192Text;
-                        document.getElementById('custom-tile-8192-text-text').value = themeData.tile8192Text;
-                        document.getElementById('custom-tile-16384-bg').value = themeData.tile16384Bg;
-                        document.getElementById('custom-tile-16384-bg-text').value = themeData.tile16384Bg;
-                        document.getElementById('custom-tile-16384-text').value = themeData.tile16384Text;
-                        document.getElementById('custom-tile-16384-text-text').value = themeData.tile16384Text;
-                        document.getElementById('custom-tile-32768-bg').value = themeData.tile32768Bg;
-                        document.getElementById('custom-tile-32768-bg-text').value = themeData.tile32768Bg;
-                        document.getElementById('custom-tile-32768-text').value = themeData.tile32768Text;
-                        document.getElementById('custom-tile-32768-text-text').value = themeData.tile32768Text;
-                        document.getElementById('custom-tile-super-bg').value = themeData.tileSuperBg;
-                        document.getElementById('custom-tile-super-bg-text').value = themeData.tileSuperBg;
-                        document.getElementById('custom-tile-super-text').value = themeData.tileSuperText;
-                        document.getElementById('custom-tile-super-text-text').value = themeData.tileSuperText;
-                    }
-                    return true;
-                }
-            } catch (e) {
-                console.error('加载自定义主题失败:', e);
-            }
-            return false;
-        }
-        function applyCustomThemeFromData(themeData) {
-            let styleElement = document.getElementById('custom-theme-styles');
-            if (!styleElement) {
-                styleElement = document.createElement('style');
-                styleElement.id = 'custom-theme-styles';
-                document.head.appendChild(styleElement);
-            }
-            const customStyles = `
-                :root {
-                    --custom-bg-color: ${themeData.bgColor};
-                    --custom-bg-opacity: ${themeData.bgOpacity};
-                    --custom-primary-color: ${themeData.primaryColor};
-                    --custom-primary-opacity: ${themeData.primaryOpacity};
-                    --custom-secondary-color: ${themeData.secondaryColor};
-                    --custom-secondary-opacity: ${themeData.secondaryOpacity};
-                    --custom-grid-color: ${themeData.gridColor};
-                    --custom-grid-opacity: ${themeData.gridOpacity};
-                    --custom-cell-empty-color: ${themeData.cellEmptyColor};
-                    --custom-cell-empty-opacity: ${themeData.cellEmptyOpacity};
-                    --custom-scrollbar-color: ${themeData.scrollbarColor};
-                    --custom-scrollbar-opacity: ${themeData.scrollbarOpacity};
-                    --custom-modal-bg-color: ${themeData.modalBgColor};
-                    --custom-modal-bg-opacity: ${themeData.modalBgOpacity};
-                    --custom-modal-text-color: ${themeData.modalTextColor};
-                    --custom-modal-text-opacity: ${themeData.modalTextOpacity};
-                    --custom-tile-2-bg: ${themeData.tile2Bg};
-                    --custom-tile-2-text: ${themeData.tile2Text};
-                    --custom-tile-4-bg: ${themeData.tile4Bg};
-                    --custom-tile-4-text: ${themeData.tile4Text};
-                    --custom-tile-8-bg: ${themeData.tile8Bg};
-                    --custom-tile-8-text: ${themeData.tile8Text};
-                    --custom-tile-16-bg: ${themeData.tile16Bg};
-                    --custom-tile-16-text: ${themeData.tile16Text};
-                    --custom-tile-32-bg: ${themeData.tile32Bg};
-                    --custom-tile-32-text: ${themeData.tile32Text};
-                    --custom-tile-64-bg: ${themeData.tile64Bg};
-                    --custom-tile-64-text: ${themeData.tile64Text};
-                    --custom-tile-128-bg: ${themeData.tile128Bg};
-                    --custom-tile-128-text: ${themeData.tile128Text};
-                    --custom-tile-256-bg: ${themeData.tile256Bg};
-                    --custom-tile-256-text: ${themeData.tile256Text};
-                    --custom-tile-512-bg: ${themeData.tile512Bg};
-                    --custom-tile-512-text: ${themeData.tile512Text};
-                    --custom-tile-1024-bg: ${themeData.tile1024Bg};
-                    --custom-tile-1024-text: ${themeData.tile1024Text};
-                    --custom-tile-2048-bg: ${themeData.tile2048Bg};
-                    --custom-tile-2048-text: ${themeData.tile2048Text};
-                    --custom-tile-4096-bg: ${themeData.tile4096Bg};
-                    --custom-tile-4096-text: ${themeData.tile4096Text};
-                    --custom-tile-8192-bg: ${themeData.tile8192Bg};
-                    --custom-tile-8192-text: ${themeData.tile8192Text};
-                    --custom-tile-16384-bg: ${themeData.tile16384Bg};
-                    --custom-tile-16384-text: ${themeData.tile16384Text};
-                    --custom-tile-32768-bg: ${themeData.tile32768Bg};
-                    --custom-tile-32768-text: ${themeData.tile32768Text};
-                    --custom-tile-super-bg: ${themeData.tileSuperBg};
-                    --custom-tile-super-text: ${themeData.tileSuperText};
-                }
-                body[data-theme="custom"] {
-                    background-color: ${themeData.bgColor}${Math.floor(themeData.bgOpacity * 2.55).toString(16).padStart(2, '0')};
-                    color: ${themeData.secondaryColor}${Math.floor(themeData.secondaryOpacity * 2.55).toString(16).padStart(2, '0')};
-                }
-                body[data-theme="custom"] .bg-bg {
-                    background-color: ${themeData.bgColor}${Math.floor(themeData.bgOpacity * 2.55).toString(16).padStart(2, '0')};
-                }
-                body[data-theme="custom"] .text-secondary {
-                    color: ${themeData.secondaryColor}${Math.floor(themeData.secondaryOpacity * 2.55).toString(16).padStart(2, '0')};
-                }
-                body[data-theme="custom"] .text-secondary\\/80 {
-                    color: ${themeData.secondaryColor}${Math.floor(themeData.secondaryOpacity * 2.55).toString(16).padStart(2, '0')};
-                }
-                body[data-theme="custom"] .bg-grid {
-                    background-color: ${themeData.gridColor}${Math.floor(themeData.gridOpacity * 2.55).toString(16).padStart(2, '0')};
-                }
-                body[data-theme="custom"] .grid-cell {
-                    background-color: ${themeData.cellEmptyColor}${Math.floor(themeData.cellEmptyOpacity * 2.55).toString(16).padStart(2, '0')};
-                }
-                body[data-theme="custom"] .bg-primary {
-                    background-color: ${themeData.primaryColor}${Math.floor(themeData.primaryOpacity * 2.55).toString(16).padStart(2, '0')};
-                }
-                body[data-theme="custom"] .bg-secondary {
-                    background-color: ${themeData.secondaryColor}${Math.floor(themeData.secondaryOpacity * 2.55).toString(16).padStart(2, '0')};
-                }
-                body[data-theme="custom"] .bg-easy {
-                    background-color: #4CAF50;
-                }
-                body[data-theme="custom"] .bg-medium {
-                    background-color: #FFC107;
-                }
-                body[data-theme="custom"] .bg-hard {
-                    background-color: #F44336;
-                }
-                body[data-theme="custom"] .game-container {
-                    background-color: ${themeData.gridColor}${Math.floor(themeData.gridOpacity * 2.55).toString(16).padStart(2, '0')};
-                }
-                body[data-theme="custom"] [role="dialog"] > div {
-                    background-color: ${themeData.modalBgColor}${Math.floor(themeData.modalBgOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                    color: ${themeData.modalTextColor}${Math.floor(themeData.modalTextOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-                }
-                body[data-theme="custom"] ::-webkit-scrollbar-track {
-                    background: ${themeData.bgColor}${Math.floor(themeData.bgOpacity * 2.55).toString(16).padStart(2, '0')};
-                }
-                body[data-theme="custom"] ::-webkit-scrollbar-thumb {
-                    background-color: ${themeData.scrollbarColor}${Math.floor(themeData.scrollbarOpacity * 2.55).toString(16).padStart(2, '0')};
-                }
-                body[data-theme="custom"] ::-webkit-scrollbar-thumb:hover {
-                    background-color: ${themeData.scrollbarColor}${Math.floor(themeData.scrollbarOpacity * 2.55).toString(16).padStart(2, '0')};
-                }
-                body[data-theme="custom"] .tile-2 {
-                    background-color: var(--custom-tile-2-bg);
-                    color: var(--custom-tile-2-text);
-                }
-                body[data-theme="custom"] .tile-4 {
-                    background-color: var(--custom-tile-4-bg);
-                    color: var(--custom-tile-4-text);
-                }
-                body[data-theme="custom"] .tile-8 {
-                    background-color: var(--custom-tile-8-bg);
-                    color: var(--custom-tile-8-text);
-                }
-                body[data-theme="custom"] .tile-16 {
-                    background-color: var(--custom-tile-16-bg);
-                    color: var(--custom-tile-16-text);
-                }
-                body[data-theme="custom"] .tile-32 {
-                    background-color: var(--custom-tile-32-bg);
-                    color: var(--custom-tile-32-text);
-                }
-                body[data-theme="custom"] .tile-64 {
-                    background-color: var(--custom-tile-64-bg);
-                    color: var(--custom-tile-64-text);
-                }
-                body[data-theme="custom"] .tile-128 {
-                    background-color: var(--custom-tile-128-bg);
-                    color: var(--custom-tile-128-text);
-                }
-                body[data-theme="custom"] .tile-256 {
-                    background-color: var(--custom-tile-256-bg);
-                    color: var(--custom-tile-256-text);
-                }
-                body[data-theme="custom"] .tile-512 {
-                    background-color: var(--custom-tile-512-bg);
-                    color: var(--custom-tile-512-text);
-                }
-                body[data-theme="custom"] .tile-1024 {
-                    background-color: var(--custom-tile-1024-bg);
-                    color: var(--custom-tile-1024-text);
-                }
-                body[data-theme="custom"] .tile-2048 {
-                    background-color: var(--custom-tile-2048-bg);
-                    color: var(--custom-tile-2048-text);
-                }
-                body[data-theme="custom"] .tile-4096 {
-                    background-color: var(--custom-tile-4096-bg);
-                    color: var(--custom-tile-4096-text);
-                }
-                body[data-theme="custom"] .tile-8192 {
-                    background-color: var(--custom-tile-8192-bg);
-                    color: var(--custom-tile-8192-text);
-                }
-                body[data-theme="custom"] .tile-16384 {
-                    background-color: var(--custom-tile-16384-bg);
-                    color: var(--custom-tile-16384-text);
-                }
-                body[data-theme="custom"] .tile-32768 {
-                    background-color: var(--custom-tile-32768-bg);
-                    color: var(--custom-tile-32768-text);
-                }
-                body[data-theme="custom"] .tile-super {
-                    background-color: var(--custom-tile-super-bg);
-                    color: var(--custom-tile-super-text);
-                }
-                body[data-theme="custom"] .bg-primary:focus-visible {
-                    box-shadow: 0 0 0 3px rgba(250, 163, 27, 0.5) !important;
-                }
-                body[data-theme="custom"] .bg-secondary:focus-visible {
-                    box-shadow: 0 0 0 3px rgba(143, 122, 102, 0.5) !important;
-                }
-                body[data-theme="custom"] .bg-easy:focus-visible {
-                    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.5) !important;
-                }
-                body[data-theme="custom"] .bg-medium:focus-visible {
-                    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.5) !important;
-                }
-                body[data-theme="custom"] .bg-hard:focus-visible {
-                    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.5) !important;
-                }
-                body[data-theme="custom"] button:focus-visible,
-                body[data-theme="custom"] a:focus-visible,
-                body[data-theme="custom"] input:focus-visible,
-                body[data-theme="custom"] select:focus-visible,
-                body[data-theme="custom"] textarea:focus-visible,
-                body[data-theme="custom"] [tabindex]:not([tabindex="-1"]):focus-visible {
-                    box-shadow: 0 0 0 3px rgba(250, 163, 27, 0.5);
-                }
-            `;
-            styleElement.textContent = customStyles;
-            document.body.setAttribute('data-theme', 'custom');
-            if (elements && elements.themeToggle && elements.themeToggle.querySelector('i')) {
-                elements.themeToggle.querySelector('i').className = 'fa-solid fa-palette';
-            }
         }
         function loadGameState() {
             const savedState = localStorage.getItem('2048-game-state');
@@ -4601,9 +3652,26 @@
                 document.getElementById('custom-theme-button').style.display = 'none';
                 document.getElementById('custom-theme-button-container').classList.remove('mb-2');
             } else if (savedTheme === 'custom') {
-                elements.themeToggle.value = 'custom';
-                document.getElementById('custom-theme-button').style.display = 'block';
-                document.getElementById('custom-theme-button-container').classList.add('mb-2');
+                if (!window.customThemeModuleLoaded) {
+                    elements.themeToggle.value = 'auto';
+                    localStorage.setItem('2048-theme', 'auto');
+                    const themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                    const updateTheme = (e) => {
+                        document.documentElement.classList.toggle('dark', e.matches);
+                    };
+                    themeMediaQuery.addEventListener('change', updateTheme);
+                    updateTheme(themeMediaQuery);
+                    window.themeMediaQueryListener = {
+                        mediaQuery: themeMediaQuery,
+                        handler: updateTheme
+                    };
+                    document.getElementById('custom-theme-button').style.display = 'none';
+                    document.getElementById('custom-theme-button-container').classList.remove('mb-2');
+                } else {
+                    elements.themeToggle.value = 'custom';
+                    document.getElementById('custom-theme-button').style.display = 'block';
+                    document.getElementById('custom-theme-button-container').classList.add('mb-2');
+                }
             } else if (savedTheme === 'dark') {
                 document.documentElement.classList.add('dark');
                 elements.themeToggle.value = 'dark';
@@ -4670,7 +3738,11 @@
             initEventListeners();
             handleResize();
         }
-        startGame();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startGame);
+        } else {
+            startGame();
+        }
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -5247,61 +4319,8 @@
             }
             score += rowIncreasing || rowDecreasing ? 2 : 0;
         }
-        for (let x = 0; x < gridSize; x++) {
-            let colIncreasing = true;
-            let colDecreasing = true;
-            for (let y = 0; y < gridSize - 1; y++) {
-                const curr = grid[y][x] ? grid[y][x].value : 0;
-                const next = grid[y+1][x] ? grid[y+1][x].value : 0;
-                colIncreasing = colIncreasing && (curr <= next);
-                colDecreasing = colDecreasing && (curr >= next);
-            }
-            score += colIncreasing || colDecreasing ? 2 : 0;
-        }
-        return score / (2 * gridSize) * 10;
+        return score;
     }
-    function countEmptyCells(grid) {
-        let count = 0;
-        for (let y = 0; y < grid.length; y++) {
-            for (let x = 0; x < grid[y].length; x++) {
-                if (!grid[y][x]) count++;
-            }
-        }
-        return count;
-    }
-    document.getElementById('ai-analysis-button').addEventListener('click', analyzeGameState);
-        document.getElementById('close-ai-modal').addEventListener('click', function() {
-            document.getElementById('ai-analysis-modal').classList.add('hidden');
-        });
-        const bestMoveText = document.querySelector('#best-move-direction .best-move-text');
-        const toggleButton = document.getElementById('toggle-best-move');
-        const iconElement = toggleButton.querySelector('i');
-        const isBestMoveHidden = localStorage.getItem('bestMoveHidden') === 'true';
-        if (isBestMoveHidden) {
-            bestMoveText.classList.add('blur-sm');
-            iconElement.className = 'fa-solid fa-eye-slash';
-            toggleButton.setAttribute('title', '显示最佳移动方向');
-        } else {
-            bestMoveText.classList.remove('blur-sm');
-            iconElement.className = 'fa-solid fa-eye';
-            toggleButton.setAttribute('title', '隐藏最佳移动方向');
-        }
-        toggleButton.addEventListener('click', function() {
-            if (bestMoveText.classList.contains('blur-sm')) {
-                bestMoveText.classList.remove('blur-sm');
-                iconElement.className = 'fa-solid fa-eye';
-                this.setAttribute('title', '隐藏最佳移动方向');
-                localStorage.setItem('bestMoveHidden', 'false');
-            } else {
-                bestMoveText.classList.add('blur-sm');
-                iconElement.className = 'fa-solid fa-eye-slash';
-                this.setAttribute('title', '显示最佳移动方向');
-                localStorage.setItem('bestMoveHidden', 'true');
-            }
-        });
-        document.getElementById('ai-analysis-modal').addEventListener('click', function(e) {
-            if (e.target === this) this.classList.add('hidden');
-        });
     </script>
 </body>
 </html>
