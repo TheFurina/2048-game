@@ -814,7 +814,18 @@
                 transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
                 margin-top: 12px;
             }
+            #vibration-details {
+                max-height: 200px;
+                overflow: hidden;
+                transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+                margin-top: 12px;
+            }
             #animation-details.collapsed {
+                max-height: 0;
+                opacity: 0;
+                margin: 0;
+            }
+            #vibration-details.collapsed {
                 max-height: 0;
                 opacity: 0;
                 margin: 0;
@@ -1459,6 +1470,42 @@
                                 </label>
                             </div>
                             <div class="border-b border-gray-200 dark:border-gray-700 my-3 mx-2"></div>
+                            <div class="vibration-toggle-container flex items-center justify-between mb-2 px-2">
+                                <div class="flex items-center">
+                                    <span class="text-gray-700 dark:text-dark-muted">振动反馈</span>
+                                    <span id="vibration-warning-icon" class="ml-2 text-yellow-500 opacity-0 transition-opacity duration-300" title="当前浏览器不支持振动功能">
+                                        <i class="fa-solid fa-circle-exclamation"></i>
+                                    </span>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="vibration-toggle" class="sr-only peer" checked title="振动反馈">
+                                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
+                                </label>
+                            </div>
+                            <div id="vibration-details" class="ml-6 mt-1 space-y-2">
+                                <div class="flex items-center justify-between px-2">
+                                    <span class="text-gray-600 dark:text-dark-muted text-sm">合并振动</span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="vibration-merge" class="sr-only peer" checked title="合并振动">
+                                        <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
+                                    </label>
+                                </div>
+                                <div class="flex items-center justify-between px-2">
+                                    <span class="text-gray-600 dark:text-dark-muted text-sm">获胜振动</span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="vibration-win" class="sr-only peer" checked title="获胜振动">
+                                        <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
+                                    </label>
+                                </div>
+                                <div class="flex items-center justify-between px-2">
+                                    <span class="text-gray-600 dark:text-dark-muted text-sm">失败振动</span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="vibration-loss" class="sr-only peer" checked title="失败振动">
+                                        <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="border-b border-gray-200 dark:border-gray-700 my-3 mx-2"></div>
                             <div class="flex items-center justify-between px-2">
                                 <span class="text-gray-700 dark:text-dark-muted">滑块动画</span>
                                 <label class="relative inline-flex items-center cursor-pointer">
@@ -1535,7 +1582,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="text-sm text-secondary/70 mt-4">2048 v1.24.0 | by TheFurina</div>
+                    <div class="text-sm text-secondary/70 mt-4">2048 v1.25.0 | by TheFurina</div>
                     <button id="reset-settings-button" class="text-gray-500 hover:text-gray-700 focus:outline-none text-sm inline-block mx-auto">
                         <i class="fa-solid fa-rotate-right mr-1"></i><span>重置所有设置</span>
                     </button>
@@ -2010,6 +2057,10 @@
             tileAppearAnimationEnabled: localStorage.getItem('2048-tile-appear-animation') !== 'false',
             tileMoveAnimationEnabled: localStorage.getItem('2048-tile-move-animation') !== 'false',
             tileMergeAnimationEnabled: localStorage.getItem('2048-tile-merge-animation') !== 'false',
+            vibrationEnabled: localStorage.getItem('2048-vibration') !== 'false',
+            vibrationMergeEnabled: localStorage.getItem('2048-vibration-merge') !== 'false',
+            vibrationWinEnabled: localStorage.getItem('2048-vibration-win') !== 'false',
+            vibrationLossEnabled: localStorage.getItem('2048-vibration-loss') !== 'false',
             grid: [],
             gridSize: 4,
             gridRows: 4,
@@ -2029,6 +2080,97 @@
         };
         let lastFocusedElement = null;
         const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+        let isDebugMode = false;
+        let simulateNoVibration = false;
+        Object.defineProperty(window, 'gameDebug', {
+            get: function() {
+                isDebugMode = !isDebugMode;
+                console.log(`Debug mode ${isDebugMode ? 'enabled' : 'disabled'}`);
+                if (isDebugMode) {
+                    console.log('Debug commands:');
+                    console.log('- "novib" - 模拟无法振动的情况');
+                    console.log('- "vib" - 恢复振动功能');
+                    console.log('- "exitDebug" - 退出debug模式');
+                }
+                return 'Debug mode command executed';
+            }
+        });
+        Object.defineProperty(window, 'novib', {
+            get: function() {
+                if (isDebugMode) {
+                    simulateNoVibration = true;
+                    console.log('Simulating no vibration support');
+                    const vibrationToggle = document.getElementById('vibration-toggle');
+                    const vibrationWarningIcon = document.getElementById('vibration-warning-icon');
+                    const vibrationDetails = document.getElementById('vibration-details');
+                    if (vibrationToggle) {
+                        vibrationToggle.disabled = true;
+                        vibrationToggle.checked = false;
+                        gameState.vibrationEnabled = false;
+                        localStorage.setItem('2048-vibration', gameState.vibrationEnabled);
+                        vibrationToggle.closest('.vibration-toggle-container').classList.add('opacity-50');
+                        vibrationToggle.closest('.vibration-toggle-container').classList.remove('mb-2');
+                        if (vibrationWarningIcon) {
+                            vibrationWarningIcon.classList.remove('opacity-0');
+                        }
+                        if (vibrationDetails) {
+                            vibrationDetails.classList.add('opacity-50');
+                            vibrationDetails.classList.add('collapsed');
+                        }
+                    }
+                    return 'No vibration simulation enabled';
+                } else {
+                    console.log('Please enable debug mode first with gameDebug');
+                    return 'Debug mode not enabled';
+                }
+            }
+        });
+        Object.defineProperty(window, 'vib', {
+            get: function() {
+                if (isDebugMode) {
+                    simulateNoVibration = false;
+                    console.log('Restoring vibration support');
+                    const vibrationToggle = document.getElementById('vibration-toggle');
+                    const vibrationWarningIcon = document.getElementById('vibration-warning-icon');
+                    const vibrationDetails = document.getElementById('vibration-details');
+                    if (vibrationToggle) {
+                        vibrationToggle.disabled = false;
+                        vibrationToggle.checked = true;
+                        gameState.vibrationEnabled = true;
+                        localStorage.setItem('2048-vibration', gameState.vibrationEnabled);
+                        vibrationToggle.closest('.vibration-toggle-container').classList.remove('opacity-50');
+                        vibrationToggle.closest('.vibration-toggle-container').classList.add('mb-2');
+                        if (vibrationWarningIcon) {
+                            vibrationWarningIcon.classList.add('opacity-0');
+                        }
+                        if (vibrationDetails) {
+                            vibrationDetails.classList.remove('opacity-50');
+                            vibrationDetails.classList.remove('collapsed');
+                        }
+                    }
+                    return 'Vibration support restored';
+                } else {
+                    console.log('Please enable debug mode first with gameDebug');
+                    return 'Debug mode not enabled';
+                }
+            }
+        });
+        Object.defineProperty(window, 'exitDebug', {
+            get: function() {
+                if (isDebugMode) {
+                    isDebugMode = false;
+                    console.log('Debug mode disabled');
+                    return 'Debug mode disabled';
+                } else {
+                    console.log('Debug mode is already disabled');
+                    return 'Debug mode already disabled';
+                }
+            }
+        });
+        const originalConsoleLog = console.log;
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+        };
         function handleModalKeyDown(e) {
             const modalId = e.currentTarget.id;
             if (e.key === 'Escape') {
@@ -2114,6 +2256,10 @@
                         '2048-tile-appear-animation': localStorage.getItem('2048-tile-appear-animation'),
                         '2048-tile-move-animation': localStorage.getItem('2048-tile-move-animation'),
                         '2048-tile-merge-animation': localStorage.getItem('2048-tile-merge-animation'),
+                        '2048-vibration': localStorage.getItem('2048-vibration'),
+                        '2048-vibration-merge': localStorage.getItem('2048-vibration-merge'),
+                        '2048-vibration-win': localStorage.getItem('2048-vibration-win'),
+                        '2048-vibration-loss': localStorage.getItem('2048-vibration-loss'),
                         '2048-square-grid-locked': localStorage.getItem('2048-square-grid-locked'),
                         'controlsCollapsed': localStorage.getItem('controlsCollapsed'),
                         'bestMoveHidden': localStorage.getItem('bestMoveHidden')
@@ -2150,8 +2296,8 @@
             }
         }
         document.addEventListener('DOMContentLoaded', () => { 
-            console.log('%c   ____     ___    _  _      ___                                        \n  |___ \\   / _ \\  | || |    ( _ )      __ _    __ _   _ __ ___     ___ \n    __) | | | | | | || |_   / _ \\     / _` |  / _` | | \'_ ` _ \\   / _ \\ \n   / __/  | |_| | |__   _| | (_) |   | (_| | | (_| | | | | | | | |  __/ \n  |_____|  \\___/     |_|    \\___/     \\__, |  \\__,_| |_| |_| |_|  \\___| \n                                      |___/                            ', 'color: #faa31b; font-size: 14px;');
-            console.log('2048 v1.24.0\n自定义主题 ' + (window.customThemeVersion ? 'v' + window.customThemeVersion : '未找到') + '\nAI分析 ' + (window.aiAnalysisVersion ? 'v' + window.aiAnalysisVersion : '未找到'));
+            console.log('%c   ____     ___    _  _      ___  \n  |___ \\   / _ \\  | || |    ( _ ) \n    __) | | | | | | || |_   / _ \\ \n   / __/  | |_| | |__   _| | (_) | \n  |_____|  \\___/     |_|    \\___/ \n                                   \n    ____                             \n   / ___|   __ _   _ __ ___     ___ \n  | |  _   / _` | | \'_ ` _ \\   / _ \\ \n  | |_| | | (_| | | | | | | | |  __/ \n   \\____|  \\__,_| |_| |_| |_|  \\___| \n                                     ', 'color: #faa31b; font-size: 14px;');
+            console.log('2048 v1.25.0\n自定义主题 ' + (window.customThemeVersion ? 'v' + window.customThemeVersion : '未找到') + '\nAI分析 ' + (window.aiAnalysisVersion ? 'v' + window.aiAnalysisVersion : '未找到'));
             const textarea = document.getElementById('data-textarea');
             const textareaContainer = textarea ? textarea.closest('.relative') : null;
             const copyButton = document.getElementById('copy-data-button'); 
@@ -2238,6 +2384,10 @@
                     gameState.tileAppearAnimationEnabled = localStorage.getItem('2048-tile-appear-animation') !== 'false';
                     gameState.tileMoveAnimationEnabled = localStorage.getItem('2048-tile-move-animation') !== 'false';
                     gameState.tileMergeAnimationEnabled = localStorage.getItem('2048-tile-merge-animation') !== 'false';
+                    gameState.vibrationEnabled = localStorage.getItem('2048-vibration') !== 'false';
+                    gameState.vibrationMergeEnabled = localStorage.getItem('2048-vibration-merge') !== 'false';
+                    gameState.vibrationWinEnabled = localStorage.getItem('2048-vibration-win') !== 'false';
+                    gameState.vibrationLossEnabled = localStorage.getItem('2048-vibration-loss') !== 'false';
                     const importedTheme = data.settings['2048-theme'];
                     if (importedTheme) {
                         if (importedTheme === 'auto') {
@@ -2292,6 +2442,36 @@
                     const mergeAnimationCheckbox = document.getElementById('tile-merge-animation');
                     if (mergeAnimationCheckbox) {
                         mergeAnimationCheckbox.checked = localStorage.getItem('2048-tile-merge-animation') !== 'false';
+                    }
+                    const vibrationToggle = document.getElementById('vibration-toggle');
+                    const vibrationMergeToggle = document.getElementById('vibration-merge');
+                    const vibrationWinToggle = document.getElementById('vibration-win');
+                    const vibrationLossToggle = document.getElementById('vibration-loss');
+                    const vibrationDetails = document.getElementById('vibration-details');
+                    if (vibrationToggle) {
+                        vibrationToggle.checked = localStorage.getItem('2048-vibration') !== 'false';
+                    }
+                    if (vibrationMergeToggle) {
+                        vibrationMergeToggle.checked = localStorage.getItem('2048-vibration-merge') !== 'false';
+                    }
+                    if (vibrationWinToggle) {
+                        vibrationWinToggle.checked = localStorage.getItem('2048-vibration-win') !== 'false';
+                    }
+                    if (vibrationLossToggle) {
+                        vibrationLossToggle.checked = localStorage.getItem('2048-vibration-loss') !== 'false';
+                    }
+                    if (vibrationDetails) {
+                        if (gameState.vibrationEnabled) {
+                            vibrationDetails.classList.remove('collapsed');
+                            if (vibrationToggle) {
+                                vibrationToggle.closest('.vibration-toggle-container').classList.add('mb-2');
+                            }
+                        } else {
+                            vibrationDetails.classList.add('collapsed');
+                            if (vibrationToggle) {
+                                vibrationToggle.closest('.vibration-toggle-container').classList.remove('mb-2');
+                            }
+                        }
                     }
                     return;
                 }
@@ -2710,6 +2890,23 @@
             updateUndoButtonState();
             return moved;
         }
+        function vibrate(pattern = 50, type = 'merge') {
+            let shouldVibrate = gameState.vibrationEnabled && navigator.vibrate && !simulateNoVibration;
+            switch (type) {
+                case 'merge':
+                    shouldVibrate = shouldVibrate && gameState.vibrationMergeEnabled;
+                    break;
+                case 'win':
+                    shouldVibrate = shouldVibrate && gameState.vibrationWinEnabled;
+                    break;
+                case 'loss':
+                    shouldVibrate = shouldVibrate && gameState.vibrationLossEnabled;
+                    break;
+            }
+            if (shouldVibrate) {
+                navigator.vibrate(pattern);
+            }
+        }
         function handleTileMerge(targetY, targetX, sourceY, sourceX) {
             gameState.grid[targetY][targetX].value *= 2;
             gameState.grid[targetY][targetX].merged = true;
@@ -2724,6 +2921,7 @@
             }
             elements.scoreDisplay.textContent = gameState.score;
             updateDocumentTitle();
+            vibrate(50, 'merge');
         }
         function checkWin() {
             for (let y = 0; y < gameState.gridRows; y++) {
@@ -2732,6 +2930,7 @@
                         gameState.gameWon = true;
                         if (!gameState.isEndlessMode) {
                             showGameMessage("恭喜你获胜！", "你达到了2048分，可以继续游戏挑战更高分数，或者重新开始。");
+                            vibrate([100, 50, 100], 'win');
                         }
                         return true;
                     }
@@ -2760,6 +2959,7 @@
             }
             gameState.gameOver = true;
             showGameMessage("游戏结束！", "无法进行任何移动。");
+            vibrate([50, 50, 50, 50, 50], 'loss');
             return true;
         }
         function showGameMessage(title, text) {
@@ -3011,11 +3211,19 @@
                 localStorage.removeItem('2048-tile-appear-animation');
                 localStorage.removeItem('2048-tile-move-animation');
                 localStorage.removeItem('2048-tile-merge-animation');
+                localStorage.removeItem('2048-vibration');
+                localStorage.removeItem('2048-vibration-merge');
+                localStorage.removeItem('2048-vibration-win');
+                localStorage.removeItem('2048-vibration-loss');
                 gameState.gpuAccelerationEnabled = true;
                 gameState.tileAnimationEnabled = true;
                 gameState.tileAppearAnimationEnabled = true;
                 gameState.tileMoveAnimationEnabled = true;
                 gameState.tileMergeAnimationEnabled = true;
+                gameState.vibrationEnabled = true;
+                gameState.vibrationMergeEnabled = true;
+                gameState.vibrationWinEnabled = true;
+                gameState.vibrationLossEnabled = true;
                 gameState.difficulty = 'medium';
                 document.documentElement.classList.remove('dark');
                 const styleElement = document.getElementById('custom-theme-styles');
@@ -3053,6 +3261,27 @@
                 elements.tileAppearAnimation.checked = true;
                 elements.tileMoveAnimation.checked = true;
                 elements.tileMergeAnimation.checked = true;
+                const vibrationToggle = document.getElementById('vibration-toggle');
+                const vibrationMergeToggle = document.getElementById('vibration-merge');
+                const vibrationWinToggle = document.getElementById('vibration-win');
+                const vibrationLossToggle = document.getElementById('vibration-loss');
+                if (vibrationToggle) {
+                    vibrationToggle.checked = true;
+                    vibrationToggle.closest('.vibration-toggle-container').classList.add('mb-2');
+                }
+                if (vibrationMergeToggle) {
+                    vibrationMergeToggle.checked = true;
+                }
+                if (vibrationWinToggle) {
+                    vibrationWinToggle.checked = true;
+                }
+                if (vibrationLossToggle) {
+                    vibrationLossToggle.checked = true;
+                }
+                const vibrationDetails = document.getElementById('vibration-details');
+                if (vibrationDetails) {
+                    vibrationDetails.classList.remove('collapsed');
+                }
                 const animationDetails = document.getElementById('animation-details');
                 if (animationDetails) {
                     animationDetails.classList.remove('collapsed');
@@ -3552,6 +3781,82 @@
                 gameState.tileMergeAnimationEnabled = e.target.checked;
                 localStorage.setItem('2048-tile-merge-animation', gameState.tileMergeAnimationEnabled);
             });
+            const vibrationToggle = document.getElementById('vibration-toggle');
+            const vibrationMergeToggle = document.getElementById('vibration-merge');
+            const vibrationWinToggle = document.getElementById('vibration-win');
+            const vibrationLossToggle = document.getElementById('vibration-loss');
+            const vibrationDetails = document.getElementById('vibration-details');
+            if (vibrationToggle) {
+                vibrationToggle.checked = gameState.vibrationEnabled;
+                vibrationToggle.addEventListener('change', (e) => {
+                    gameState.vibrationEnabled = e.target.checked;
+                    localStorage.setItem('2048-vibration', gameState.vibrationEnabled);
+                    if (e.target.checked) {
+                        vibrate(50, 'merge');
+                    }
+                    if (vibrationDetails) {
+                        if (!e.target.checked) {
+                            vibrationDetails.classList.add('collapsed');
+                            vibrationToggle.closest('.vibration-toggle-container').classList.remove('mb-2');
+                        } else {
+                            vibrationDetails.classList.remove('collapsed');
+                            vibrationToggle.closest('.vibration-toggle-container').classList.add('mb-2');
+                        }
+                    }
+                });
+                if (vibrationDetails) {
+                    if (!gameState.vibrationEnabled) {
+                        vibrationDetails.classList.add('collapsed');
+                        vibrationToggle.closest('.vibration-toggle-container').classList.remove('mb-2');
+                    }
+                }
+                if (!navigator.vibrate || simulateNoVibration) {
+                    vibrationToggle.disabled = true;
+                    vibrationToggle.checked = false;
+                    gameState.vibrationEnabled = false;
+                    localStorage.setItem('2048-vibration', gameState.vibrationEnabled);
+                    vibrationToggle.closest('.vibration-toggle-container').classList.add('opacity-50');
+                    vibrationToggle.closest('.vibration-toggle-container').classList.remove('mb-2');
+                    const vibrationWarningIcon = document.getElementById('vibration-warning-icon');
+                    if (vibrationWarningIcon) {
+                        vibrationWarningIcon.classList.remove('opacity-0');
+                    }
+                    if (vibrationDetails) {
+                        vibrationDetails.classList.add('opacity-50');
+                        vibrationDetails.classList.add('collapsed');
+                    }
+                }
+            }
+            if (vibrationMergeToggle) {
+                vibrationMergeToggle.checked = gameState.vibrationMergeEnabled;
+                vibrationMergeToggle.addEventListener('change', (e) => {
+                    gameState.vibrationMergeEnabled = e.target.checked;
+                    localStorage.setItem('2048-vibration-merge', gameState.vibrationMergeEnabled);
+                });
+                if (!navigator.vibrate || simulateNoVibration) {
+                    vibrationMergeToggle.disabled = true;
+                }
+            }
+            if (vibrationWinToggle) {
+                vibrationWinToggle.checked = gameState.vibrationWinEnabled;
+                vibrationWinToggle.addEventListener('change', (e) => {
+                    gameState.vibrationWinEnabled = e.target.checked;
+                    localStorage.setItem('2048-vibration-win', gameState.vibrationWinEnabled);
+                });
+                if (!navigator.vibrate || simulateNoVibration) {
+                    vibrationWinToggle.disabled = true;
+                }
+            }
+            if (vibrationLossToggle) {
+                vibrationLossToggle.checked = gameState.vibrationLossEnabled;
+                vibrationLossToggle.addEventListener('change', (e) => {
+                    gameState.vibrationLossEnabled = e.target.checked;
+                    localStorage.setItem('2048-vibration-loss', gameState.vibrationLossEnabled);
+                });
+                if (!navigator.vibrate || simulateNoVibration) {
+                    vibrationLossToggle.disabled = true;
+                }
+            }
             elements.resetSettingsButton.addEventListener('click', resetAllSettings);
         }
         function setupThemeListeners() {
@@ -3848,17 +4153,6 @@
         function analyzeGameState() {
             const modal = document.getElementById('ai-analysis-modal');
             const overlay = document.getElementById('ai-analysis-overlay');
-            const isStandardGrid = (gameState.gridRows === gameState.gridCols) && 
-                                   (gameState.gridRows >= 3 && gameState.gridRows <= 5);
-            if (!isStandardGrid) {
-                modal.classList.remove('hidden');
-                setTimeout(() => {
-                    modal.classList.add('opacity-100', 'scale-100');
-                    modal.classList.remove('opacity-0', 'scale-95');
-                }, 10);
-                overlay.classList.remove('hidden');
-                return;
-            }
             overlay.classList.add('hidden');
             const directions = ['up', 'down', 'left', 'right'];
             const directionNames = {
