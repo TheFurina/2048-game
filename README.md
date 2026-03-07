@@ -166,9 +166,9 @@
 2048_v1.26.0/
 ├── 2048_v1.26.0.html          # 主HTML文件（包含所有游戏逻辑）
 └── features/                  # 功能模块目录
-    ├── custom-theme.js        # 自定义主题功能（v0.1）
-    ├── ai-analysis.js         # AI分析功能（v2.0）
-    └── i18n.js                # i18n国际化（v1.0）
+    ├── custom-theme.js        # 自定义主题功能
+    ├── ai-analysis.js         # AI分析功能
+    └── i18n.js                # i18n国际化
 ```
 
 ## 贡献指南
