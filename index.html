@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="icon" href="https://cdn.jsdelivr.net/gh/TheFurina/2048-game@main/icon.png">
+    <link rel="icon" href="./icon.png">
     <title>2048 Game</title>
     <meta name="description" content="玩2048游戏，一款流行的在线益智数字游戏。通过滑动合并相同数字，挑战达到2048方块。支持多种难度和网格大小。">
     <meta name="keywords" content="2048游戏,2048,数字游戏,益智游戏,在线游戏,免费游戏,脑力游戏,滑动游戏,合并游戏,挑战游戏">
@@ -62,9 +62,31 @@
     <script src="./features/custom-theme.js"></script>
     <script src="./features/ai-analysis.js"></script>
     <script src="./features/i18n.js"></script>
+    <script src="./features/bluetooth-sync.js"></script>
     <script>
-        const gameVersion = '1.26.0';
+        const gameVersion = '2.3.0';
         window.gameVersion = gameVersion;
+        const config = { // Game configuration
+            initialTiles: 2, // Initial number of tiles
+            winningValue: 2048, // Winning target value
+            touchThreshold: 10, // Minimum touch swipe distance
+            maxUndoSteps: 10, // Maximum undo steps
+            animationDuration: 150, // Tile movement animation duration (milliseconds)
+            difficultySettings: { // Difficulty settings
+                easy: { // Easy
+                    fourProbability: 0.4, // 4 appearance probability: 40%
+                    scoreMultiplier: 1 // Score multiplier
+                },
+                medium: { // Medium
+                    fourProbability: 0.1, // 4 appearance probability: 10%
+                    scoreMultiplier: 1 // Score multiplier
+                },
+                hard: { // Hard
+                    fourProbability: 0.05, // 4 appearance probability: 5%
+                    scoreMultiplier: 1.5 // Score multiplier
+                }
+            }
+        };
     </script>
     <script>
         (function() {
@@ -79,11 +101,11 @@
                     setupThemeCustomizer();
                 }
             } catch (error) {
-                console.warn('自定义主题模块加载失败:', error);
+                console.warn('Custom theme module loading failed:', error);
                 window.customThemeModuleLoaded = false;
-                window.setupThemeCustomizer = function() { alert('自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); };
-                window.loadCustomTheme = function() { alert('自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); };
-                window.resetCustomTheme = function() { alert('自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); };
+                window.setupThemeCustomizer = function() { alert(window.i18n && window.i18n.t ? i18n.t('customThemeModuleMissing') : '自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); };
+                window.loadCustomTheme = function() { alert(window.i18n && window.i18n.t ? i18n.t('customThemeModuleMissing') : '自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); };
+                window.resetCustomTheme = function() { alert(window.i18n && window.i18n.t ? i18n.t('customThemeModuleMissing') : '自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); };
             }
         })();
     </script>
@@ -99,17 +121,17 @@
                     setupAiAnalysis();
                 }
             } catch (error) {
-                console.warn('AI分析模块加载失败:', error);
+                console.warn('AI analysis module loading failed:', error);
                 window.aiAnalysisModuleLoaded = false;
                 window.setupAiAnalysis = function() {
                     const aiAnalysisButton = document.getElementById('ai-analysis-button');
                     if (aiAnalysisButton) {
                         aiAnalysisButton.addEventListener('click', function() {
-                            alert('AI分析模块未找到，请确保 features/ai-analysis.js 文件存在。');
+                            alert(window.i18n && window.i18n.t ? i18n.t('aiAnalysisModuleMissing') : 'AI分析模块未找到，请确保 features/ai-analysis.js 文件存在。');
                         });
                     }
                 };
-                window.analyzeGameState = function() { alert('AI分析模块未找到，请确保 features/ai-analysis.js 文件存在。'); };
+                window.analyzeGameState = function() { alert(window.i18n && window.i18n.t ? i18n.t('aiAnalysisModuleMissing') : 'AI分析模块未找到，请确保 features/ai-analysis.js 文件存在。'); };
                 if (document.readyState === 'loading') {
                     document.addEventListener('DOMContentLoaded', window.setupAiAnalysis);
                 } else {
@@ -131,12 +153,39 @@
                     i18n.init();
                 }
             } catch (error) {
-                console.warn('i18n模块加载失败:', error);
+                console.warn('i18n module loading failed:', error);
                 window.i18nModuleLoaded = false;
                 window.i18n = {
                     t: function(key) { return key; },
-                    init: function() { console.warn('i18n模块未找到，请确保 features/i18n.js 文件存在。'); }
+                    init: function() { console.warn('i18n module not found. Please ensure features/i18n.js file exists.'); }
                 };
+            }
+        })();
+    </script>
+    <script>
+        (function() {
+            try {
+                window.bluetoothSync = bluetoothSync;
+                window.bluetoothSyncModuleLoaded = true;
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        bluetoothSync.init();
+                    });
+                } else {
+                    bluetoothSync.init();
+                }
+            } catch (error) {
+                console.warn('Bluetooth sync module loading failed:', error);
+                window.bluetoothSyncModuleLoaded = false;
+                window.bluetoothSync = {
+                    init: function() { console.warn('Bluetooth sync module not found. Please ensure features/bluetooth-sync.js file exists.'); }
+                };
+                const bluetoothSyncBtn = document.getElementById('bluetooth-sync-button');
+                if (bluetoothSyncBtn) {
+                    bluetoothSyncBtn.addEventListener('click', function() {
+                        alert(window.i18n && window.i18n.t ? i18n.t('bluetoothSyncModuleMissing') : '蓝牙同步模块未找到，请确保 features/bluetooth-sync.js 文件存在。');
+                    });
+                }
             }
         })();
     </script>
@@ -202,7 +251,21 @@
             opacity: 0;
             transform: scale(0.95);
             transition: opacity 0.3s ease, transform 0.3s ease;
-        } 
+        }
+        .bluetooth-content.modal-enter {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        .bluetooth-content.modal-enter-active {
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .bluetooth-content.modal-exit-active {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
         :host, html { 
             -webkit-text-size-adjust: 100%;
             -moz-text-size-adjust: 100%;
@@ -1244,6 +1307,16 @@
             display: inline-block;
             text-align: center;
         }
+        .custom-select .select-selected > span:first-child {
+            flex: 1;
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .custom-select .select-item {
+            text-align: left;
+        }
         #game-state-assessment {
             font-weight: bold;
         }
@@ -1332,6 +1405,8 @@
             .select-items {
                 user-select: none;
                 overflow-y: auto;
+            }
+            .select-selected.active ~ .select-items {
                 max-height: 200px;
             }
             .select-item {
@@ -1340,10 +1415,16 @@
                 font-family: 'Font Awesome 6 Free', sans-serif;
                 font-weight: 900;
             }
-            .select-item.selected { 
+            .select-item.selected {
+                background-color: transparent;
+            }
+            .select-selected.active ~ .select-items .select-item.selected {
                 background-color: #d1d5db;
             }
-            .dark .select-item.selected { 
+            .dark .select-item.selected {
+                background-color: transparent;
+            }
+            .dark .select-selected.active ~ .select-items .select-item.selected {
                 background-color: #4b5563;
             }
             .select-selected span {
@@ -1410,7 +1491,7 @@
                     </div>
                 </div>
                 <div class="options-row">
-                    <span class="option-label">难度选择:</span>
+                    <span class="option-label" data-i18n="difficulty">难度选择:</span>
                     <div class="option-buttons">
                         <button id="easy-mode" class="bg-easy hover:bg-easy/90 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-easy/50 flex-1 btn-hover">
                             <i class="fa-solid fa-shield-check"></i>简单
@@ -1427,11 +1508,11 @@
         </div>
         <div class="stats-container flex justify-between mb-4">
             <div class="bg-grid dark:bg-dark-grid text-center rounded-md p-3 flex-1 mr-2">
-                <div class="text-xs uppercase text-white/70 dark:text-dark-muted">分数</div>
+                <div class="text-xs uppercase text-white/70 dark:text-dark-muted" data-i18n="score">分数</div>
                 <div id="score" class="text-xl font-bold text-white dark:text-dark-text">0</div>
             </div>
             <div class="bg-grid dark:bg-dark-grid text-center rounded-md p-3 flex-1">
-                <div class="text-xs uppercase text-white/70 dark:text-dark-muted">最高分</div>
+                <div class="text-xs uppercase text-white/70 dark:text-dark-muted" data-i18n="bestScore">最高分</div>
                 <div id="best-score" class="text-xl font-bold text-white dark:text-dark-text">0</div>
             </div>
         </div>
@@ -1455,16 +1536,16 @@
         <div id="game-touch-area" class="mt-4 h-5 bg-transparent"></div>
         <div id="game-message" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="game-message-title" aria-modal="true">
             <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0">
-                <h2 id="game-message-title" class="text-2xl font-bold text-secondary mb-4">恭喜你获胜！</h2>
-                <p id="game-message-text" class="text-secondary/80 mb-6">你达到了2048分，可以继续游戏挑战更高分数，或者重新开始。</p>
+                <h2 id="game-message-title" class="text-2xl font-bold text-secondary mb-4" data-i18n="gameWon">恭喜你获胜！</h2>
+                <p id="game-message-text" class="text-secondary/80 mb-6" data-i18n="gameWonText">你达到了2048分，可以继续游戏挑战更高分数，或者重新开始。</p>
                 <button id="game-message-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50">
-                    <i class="fa-solid fa-refresh mr-2"></i>再玩一次
+                    <i class="fa-solid fa-refresh mr-2"></i><span data-i18n="tryAgain">再玩一次</span>
                 </button>
             </div>
         </div>
         <div id="pause-menu" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="pause-menu-title" aria-modal="true">
             <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0">
-                <h2 id="pause-menu-title" class="text-2xl font-bold text-secondary mb-4">游戏暂停</h2>
+                <h2 id="pause-menu-title" class="text-2xl font-bold text-secondary mb-4" data-i18n="gamePaused">游戏暂停</h2>
                 <div class="flex flex-col gap-4">
                     <button id="resume-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50">
                         <i class="fa-solid fa-play mr-2"></i><span>继续游戏</span>
@@ -1486,11 +1567,11 @@
                 <div class="flex flex-col gap-3">
                     <div class="setting-category">
                         <h3 class="text-base font-semibold text-secondary mb-2 text-left category-title flex items-center">
-                            <i class="fa-solid fa-gauge-high mr-2"></i>游戏性能
+                            <i class="fa-solid fa-gauge-high mr-2"></i><span data-i18n="gamePerformance">游戏性能</span>
                         </h3>
                         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 py-3 px-2 shadow-sm">
                             <div class="flex items-center justify-between mb-2 px-2">
-                                <span class="text-gray-700 dark:text-dark-muted">GPU加速</span>
+                                <span class="text-gray-700 dark:text-dark-muted" data-i18n="gpuAcceleration">GPU加速</span>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" id="gpu-acceleration" class="sr-only peer" checked title="GPU加速">
                                     <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
@@ -1499,7 +1580,7 @@
                             <div class="border-b border-gray-200 dark:border-gray-700 my-3 mx-2"></div>
                             <div class="vibration-toggle-container flex items-center justify-between mb-2 px-2">
                                 <div class="flex items-center">
-                                    <span class="text-gray-700 dark:text-dark-muted">振动反馈</span>
+                                    <span class="text-gray-700 dark:text-dark-muted" data-i18n="vibration">振动反馈</span>
                                     <span id="vibration-warning-icon" class="ml-2 text-yellow-500 opacity-0 transition-opacity duration-300" title="当前浏览器不支持振动功能">
                                         <i class="fa-solid fa-circle-exclamation"></i>
                                     </span>
@@ -1511,21 +1592,21 @@
                             </div>
                             <div id="vibration-details" class="ml-6 mt-1 space-y-2">
                                 <div class="flex items-center justify-between px-2">
-                                    <span class="text-gray-600 dark:text-dark-muted text-sm">合并振动</span>
+                                    <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="mergeVibration">合并振动</span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="vibration-merge" class="sr-only peer" checked title="合并振动">
                                         <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
                                     </label>
                                 </div>
                                 <div class="flex items-center justify-between px-2">
-                                    <span class="text-gray-600 dark:text-dark-muted text-sm">获胜振动</span>
+                                    <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="winVibration">获胜振动</span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="vibration-win" class="sr-only peer" checked title="获胜振动">
                                         <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
                                     </label>
                                 </div>
                                 <div class="flex items-center justify-between px-2">
-                                    <span class="text-gray-600 dark:text-dark-muted text-sm">失败振动</span>
+                                    <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="lossVibration">失败振动</span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="vibration-loss" class="sr-only peer" checked title="失败振动">
                                         <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
@@ -1534,7 +1615,7 @@
                             </div>
                             <div class="border-b border-gray-200 dark:border-gray-700 my-3 mx-2"></div>
                             <div class="flex items-center justify-between px-2">
-                                <span class="text-gray-700 dark:text-dark-muted">滑块动画</span>
+                                <span class="text-gray-700 dark:text-dark-muted" data-i18n="tileAnimation">滑块动画</span>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" id="tile-animation" class="sr-only peer" checked title="滑块动画">
                                     <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
@@ -1542,21 +1623,21 @@
                             </div>
                             <div id="animation-details" class="ml-6 mt-1 space-y-2">
                                 <div class="flex items-center justify-between px-2">
-                                    <span class="text-gray-600 dark:text-dark-muted text-sm">新滑块出现动画</span>
+                                    <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="appearAnimation">新滑块出现动画</span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="tile-appear-animation" class="sr-only peer" checked title="新滑块出现动画">
                                         <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
                                     </label>
                                 </div>
                                 <div class="flex items-center justify-between px-2">
-                                    <span class="text-gray-600 dark:text-dark-muted text-sm">滑块移动动画</span>
+                                    <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="moveAnimation">滑块移动动画</span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="tile-move-animation" class="sr-only peer" checked title="滑块移动动画">
                                         <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
                                     </label>
                                 </div>
                                 <div class="flex items-center justify-between px-2">
-                                    <span class="text-gray-600 dark:text-dark-muted text-sm">滑块合并动画</span>
+                                    <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="mergeAnimation">滑块合并动画</span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="tile-merge-animation" class="sr-only peer" checked title="滑块合并动画">
                                         <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
@@ -1567,21 +1648,21 @@
                     </div>
                     <div class="setting-category">
                         <h3 class="text-base font-semibold text-secondary mb-2 text-left category-title flex items-center">
-                            <i class="fa-solid fa-paint-roller mr-2"></i>外观设置
+                            <i class="fa-solid fa-paint-roller mr-2"></i><span data-i18n="appearance">外观设置</span>
                         </h3>
                         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-3 shadow-sm">
                             <div class="flex items-center justify-between mt-2 mb-2 px-2">
-                                <label for="theme-toggle" class="text-gray-700 dark:text-dark-muted">主题</label>
+                                <label for="theme-toggle" class="text-gray-700 dark:text-dark-muted" data-i18n="theme">主题</label>
                                 <div class="custom-select relative w-full max-w-[180px]">
                                     <div class="select-selected flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md border border-gray-300 dark:border-gray-600 cursor-pointer transition-all duration-200 hover:border-primary/50">
-                                        <span><i class="fa-solid fa-desktop mr-1"></i>跟随浏览器</span>
+                                        <span><i class="fa-solid fa-desktop mr-1"></i><span data-i18n="followBrowser">跟随浏览器</span></span>
                                         <i class="fa fa-chevron-down text-xs ml-2 text-gray-500 dark:text-gray-400"></i>
                                     </div>
                                     <div class="select-items absolute mt-1 w-full bg-gray-100 dark:bg-gray-800 rounded-md shadow-lg border border-gray-300 dark:border-gray-600 z-20 max-h-0 opacity-0 overflow-y-auto transition-all duration-300 ease-in-out">
-                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="auto"><i class="fa-solid fa-desktop mr-1"></i>跟随浏览器</div>
-                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="light"><i class="fa-solid fa-sun mr-1"></i>浅色</div>
-                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="dark"><i class="fa-solid fa-moon mr-1"></i>深色</div>
-                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="custom"><i class="fa-solid fa-palette mr-1"></i>自定义</div>
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="auto"><i class="fa-solid fa-desktop mr-1"></i><span data-i18n="followBrowser">跟随浏览器</span></div>
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="light"><i class="fa-solid fa-sun mr-1"></i><span data-i18n="lightTheme">浅色</span></div>
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="dark"><i class="fa-solid fa-moon mr-1"></i><span data-i18n="darkTheme">深色</span></div>
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="custom"><i class="fa-solid fa-palette mr-1"></i><span data-i18n="custom">自定义</span></div>
                                     </div>
                                 </div>
                                 <select id="theme-toggle" style="display: none;" class="bg-grid text-gray-800 dark:text-white p-2 rounded-md shadow-md transition-all duration-200 focus:outline-none dark:bg-dark-grid" title="选择主题">
@@ -1593,18 +1674,32 @@
                             </div>
                             <div id="custom-theme-button-container" class="flex justify-end px-2 mt-1">
                                 <button id="custom-theme-button" style="display: none;" class="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded-md text-sm transition-all duration-200">
-                                    <i class="fa-solid fa-palette mr-1"></i>自定义主题设置
+                                    <i class="fa-solid fa-palette mr-1"></i><span data-i18n="customThemeButton">自定义主题设置</span>
                                 </button>
                             </div>
                         </div>
                     </div>
                     <div class="setting-category">
                         <h3 class="text-base font-semibold text-secondary mb-2 text-left category-title flex items-center">
-                            <i class="fa-solid fa-database mr-2"></i>数据与管理
+                            <i class="fa-solid fa-database mr-2"></i><span data-i18n="dataManagement">数据与管理</span>
                         </h3>
                         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-2 shadow-sm">
                             <button id="data-transfer-button" class="flex items-center justify-between w-full px-4 py-3 text-gray-700 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-all duration-200 rounded-lg">
-                                数据管理
+                                <span class="flex items-center">
+                                    <i class="fa-solid fa-database w-5 mr-2"></i>
+                                    <span data-i18n="dataTransfer">数据管理</span>
+                                </span>
+                                <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </button>
+                            <div class="border-b border-gray-200 dark:border-gray-700 my-2 mx-2"></div>
+                            <button id="bluetooth-sync-button" class="flex items-center justify-between w-full px-4 py-3 text-gray-700 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-all duration-200 rounded-lg">
+                                <span class="flex items-center">
+                                    <i class="fa-brands fa-bluetooth-b w-5 mr-2"></i>
+                                    <span data-i18n="bluetoothSync">蓝牙同步</span>
+                                    <span id="bluetooth-warning-icon" class="ml-2 text-yellow-500 opacity-0 transition-opacity duration-300" title="当前浏览器不支持蓝牙功能">
+                                        <i class="fa-solid fa-circle-exclamation"></i>
+                                    </span>
+                                </span>
                                 <i class="fa-solid fa-chevron-right text-xs"></i>
                             </button>
                         </div>
@@ -1617,7 +1712,7 @@
                         <i class="fa-solid fa-times"></i>
                     </button>
                     <div class="flex justify-end">
-                        <a href="https://github.com/TheFurina/2048-game" class="text-primary hover:underline flex items-center gap-1 text-xs" target="_blank"><i class="fa-brands fa-github"></i> 项目主页</a>
+                        <a href="https://github.com/TheFurina/2048-game" class="text-primary hover:underline flex items-center gap-1 text-xs" target="_blank"><i class="fa-brands fa-github"></i> <span data-i18n="github">项目主页</span></a>
                     </div>
                 </div>
             </div>
@@ -1625,7 +1720,7 @@
         <div id="custom-theme-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="custom-theme-modal-title" aria-modal="true">
             <div class="bg-gray-50 dark:bg-dark-surface rounded-lg max-w-2xl w-full max-h-[90vh] shadow-xl transform transition-all duration-300 scale-95 opacity-0 flex flex-col">
                 <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                    <h2 id="custom-theme-modal-title" class="text-xl font-bold text-secondary">自定义主题</h2>
+                    <h2 id="custom-theme-modal-title" class="text-xl font-bold text-secondary" data-i18n="customTheme">自定义主题</h2>
                     <div class="mr-[1rem]">
                         <button id="close-custom-theme-modal" class="text-secondary/60 hover:text-secondary focus:outline-none text-lg" title="关闭">
                             <i class="fa-solid fa-xmark"></i>
@@ -1635,76 +1730,76 @@
             <div class="flex-1 p-6 overflow-y-auto">
                 <div class="flex flex-col gap-4">
                 <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
-                    <h3 class="text-lg font-semibold text-gray-700 dark:text-dark-text mb-3">基础颜色</h3>
+                    <h3 class="text-lg font-semibold text-gray-700 dark:text-dark-text mb-3" data-i18n="baseColors">基础颜色</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div class="flex flex-col">
-                            <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">主背景色</label>
+                            <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="mainBg">主背景色</label>
                             <div class="flex items-center gap-2 mb-2">
                                 <input type="color" id="custom-bg-color" value="#faf8ef" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                 <input type="text" id="custom-bg-color-text" value="#faf8ef" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                             </div>
                             <div class="flex items-center gap-2">
-                                <label class="text-xs text-gray-500 dark:text-gray-400 w-12">不透明度</label>
+                                <label class="text-xs text-gray-500 dark:text-gray-400 w-12" data-i18n="opacity">不透明度</label>
                                 <input type="range" id="custom-bg-opacity" min="0" max="100" value="100" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
                                 <span id="custom-bg-opacity-value" class="text-xs text-gray-500 dark:text-gray-400 w-8 text-center">100%</span>
                             </div>
                         </div>
                         <div class="flex flex-col">
-                            <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">主色调</label>
+                            <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="primaryColor">主色调</label>
                             <div class="flex items-center gap-2 mb-2">
                                 <input type="color" id="custom-primary-color" value="#faa31b" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                 <input type="text" id="custom-primary-color-text" value="#faa31b" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                             </div>
                             <div class="flex items-center gap-2">
-                                <label class="text-xs text-gray-500 dark:text-gray-400 w-12">不透明度</label>
+                                <label class="text-xs text-gray-500 dark:text-gray-400 w-12" data-i18n="opacity">不透明度</label>
                                 <input type="range" id="custom-primary-opacity" min="0" max="100" value="100" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
                                 <span id="custom-primary-opacity-value" class="text-xs text-gray-500 dark:text-gray-400 w-8 text-center">100%</span>
                             </div>
                         </div>
                         <div class="flex flex-col">
-                            <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">次色调</label>
+                            <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="secondaryColor">次色调</label>
                             <div class="flex items-center gap-2 mb-2">
                                 <input type="color" id="custom-secondary-color" value="#8f7a66" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                 <input type="text" id="custom-secondary-color-text" value="#8f7a66" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                             </div>
                             <div class="flex items-center gap-2">
-                                <label class="text-xs text-gray-500 dark:text-gray-400 w-12">不透明度</label>
+                                <label class="text-xs text-gray-500 dark:text-gray-400 w-12" data-i18n="opacity">不透明度</label>
                                 <input type="range" id="custom-secondary-opacity" min="0" max="100" value="100" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
                                 <span id="custom-secondary-opacity-value" class="text-xs text-gray-500 dark:text-gray-400 w-8 text-center">100%</span>
                             </div>
                         </div>
                         <div class="flex flex-col">
-                            <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">网格颜色</label>
+                            <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="gridColor">网格颜色</label>
                             <div class="flex items-center gap-2 mb-2">
                                 <input type="color" id="custom-grid-color" value="#bbada0" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                 <input type="text" id="custom-grid-color-text" value="#bbada0" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                             </div>
                             <div class="flex items-center gap-2">
-                                <label class="text-xs text-gray-500 dark:text-gray-400 w-12">不透明度</label>
+                                <label class="text-xs text-gray-500 dark:text-gray-400 w-12" data-i18n="opacity">不透明度</label>
                                 <input type="range" id="custom-grid-opacity" min="0" max="100" value="100" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
                                 <span id="custom-grid-opacity-value" class="text-xs text-gray-500 dark:text-gray-400 w-8 text-center">100%</span>
                             </div>
                         </div>
                         <div class="flex flex-col">
-                            <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">空单元格颜色</label>
+                            <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="cellEmptyColor">空单元格颜色</label>
                             <div class="flex items-center gap-2 mb-2">
                                 <input type="color" id="custom-cell-empty-color" value="#cdc1b4" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                 <input type="text" id="custom-cell-empty-color-text" value="#cdc1b4" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                             </div>
                             <div class="flex items-center gap-2">
-                                <label class="text-xs text-gray-500 dark:text-gray-400 w-12">不透明度</label>
+                                <label class="text-xs text-gray-500 dark:text-gray-400 w-12" data-i18n="opacity">不透明度</label>
                                 <input type="range" id="custom-cell-empty-opacity" min="0" max="100" value="100" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
                                 <span id="custom-cell-empty-opacity-value" class="text-xs text-gray-500 dark:text-gray-400 w-8 text-center">100%</span>
                             </div>
                         </div>
                         <div class="flex flex-col">
-                            <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">滚动条颜色</label>
+                            <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="scrollbarColor">滚动条颜色</label>
                             <div class="flex items-center gap-2 mb-2">
                                 <input type="color" id="custom-scrollbar-color" value="#bbbbbb" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                 <input type="text" id="custom-scrollbar-color-text" value="#bbbbbb" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                             </div>
                             <div class="flex items-center gap-2">
-                                <label class="text-xs text-gray-500 dark:text-gray-400 w-12">不透明度</label>
+                                <label class="text-xs text-gray-500 dark:text-gray-400 w-12" data-i18n="opacity">不透明度</label>
                                 <input type="range" id="custom-scrollbar-opacity" min="0" max="100" value="100" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
                                 <span id="custom-scrollbar-opacity-value" class="text-xs text-gray-500 dark:text-gray-400 w-8 text-center">100%</span>
                             </div>
@@ -1712,28 +1807,28 @@
                         </div>
                     </div>
                     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
-                        <h3 class="text-lg font-semibold text-gray-700 dark:text-dark-text mb-3">模态框颜色</h3>
+                        <h3 class="text-lg font-semibold text-gray-700 dark:text-dark-text mb-3" data-i18n="modalColors">模态框颜色</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">模态框背景色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="modalBg">模态框背景色</label>
                                 <div class="flex items-center gap-2 mb-2">
                                     <input type="color" id="custom-modal-bg" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-modal-bg-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <label class="text-xs text-gray-500 dark:text-gray-400 w-12">不透明度</label>
+                                    <label class="text-xs text-gray-500 dark:text-gray-400 w-12" data-i18n="opacity">不透明度</label>
                                     <input type="range" id="custom-modal-bg-opacity" min="0" max="100" value="100" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
                                     <span id="custom-modal-bg-opacity-value" class="text-xs text-gray-500 dark:text-gray-400 w-8 text-center">100%</span>
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">模态框文字颜色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="modalText">模态框文字颜色</label>
                                 <div class="flex items-center gap-2 mb-2">
                                     <input type="color" id="custom-modal-text" value="#333333" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-modal-text-text" value="#333333" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <label class="text-xs text-gray-500 dark:text-gray-400 w-12">不透明度</label>
+                                    <label class="text-xs text-gray-500 dark:text-gray-400 w-12" data-i18n="opacity">不透明度</label>
                                     <input type="range" id="custom-modal-text-opacity" min="0" max="100" value="100" class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
                                     <span id="custom-modal-text-opacity-value" class="text-xs text-gray-500 dark:text-gray-400 w-8 text-center">100%</span>
                                 </div>
@@ -1741,227 +1836,227 @@
                         </div>
                     </div>
                     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
-                        <h3 class="text-lg font-semibold text-gray-700 dark:text-dark-text mb-3">滑块颜色</h3>
+                        <h3 class="text-lg font-semibold text-gray-700 dark:text-dark-text mb-3" data-i18n="tileColors">滑块颜色</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 2 背景色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile2Bg">数字 2 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-2-bg" value="#eee4da" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-2-bg-text" value="#eee4da" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 2 文字颜色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile2Text">数字 2 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-2-text" value="#776e65" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-2-text-text" value="#776e65" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 4 背景色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile4Bg">数字 4 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-4-bg" value="#ede0c8" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-4-bg-text" value="#ede0c8" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 4 文字颜色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile4Text">数字 4 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-4-text" value="#776e65" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-4-text-text" value="#776e65" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 8 背景色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile8Bg">数字 8 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-8-bg" value="#f2b179" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-8-bg-text" value="#f2b179" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 8 文字颜色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile8Text">数字 8 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-8-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-8-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 16 背景色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile16Bg">数字 16 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-16-bg" value="#f59563" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-16-bg-text" value="#f59563" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 16 文字颜色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile16Text">数字 16 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-16-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-16-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 32 背景色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile32Bg">数字 32 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-32-bg" value="#f67c5f" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-32-bg-text" value="#f67c5f" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 32 文字颜色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile32Text">数字 32 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-32-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-32-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 64 背景色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile64Bg">数字 64 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-64-bg" value="#f65e3b" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-64-bg-text" value="#f65e3b" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 64 文字颜色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile64Text">数字 64 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-64-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-64-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 128 背景色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile128Bg">数字 128 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-128-bg" value="#edcf72" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-128-bg-text" value="#edcf72" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 128 文字颜色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile128Text">数字 128 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-128-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-128-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 256 背景色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile256Bg">数字 256 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-256-bg" value="#edcc61" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-256-bg-text" value="#edcc61" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 256 文字颜色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile256Text">数字 256 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-256-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-256-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 512 背景色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile512Bg">数字 512 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-512-bg" value="#edc850" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-512-bg-text" value="#edc850" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 512 文字颜色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile512Text">数字 512 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-512-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-512-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 1024 背景色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile1024Bg">数字 1024 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-1024-bg" value="#edc53f" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-1024-bg-text" value="#edc53f" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 1024 文字颜色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile1024Text">数字 1024 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-1024-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-1024-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 2048 背景色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile2048Bg">数字 2048 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-2048-bg" value="#edc22e" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-2048-bg-text" value="#edc22e" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 2048 文字颜色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile2048Text">数字 2048 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-2048-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-2048-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 4096 背景色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile4096Bg">数字 4096 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-4096-bg" value="#e65100" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-4096-bg-text" value="#e65100" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 4096 文字颜色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile4096Text">数字 4096 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-4096-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-4096-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 8192 背景色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile8192Bg">数字 8192 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-8192-bg" value="#bf360c" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-8192-bg-text" value="#bf360c" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 8192 文字颜色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile8192Text">数字 8192 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-8192-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-8192-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 16384 背景色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile16384Bg">数字 16384 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-16384-bg" value="#880e4f" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-16384-bg-text" value="#880e4f" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 16384 文字颜色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile16384Text">数字 16384 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-16384-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-16384-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 32768 背景色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile32768Bg">数字 32768 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-32768-bg" value="#4a148c" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-32768-bg-text" value="#4a148c" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">数字 32768 文字颜色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile32768Text">数字 32768 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-32768-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-32768-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">更大数字 背景色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tileSuperBg">更大数字 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-super-bg" value="#311b92" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-super-bg-text" value="#311b92" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1">更大数字 文字颜色</label>
+                                <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tileSuperText">更大数字 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-super-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     <input type="text" id="custom-tile-super-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
@@ -1979,10 +2074,10 @@
                         </button>
                         <div id="theme-actions-bubble" class="absolute bottom-12 left-[-10px] bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 opacity-0 invisible transition-all duration-200 transform translate-y-2 z-30 flex flex-col gap-2 min-w-[110px]">
                             <button id="export-custom-theme" class="px-3 py-1 bg-secondary hover:bg-secondary/90 text-white rounded-md transition-all duration-200 text-sm flex items-center justify-center min-w-[110px]">
-                                <i class="fa-solid fa-upload mr-1"></i>导出主题
+                                <i class="fa-solid fa-upload mr-1"></i><span data-i18n="exportTheme">导出主题</span>
                             </button>
                             <button id="import-custom-theme" class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded-md transition-all duration-200 text-sm flex items-center justify-center min-w-[110px]">
-                                <i class="fa-solid fa-download mr-1"></i>导入主题
+                                <i class="fa-solid fa-download mr-1"></i><span data-i18n="importTheme">导入主题</span>
                             </button>
                             <div class="absolute bottom-[-8px] left-3 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white dark:border-t-gray-800"></div>
                         </div>
@@ -1990,27 +2085,62 @@
                 </div>
                 <div class="flex flex-wrap gap-2 justify-center">
                     <button id="save-custom-theme" class="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded-md transition-all duration-200 flex-1 sm:flex-none sm:min-w-[100px]">
-                        <i class="fa-solid fa-save mr-1"></i>保存
+                        <i class="fa-solid fa-save mr-1"></i><span data-i18n="save">保存</span>
                     </button>
                     <button id="reset-custom-theme" class="px-3 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-md transition-all duration-200 flex-1 sm:flex-none sm:min-w-[100px]">
-                        <i class="fa-solid fa-rotate-right mr-1"></i>重置
+                        <i class="fa-solid fa-rotate-right mr-1"></i><span data-i18n="reset">重置</span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
+        <div id="export-theme-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="export-theme-modal-title" aria-modal="true">
+            <div class="bg-gray-50 dark:bg-dark-surface rounded-lg max-w-2xl w-full max-h-[90vh] shadow-xl transform transition-all duration-300 scale-95 opacity-0 flex flex-col">
+                <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <h2 id="export-theme-modal-title" class="text-xl font-bold text-secondary" data-i18n="exportThemeModal">导出主题</h2>
+                    <div class="mr-[1rem]">
+                        <button id="close-export-theme-modal" class="text-secondary/60 hover:text-secondary focus:outline-none text-lg" title="关闭">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex-1 p-6 overflow-y-auto">
+                    <div class="flex flex-col gap-4">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+                            <h3 class="text-lg font-semibold text-gray-700 dark:text-dark-text mb-3" data-i18n="selectThemeItems">选择要导出的主题项</h3>
+                            <div id="theme-export-options" class="space-y-2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-dark-surface rounded-b-lg">
+                    <div class="flex items-center gap-2 mb-3">
+                        <input type="checkbox" id="select-all-theme-items" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:bg-dark-surface dark:border-dark-muted" checked>
+                        <label for="select-all-theme-items" class="text-sm text-gray-700 dark:text-dark-text" data-i18n="selectAll">全选</label>
+                    </div>
+                    <div class="flex flex-wrap gap-2 justify-center">
+                        <button id="confirm-export-theme" class="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded-md transition-all duration-200 flex-1 sm:flex-none sm:min-w-[100px]">
+                            <i class="fa-solid fa-upload mr-1"></i><span data-i18n="export">导出</span>
+                        </button>
+                        <button id="cancel-export-theme" class="px-3 py-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-md transition-all duration-200 flex-1 sm:flex-none sm:min-w-[100px]">
+                            <i class="fa-solid fa-times mr-1"></i><span data-i18n="cancel">取消</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="data-transfer-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="data-transfer-modal-title" aria-modal="true">
             <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0 relative">
-                <h2 id="data-transfer-modal-title" class="text-2xl font-bold text-secondary mb-4">数据管理</h2>
-                <button id="close-data-modal" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl dark:text-dark-muted dark:hover:text-white" title="关闭数据管理">
+                <h2 id="data-transfer-modal-title" class="text-2xl font-bold text-secondary mb-4" data-i18n="dataTransfer">数据管理</h2>
+                <button id="close-data-modal" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl dark:text-dark-muted dark:hover:text-white" title="关闭设置">
                     <i class="fa-solid fa-times"></i>
                 </button>
                 <div class="flex flex-col gap-3 mb-4">
                     <button id="export-data-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50">
-                        <i class="fa-solid fa-upload mr-2"></i>导出数据
+                        <i class="fa-solid fa-upload mr-2"></i><span>导出数据</span>
                     </button>
                     <button id="import-data-button" class="bg-secondary hover:bg-secondary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary/50">
-                        <i class="fa-solid fa-download mr-2"></i>导入数据
+                        <i class="fa-solid fa-download mr-2"></i><span>导入数据</span>
                     </button>
                 </div>
                 <div class="relative w-full mb-0.5">
@@ -2019,9 +2149,92 @@
                         <i class="fa-solid fa-copy text-gray-600 dark:text-gray-300"></i>
                     </button>
                 </div>
-                <div class="flex items-center gap-2 mb-4">
-                    <input type="checkbox" id="export-settings-checkbox" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:bg-dark-surface dark:border-dark-muted">
-                    <label for="export-settings-checkbox" class="text-sm text-gray-700 dark:text-dark-text">包含设置数据</label>
+                <div class="flex items-center justify-between gap-4 mb-4">
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="export-settings-checkbox" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:bg-dark-surface dark:border-dark-muted">
+                        <label for="export-settings-checkbox" class="text-sm text-gray-700 dark:text-dark-text">包含设置数据</label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label for="encoding-select" class="text-sm text-gray-700 dark:text-dark-text" data-i18n="encoding">编码方式:</label>
+                        <select id="encoding-select" class="px-3 py-2 border border-gray-300 dark:border-dark-muted rounded-md bg-white dark:bg-dark-surface text-gray-700 dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary">
+                            <option value="base64">Base64</option>
+                            <option value="base91">Base91</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="bluetooth-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="bluetooth-modal-title" aria-modal="true">
+            <div class="bluetooth-content bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl relative">
+                <h2 id="bluetooth-modal-title" class="text-2xl font-bold text-secondary mb-4" data-i18n="bluetoothModalTitle">蓝牙同步</h2>
+                <button id="close-bluetooth-modal" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl dark:text-dark-muted dark:hover:text-white" title="关闭">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+                <div id="bluetooth-select-section">
+                    <div class="flex flex-col gap-4 mb-6">
+                        <button id="bluetooth-export-select" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                            <i class="fa-brands fa-bluetooth-b mr-2"></i><span data-i18n="exportViaBluetooth">蓝牙导出</span>
+                        </button>
+                        <button id="bluetooth-import-select" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            <i class="fa-brands fa-bluetooth mr-2"></i><span data-i18n="importViaBluetooth">蓝牙导入</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="bluetooth-export-section" style="display: none;">
+                    <div class="mb-4">
+                        <p id="bluetooth-export-pin-text" class="text-gray-700 dark:text-dark-muted mb-4" data-i18n="bluetoothExportPin">请在接收设备上输入此PIN码</p>
+                        <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-4">
+                            <span id="bluetooth-pin-display" class="text-4xl font-mono font-bold text-primary dark:text-dark-primary">000000</span>
+                        </div>
+                        <div class="flex items-center justify-center gap-2 mb-4">
+                            <span id="bluetooth-device-label" class="text-gray-600 dark:text-dark-muted" data-i18n="bluetoothDevice">设备:</span>
+                            <span id="bluetooth-device-name" class="text-gray-800 dark:text-dark-text font-semibold">-</span>
+                        </div>
+                        <div class="flex items-center justify-center gap-2 mb-4">
+                            <input type="checkbox" id="bluetooth-export-settings-checkbox" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:bg-dark-surface dark:border-dark-muted" checked>
+                            <label for="bluetooth-export-settings-checkbox" class="text-sm text-gray-700 dark:text-dark-text" data-i18n="includeSettings">包含设置数据</label>
+                        </div>
+                        <div class="mb-4" style="display: none;" id="bluetooth-export-progress">
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-gray-600 dark:text-dark-muted" data-i18n="exportProgress">导出进度:</p>
+                                <p class="text-sm text-gray-500 dark:text-dark-muted" id="bluetooth-export-progress-text">0%</p>
+                            </div>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-center">
+                        <button id="back-to-select-from-export" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                            <i class="fa-solid fa-arrow-left mr-2"></i><span data-i18n="cancel">返回</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="bluetooth-import-section" style="display: none;">
+                    <div class="mb-4">
+                        <p id="bluetooth-import-pin-text" class="text-gray-700 dark:text-dark-muted mb-4" data-i18n="bluetoothImportPin">请输入发送设备显示的PIN码</p>
+                        <div id="bluetooth-pin-input-section" class="mb-4">
+                            <div class="flex items-center justify-center gap-2 mb-4">
+                                <label id="bluetooth-pin-label" for="bluetooth-pin-input" class="text-gray-600 dark:text-dark-muted" data-i18n="pinCode">PIN码:</label>
+                                <input type="text" id="bluetooth-pin-input" maxlength="6" placeholder="" pattern="[0-9]{6}" inputmode="numeric" class="w-32 px-4 py-2 border border-gray-300 rounded-md text-center text-2xl font-mono dark:bg-dark-surface dark:border-dark-muted dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                            </div>
+                        </div>
+                        <div class="mb-4" style="display: none;" id="bluetooth-import-progress">
+                            <p class="text-gray-600 dark:text-dark-muted mb-2" data-i18n="importProgress">导入进度:</p>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                <div class="bg-green-600 h-2.5 rounded-full" style="width: 0%"></div>
+                            </div>
+                            <p class="text-sm text-gray-500 dark:text-dark-muted mt-2 text-center" id="bluetooth-import-progress-text">接收中...</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 justify-center">
+                        <button id="verify-pin-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <i class="fa-solid fa-check mr-2"></i><span data-i18n="verify">验证</span>
+                        </button>
+                        <button id="back-to-select-from-import" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                            <i class="fa-solid fa-arrow-left mr-2"></i><span data-i18n="cancel">返回</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2038,7 +2251,7 @@
                     <div class="mt-2">
                         <label class="inline-flex items-center">
                             <input type="checkbox" id="square-grid" checked class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            <span class="ml-2 text-sm text-gray-700 dark:text-dark-muted">正方形网格 (锁定宽高比)</span>
+                            <span class="ml-2 text-sm text-gray-700 dark:text-dark-muted" data-i18n="squareGrid">正方形网格 (锁定宽高比)</span>
                         </label>
                     </div>
                 </div>
@@ -2057,28 +2270,7 @@
         </footer>
     </div>
     <script>
-        const config = { // 游戏配置
-            initialTiles: 2, // 初始生成的方块数量
-            winningValue: 2048, // 获胜目标值
-            touchThreshold: 10, // 触摸滑动的最小距离
-            maxUndoSteps: 10, // 最大撤销步数
-            animationDuration: 150, // 滑块移动动画持续时间（毫秒）
-            difficultySettings: { // 难度设置
-                easy: { // 简单
-                    fourProbability: 0.4, // 4出现的概率为40%
-                    scoreMultiplier: 1 // 得分乘数
-                },
-                medium: { // 中等
-                    fourProbability: 0.1, // 4出现的概率为10%
-                    scoreMultiplier: 1 // 得分乘数
-                },
-                hard: { // 困难
-                    fourProbability: 0.05, // 4出现的概率为5%
-                    scoreMultiplier: 1.5 // 得分乘数
-                }
-            }
-        };
-        const gameState = {
+        window.gameState = {
             gpuAccelerationEnabled: localStorage.getItem('2048-gpu-acceleration') !== 'false',
             tileAnimationEnabled: localStorage.getItem('2048-tile-animation') !== 'false',
             tileAppearAnimationEnabled: localStorage.getItem('2048-tile-appear-animation') !== 'false',
@@ -2109,12 +2301,19 @@
         const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
         let isDebugMode = false;
         let simulateNoVibration = false;
+        let simulateNoBluetooth = false;
+        Object.defineProperty(window, 'gameVersions', {
+            get: function() {
+                console.log('2048 v' + gameVersion + '\nCustom Theme ' + (window.customThemeVersion ? 'v' + window.customThemeVersion : 'Not found') + '\nAI Analysis ' + (window.aiAnalysisVersion ? 'v' + window.aiAnalysisVersion : 'Not found') + '\ni18n ' + (window.i18nVersion ? 'v' + window.i18nVersion : 'Not found') + '\nBluetooth Sync ' + (window.bluetoothSyncVersion ? 'v' + window.bluetoothSyncVersion : 'Not found'));
+                return 'Version info displayed above';
+            }
+        });
         Object.defineProperty(window, 'gameDebug', {
             get: function() {
                 isDebugMode = !isDebugMode;
                 console.log(`Debug mode ${isDebugMode ? 'enabled' : 'disabled'}`);
                 if (isDebugMode) {
-                    console.log('Debug commands:\n- "novib" - Simulate no vibration support\n- "vib" - Restore vibration support\n- "win" - Trigger game win\n- "loss" - Trigger game over\n- "exitDebug" - Exit debug mode');
+                    console.log('Debug commands:\n- "novib" - Simulate no vibration support\n- "vib" - Restore vibration support\n- "nobluetooth" - Simulate no Bluetooth support\n- "bluetooth" - Restore Bluetooth support\n- "win" - Trigger game win\n- "loss" - Trigger game over\n- "exitDebug" - Exit debug mode');
                 }
                 return 'Debug mode command executed';
             }
@@ -2173,6 +2372,48 @@
                         }
                     }
                     return 'Vibration support restored';
+                } else {
+                    console.log('Please enable debug mode first with gameDebug');
+                    return 'Debug mode not enabled';
+                }
+            }
+        });
+        Object.defineProperty(window, 'nobluetooth', {
+            get: function() {
+                if (isDebugMode) {
+                    simulateNoBluetooth = true;
+                    console.log('Simulating no Bluetooth support');
+                    const bluetoothSyncButton = document.getElementById('bluetooth-sync-button');
+                    const bluetoothWarningIcon = document.getElementById('bluetooth-warning-icon');
+                    if (bluetoothSyncButton) {
+                        bluetoothSyncButton.disabled = true;
+                        bluetoothSyncButton.classList.add('opacity-50', 'cursor-not-allowed');
+                        if (bluetoothWarningIcon) {
+                            bluetoothWarningIcon.classList.remove('opacity-0');
+                        }
+                    }
+                    return 'No Bluetooth simulation enabled';
+                } else {
+                    console.log('Please enable debug mode first with gameDebug');
+                    return 'Debug mode not enabled';
+                }
+            }
+        });
+        Object.defineProperty(window, 'bluetooth', {
+            get: function() {
+                if (isDebugMode) {
+                    simulateNoBluetooth = false;
+                    console.log('Restoring Bluetooth support');
+                    const bluetoothSyncButton = document.getElementById('bluetooth-sync-button');
+                    const bluetoothWarningIcon = document.getElementById('bluetooth-warning-icon');
+                    if (bluetoothSyncButton) {
+                        bluetoothSyncButton.disabled = false;
+                        bluetoothSyncButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                        if (bluetoothWarningIcon) {
+                            bluetoothWarningIcon.classList.add('opacity-0');
+                        }
+                    }
+                    return 'Bluetooth support restored';
                 } else {
                     console.log('Please enable debug mode first with gameDebug');
                     return 'Debug mode not enabled';
@@ -2287,9 +2528,76 @@
                 }, 300);
             }
         }
+        const Base91 = {
+            chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~"',
+            decodeTable: null,
+            initDecodeTable: function() {
+                if (this.decodeTable) return;
+                this.decodeTable = new Uint8Array(256);
+                for (let i = 0; i < 256; i++) {
+                    this.decodeTable[i] = 255;
+                }
+                for (let i = 0; i < this.chars.length; i++) {
+                    this.decodeTable[this.chars.charCodeAt(i)] = i;
+                }
+            },
+            encode: function(str) {
+                let b = 0, n = 0, out = '';
+                for (let i = 0; i < str.length; i++) {
+                    b |= str.charCodeAt(i) << n;
+                    n += 8;
+                    if (n > 13) {
+                        let v = b & 8191;
+                        if (v > 88) {
+                            b >>= 13;
+                            n -= 13;
+                        } else {
+                            v = b & 16383;
+                            b >>= 14;
+                            n -= 14;
+                        }
+                        out += this.chars[v % 91] + this.chars[Math.floor(v / 91)];
+                    }
+                }
+                if (n) {
+                    out += this.chars[b % 91];
+                    if (n > 7 || b > 90) {
+                        out += this.chars[Math.floor(b / 91)];
+                    }
+                }
+                return out;
+            },
+            decode: function(str) {
+                this.initDecodeTable();
+                let b = 0, n = 0, out = '';
+                let v = -1;
+                for (let i = 0; i < str.length; i++) {
+                    let c = this.decodeTable[str.charCodeAt(i)];
+                    if (c === 255) continue;
+                    if (v === -1) {
+                        v = c;
+                    } else {
+                        v += c * 91;
+                        b |= v << n;
+                        n += (v & 8191) > 88 ? 13 : 14;
+                        while (n > 7) {
+                            out += String.fromCharCode(b & 255);
+                            b >>= 8;
+                            n -= 8;
+                        }
+                        v = -1;
+                    }
+                }
+                if (v !== -1) {
+                    out += String.fromCharCode((b | v << n) & 255);
+                }
+                return out;
+            }
+        };
         function exportGameData() {
             try {
                 const includeSettings = document.getElementById('export-settings-checkbox')?.checked || false;
+                const encoding = document.getElementById('encoding-select')?.value || 'base64';
                 const data = {
                     grid: gameState.grid,
                     score: gameState.score,
@@ -2299,7 +2607,8 @@
                     gridCols: gameState.gridCols,
                     difficulty: gameState.difficulty,
                     isEndlessMode: gameState.isEndlessMode,
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
+                    encoding: encoding
                 };
                 if (includeSettings) {
                     data.settings = {
@@ -2320,12 +2629,18 @@
                         '2048-language': localStorage.getItem('2048-language')
                     };
                 }
-                const dataStr = btoa(JSON.stringify(data));
+                const jsonStr = JSON.stringify(data);
+                let dataStr;
+                if (encoding === 'base91') {
+                    dataStr = Base91.encode(jsonStr);
+                } else {
+                    dataStr = btoa(jsonStr);
+                }
                 document.getElementById('data-textarea').value = dataStr;
                 return dataStr;
             } catch (error) {
                 console.error(i18n.t('exportFailed'), error);
-                alert(i18n.t('exportFailed') + ' ' + error.message);
+                alert(i18n.t('exportFailed') + error.message);
                 return null;
             }
         }
@@ -2352,7 +2667,7 @@
         }
         document.addEventListener('DOMContentLoaded', () => { 
             console.log('%c   ____     ___    _  _      ___  \n  |___ \\   / _ \\  | || |    ( _ ) \n    __) | | | | | | || |_   / _ \\ \n   / __/  | |_| | |__   _| | (_) | \n  |_____|  \\___/     |_|    \\___/ \n                                   \n    ____                             \n   / ___|   __ _   _ __ ___     ___ \n  | |  _   / _` | | \'_ ` _ \\   / _ \\ \n  | |_| | | (_| | | | | | | | |  __/ \n   \\____|  \\__,_| |_| |_| |_|  \\___| \n                                     ', 'color: #faa31b; font-size: 14px;');
-            console.log('2048 v' + gameVersion + '\nCustom Theme ' + (window.customThemeVersion ? 'v' + window.customThemeVersion : 'Not found') + '\nAI Analysis ' + (window.aiAnalysisVersion ? 'v' + window.aiAnalysisVersion : 'Not found') + '\ni18n ' + (window.i18nVersion ? 'v' + window.i18nVersion : 'Not found'));
+            console.log('2048 v' + gameVersion);
             const versionInfo = document.getElementById('version-info');
             if (versionInfo) {
                 versionInfo.textContent = i18n.t('versionInfo', { version: gameVersion });
@@ -2375,39 +2690,53 @@
         function importGameData(dataStr) {
             try {
                 if (!dataStr) {
-                    throw new Error(i18n.t('error') + ': ' + i18n.t('importFailed'));
+                    console.error(i18n.t('consoleDataEmpty'));
+                    throw new Error(i18n.t('importFailed') + ' ' + i18n.t('importFailedEmpty'));
                 }
                 let decodedData;
-                try {
-                    decodedData = atob(dataStr);
-                } catch (e) {
-                    throw new Error(i18n.t('error') + ': ' + i18n.t('importFailed'));
-                }
                 let data;
                 try {
+                    decodedData = atob(dataStr);
                     data = JSON.parse(decodedData);
                 } catch (e) {
-                    throw new Error(i18n.t('error') + ': ' + i18n.t('importFailed') + ' ' + e.message);
+                    console.error(i18n.t('consoleBase64Failed'), e);
+                    try {
+                        decodedData = Base91.decode(dataStr);
+                        data = JSON.parse(decodedData);
+                    } catch (e2) {
+                        console.error(i18n.t('consoleBase91Failed'), e2);
+                        throw new Error(i18n.t('importFailed') + ' ' + i18n.t('importFailedDecode'));
+                    }
                 }
                 if (!data || typeof data !== 'object') {
-                    throw new Error(i18n.t('error') + ': ' + i18n.t('importFailed'));
+                    console.error(i18n.t('consoleInvalidObject'), { data: data, type: typeof data });
+                    throw new Error(i18n.t('importFailed') + ' ' + i18n.t('importFailedObject'));
                 }
                 const requiredFields = ['grid', 'score', 'bestScore', 'gridSize', 'difficulty', 'isEndlessMode'];
                 const missingFields = requiredFields.filter(field => !(field in data));
                 if (missingFields.length > 0) {
-                    throw new Error(i18n.t('error') + ': ' + i18n.t('importFailed'));
+                    console.error(i18n.t('consoleMissingFields'), { missingFields: missingFields, data: data });
+                    throw new Error(i18n.t('importFailed') + ' ' + i18n.t('importFailedFields', { fields: missingFields.join(', ') }));
                 }
                 if (!Array.isArray(data.grid) || data.grid.length === 0) {
-                    throw new Error(i18n.t('error') + ': ' + i18n.t('importFailed'));
+                    console.error(i18n.t('consoleInvalidGrid'), { grid: data.grid, isArray: Array.isArray(data.grid) });
+                    throw new Error(i18n.t('importFailed') + ' ' + i18n.t('importFailedGrid'));
                 }
                 const gridRows = data.gridRows || data.gridSize;
                 const gridCols = data.gridCols || data.gridSize;
                 if (data.grid.length !== gridRows || data.grid.some(row => row.length !== gridCols)) {
-                    throw new Error(i18n.t('error') + ': ' + i18n.t('importFailed'));
+                    console.error(i18n.t('consoleSizeMismatch'), { 
+                        gridLength: data.grid.length, 
+                        gridRows: gridRows, 
+                        gridCols: gridCols,
+                        rowLengths: data.grid.map(row => row.length)
+                    });
+                    throw new Error(i18n.t('importFailed') + ' ' + i18n.t('importFailedSize'));
                 }
                 const invalidTiles = data.grid.flatMap(row => row.filter(tile => tile && (tile.value <= 0 || (tile.value & (tile.value - 1)) !== 0)));
                 if (invalidTiles.length > 0) {
-                    throw new Error(i18n.t('error') + ': ' + i18n.t('importFailed'));
+                    console.error(i18n.t('consoleInvalidTiles'), { invalidTiles: invalidTiles });
+                    throw new Error(i18n.t('importFailed') + ' ' + i18n.t('importFailedTiles'));
                 }
                 const shouldImportSettings = data.settings && confirm(i18n.t('confirmImportSettings'));
                 gameState.grid = data.grid;
@@ -2427,8 +2756,8 @@
                 renderAllTiles();
                 elements.scoreDisplay.textContent = gameState.score;
                 elements.bestScoreDisplay.textContent = gameState.bestScore;
-                elements.modeDescription.textContent = gameState.isEndlessMode ? "当前模式：无尽模式 - 尽可能获得高分" : "当前模式：标准模式 - 达到2048获胜";
-                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gridRows}×${gridCols}网格`;
+                elements.modeDescription.textContent = i18n.t('modeDescription') + (gameState.isEndlessMode ? i18n.t('endlessModeDesc') : i18n.t('standardMode'));
+                elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${gridRows}×${gridCols}` + i18n.t('grid');
                 saveGameState();
                 gameState.history = [];
                 updateUndoButtonState();
@@ -2541,12 +2870,18 @@
                 alert(i18n.t('importSuccess'));
                 return true;
             } catch (e) {
-                console.error('导入失败:', e);
-                alert(i18n.t('importFailed') + ' ' + e.message);
+                console.error(i18n.t('consoleImportFailed'), e);
+                console.error(i18n.t('consoleErrorDetails'), {
+                    message: e.message,
+                    stack: e.stack,
+                    dataLength: dataStr ? dataStr.length : 0,
+                    dataPreview: dataStr ? dataStr.substring(0, 100) + '...' : 'null'
+                });
+                alert(e.message);
                 return false;
             }
         }
-        const elements = {
+        window.elements = {
             gridContainer: document.getElementById('grid-container'),
             tileContainer: document.getElementById('tile-container'),
             scoreDisplay: document.getElementById('score'),
@@ -2601,9 +2936,9 @@
             toggleText: document.getElementById('toggle-text')
         };
         function updateDocumentTitle() {
-            const mode = gameState.isEndlessMode ? '无尽模式' : '标准模式';
-            const difficulty = getDifficultyName();
-            document.title = `2048 | ${mode} | ${difficulty} | ${gameState.gridRows}×${gameState.gridCols} | 分数: ${gameState.score}`;
+            const mode = gameState.isEndlessMode ? i18n.t('endlessMode') : i18n.t('newGame');
+            const difficulty = i18n.t(gameState.difficulty);
+            document.title = `${i18n.t('pageTitle')} | ${mode} | ${difficulty} | ${gameState.gridRows}×${gameState.gridCols} | ${i18n.t('score')}: ${gameState.score}`;
         }
         function createEmptyGrid() {
             const grid = [];
@@ -3197,7 +3532,7 @@
                 localStorage.setItem('2048-game-state', JSON.stringify(gameStateToSave));
                 return true;
             } catch (error) {
-                console.error('保存游戏状态失败:', error);
+                console.error('Failed to save game state:', error);
                 return false;
             }
         }
@@ -3349,7 +3684,7 @@
                     animationDetails.classList.remove('collapsed');
                 }
                 updateDifficultyButtons();
-                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
+                elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${gameState.gridRows}×${gameState.gridCols}` + i18n.t('grid');
                 renderAllTiles();
                 saveGameState();
                 if (window.i18n) {
@@ -3632,7 +3967,7 @@
                     gameState.gridRows = rows;
                     gameState.gridCols = cols;
                     updateGridButtonState(gridSize);
-                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${rows}×${cols}网格`;
+                    elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${rows}×${cols}` + i18n.t('grid');
                     initGame(gameState.isEndlessMode, rows, cols);
                     resetButtonStates();
                 } else {
@@ -3646,7 +3981,7 @@
                         gameState.gridRows = gridSize;
                         gameState.gridCols = gridSize;
                         updateGridButtonState(gridSize);
-                        elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
+                        elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${gameState.gridRows}×${gameState.gridCols}` + i18n.t('grid');
                         initGame(gameState.isEndlessMode, gridSize, gridSize);
                     }
                 }
@@ -3712,7 +4047,7 @@
                         return;
                     }
                     updateGridButtonState(Math.max(rows, cols));
-                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${rows}×${cols}网格`;
+                    elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${rows}×${cols}` + i18n.t('grid');
                     initGame(gameState.isEndlessMode, rows, cols);
                     hideModal('custom-grid-modal');
                     resetButtonStates();
@@ -3729,7 +4064,7 @@
                         button.classList.add('bg-red-500', 'hover:bg-red-600');
                     } else {
                         updateGridButtonState(Math.max(rows, cols));
-                        elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${rows}×${cols}网格`;
+                        elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${rows}×${cols}` + i18n.t('grid');
                         initGame(gameState.isEndlessMode, rows, cols);
                         hideModal('custom-grid-modal');
                     }
@@ -3750,19 +4085,19 @@
             elements.easyModeButton.addEventListener('click', () => {
                 gameState.difficulty = 'easy';
                 updateDifficultyButtons();
-                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
+                elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${gameState.gridRows}×${gameState.gridCols}` + i18n.t('grid');
                 saveGameState();
             });
             elements.mediumModeButton.addEventListener('click', () => {
                 gameState.difficulty = 'medium';
                 updateDifficultyButtons();
-                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
+                elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${gameState.gridRows}×${gameState.gridCols}` + i18n.t('grid');
                 saveGameState();
             });
             elements.hardModeButton.addEventListener('click', () => {
                 gameState.difficulty = 'hard';
                 updateDifficultyButtons();
-                elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
+                elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${gameState.gridRows}×${gameState.gridCols}` + i18n.t('grid');
                 saveGameState();
             });
         }
@@ -3926,6 +4261,21 @@
                     vibrationLossToggle.disabled = true;
                 }
             }
+            const bluetoothSyncButton = document.getElementById('bluetooth-sync-button');
+            const bluetoothWarningIcon = document.getElementById('bluetooth-warning-icon');
+            if (bluetoothSyncButton) {
+                if (!navigator.bluetooth || simulateNoBluetooth) {
+                    bluetoothSyncButton.disabled = true;
+                    bluetoothSyncButton.classList.add('opacity-50', 'cursor-not-allowed');
+                    if (bluetoothWarningIcon) {
+                        bluetoothWarningIcon.classList.remove('opacity-0');
+                    }
+                    bluetoothSyncButton.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        alert(i18n.t('bluetoothNotSupported'));
+                    });
+                }
+            }
             elements.resetSettingsButton.addEventListener('click', resetAllSettings);
         }
         function setupThemeListeners() {
@@ -3957,7 +4307,7 @@
                     document.getElementById('custom-theme-button-container').classList.remove('mb-2');
                 } else if (theme === 'custom') {
                     if (!window.customThemeModuleLoaded) {
-                        alert('自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。');
+                        alert(i18n.t('customThemeModuleMissing'));
                         this.value = localStorage.getItem('2048-theme');
                         return;
                     }
@@ -3973,12 +4323,15 @@
                     document.documentElement.classList.toggle('dark', isDark);
                     localStorage.setItem('2048-theme', theme);
                 }
+                if (typeof updateThemeSelector === 'function') {
+                    updateThemeSelector();
+                }
             });
             const customThemeButton = document.getElementById('custom-theme-button');
             if (customThemeButton) {
                 customThemeButton.addEventListener('click', function() {
                     if (!window.customThemeModuleLoaded) {
-                        alert('自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。');
+                        alert(i18n.t('customThemeModuleMissing'));
                         return;
                     }
                     showModal('custom-theme-modal');
@@ -4085,14 +4438,12 @@
                     renderAllTiles();
                     updateDifficultyButtons();
                     updateGridButtonState(Math.max(gameState.gridRows, gameState.gridCols));
-                    elements.modeDescription.textContent = gameState.isEndlessMode 
-                        ? "当前模式：无尽模式 - 尽可能获得高分" 
-                        : "当前模式：标准模式 - 达到2048获胜";
-                    elements.difficultyDescription.textContent = `当前难度：${getDifficultyName()} - ${gameState.gridRows}×${gameState.gridCols}网格`;
+                    elements.modeDescription.textContent = i18n.t('modeDescription') + (gameState.isEndlessMode ? i18n.t('endlessModeDesc') : i18n.t('standardMode'));
+                    elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${gameState.gridRows}×${gameState.gridCols}` + i18n.t('grid');
                     if (gameState.gameOver) {
-                        showGameMessage("游戏结束！", "无法进行任何移动。");
+                        showGameMessage("gameOver", "gameOverText");
                     } else if (gameState.gameWon && !gameState.isEndlessMode) {
-                        showGameMessage("恭喜你获胜！", "你达到了2048分，可以继续游戏挑战更高分数，或者重新开始。");
+                        showGameMessage("gameWon", "gameWonText");
                     }
                 } catch (e) {
                     console.error("Failed to load saved game state:", e);
@@ -4119,6 +4470,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const customSelects = document.querySelectorAll('.custom-select');
             customSelects.forEach(customSelect => {
+                if (customSelect.dataset.i18nSelect) return;
                 const selectedValue = customSelect.querySelector('.select-selected span');
                 const selectItems = customSelect.querySelector('.select-items');
                 const selectOptions = customSelect.querySelectorAll('.select-item');
@@ -4171,9 +4523,28 @@
                 selectOptions.forEach(option => {
                     option.addEventListener('click', function() {
                         const value = this.getAttribute('data-value');
-                        const text = this.textContent;
+                        const iconEl = this.querySelector('i');
+                        const emojiEl = this.querySelector('.emoji-icon');
+                        const iconHTML = iconEl ? iconEl.outerHTML : '';
+                        const emojiHTML = emojiEl ? emojiEl.outerHTML : '';
+                        const text = this.cloneNode(true);
+                        const iconInClone = text.querySelector('i');
+                        const emojiInClone = text.querySelector('.emoji-icon');
+                        if (iconInClone) iconInClone.remove();
+                        if (emojiInClone) emojiInClone.remove();
+                        const textContent = text.textContent.trim();
                         if (selectedValue) {
-                            selectedValue.textContent = text;
+                            const selectedIcon = selectedValue.querySelector('i') || selectedValue.querySelector('.emoji-icon');
+                            if (selectedIcon) {
+                                selectedIcon.remove();
+                            }
+                            if (iconHTML) {
+                                selectedValue.innerHTML = iconHTML + ' ' + textContent;
+                            } else if (emojiHTML) {
+                                selectedValue.innerHTML = emojiHTML + ' ' + textContent;
+                            } else {
+                                selectedValue.textContent = textContent;
+                            }
                         }
                         if (nativeSelect) {
                             nativeSelect.value = value;
@@ -4210,7 +4581,7 @@
         <div id="ai-analysis-modal" class="ai-analysis-modal hidden" role="dialog" aria-labelledby="ai-analysis-modal-title" aria-modal="true">
             <div class="ai-analysis-content max-h-[90vh] overflow-y-auto transition-all duration-300 ease-in-out">
                 <div id="ai-analysis-modal-title" class="ai-analysis-title">
-                    AI游戏分析
+                    <span data-i18n="aiGameAnalysis">AI游戏分析</span>
                     <button id="close-ai-modal" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-0 right-4 text-xl dark:text-dark-muted dark:hover:text-white" title="关闭AI分析">
                         <i class="fa-solid fa-times"></i>
                     </button>
@@ -4218,7 +4589,7 @@
                 <div class="analysis-item">
                     <div class="flex items-center justify-between">
                         <div class="analysis-label flex items-center">
-                            当前最佳移动方向
+                            <span data-i18n="currentBestMove">当前最佳移动方向</span>
                             <button id="toggle-best-move" class="text-secondary/60 hover:text-secondary focus:outline-none text-sm ml-2 dark:text-dark-muted dark:hover:text-white" title="隐藏/显示最佳移动方向">
                                 <i class="fa-solid fa-eye"></i>
                             </button>
@@ -4229,22 +4600,22 @@
                     </div>
                 </div>
                 <div class="analysis-item">
-                    <div class="analysis-label">潜在合并机会</div>
+                    <div class="analysis-label" data-i18n="mergeOpportunitiesLabel">潜在合并机会</div>
                     <div id="merge-opportunities" class="analysis-value">--</div>
                 </div>
                 <div class="analysis-item">
-                    <div class="analysis-label">游戏状态评估</div>
+                    <div class="analysis-label" data-i18n="gameStateAssessment">游戏状态评估</div>
                     <div id="game-state-assessment" class="analysis-value">--</div>
                 </div>
                 <div class="analysis-item">
-                    <div class="analysis-label">得分潜力分析</div>
+                    <div class="analysis-label" data-i18n="scorePotentialLabel">得分潜力分析</div>
                     <div id="score-potential" class="analysis-value">--</div>
                 </div>
                 <div id="ai-analysis-overlay" class="hidden absolute inset-x-0 top-16 bottom-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm flex items-center justify-center rounded-b-lg">
                     <div class="text-center">
                         <i class="fa-solid fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
-                        <p class="text-lg font-semibold text-gray-800 dark:text-gray-200">暂不支持</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">AI分析功能仅支持3×3、4×4、5×5网格</p>
+                        <p class="text-lg font-semibold text-gray-800 dark:text-gray-200" data-i18n="notSupported">暂不支持</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2" data-i18n="aiSupportNote">AI分析功能仅支持3×3、4×4、5×5网格</p>
                     </div>
                 </div>
             </div>
@@ -4255,12 +4626,6 @@
             const overlay = document.getElementById('ai-analysis-overlay');
             overlay.classList.add('hidden');
             const directions = ['up', 'down', 'left', 'right'];
-            const directionNames = {
-                up: '向上', 
-                down: '向下', 
-                left: '向左', 
-                right: '向右'
-            };
             let bestScore = -1;
             let bestDirection = 'up';
             let mergeOpportunities = 0;
@@ -4354,9 +4719,9 @@
             else if (mergeOpportunities >= mediumPotentialThreshold) scorePotential = i18n.t('mediumScore');
             const bestMoveText = document.querySelector('#best-move-direction .best-move-text');
             if (bestMoveText) {
-                bestMoveText.textContent = directionNames[bestDirection];
+                bestMoveText.textContent = i18n.t(bestDirection);
             } else {
-                document.getElementById('best-move-direction').innerHTML = `<span class="best-move-text">${directionNames[bestDirection]}</span>`;
+                document.getElementById('best-move-direction').innerHTML = `<span class="best-move-text">${i18n.t(bestDirection)}</span>`;
             }
             const mergeOpportunitiesElement = document.getElementById('merge-opportunities');
             mergeOpportunitiesElement.textContent = `${mergeOpportunities}处`;
@@ -4382,7 +4747,7 @@
             scorePotentialElement.textContent = `${scorePotential} (${
                 scorePotential === '高' ? '预计可合并多个高价值方块' : 
                 scorePotential === '中' ? '有一定合并机会' : 
-                '合并机会有限'
+                i18n.t('limitedMergeOpportunities')
             })`;
             scorePotentialElement.className = 'analysis-value';
             if (scorePotential === '高') {
