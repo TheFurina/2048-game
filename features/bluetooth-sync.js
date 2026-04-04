@@ -183,10 +183,11 @@ class BluetoothSync {
                 throw new Error(i18n.t('bluetoothNotSupported'));
             }
             this.currentPin = this.generatePin();
-            this.isVerified = false;
+            this.isVerified = true;
             const device = await this.requestDevice();
             await this.connect(device);
-            await this.sendData(gameData, onProgress);
+            await this.sendData({ type: 'pin', pin: this.currentPin });
+            await this.sendData({ type: 'gameData', data: gameData }, onProgress);
             return {
                 success: true,
                 pin: this.currentPin,
@@ -204,8 +205,24 @@ class BluetoothSync {
             }
             const device = await this.requestDevice();
             await this.connect(device);
-            const data = await this.receiveData(onProgress);
-            return data;
+            const pinData = await this.receiveData();
+            if (pinData.type === 'pin') {
+                this.currentPin = pinData.pin;
+                const userPin = prompt(i18n.t('bluetoothImportPin') + ':\n' + pinData.pin + '\n' + i18n.t('enterPinToVerify'));
+                if (userPin === pinData.pin) {
+                    this.isVerified = true;
+                    const gameData = await this.receiveData(onProgress);
+                    if (gameData.type === 'gameData') {
+                        return gameData.data;
+                    } else {
+                        throw new Error('Invalid data type received');
+                    }
+                } else {
+                    throw new Error('PIN verification failed');
+                }
+            } else {
+                throw new Error('Expected PIN data but received something else');
+            }
         } catch (error) {
             console.error('Bluetooth import failed:', error);
             throw error;
@@ -341,6 +358,7 @@ async function handleBluetoothImport() {
             return;
         }
         showBluetoothModal('import');
+        await verifyPinAndImport();
     } catch (error) {
         console.error('Bluetooth import error:', error);
         alert(i18n.t('bluetoothImportFailed') + ': ' + error.message);
@@ -349,14 +367,8 @@ async function handleBluetoothImport() {
 }
 async function verifyPinAndImport() {
     try {
-        const pinInput = document.getElementById('bluetooth-pin-input');
-        const pin = pinInput.value.trim();
         if (!bluetoothSyncInstance) {
             alert(i18n.t('bluetoothModuleError'));
-            return;
-        }
-        if (!bluetoothSyncInstance.verifyPin(pin)) {
-            alert(i18n.t('pinInvalid'));
             return;
         }
         const progressBar = document.getElementById('bluetooth-import-progress');
