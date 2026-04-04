@@ -1,6 +1,7 @@
-const customThemeVersion = '0.1';
+const customThemeVersion = '1.1';
 window.customThemeVersion = customThemeVersion;
 function setupThemeCustomizer() {
+    localStorage.removeItem('themeExportSelection');
     const customThemeModal = document.getElementById('custom-theme-modal');
     if (!customThemeModal) return;
     const closeButton = document.getElementById('close-custom-theme-modal');
@@ -387,75 +388,102 @@ function saveCustomTheme() {
     };
     localStorage.setItem('customTheme', JSON.stringify(themeData));
     localStorage.setItem('2048-theme', 'custom');
-    alert('主题保存成功！');
+    alert(i18n.t('themeSaved'));
 }
 function exportCustomTheme() {
-    try {
-        const themeData = {
-            bgColor: document.getElementById('custom-bg-color').value,
-            bgOpacity: document.getElementById('custom-bg-opacity').value,
-            primaryColor: document.getElementById('custom-primary-color').value,
-            primaryOpacity: document.getElementById('custom-primary-opacity').value,
-            secondaryColor: document.getElementById('custom-secondary-color').value,
-            secondaryOpacity: document.getElementById('custom-secondary-opacity').value,
-            gridColor: document.getElementById('custom-grid-color').value,
-            gridOpacity: document.getElementById('custom-grid-opacity').value,
-            cellEmptyColor: document.getElementById('custom-cell-empty-color').value,
-            cellEmptyOpacity: document.getElementById('custom-cell-empty-opacity').value,
-            scrollbarColor: document.getElementById('custom-scrollbar-color').value,
-            scrollbarOpacity: document.getElementById('custom-scrollbar-opacity').value,
-            modalBgColor: document.getElementById('custom-modal-bg').value,
-            modalBgOpacity: document.getElementById('custom-modal-bg-opacity').value,
-            modalTextColor: document.getElementById('custom-modal-text').value,
-            modalTextOpacity: document.getElementById('custom-modal-text-opacity').value,
-            tile2Bg: document.getElementById('custom-tile-2-bg').value,
-            tile2Text: document.getElementById('custom-tile-2-text').value,
-            tile4Bg: document.getElementById('custom-tile-4-bg').value,
-            tile4Text: document.getElementById('custom-tile-4-text').value,
-            tile8Bg: document.getElementById('custom-tile-8-bg').value,
-            tile8Text: document.getElementById('custom-tile-8-text').value,
-            tile16Bg: document.getElementById('custom-tile-16-bg').value,
-            tile16Text: document.getElementById('custom-tile-16-text').value,
-            tile32Bg: document.getElementById('custom-tile-32-bg').value,
-            tile32Text: document.getElementById('custom-tile-32-text').value,
-            tile64Bg: document.getElementById('custom-tile-64-bg').value,
-            tile64Text: document.getElementById('custom-tile-64-text').value,
-            tile128Bg: document.getElementById('custom-tile-128-bg').value,
-            tile128Text: document.getElementById('custom-tile-128-text').value,
-            tile256Bg: document.getElementById('custom-tile-256-bg').value,
-            tile256Text: document.getElementById('custom-tile-256-text').value,
-            tile512Bg: document.getElementById('custom-tile-512-bg').value,
-            tile512Text: document.getElementById('custom-tile-512-text').value,
-            tile1024Bg: document.getElementById('custom-tile-1024-bg').value,
-            tile1024Text: document.getElementById('custom-tile-1024-text').value,
-            tile2048Bg: document.getElementById('custom-tile-2048-bg').value,
-            tile2048Text: document.getElementById('custom-tile-2048-text').value,
-            tile4096Bg: document.getElementById('custom-tile-4096-bg').value,
-            tile4096Text: document.getElementById('custom-tile-4096-text').value,
-            tile8192Bg: document.getElementById('custom-tile-8192-bg').value,
-            tile8192Text: document.getElementById('custom-tile-8192-text').value,
-            tile16384Bg: document.getElementById('custom-tile-16384-bg').value,
-            tile16384Text: document.getElementById('custom-tile-16384-text').value,
-            tile32768Bg: document.getElementById('custom-tile-32768-bg').value,
-            tile32768Text: document.getElementById('custom-tile-32768-text').value,
-            tileSuperBg: document.getElementById('custom-tile-super-bg').value,
-            tileSuperText: document.getElementById('custom-tile-super-text').value,
-            timestamp: new Date().getTime()
-        };
-        const dataStr = JSON.stringify(themeData, null, 2);
-        const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(dataBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `2048-custom-theme-${new Date().getTime()}.json`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    } catch (e) {
-        console.error('导出失败:', e);
-        alert('导出失败：' + e.message);
+    const exportModal = document.getElementById('export-theme-modal');
+    const optionsContainer = document.getElementById('theme-export-options');
+    const selectAllCheckbox = document.getElementById('select-all-theme-items');
+    optionsContainer.innerHTML = '';
+    const themeItems = [
+        { id: 'bgColor', elementId: 'custom-bg-color', label: i18n.t('mainBg') },
+        { id: 'bgOpacity', elementId: 'custom-bg-opacity', label: i18n.t('bgOpacity') },
+        { id: 'primaryColor', elementId: 'custom-primary-color', label: i18n.t('primaryColor') },
+        { id: 'primaryOpacity', elementId: 'custom-primary-opacity', label: i18n.t('primaryOpacity') },
+        { id: 'secondaryColor', elementId: 'custom-secondary-color', label: i18n.t('secondaryColor') },
+        { id: 'secondaryOpacity', elementId: 'custom-secondary-opacity', label: i18n.t('secondaryOpacity') },
+        { id: 'gridColor', elementId: 'custom-grid-color', label: i18n.t('gridColor') },
+        { id: 'gridOpacity', elementId: 'custom-grid-opacity', label: i18n.t('gridOpacity') },
+        { id: 'cellEmptyColor', elementId: 'custom-cell-empty-color', label: i18n.t('cellEmptyColor') },
+        { id: 'cellEmptyOpacity', elementId: 'custom-cell-empty-opacity', label: i18n.t('cellEmptyOpacity') },
+        { id: 'scrollbarColor', elementId: 'custom-scrollbar-color', label: i18n.t('scrollbarColor') },
+        { id: 'scrollbarOpacity', elementId: 'custom-scrollbar-opacity', label: i18n.t('scrollbarOpacity') },
+        { id: 'modalBgColor', elementId: 'custom-modal-bg', label: i18n.t('modalBg') },
+        { id: 'modalBgOpacity', elementId: 'custom-modal-bg-opacity', label: i18n.t('modalBgOpacity') },
+        { id: 'modalTextColor', elementId: 'custom-modal-text', label: i18n.t('modalText') },
+        { id: 'modalTextOpacity', elementId: 'custom-modal-text-opacity', label: i18n.t('modalTextOpacity') }
+    ];
+    for (let i = 2; i <= 32768; i *= 2) {
+        themeItems.push({ id: `tile${i}Bg`, elementId: `custom-tile-${i}-bg`, label: i18n.t(`tile${i}Bg`) });
+        themeItems.push({ id: `tile${i}Text`, elementId: `custom-tile-${i}-text`, label: i18n.t(`tile${i}Text`) });
     }
+    themeItems.push({ id: 'tileSuperBg', elementId: 'custom-tile-super-bg', label: i18n.t('tileSuperBg') });
+    themeItems.push({ id: 'tileSuperText', elementId: 'custom-tile-super-text', label: i18n.t('tileSuperText') });
+    const savedState = JSON.parse(localStorage.getItem('themeExportSelection'));
+    themeItems.forEach(item => {
+        const optionDiv = document.createElement('div');
+        optionDiv.className = 'flex items-center gap-2';
+        const isChecked = savedState ? (savedState[item.id] !== undefined ? savedState[item.id] : true) : true;
+        optionDiv.innerHTML = `
+            <input type="checkbox" id="export-${item.id}" class="theme-export-checkbox w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:bg-dark-surface dark:border-dark-muted" ${isChecked ? 'checked' : ''}>
+            <label for="export-${item.id}" class="text-sm text-gray-700 dark:text-dark-text">${item.label}</label>
+        `;
+        optionsContainer.appendChild(optionDiv);
+    });
+    const updateSelectAllState = function() {
+        const checkboxes = document.querySelectorAll('.theme-export-checkbox');
+        const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+        selectAllCheckbox.checked = allChecked;
+    };
+    selectAllCheckbox.checked = savedState ? (savedState.selectAll !== undefined ? savedState.selectAll : true) : true;
+    selectAllCheckbox.addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.theme-export-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = selectAllCheckbox.checked;
+        });
+    });
+    optionsContainer.addEventListener('change', updateSelectAllState);
+    const saveAndClose = function() {
+        const selectionState = { selectAll: selectAllCheckbox.checked };
+        themeItems.forEach(item => {
+            const checkbox = document.getElementById(`export-${item.id}`);
+            selectionState[item.id] = checkbox.checked;
+        });
+        localStorage.setItem('themeExportSelection', JSON.stringify(selectionState));
+        hideModal('export-theme-modal');
+    };
+    showModal('export-theme-modal');
+    document.getElementById('cancel-export-theme').addEventListener('click', saveAndClose);
+    document.getElementById('close-export-theme-modal').addEventListener('click', saveAndClose);
+    document.getElementById('confirm-export-theme').addEventListener('click', function() {
+        try {
+            const themeData = { timestamp: new Date().getTime() };
+            themeItems.forEach(item => {
+                const checkbox = document.getElementById(`export-${item.id}`);
+                if (checkbox.checked) {
+                    const element = document.getElementById(item.elementId);
+                    if (element) {
+                        themeData[item.id] = element.value;
+                    }
+                }
+            });
+            const dataStr = JSON.stringify(themeData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `2048-custom-theme-${new Date().getTime()}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            saveAndClose();
+        } catch (e) {
+            console.error('Export failed:', e);
+            alert(i18n.t('exportFailed') + e.message);
+            saveAndClose();
+        }
+    });
 }
 function importCustomTheme() {
     const input = document.createElement('input');
@@ -468,41 +496,73 @@ function importCustomTheme() {
         reader.onload = function(e) {
             try {
                 const themeData = JSON.parse(e.target.result);
-                if (!themeData.bgColor || !themeData.primaryColor) {
-                    throw new Error('无效的主题文件');
+                if (!themeData || typeof themeData !== 'object') {
+                    throw new Error(i18n.t('invalidThemeFile'));
                 }
-                document.getElementById('custom-bg-color').value = themeData.bgColor;
-                document.getElementById('custom-bg-color-text').value = themeData.bgColor;
-                document.getElementById('custom-bg-opacity').value = themeData.bgOpacity;
-                document.getElementById('custom-bg-opacity-value').textContent = themeData.bgOpacity + '%';
-                document.getElementById('custom-primary-color').value = themeData.primaryColor;
-                document.getElementById('custom-primary-color-text').value = themeData.primaryColor;
-                document.getElementById('custom-primary-opacity').value = themeData.primaryOpacity;
-                document.getElementById('custom-primary-opacity-value').textContent = themeData.primaryOpacity + '%';
-                document.getElementById('custom-secondary-color').value = themeData.secondaryColor;
-                document.getElementById('custom-secondary-color-text').value = themeData.secondaryColor;
-                document.getElementById('custom-secondary-opacity').value = themeData.secondaryOpacity;
-                document.getElementById('custom-secondary-opacity-value').textContent = themeData.secondaryOpacity + '%';
-                document.getElementById('custom-grid-color').value = themeData.gridColor;
-                document.getElementById('custom-grid-color-text').value = themeData.gridColor;
-                document.getElementById('custom-grid-opacity').value = themeData.gridOpacity;
-                document.getElementById('custom-grid-opacity-value').textContent = themeData.gridOpacity + '%';
-                document.getElementById('custom-cell-empty-color').value = themeData.cellEmptyColor;
-                document.getElementById('custom-cell-empty-color-text').value = themeData.cellEmptyColor;
-                document.getElementById('custom-cell-empty-opacity').value = themeData.cellEmptyOpacity;
-                document.getElementById('custom-cell-empty-opacity-value').textContent = themeData.cellEmptyOpacity + '%';
-                document.getElementById('custom-scrollbar-color').value = themeData.scrollbarColor;
-                document.getElementById('custom-scrollbar-color-text').value = themeData.scrollbarColor;
-                document.getElementById('custom-scrollbar-opacity').value = themeData.scrollbarOpacity;
-                document.getElementById('custom-scrollbar-opacity-value').textContent = themeData.scrollbarOpacity + '%';
-                document.getElementById('custom-modal-bg').value = themeData.modalBgColor;
-                document.getElementById('custom-modal-bg-text').value = themeData.modalBgColor;
-                document.getElementById('custom-modal-bg-opacity').value = themeData.modalBgOpacity;
-                document.getElementById('custom-modal-bg-opacity-value').textContent = themeData.modalBgOpacity + '%';
-                document.getElementById('custom-modal-text').value = themeData.modalTextColor;
-                document.getElementById('custom-modal-text-text').value = themeData.modalTextColor;
-                document.getElementById('custom-modal-text-opacity').value = themeData.modalTextOpacity;
-                document.getElementById('custom-modal-text-opacity-value').textContent = themeData.modalTextOpacity + '%';
+                if (themeData.bgColor) {
+                    document.getElementById('custom-bg-color').value = themeData.bgColor;
+                    document.getElementById('custom-bg-color-text').value = themeData.bgColor;
+                }
+                if (themeData.bgOpacity) {
+                    document.getElementById('custom-bg-opacity').value = themeData.bgOpacity;
+                    document.getElementById('custom-bg-opacity-value').textContent = themeData.bgOpacity + '%';
+                }
+                if (themeData.primaryColor) {
+                    document.getElementById('custom-primary-color').value = themeData.primaryColor;
+                    document.getElementById('custom-primary-color-text').value = themeData.primaryColor;
+                }
+                if (themeData.primaryOpacity) {
+                    document.getElementById('custom-primary-opacity').value = themeData.primaryOpacity;
+                    document.getElementById('custom-primary-opacity-value').textContent = themeData.primaryOpacity + '%';
+                }
+                if (themeData.secondaryColor) {
+                    document.getElementById('custom-secondary-color').value = themeData.secondaryColor;
+                    document.getElementById('custom-secondary-color-text').value = themeData.secondaryColor;
+                }
+                if (themeData.secondaryOpacity) {
+                    document.getElementById('custom-secondary-opacity').value = themeData.secondaryOpacity;
+                    document.getElementById('custom-secondary-opacity-value').textContent = themeData.secondaryOpacity + '%';
+                }
+                if (themeData.gridColor) {
+                    document.getElementById('custom-grid-color').value = themeData.gridColor;
+                    document.getElementById('custom-grid-color-text').value = themeData.gridColor;
+                }
+                if (themeData.gridOpacity) {
+                    document.getElementById('custom-grid-opacity').value = themeData.gridOpacity;
+                    document.getElementById('custom-grid-opacity-value').textContent = themeData.gridOpacity + '%';
+                }
+                if (themeData.cellEmptyColor) {
+                    document.getElementById('custom-cell-empty-color').value = themeData.cellEmptyColor;
+                    document.getElementById('custom-cell-empty-color-text').value = themeData.cellEmptyColor;
+                }
+                if (themeData.cellEmptyOpacity) {
+                    document.getElementById('custom-cell-empty-opacity').value = themeData.cellEmptyOpacity;
+                    document.getElementById('custom-cell-empty-opacity-value').textContent = themeData.cellEmptyOpacity + '%';
+                }
+                if (themeData.scrollbarColor) {
+                    document.getElementById('custom-scrollbar-color').value = themeData.scrollbarColor;
+                    document.getElementById('custom-scrollbar-color-text').value = themeData.scrollbarColor;
+                }
+                if (themeData.scrollbarOpacity) {
+                    document.getElementById('custom-scrollbar-opacity').value = themeData.scrollbarOpacity;
+                    document.getElementById('custom-scrollbar-opacity-value').textContent = themeData.scrollbarOpacity + '%';
+                }
+                if (themeData.modalBgColor) {
+                    document.getElementById('custom-modal-bg').value = themeData.modalBgColor;
+                    document.getElementById('custom-modal-bg-text').value = themeData.modalBgColor;
+                }
+                if (themeData.modalBgOpacity) {
+                    document.getElementById('custom-modal-bg-opacity').value = themeData.modalBgOpacity;
+                    document.getElementById('custom-modal-bg-opacity-value').textContent = themeData.modalBgOpacity + '%';
+                }
+                if (themeData.modalTextColor) {
+                    document.getElementById('custom-modal-text').value = themeData.modalTextColor;
+                    document.getElementById('custom-modal-text-text').value = themeData.modalTextColor;
+                }
+                if (themeData.modalTextOpacity) {
+                    document.getElementById('custom-modal-text-opacity').value = themeData.modalTextOpacity;
+                    document.getElementById('custom-modal-text-opacity-value').textContent = themeData.modalTextOpacity + '%';
+                }
                 for (let i = 2; i <= 32768; i *= 2) {
                     const bg = document.getElementById(`custom-tile-${i}-bg`);
                     const bgText = document.getElementById(`custom-tile-${i}-bg-text`);
@@ -530,10 +590,10 @@ function importCustomTheme() {
                     superTextText.value = themeData.tileSuperText;
                 }
                 previewCustomTheme();
-                alert('主题导入成功！');
+                alert(i18n.t('themeImported'));
             } catch (e) {
-                console.error('导入失败:', e);
-                alert('导入失败：' + e.message);
+                console.error('Import failed:', e);
+                alert(i18n.t('importFailed') + e.message);
             }
         };
         reader.readAsText(file);
@@ -606,7 +666,7 @@ function loadCustomTheme() {
         styleElement.textContent = customStyles;
         document.body.setAttribute('data-theme', 'custom');
     } catch (e) {
-        console.error('加载自定义主题失败:', e);
+        console.error('Failed to load custom theme:', e);
         localStorage.removeItem('customTheme');
         localStorage.setItem('2048-theme', 'light');
     }

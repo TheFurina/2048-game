@@ -1,4 +1,4 @@
-const aiAnalysisVersion = '2.0';
+const aiAnalysisVersion = '2.1';
 window.aiAnalysisVersion = aiAnalysisVersion;
 function setupAiAnalysis() {
     const aiAnalysisButton = document.getElementById('ai-analysis-button');
@@ -28,25 +28,25 @@ function setupAiAnalysis() {
                 bestMoveText.classList.add('blur-sm');
                 icon.classList.remove('fa-eye');
                 icon.classList.add('fa-eye-slash');
-                toggleBestMoveButton.title = '显示最佳移动方向';
+                toggleBestMoveButton.title = i18n.t('showBestMove');
             } else {
                 bestMoveText.classList.remove('blur-sm');
                 icon.classList.remove('fa-eye-slash');
                 icon.classList.add('fa-eye');
-                toggleBestMoveButton.title = '隐藏最佳移动方向';
+                toggleBestMoveButton.title = i18n.t('hideBestMove');
             }
             toggleBestMoveButton.addEventListener('click', function() {
                 if (bestMoveText.classList.contains('blur-sm')) {
                     bestMoveText.classList.remove('blur-sm');
                     icon.classList.remove('fa-eye-slash');
                     icon.classList.add('fa-eye');
-                    this.title = '隐藏最佳移动方向';
+                    this.title = i18n.t('hideBestMove');
                     localStorage.setItem('bestMoveHidden', 'false');
                 } else {
                     bestMoveText.classList.add('blur-sm');
                     icon.classList.remove('fa-eye');
                     icon.classList.add('fa-eye-slash');
-                    this.title = '显示最佳移动方向';
+                    this.title = i18n.t('showBestMove');
                     localStorage.setItem('bestMoveHidden', 'true');
                 }
             });
@@ -59,10 +59,10 @@ function analyzeGameState() {
     overlay.classList.add('hidden');
     const directions = ['up', 'down', 'left', 'right'];
     const directionNames = {
-        up: '向上', 
-        down: '向下', 
-        left: '向左', 
-        right: '向右'
+        up: i18n.t('up'), 
+        down: i18n.t('down'), 
+        left: i18n.t('left'), 
+        right: i18n.t('right')
     };
     let bestScore = -1;
     let bestDirection = 'up';
@@ -131,7 +131,7 @@ function analyzeGameState() {
         }
     });
     document.getElementById('best-move-direction').innerHTML = `<span class="best-move-text">${directionNames[bestDirection]}</span>`;
-    document.getElementById('merge-opportunities').textContent = mergeOpportunities > 0 ? mergeOpportunities : '无';
+    document.getElementById('merge-opportunities').textContent = mergeOpportunities > 0 ? mergeOpportunities : i18n.t('noMergeOpportunities');
     const assessment = evaluateGameState(gameState, dangerThreshold, warningThreshold);
     document.getElementById('game-state-assessment').textContent = assessment;
     const potential = assessScorePotential(gameState, highPotentialThreshold, mediumPotentialThreshold);
@@ -355,21 +355,21 @@ function calculateMonotonicityScore(grid) {
 function evaluateGameState(gameState, dangerThreshold, warningThreshold) {
     const emptyCells = countEmptyCells(gameState.grid);
     if (emptyCells <= dangerThreshold) {
-        return '危险';
+        return i18n.t('danger');
     } else if (emptyCells <= warningThreshold) {
-        return '警告';
+        return i18n.t('warning');
     } else {
-        return '安全';
+        return i18n.t('safe');
     }
 }
 function assessScorePotential(gameState, highPotentialThreshold, mediumPotentialThreshold) {
     const emptyCells = countEmptyCells(gameState.grid);
     if (emptyCells >= highPotentialThreshold) {
-        return '高';
+        return i18n.t('high');
     } else if (emptyCells >= mediumPotentialThreshold) {
-        return '中';
+        return i18n.t('mediumScore');
     } else {
-        return '低';
+        return i18n.t('low');
     }
 }
 if (typeof window !== 'undefined') {
