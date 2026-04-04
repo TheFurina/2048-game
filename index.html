@@ -2212,13 +2212,7 @@
                 </div>
                 <div id="bluetooth-import-section" style="display: none;">
                     <div class="mb-4">
-                        <p id="bluetooth-import-pin-text" class="text-gray-700 dark:text-dark-muted mb-4" data-i18n="bluetoothImportPin">请输入发送设备显示的PIN码</p>
-                        <div id="bluetooth-pin-input-section" class="mb-4">
-                            <div class="flex items-center justify-center gap-2 mb-4">
-                                <label id="bluetooth-pin-label" for="bluetooth-pin-input" class="text-gray-600 dark:text-dark-muted" data-i18n="pinCode">PIN码:</label>
-                                <input type="text" id="bluetooth-pin-input" maxlength="6" placeholder="" pattern="[0-9]{6}" inputmode="numeric" class="w-32 px-4 py-2 border border-gray-300 rounded-md text-center text-2xl font-mono dark:bg-dark-surface dark:border-dark-muted dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-                            </div>
-                        </div>
+                        <p class="text-gray-700 dark:text-dark-muted mb-4" data-i18n="searchingAndVerifying">正在搜索设备并验证...请稍候</p>
                         <div class="mb-4" style="display: none;" id="bluetooth-import-progress">
                             <p class="text-gray-600 dark:text-dark-muted mb-2" data-i18n="importProgress">导入进度:</p>
                             <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
@@ -2227,10 +2221,7 @@
                             <p class="text-sm text-gray-500 dark:text-dark-muted mt-2 text-center" id="bluetooth-import-progress-text">接收中...</p>
                         </div>
                     </div>
-                    <div class="flex gap-3 justify-center">
-                        <button id="verify-pin-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50">
-                            <i class="fa-solid fa-check mr-2"></i><span data-i18n="verify">验证</span>
-                        </button>
+                    <div class="flex justify-center">
                         <button id="back-to-select-from-import" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
                             <i class="fa-solid fa-arrow-left mr-2"></i><span data-i18n="cancel">返回</span>
                         </button>
