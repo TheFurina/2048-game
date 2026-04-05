@@ -812,425 +812,124 @@ function initI18n() {
         }
     }, 100);
 }
+function setI18nAttribute(element, key) {
+    if (element) {
+        element.setAttribute('data-i18n', key);
+    }
+}
+function setById(id, key, preferSpan = false) {
+    const element = document.getElementById(id);
+    if (!element) return;
+    if (preferSpan) {
+        const span = element.querySelector('span');
+        setI18nAttribute(span || element, key);
+    } else {
+        setI18nAttribute(element, key);
+    }
+}
+function setBySelector(selector, key, preferSpan = false) {
+    const element = document.querySelector(selector);
+    if (!element) return;
+    if (preferSpan) {
+        const span = element.querySelector('span');
+        setI18nAttribute(span || element, key);
+    } else {
+        setI18nAttribute(element, key);
+    }
+}
+const i18nConfig = {
+    simpleIds: [
+        ['game-title', 'gameTitle'],
+        ['settings-modal-title', 'settings'],
+        ['data-transfer-modal-title', 'dataTransfer'],
+        ['custom-grid-modal-title', 'customGrid'],
+        ['custom-theme-modal-title', 'customTheme'],
+        ['export-theme-modal-title', 'exportThemeModal'],
+        ['bluetooth-modal-title', 'bluetoothModalTitle'],
+        ['easy-mode', 'easy'],
+        ['medium-mode', 'medium'],
+        ['hard-mode', 'hard'],
+        ['custom-grid', 'custom'],
+        ['apply-custom-grid', 'apply'],
+        ['cancel-custom-grid', 'cancel'],
+        ['game-message-title', 'gameWon'],
+        ['game-message-text', 'gameWonText'],
+        ['game-message-button', 'tryAgain'],
+        ['custom-theme-button', 'customThemeButton'],
+        ['bluetooth-export-pin-text', 'bluetoothExportPin'],
+        ['bluetooth-import-pin-text', 'bluetoothImportPin'],
+        ['bluetooth-device-label', 'bluetoothDevice'],
+        ['bluetooth-pin-label', 'pinCode']
+    ],
+    buttonIds: [
+        ['new-game', 'newGame'],
+        ['endless-mode', 'endlessMode'],
+        ['undo-button', 'undo'],
+        ['pause-button', 'pause'],
+        ['resume-button', 'resume'],
+        ['restart-button', 'restart'],
+        ['settings-button', 'settings'],
+        ['reset-settings-button', 'resetSettings'],
+        ['export-data-button', 'exportData'],
+        ['import-data-button', 'importData'],
+        ['save-custom-theme', 'save'],
+        ['reset-custom-theme', 'reset'],
+        ['export-custom-theme', 'exportTheme'],
+        ['import-custom-theme', 'importTheme'],
+        ['confirm-export-theme', 'export'],
+        ['cancel-export-theme', 'cancel'],
+        ['verify-pin-button', 'verify'],
+        ['cancel-bluetooth-button', 'cancel'],
+        ['export-bluetooth-button', 'exportViaBluetooth'],
+        ['import-bluetooth-button', 'importViaBluetooth']
+    ],
+    selectors: [
+        ['#game-header p', 'gameDescription'],
+        ['.option-label:nth-child(1)', 'gridSize'],
+        ['.option-label:nth-child(2)', 'difficulty'],
+        ['.stats-container .text-xs:first-child', 'score'],
+        ['.stats-container .text-xs:last-child', 'bestScore'],
+        ['.category-title:nth-child(1)', 'gamePerformance'],
+        ['.category-title:nth-child(2)', 'appearance'],
+        ['.category-title:nth-child(3)', 'dataManagement'],
+        ['label[for="export-settings-checkbox"]', 'includeSettings'],
+        ['label[for="grid-size-input"]', 'gridSizeInput'],
+        ['label[for="square-grid"]', 'squareGrid'],
+        ['label[for="select-all-theme-items"]', 'selectAll'],
+        ['footer p', 'footer']
+    ]
+};
+function processBatch(items, handler) {
+    items.forEach(([target, key]) => handler(target, key));
+}
+function processSpecialCases() {
+    const toggleText = document.getElementById('toggle-text');
+    if (toggleText) {
+        const key = elements.controlsContainer.classList.contains('collapsed') ? 'expandControls' : 'toggleControls';
+        toggleText.setAttribute('data-i18n', key);
+    }
+    const h3Element = document.querySelector('#theme-export-options').previousElementSibling;
+    if (h3Element && h3Element.tagName === 'H3' && h3Element.textContent.trim() === '选择要导出的主题项') {
+        h3Element.setAttribute('data-i18n', 'selectThemeItems');
+    }
+    const bluetoothSyncBtn = document.getElementById('bluetooth-sync-button');
+    if (bluetoothSyncBtn) {
+        const span = bluetoothSyncBtn.querySelector('span[data-i18n]');
+        if (span) {
+            span.setAttribute('data-i18n', 'bluetoothSync');
+        }
+    }
+    setById('bluetooth-export-select', 'exportViaBluetooth', true);
+    setById('bluetooth-import-select', 'importViaBluetooth', true);
+    setById('cancel-bluetooth-select', 'cancel', true);
+    setById('back-to-select-from-export', 'cancel', true);
+    setById('back-to-select-from-import', 'cancel', true);
+}
 function addI18nAttributes() {
-    if (document.getElementById('game-title')) {
-        document.getElementById('game-title').setAttribute('data-i18n', 'gameTitle');
-    }
-    if (document.querySelector('#game-header p')) {
-        document.querySelector('#game-header p').setAttribute('data-i18n', 'gameDescription');
-    }
-    if (document.getElementById('new-game')) {
-        const newGameBtn = document.getElementById('new-game');
-        const newGameBtnSpan = newGameBtn.querySelector('span');
-        if (newGameBtnSpan) {
-            newGameBtnSpan.setAttribute('data-i18n', 'newGame');
-        } else {
-            newGameBtn.setAttribute('data-i18n', 'newGame');
-        }
-    }
-    if (document.getElementById('endless-mode')) {
-        const endlessModeBtn = document.getElementById('endless-mode');
-        const endlessModeBtnSpan = endlessModeBtn.querySelector('span');
-        if (endlessModeBtnSpan) {
-            endlessModeBtnSpan.setAttribute('data-i18n', 'endlessMode');
-        } else {
-            endlessModeBtn.setAttribute('data-i18n', 'endlessMode');
-        }
-    }
-    if (document.getElementById('undo-button')) {
-        const undoBtn = document.getElementById('undo-button');
-        const undoBtnSpan = undoBtn.querySelector('span');
-        if (undoBtnSpan) {
-            undoBtnSpan.setAttribute('data-i18n', 'undo');
-        } else {
-            undoBtn.setAttribute('data-i18n', 'undo');
-        }
-    }
-    if (document.getElementById('pause-button')) {
-        const pauseBtn = document.getElementById('pause-button');
-        const pauseBtnSpan = pauseBtn.querySelector('span');
-        if (pauseBtnSpan) {
-            pauseBtnSpan.setAttribute('data-i18n', 'pause');
-        } else {
-            pauseBtn.setAttribute('data-i18n', 'pause');
-        }
-    }
-    if (document.getElementById('resume-button')) {
-        const resumeBtn = document.getElementById('resume-button');
-        const resumeBtnSpan = resumeBtn.querySelector('span');
-        if (resumeBtnSpan) {
-            resumeBtnSpan.setAttribute('data-i18n', 'resume');
-        } else {
-            resumeBtn.setAttribute('data-i18n', 'resume');
-        }
-    }
-    if (document.getElementById('restart-button')) {
-        const restartBtn = document.getElementById('restart-button');
-        const restartBtnSpan = restartBtn.querySelector('span');
-        if (restartBtnSpan) {
-            restartBtnSpan.setAttribute('data-i18n', 'restart');
-        } else {
-            restartBtn.setAttribute('data-i18n', 'restart');
-        }
-    }
-    if (document.getElementById('settings-button')) {
-        const settingsBtn = document.getElementById('settings-button');
-        const settingsBtnSpan = settingsBtn.querySelector('span');
-        if (settingsBtnSpan) {
-            settingsBtnSpan.setAttribute('data-i18n', 'settings');
-        } else {
-            settingsBtn.setAttribute('data-i18n', 'settings');
-        }
-    }
-    if (document.getElementById('game-message-button')) {
-        document.getElementById('game-message-button').setAttribute('data-i18n', 'tryAgain');
-    }
-    if (document.querySelector('.option-label:nth-child(1)')) {
-        document.querySelector('.option-label:nth-child(1)').setAttribute('data-i18n', 'gridSize');
-    }
-    if (document.querySelector('.option-label:nth-child(2)')) {
-        document.querySelector('.option-label:nth-child(2)').setAttribute('data-i18n', 'difficulty');
-    }
-    if (document.getElementById('easy-mode')) {
-        document.getElementById('easy-mode').setAttribute('data-i18n', 'easy');
-    }
-    if (document.getElementById('medium-mode')) {
-        document.getElementById('medium-mode').setAttribute('data-i18n', 'medium');
-    }
-    if (document.getElementById('hard-mode')) {
-        document.getElementById('hard-mode').setAttribute('data-i18n', 'hard');
-    }
-    if (document.getElementById('custom-grid')) {
-        document.getElementById('custom-grid').setAttribute('data-i18n', 'custom');
-    }
-    if (document.querySelector('.stats-container .text-xs:first-child')) {
-        document.querySelector('.stats-container .text-xs:first-child').setAttribute('data-i18n', 'score');
-    }
-    if (document.querySelector('.stats-container .text-xs:last-child')) {
-        document.querySelector('.stats-container .text-xs:last-child').setAttribute('data-i18n', 'bestScore');
-    }
-    if (document.getElementById('toggle-text')) {
-        document.getElementById('toggle-text').setAttribute('data-i18n', elements.controlsContainer.classList.contains('collapsed') ? 'expandControls' : 'toggleControls');
-    }
-    if (document.getElementById('settings-modal-title')) {
-        document.getElementById('settings-modal-title').setAttribute('data-i18n', 'settings');
-    }
-    if (document.querySelector('.category-title:nth-child(1)')) {
-        document.querySelector('.category-title:nth-child(1)').setAttribute('data-i18n', 'gamePerformance');
-    }
-    if (document.querySelector('.category-title:nth-child(2)')) {
-        document.querySelector('.category-title:nth-child(2)').setAttribute('data-i18n', 'appearance');
-    }
-    if (document.querySelector('.category-title:nth-child(3)')) {
-        document.querySelector('.category-title:nth-child(3)').setAttribute('data-i18n', 'dataManagement');
-    }
-    if (document.getElementById('reset-settings-button')) {
-        const resetSettingsBtn = document.getElementById('reset-settings-button');
-        const resetSettingsBtnSpan = resetSettingsBtn.querySelector('span');
-        if (resetSettingsBtnSpan) {
-            resetSettingsBtnSpan.setAttribute('data-i18n', 'resetSettings');
-        } else {
-            resetSettingsBtn.setAttribute('data-i18n', 'resetSettings');
-        }
-    }
-    if (document.getElementById('data-transfer-modal-title')) {
-        document.getElementById('data-transfer-modal-title').setAttribute('data-i18n', 'dataTransfer');
-    }
-    if (document.getElementById('export-data-button')) {
-        const exportDataBtn = document.getElementById('export-data-button');
-        const exportDataBtnSpan = exportDataBtn.querySelector('span');
-        if (exportDataBtnSpan) {
-            exportDataBtnSpan.setAttribute('data-i18n', 'exportData');
-        } else {
-            exportDataBtn.setAttribute('data-i18n', 'exportData');
-        }
-    }
-    if (document.getElementById('import-data-button')) {
-        const importDataBtn = document.getElementById('import-data-button');
-        const importDataBtnSpan = importDataBtn.querySelector('span');
-        if (importDataBtnSpan) {
-            importDataBtnSpan.setAttribute('data-i18n', 'importData');
-        } else {
-            importDataBtn.setAttribute('data-i18n', 'importData');
-        }
-    }
-    if (document.querySelector('label[for="export-settings-checkbox"]')) {
-        document.querySelector('label[for="export-settings-checkbox"]').setAttribute('data-i18n', 'includeSettings');
-    }
-    if (document.getElementById('custom-grid-modal-title')) {
-        document.getElementById('custom-grid-modal-title').setAttribute('data-i18n', 'customGrid');
-    }
-    if (document.querySelector('label[for="grid-size-input"]')) {
-        document.querySelector('label[for="grid-size-input"]').setAttribute('data-i18n', 'gridSizeInput');
-    }
-    if (document.querySelector('label[for="square-grid"]')) {
-        document.querySelector('label[for="square-grid"]').setAttribute('data-i18n', 'squareGrid');
-    }
-    if (document.getElementById('apply-custom-grid')) {
-        document.getElementById('apply-custom-grid').setAttribute('data-i18n', 'apply');
-    }
-    if (document.getElementById('cancel-custom-grid')) {
-        document.getElementById('cancel-custom-grid').setAttribute('data-i18n', 'cancel');
-    }
-    if (document.getElementById('custom-theme-modal-title')) {
-        document.getElementById('custom-theme-modal-title').setAttribute('data-i18n', 'customTheme');
-    }
-    if (document.getElementById('save-custom-theme')) {
-        const saveBtn = document.getElementById('save-custom-theme');
-        const saveBtnSpan = saveBtn.querySelector('span');
-        if (saveBtnSpan) {
-            saveBtnSpan.setAttribute('data-i18n', 'save');
-        } else {
-            saveBtn.setAttribute('data-i18n', 'save');
-        }
-    }
-    if (document.getElementById('reset-custom-theme')) {
-        const resetBtn = document.getElementById('reset-custom-theme');
-        const resetBtnSpan = resetBtn.querySelector('span');
-        if (resetBtnSpan) {
-            resetBtnSpan.setAttribute('data-i18n', 'reset');
-        } else {
-            resetBtn.setAttribute('data-i18n', 'reset');
-        }
-    }
-    if (document.getElementById('export-custom-theme')) {
-        const exportBtn = document.getElementById('export-custom-theme');
-        const exportBtnSpan = exportBtn.querySelector('span');
-        if (exportBtnSpan) {
-            exportBtnSpan.setAttribute('data-i18n', 'exportTheme');
-        } else {
-            exportBtn.setAttribute('data-i18n', 'exportTheme');
-        }
-    }
-    if (document.getElementById('import-custom-theme')) {
-        const importBtn = document.getElementById('import-custom-theme');
-        const importBtnSpan = importBtn.querySelector('span');
-        if (importBtnSpan) {
-            importBtnSpan.setAttribute('data-i18n', 'importTheme');
-        } else {
-            importBtn.setAttribute('data-i18n', 'importTheme');
-        }
-    }
-    if (document.querySelector('footer p')) {
-        document.querySelector('footer p').setAttribute('data-i18n', 'footer');
-    }
-    if (document.getElementById('export-theme-modal-title')) {
-        document.getElementById('export-theme-modal-title').setAttribute('data-i18n', 'exportThemeModal');
-    }
-    if (document.querySelector('#theme-export-options').previousElementSibling) {
-        const h3Element = document.querySelector('#theme-export-options').previousElementSibling;
-        if (h3Element.tagName === 'H3' && h3Element.textContent.trim() === '选择要导出的主题项') {
-            h3Element.setAttribute('data-i18n', 'selectThemeItems');
-        }
-    }
-    if (document.querySelector('label[for="select-all-theme-items"]')) {
-        document.querySelector('label[for="select-all-theme-items"]').setAttribute('data-i18n', 'selectAll');
-    }
-    if (document.getElementById('confirm-export-theme')) {
-        const exportBtn = document.getElementById('confirm-export-theme');
-        const exportBtnSpan = exportBtn.querySelector('span');
-        if (exportBtnSpan) {
-            exportBtnSpan.setAttribute('data-i18n', 'export');
-        } else {
-            exportBtn.setAttribute('data-i18n', 'export');
-        }
-    }
-    if (document.getElementById('cancel-export-theme')) {
-        const cancelBtn = document.getElementById('cancel-export-theme');
-        const cancelBtnSpan = cancelBtn.querySelector('span');
-        if (cancelBtnSpan) {
-            cancelBtnSpan.setAttribute('data-i18n', 'cancel');
-        } else {
-            cancelBtn.setAttribute('data-i18n', 'cancel');
-        }
-    }
-    if (document.getElementById('game-message-title')) {
-        document.getElementById('game-message-title').setAttribute('data-i18n', 'gameWon');
-    }
-    if (document.getElementById('game-message-text')) {
-        document.getElementById('game-message-text').setAttribute('data-i18n', 'gameWonText');
-    }
-    if (document.getElementById('game-message-button')) {
-        const gameMessageBtn = document.getElementById('game-message-button');
-        const gameMessageBtnSpan = gameMessageBtn.querySelector('span');
-        if (gameMessageBtnSpan) {
-            gameMessageBtnSpan.setAttribute('data-i18n', 'tryAgain');
-        } else {
-            gameMessageBtn.setAttribute('data-i18n', 'tryAgain');
-        }
-    }
-    if (document.getElementById('custom-theme-button')) {
-        const customThemeBtn = document.getElementById('custom-theme-button');
-        const customThemeBtnSpan = customThemeBtn.querySelector('span');
-        if (customThemeBtnSpan) {
-            customThemeBtnSpan.setAttribute('data-i18n', 'customThemeButton');
-        } else {
-            customThemeBtn.setAttribute('data-i18n', 'customThemeButton');
-        }
-    }
-    if (document.getElementById('custom-theme-modal-title')) {
-        document.getElementById('custom-theme-modal-title').setAttribute('data-i18n', 'customTheme');
-    }
-    if (document.getElementById('export-custom-theme')) {
-        const exportThemeBtn = document.getElementById('export-custom-theme');
-        const exportThemeBtnSpan = exportThemeBtn.querySelector('span');
-        if (exportThemeBtnSpan) {
-            exportThemeBtnSpan.setAttribute('data-i18n', 'exportTheme');
-        } else {
-            exportThemeBtn.setAttribute('data-i18n', 'exportTheme');
-        }
-    }
-    if (document.getElementById('import-custom-theme')) {
-        const importThemeBtn = document.getElementById('import-custom-theme');
-        const importThemeBtnSpan = importThemeBtn.querySelector('span');
-        if (importThemeBtnSpan) {
-            importThemeBtnSpan.setAttribute('data-i18n', 'importTheme');
-        } else {
-            importThemeBtn.setAttribute('data-i18n', 'importTheme');
-        }
-    }
-    if (document.getElementById('save-custom-theme')) {
-        const saveThemeBtn = document.getElementById('save-custom-theme');
-        const saveThemeBtnSpan = saveThemeBtn.querySelector('span');
-        if (saveThemeBtnSpan) {
-            saveThemeBtnSpan.setAttribute('data-i18n', 'save');
-        } else {
-            saveThemeBtn.setAttribute('data-i18n', 'save');
-        }
-    }
-    if (document.getElementById('reset-custom-theme')) {
-        const resetThemeBtn = document.getElementById('reset-custom-theme');
-        const resetThemeBtnSpan = resetThemeBtn.querySelector('span');
-        if (resetThemeBtnSpan) {
-            resetThemeBtnSpan.setAttribute('data-i18n', 'reset');
-        } else {
-            resetThemeBtn.setAttribute('data-i18n', 'reset');
-        }
-    }
-    if (document.getElementById('export-theme-modal-title')) {
-        document.getElementById('export-theme-modal-title').setAttribute('data-i18n', 'exportThemeModal');
-    }
-    if (document.getElementById('confirm-export-theme')) {
-        const confirmExportBtn = document.getElementById('confirm-export-theme');
-        const confirmExportBtnSpan = confirmExportBtn.querySelector('span');
-        if (confirmExportBtnSpan) {
-            confirmExportBtnSpan.setAttribute('data-i18n', 'export');
-        } else {
-            confirmExportBtn.setAttribute('data-i18n', 'export');
-        }
-    }
-    if (document.getElementById('cancel-export-theme')) {
-        const cancelExportBtn = document.getElementById('cancel-export-theme');
-        const cancelExportBtnSpan = cancelExportBtn.querySelector('span');
-        if (cancelExportBtnSpan) {
-            cancelExportBtnSpan.setAttribute('data-i18n', 'cancel');
-        } else {
-            cancelExportBtn.setAttribute('data-i18n', 'cancel');
-        }
-    }
-    if (document.getElementById('export-bluetooth-button')) {
-        const exportBluetoothBtn = document.getElementById('export-bluetooth-button');
-        const exportBluetoothBtnSpan = exportBluetoothBtn.querySelector('span');
-        if (exportBluetoothBtnSpan) {
-            exportBluetoothBtnSpan.setAttribute('data-i18n', 'exportViaBluetooth');
-        } else {
-            exportBluetoothBtn.setAttribute('data-i18n', 'exportViaBluetooth');
-        }
-    }
-    if (document.getElementById('import-bluetooth-button')) {
-        const importBluetoothBtn = document.getElementById('import-bluetooth-button');
-        const importBluetoothBtnSpan = importBluetoothBtn.querySelector('span');
-        if (importBluetoothBtnSpan) {
-            importBluetoothBtnSpan.setAttribute('data-i18n', 'importViaBluetooth');
-        } else {
-            importBluetoothBtn.setAttribute('data-i18n', 'importViaBluetooth');
-        }
-    }
-    if (document.getElementById('bluetooth-modal-title')) {
-        document.getElementById('bluetooth-modal-title').setAttribute('data-i18n', 'bluetoothModalTitle');
-    }
-    if (document.getElementById('bluetooth-export-pin-text')) {
-        document.getElementById('bluetooth-export-pin-text').setAttribute('data-i18n', 'bluetoothExportPin');
-    }
-    if (document.getElementById('bluetooth-import-pin-text')) {
-        document.getElementById('bluetooth-import-pin-text').setAttribute('data-i18n', 'bluetoothImportPin');
-    }
-    if (document.getElementById('bluetooth-device-label')) {
-        document.getElementById('bluetooth-device-label').setAttribute('data-i18n', 'bluetoothDevice');
-    }
-    if (document.getElementById('bluetooth-pin-label')) {
-        document.getElementById('bluetooth-pin-label').setAttribute('data-i18n', 'pinCode');
-    }
-    if (document.getElementById('verify-pin-button')) {
-        const verifyPinBtn = document.getElementById('verify-pin-button');
-        const verifyPinBtnSpan = verifyPinBtn.querySelector('span');
-        if (verifyPinBtnSpan) {
-            verifyPinBtnSpan.setAttribute('data-i18n', 'verify');
-        } else {
-            verifyPinBtn.setAttribute('data-i18n', 'verify');
-        }
-    }
-    if (document.getElementById('cancel-bluetooth-button')) {
-        const cancelBluetoothBtn = document.getElementById('cancel-bluetooth-button');
-        const cancelBluetoothBtnSpan = cancelBluetoothBtn.querySelector('span');
-        if (cancelBluetoothBtnSpan) {
-            cancelBluetoothBtnSpan.setAttribute('data-i18n', 'cancel');
-        } else {
-            cancelBluetoothBtn.setAttribute('data-i18n', 'cancel');
-        }
-    }
-    if (document.getElementById('bluetooth-sync-button')) {
-        const bluetoothSyncBtn = document.getElementById('bluetooth-sync-button');
-        const bluetoothSyncBtnSpan = bluetoothSyncBtn.querySelector('span[data-i18n]');
-        if (bluetoothSyncBtnSpan) {
-            bluetoothSyncBtnSpan.setAttribute('data-i18n', 'bluetoothSync');
-        }
-    }
-    if (document.getElementById('bluetooth-export-select')) {
-        const bluetoothExportSelect = document.getElementById('bluetooth-export-select');
-        const bluetoothExportSelectSpan = bluetoothExportSelect.querySelector('span');
-        if (bluetoothExportSelectSpan) {
-            bluetoothExportSelectSpan.setAttribute('data-i18n', 'exportViaBluetooth');
-        } else {
-            bluetoothExportSelect.setAttribute('data-i18n', 'exportViaBluetooth');
-        }
-    }
-    if (document.getElementById('bluetooth-import-select')) {
-        const bluetoothImportSelect = document.getElementById('bluetooth-import-select');
-        const bluetoothImportSelectSpan = bluetoothImportSelect.querySelector('span');
-        if (bluetoothImportSelectSpan) {
-            bluetoothImportSelectSpan.setAttribute('data-i18n', 'importViaBluetooth');
-        } else {
-            bluetoothImportSelect.setAttribute('data-i18n', 'importViaBluetooth');
-        }
-    }
-    if (document.getElementById('cancel-bluetooth-select')) {
-        const cancelBluetoothSelect = document.getElementById('cancel-bluetooth-select');
-        const cancelBluetoothSelectSpan = cancelBluetoothSelect.querySelector('span');
-        if (cancelBluetoothSelectSpan) {
-            cancelBluetoothSelectSpan.setAttribute('data-i18n', 'cancel');
-        } else {
-            cancelBluetoothSelect.setAttribute('data-i18n', 'cancel');
-        }
-    }
-    if (document.getElementById('back-to-select-from-export')) {
-        const backToSelectFromExport = document.getElementById('back-to-select-from-export');
-        const backToSelectFromExportSpan = backToSelectFromExport.querySelector('span');
-        if (backToSelectFromExportSpan) {
-            backToSelectFromExportSpan.setAttribute('data-i18n', 'cancel');
-        } else {
-            backToSelectFromExport.setAttribute('data-i18n', 'cancel');
-        }
-    }
-    if (document.getElementById('back-to-select-from-import')) {
-        const backToSelectFromImport = document.getElementById('back-to-select-from-import');
-        const backToSelectFromImportSpan = backToSelectFromImport.querySelector('span');
-        if (backToSelectFromImportSpan) {
-            backToSelectFromImportSpan.setAttribute('data-i18n', 'cancel');
-        } else {
-            backToSelectFromImport.setAttribute('data-i18n', 'cancel');
-        }
-    }
+    processBatch(i18nConfig.simpleIds, (id, key) => setById(id, key));
+    processBatch(i18nConfig.buttonIds, (id, key) => setById(id, key, true));
+    processBatch(i18nConfig.selectors, (selector, key) => setBySelector(selector, key));
+    processSpecialCases();
 }
 window.i18n = {
     version: i18nVersion,
