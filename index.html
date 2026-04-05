@@ -2186,13 +2186,15 @@
                         <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-4">
                             <span id="bluetooth-pin-display" class="text-4xl font-mono font-bold text-primary dark:text-dark-primary">000000</span>
                         </div>
-                        <div class="flex items-center justify-center gap-2 mb-4">
-                            <span id="bluetooth-device-label" class="text-gray-600 dark:text-dark-muted" data-i18n="bluetoothDevice">设备:</span>
-                            <span id="bluetooth-device-name" class="text-gray-800 dark:text-dark-text font-semibold">-</span>
-                        </div>
-                        <div class="flex items-center justify-center gap-2 mb-4">
-                            <input type="checkbox" id="bluetooth-export-settings-checkbox" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:bg-dark-surface dark:border-dark-muted" checked>
-                            <label for="bluetooth-export-settings-checkbox" class="text-sm text-gray-700 dark:text-dark-text" data-i18n="includeSettings">包含设置数据</label>
+                        <div class="flex items-center justify-between gap-4 mb-4 px-4">
+                            <div class="flex items-center gap-2">
+                                <span id="bluetooth-device-label" class="text-gray-600 dark:text-dark-muted" data-i18n="bluetoothDevice">设备:</span>
+                                <span id="bluetooth-device-name" class="text-gray-800 dark:text-dark-text font-semibold">-</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="bluetooth-export-settings-checkbox" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:bg-dark-surface dark:border-dark-muted" checked>
+                                <label for="bluetooth-export-settings-checkbox" class="text-sm text-gray-700 dark:text-dark-text" data-i18n="includeSettings">包含设置数据</label>
+                            </div>
                         </div>
                         <div class="mb-4" style="display: none;" id="bluetooth-export-progress">
                             <div class="flex items-center justify-between mb-2">
@@ -2214,11 +2216,13 @@
                     <div class="mb-4">
                         <p class="text-gray-700 dark:text-dark-muted mb-4" data-i18n="searchingAndVerifying">正在搜索设备并验证...请稍候</p>
                         <div class="mb-4" style="display: none;" id="bluetooth-import-progress">
-                            <p class="text-gray-600 dark:text-dark-muted mb-2" data-i18n="importProgress">导入进度:</p>
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-gray-600 dark:text-dark-muted" data-i18n="importProgress">导入进度:</p>
+                                <p class="text-sm text-gray-500 dark:text-dark-muted" id="bluetooth-import-progress-text">接收中...</p>
+                            </div>
                             <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                                 <div class="bg-green-600 h-2.5 rounded-full" style="width: 0%"></div>
                             </div>
-                            <p class="text-sm text-gray-500 dark:text-dark-muted mt-2 text-center" id="bluetooth-import-progress-text">接收中...</p>
                         </div>
                     </div>
                     <div class="flex justify-center">
