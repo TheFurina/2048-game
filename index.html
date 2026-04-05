@@ -1393,6 +1393,22 @@
             .custom-select {
                 position: relative;
             }
+            .custom-select .relative:hover .absolute {
+                opacity: 1;
+                visibility: visible;
+            }
+            .custom-select .relative:hover .absolute::after {
+                content: '';
+                position: absolute;
+                top: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                border: 5px solid transparent;
+                border-top-color: #1f2937;
+            }
+            .dark .custom-select .relative:hover .absolute::after {
+                border-top-color: #1f2937;
+            }
             .select-selected {
                 user-select: none;
             }
@@ -1581,9 +1597,14 @@
                             <div class="vibration-toggle-container flex items-center justify-between mb-2 px-2">
                                 <div class="flex items-center">
                                     <span class="text-gray-700 dark:text-dark-muted" data-i18n="vibration">振动反馈</span>
-                                    <span id="vibration-warning-icon" class="ml-2 text-yellow-500 opacity-0 transition-opacity duration-300" title="当前浏览器不支持振动功能">
-                                        <i class="fa-solid fa-circle-exclamation"></i>
-                                    </span>
+                                    <div class="relative ml-2">
+                                        <span id="vibration-warning-icon" class="text-yellow-500 opacity-0 transition-opacity duration-300 cursor-help">
+                                            <i class="fa-solid fa-circle-exclamation"></i>
+                                        </span>
+                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs p-2 rounded-md shadow-lg opacity-0 invisible transition-all duration-300 z-50">
+                                            <span data-i18n="vibrationWarning">当前浏览器不支持振动功能</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" id="vibration-toggle" class="sr-only peer" checked title="振动反馈">
@@ -1696,9 +1717,14 @@
                                 <span class="flex items-center">
                                     <i class="fa-brands fa-bluetooth-b w-5 mr-2"></i>
                                     <span data-i18n="bluetoothSync">蓝牙同步</span>
-                                    <span id="bluetooth-warning-icon" class="ml-2 text-yellow-500 opacity-0 transition-opacity duration-300" title="当前浏览器不支持蓝牙功能">
-                                        <i class="fa-solid fa-circle-exclamation"></i>
-                                    </span>
+                                    <div class="relative ml-2">
+                                        <span id="bluetooth-warning-icon" class="text-yellow-500 opacity-0 transition-opacity duration-300 cursor-help">
+                                            <i class="fa-solid fa-circle-exclamation"></i>
+                                        </span>
+                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs p-2 rounded-md shadow-lg opacity-0 invisible transition-all duration-300 z-50">
+                                            <span data-i18n="bluetoothNotSupported">当前浏览器不支持蓝牙功能</span>
+                                        </div>
+                                    </div>
                                 </span>
                                 <i class="fa-solid fa-chevron-right text-xs"></i>
                             </button>
