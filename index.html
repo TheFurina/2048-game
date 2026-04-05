@@ -2304,7 +2304,7 @@
                 isDebugMode = !isDebugMode;
                 console.log(`Debug mode ${isDebugMode ? 'enabled' : 'disabled'}`);
                 if (isDebugMode) {
-                    console.log('Debug commands:\n- "novib" - Simulate no vibration support\n- "vib" - Restore vibration support\n- "nobluetooth" - Simulate no Bluetooth support\n- "bluetooth" - Restore Bluetooth support\n- "win" - Trigger game win\n- "loss" - Trigger game over\n- "exitDebug" - Exit debug mode');
+                    console.log('Debug commands:\n- "novib" - Simulate no vibration support\n- "vib" - Restore vibration support\n- "nobluetooth" - Simulate no Bluetooth support\n- "bluetooth" - Restore Bluetooth support\n- "alldeviceson" - Enable discover all Bluetooth devices\n- "alldevicesoff" - Disable discover all Bluetooth devices\n- "win" - Trigger game win\n- "loss" - Trigger game over\n- "exitDebug" - Exit debug mode');
                 }
                 return 'Debug mode command executed';
             }
@@ -2405,6 +2405,40 @@
                         }
                     }
                     return 'Bluetooth support restored';
+                } else {
+                    console.log('Please enable debug mode first with gameDebug');
+                    return 'Debug mode not enabled';
+                }
+            }
+        });
+        Object.defineProperty(window, 'alldeviceson', {
+            get: function() {
+                if (isDebugMode) {
+                    if (window.bluetoothSync && window.bluetoothSync.instance) {
+                        window.bluetoothSync.instance.discoverAllDevices = true;
+                        console.log('Discover all devices mode enabled');
+                        return 'Discover all devices mode enabled';
+                    } else {
+                        console.log('Bluetooth sync module not initialized');
+                        return 'Bluetooth sync module not initialized';
+                    }
+                } else {
+                    console.log('Please enable debug mode first with gameDebug');
+                    return 'Debug mode not enabled';
+                }
+            }
+        });
+        Object.defineProperty(window, 'alldevicesoff', {
+            get: function() {
+                if (isDebugMode) {
+                    if (window.bluetoothSync && window.bluetoothSync.instance) {
+                        window.bluetoothSync.instance.discoverAllDevices = false;
+                        console.log('Discover all devices mode disabled');
+                        return 'Discover all devices mode disabled';
+                    } else {
+                        console.log('Bluetooth sync module not initialized');
+                        return 'Bluetooth sync module not initialized';
+                    }
                 } else {
                     console.log('Please enable debug mode first with gameDebug');
                     return 'Debug mode not enabled';
