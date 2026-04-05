@@ -98,6 +98,13 @@ class BluetoothSync {
                 timestamp: Date.now()
             };
             const payloadString = JSON.stringify(payload);
+            const totalSize = payloadString.length;
+            await this.withTimeout(
+                this.characteristic.writeValue(encoder.encode('SIZE:' + totalSize + '\n')),
+                this.timeoutDuration,
+                'Size send timeout'
+            );
+            await this.delay(100);
             const chunks = this.chunkData(payloadString, 20);
             for (let i = 0; i < chunks.length; i++) {
                 await this.withTimeout(
@@ -126,17 +133,30 @@ class BluetoothSync {
         try {
             let receivedData = '';
             let isComplete = false;
+            let totalSize = null;
+            let receivedSize = 0;
             const decoder = new TextDecoder();
             const notificationCallback = (event) => {
                 const value = event.target.value;
                 const chunk = decoder.decode(value);
+                if (chunk.startsWith('SIZE:')) {
+                    const sizeStr = chunk.substring(5).trim();
+                    totalSize = parseInt(sizeStr, 10);
+                    return;
+                }
                 if (chunk.trim() === 'END') {
                     isComplete = true;
                     return;
                 }
                 receivedData += chunk;
+                receivedSize += chunk.length;
                 if (onProgress) {
-                    onProgress(receivedData.length);
+                    if (totalSize) {
+                        const progress = Math.min(Math.round((receivedSize / totalSize) * 100), 99);
+                        onProgress(receivedSize, progress, totalSize);
+                    } else {
+                        onProgress(receivedSize);
+                    }
                 }
             };
             await this.withTimeout(
@@ -316,10 +336,11 @@ async function handleBluetoothExport() {
         document.getElementById('bluetooth-device-name').textContent = i18n.t('ready');
         const progressBar = document.getElementById('bluetooth-export-progress');
         const progressText = document.getElementById('bluetooth-export-progress-text');
-        if (progressBar && progressText) {
+        const progressBarFill = progressBar ? progressBar.querySelector('.bg-blue-600') : null;
+        if (progressBar && progressText && progressBarFill) {
             progressBar.style.display = 'block';
             progressText.style.display = 'block';
-            progressBar.value = 0;
+            progressBarFill.style.width = '0%';
             progressText.textContent = '0%';
         }
         const includeSettings = document.getElementById('bluetooth-export-settings-checkbox').checked;
@@ -335,12 +356,18 @@ async function handleBluetoothExport() {
             gameData.vibration = window.vibrationEnabled;
         }
         const result = await bluetoothSyncInstance.exportDataViaBluetooth(gameData, (progress) => {
-            if (progressBar && progressText) {
-                progressBar.value = progress;
+            if (progressBar && progressText && progressBarFill) {
+                progressBarFill.style.width = progress + '%';
                 progressText.textContent = `${progress}%`;
             }
         });
         if (result.success) {
+            if (progressBarFill) {
+                progressBarFill.style.width = '100%';
+                if (progressText) {
+                    progressText.textContent = '100%';
+                }
+            }
             document.getElementById('bluetooth-device-name').textContent = `${i18n.t('connected')}: ${result.device}`;
             setTimeout(() => {
                 alert(i18n.t('bluetoothExportSuccess'));
@@ -379,17 +406,28 @@ async function verifyPinAndImport() {
         }
         const progressBar = document.getElementById('bluetooth-import-progress');
         const progressText = document.getElementById('bluetooth-import-progress-text');
-        if (progressBar && progressText) {
+        const progressBarFill = progressBar ? progressBar.querySelector('.bg-green-600') : null;
+        if (progressBar && progressText && progressBarFill) {
             progressBar.style.display = 'block';
             progressText.style.display = 'block';
-            progressBar.value = 0;
+            progressBarFill.style.width = '0%';
             progressText.textContent = i18n.t('receiving') + '...';
         }
-        const importedData = await bluetoothSyncInstance.importDataViaBluetooth((bytesReceived) => {
+        const importedData = await bluetoothSyncInstance.importDataViaBluetooth((bytesReceived, progress, totalSize) => {
             if (progressText) {
-                progressText.textContent = i18n.t('receivingBytes').replace('{bytes}', bytesReceived);
+                if (totalSize) {
+                    progressText.textContent = i18n.t('receivingBytesTotal', { bytes: bytesReceived, total: totalSize });
+                } else {
+                    progressText.textContent = i18n.t('receivingBytes', { bytes: bytesReceived });
+                }
+            }
+            if (progressBarFill && progress !== undefined) {
+                progressBarFill.style.width = progress + '%';
             }
         });
+        if (progressBarFill) {
+            progressBarFill.style.width = '100%';
+        }
         if (importedData) {
             if (importedData.gameState) {
                 window.gameState = importedData.gameState;

@@ -233,6 +233,7 @@ const translations = {
         connected: '已连接',
         receiving: '接收中',
         receivingBytes: '接收中: {bytes} 字节',
+        receivingBytesTotal: '接收中: {bytes} / {total} 字节',
         includeSettings: '包含设置数据'
     },
     en: {
@@ -467,6 +468,7 @@ const translations = {
         connected: 'Connected',
         receiving: 'Receiving',
         receivingBytes: 'Receiving: {bytes} bytes',
+        receivingBytesTotal: 'Receiving: {bytes} / {total} bytes',
         includeSettings: 'Include settings data'
     }
 };
