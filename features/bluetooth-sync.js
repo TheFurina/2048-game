@@ -9,6 +9,7 @@ class BluetoothSync {
         this.isVerified = false;
         this.maxRetries = 3;
         this.timeoutDuration = 15000;
+        this.discoverAllDevices = false;
         this.checkBluetoothSupport();
     }
     updateSupportStatus() {
@@ -36,11 +37,16 @@ class BluetoothSync {
     }
     async requestDevice() {
         try {
+            const requestOptions = {
+                optionalServices: ['0000ffe0-0000-1000-8000-00805f9b34fb']
+            };
+            if (this.discoverAllDevices) {
+                requestOptions.acceptAllDevices = true;
+            } else {
+                requestOptions.filters = [{ services: ['generic_access'] }];
+            }
             const device = await this.withTimeout(
-                navigator.bluetooth.requestDevice({
-                    filters: [{ services: ['generic_access'] }],
-                    optionalServices: ['0000ffe0-0000-1000-8000-00805f9b34fb']
-                }),
+                navigator.bluetooth.requestDevice(requestOptions),
                 this.timeoutDuration,
                 'Device selection timeout'
             );
@@ -488,5 +494,7 @@ function hideBluetoothModal() {
 window.bluetoothSync = {
     version: bluetoothSyncVersion,
     init: initBluetoothSync,
-    instance: bluetoothSyncInstance
+    get instance() {
+        return bluetoothSyncInstance;
+    }
 };
