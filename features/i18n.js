@@ -1,4 +1,4 @@
-const i18nVersion = '1.1';
+const i18nVersion = '1.2';
 window.i18nVersion = i18nVersion;
 const translations = {
     zh: {
@@ -181,8 +181,7 @@ const translations = {
         down: '向下',
         left: '向左',
         right: '向右',
-        notSupported: '暂不支持',
-        aiSupportNote: 'AI分析功能仅支持3×3、4×4、5×5网格',
+        notAvailable: '不可用',
         followBrowser: '跟随浏览器',
         lightTheme: '浅色',
         darkTheme: '深色',
@@ -200,6 +199,7 @@ const translations = {
         invalidThemeFile: '无效的主题文件',
         customThemeModuleMissing: '自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。',
         aiAnalysisModuleMissing: 'AI分析模块未找到，请确保 features/ai-analysis.js 文件存在。',
+        dataTransferModuleMissing: '数据传输模块未找到，请确保 features/data-transfer.js 文件存在。',
         i18nModuleMissing: 'i18n模块未找到，请确保 features/i18n.js 文件存在。',
         customThemeModuleFailed: '自定义主题模块加载失败:',
         aiAnalysisModuleFailed: 'AI分析模块加载失败:',
@@ -416,8 +416,7 @@ const translations = {
         down: 'Down',
         left: 'Left',
         right: 'Right',
-        notSupported: 'Not Supported',
-        aiSupportNote: 'AI analysis is only supported for 3×3, 4×4, 5×5 grids',
+        notAvailable: 'Not Available',
         followBrowser: 'Follow Browser',
         lightTheme: 'Light',
         darkTheme: 'Dark',
@@ -435,6 +434,7 @@ const translations = {
         invalidThemeFile: 'Invalid theme file',
         customThemeModuleMissing: 'Custom theme module not found. Please ensure features/custom-theme.js file exists.',
         aiAnalysisModuleMissing: 'AI analysis module not found. Please ensure features/ai-analysis.js file exists.',
+        dataTransferModuleMissing: 'Data transfer module not found. Please ensure features/data-transfer.js file exists.',
         i18nModuleMissing: 'i18n module not found. Please ensure features/i18n.js file exists.',
         customThemeModuleFailed: 'Custom theme module loading failed:',
         aiAnalysisModuleFailed: 'AI analysis module loading failed:',

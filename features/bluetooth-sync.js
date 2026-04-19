@@ -1,4 +1,4 @@
-const bluetoothSyncVersion = '1.0';
+const bluetoothSyncVersion = '2.0';
 window.bluetoothSyncVersion = bluetoothSyncVersion;
 class BluetoothSync {
     constructor() {
@@ -8,7 +8,7 @@ class BluetoothSync {
         this.currentPin = null;
         this.isVerified = false;
         this.maxRetries = 3;
-        this.timeoutDuration = 15000;
+        this.timeoutDuration = 30000;
         this.discoverAllDevices = false;
         this.checkBluetoothSupport();
     }
@@ -43,7 +43,7 @@ class BluetoothSync {
             if (this.discoverAllDevices) {
                 requestOptions.acceptAllDevices = true;
             } else {
-                requestOptions.filters = [{ services: ['generic_access'] }];
+                requestOptions.filters = [{ services: ['0000ffe0-0000-1000-8000-00805f9b34fb'] }];
             }
             const device = await this.withTimeout(
                 navigator.bluetooth.requestDevice(requestOptions),
@@ -57,6 +57,9 @@ class BluetoothSync {
         }
     }
     async connect(device) {
+        if (!device || !device.gatt) {
+            throw new Error('Invalid device or device does not support GATT');
+        }
         let retries = 0;
         while (retries < this.maxRetries) {
             try {
@@ -136,7 +139,8 @@ class BluetoothSync {
             let totalSize = null;
             let receivedSize = 0;
             const decoder = new TextDecoder();
-            const notificationCallback = (event) => {
+            const self = this;
+            const notificationCallback = function(event) {
                 const value = event.target.value;
                 const chunk = decoder.decode(value);
                 if (chunk.startsWith('SIZE:')) {
@@ -166,7 +170,7 @@ class BluetoothSync {
             );
             this.characteristic.addEventListener('characteristicvaluechanged', notificationCallback);
             const startTime = Date.now();
-            while (!isComplete && (Date.now() - startTime) < this.timeoutDuration) {
+            while (!isComplete && (Date.now() - startTime) < self.timeoutDuration) {
                 await this.delay(100);
             }
             this.characteristic.removeEventListener('characteristicvaluechanged', notificationCallback);
@@ -206,7 +210,7 @@ class BluetoothSync {
     async exportDataViaBluetooth(gameData, onProgress) {
         try {
             if (!this.isSupported) {
-                throw new Error(i18n.t('bluetoothNotSupported'));
+                throw new Error(window.i18n ? window.i18n.t('bluetoothNotSupported') : 'Bluetooth is not supported in this browser');
             }
             this.currentPin = this.generatePin();
             this.isVerified = true;
@@ -217,7 +221,7 @@ class BluetoothSync {
             return {
                 success: true,
                 pin: this.currentPin,
-                device: device.name
+                device: device.name || 'Unknown Device'
             };
         } catch (error) {
             console.error('Bluetooth export failed:', error);
@@ -227,14 +231,16 @@ class BluetoothSync {
     async importDataViaBluetooth(onProgress) {
         try {
             if (!this.isSupported) {
-                throw new Error(i18n.t('bluetoothNotSupported'));
+                throw new Error(window.i18n ? window.i18n.t('bluetoothNotSupported') : 'Bluetooth is not supported in this browser');
             }
             const device = await this.requestDevice();
             await this.connect(device);
             const pinData = await this.receiveData();
             if (pinData.type === 'pin') {
                 this.currentPin = pinData.pin;
-                const userPin = prompt(i18n.t('bluetoothImportPin') + ':\n' + pinData.pin + '\n' + i18n.t('enterPinToVerify'));
+                const userPin = prompt(
+                    (window.i18n ? window.i18n.t('bluetoothImportPin') : 'Please enter the PIN shown on the sending device') + ':\n' + pinData.pin + '\n' + (window.i18n ? window.i18n.t('enterPinToVerify') : 'Please enter the above PIN to verify')
+                );
                 if (userPin === pinData.pin) {
                     this.isVerified = true;
                     const gameData = await this.receiveData(onProgress);
@@ -284,8 +290,6 @@ function setupBluetoothUI() {
     const backToSelectFromImport = document.getElementById('back-to-select-from-import');
     const bluetoothModal = document.getElementById('bluetooth-modal');
     const closeBluetoothModal = document.getElementById('close-bluetooth-modal');
-    const pinInput = document.getElementById('bluetooth-pin-input');
-    const verifyPinBtn = document.getElementById('verify-pin-button');
     if (bluetoothSyncBtn) {
         bluetoothSyncBtn.addEventListener('click', () => {
             showBluetoothModal('select');
@@ -315,25 +319,105 @@ function setupBluetoothUI() {
             }
         });
     }
-    if (verifyPinBtn) {
-        verifyPinBtn.addEventListener('click', verifyPinAndImport);
+}
+function getGameDataForExport(includeSettings) {
+    const gameState = window.gameState;
+    const gameData = {
+        gameState: {
+            grid: gameState.grid,
+            gridSize: gameState.gridSize,
+            gridRows: gameState.gridRows,
+            gridCols: gameState.gridCols,
+            score: gameState.score,
+            bestScore: gameState.bestScore,
+            gameOver: gameState.gameOver,
+            gameWon: gameState.gameWon,
+            isEndlessMode: gameState.isEndlessMode,
+            difficulty: gameState.difficulty,
+            history: []
+        },
+        bestScore: gameState.bestScore
+    };
+    if (includeSettings) {
+        gameData.settings = {
+            '2048-theme': localStorage.getItem('2048-theme'),
+            '2048-language': localStorage.getItem('2048-language'),
+            '2048-gpu-acceleration': localStorage.getItem('2048-gpu-acceleration'),
+            '2048-tile-animation': localStorage.getItem('2048-tile-animation'),
+            '2048-tile-appear-animation': localStorage.getItem('2048-tile-appear-animation'),
+            '2048-tile-move-animation': localStorage.getItem('2048-tile-move-animation'),
+            '2048-tile-merge-animation': localStorage.getItem('2048-tile-merge-animation'),
+            '2048-vibration': localStorage.getItem('2048-vibration'),
+            '2048-vibration-merge': localStorage.getItem('2048-vibration-merge'),
+            '2048-vibration-win': localStorage.getItem('2048-vibration-win'),
+            '2048-vibration-loss': localStorage.getItem('2048-vibration-loss'),
+            '2048-square-grid-locked': localStorage.getItem('2048-square-grid-locked'),
+            'controlsCollapsed': localStorage.getItem('controlsCollapsed'),
+            'bestMoveHidden': localStorage.getItem('bestMoveHidden')
+        };
     }
+    return gameData;
+}
+function applyImportedData(importedData) {
+    const gameState = window.gameState;
+    if (importedData.gameState) {
+        if (importedData.gameState.grid !== undefined) {
+            gameState.grid = importedData.gameState.grid;
+        }
+        if (importedData.gameState.gridSize !== undefined) {
+            gameState.gridSize = importedData.gameState.gridSize;
+        }
+        if (importedData.gameState.gridRows !== undefined) {
+            gameState.gridRows = importedData.gameState.gridRows;
+        }
+        if (importedData.gameState.gridCols !== undefined) {
+            gameState.gridCols = importedData.gameState.gridCols;
+        }
+        if (importedData.gameState.score !== undefined) {
+            gameState.score = importedData.gameState.score;
+        }
+        if (importedData.gameState.gameOver !== undefined) {
+            gameState.gameOver = importedData.gameState.gameOver;
+        }
+        if (importedData.gameState.gameWon !== undefined) {
+            gameState.gameWon = importedData.gameState.gameWon;
+        }
+        if (importedData.gameState.isEndlessMode !== undefined) {
+            gameState.isEndlessMode = importedData.gameState.isEndlessMode;
+        }
+        if (importedData.gameState.difficulty !== undefined) {
+            gameState.difficulty = importedData.gameState.difficulty;
+        }
+        gameState.history = [];
+    }
+    if (importedData.bestScore !== undefined) {
+        gameState.bestScore = importedData.bestScore;
+        localStorage.setItem('2048-best-score', importedData.bestScore);
+    }
+    if (importedData.settings) {
+        for (const [key, value] of Object.entries(importedData.settings)) {
+            if (value !== null) {
+                localStorage.setItem(key, value);
+            }
+        }
+    }
+    saveGameState();
 }
 async function handleBluetoothExport() {
     try {
         if (!bluetoothSyncInstance) {
-            alert(i18n.t('bluetoothModuleError'));
+            alert(window.i18n ? window.i18n.t('bluetoothModuleError') : 'Bluetooth module error');
             return;
         }
         if (!bluetoothSyncInstance.isSupported) {
-            alert(i18n.t('bluetoothNotSupported'));
+            alert(window.i18n ? window.i18n.t('bluetoothNotSupported') : 'Bluetooth is not supported in this browser');
             return;
         }
         showBluetoothModal('export');
         const pin = bluetoothSyncInstance.generatePin();
         bluetoothSyncInstance.currentPin = pin;
         document.getElementById('bluetooth-pin-display').textContent = pin;
-        document.getElementById('bluetooth-device-name').textContent = i18n.t('ready');
+        document.getElementById('bluetooth-device-name').textContent = window.i18n ? window.i18n.t('ready') : 'Ready';
         const progressBar = document.getElementById('bluetooth-export-progress');
         const progressText = document.getElementById('bluetooth-export-progress-text');
         const progressBarFill = progressBar ? progressBar.querySelector('.bg-blue-600') : null;
@@ -344,17 +428,7 @@ async function handleBluetoothExport() {
             progressText.textContent = '0%';
         }
         const includeSettings = document.getElementById('bluetooth-export-settings-checkbox').checked;
-        const gameData = {
-            gameState: window.gameState,
-            bestScore: window.bestScore
-        };
-        if (includeSettings) {
-            gameData.gameSize = window.gameSize;
-            gameData.theme = window.theme;
-            gameData.music = window.musicEnabled;
-            gameData.sound = window.soundEnabled;
-            gameData.vibration = window.vibrationEnabled;
-        }
+        const gameData = getGameDataForExport(includeSettings);
         const result = await bluetoothSyncInstance.exportDataViaBluetooth(gameData, (progress) => {
             if (progressBar && progressText && progressBarFill) {
                 progressBarFill.style.width = progress + '%';
@@ -368,40 +442,40 @@ async function handleBluetoothExport() {
                     progressText.textContent = '100%';
                 }
             }
-            document.getElementById('bluetooth-device-name').textContent = `${i18n.t('connected')}: ${result.device}`;
+            document.getElementById('bluetooth-device-name').textContent = `${window.i18n ? window.i18n.t('connected') : 'Connected'}: ${result.device}`;
             setTimeout(() => {
-                alert(i18n.t('bluetoothExportSuccess'));
+                alert(window.i18n ? window.i18n.t('bluetoothExportSuccess') : 'Bluetooth export successful!');
                 hideBluetoothModal();
             }, 1000);
         }
     } catch (error) {
         console.error('Bluetooth export error:', error);
-        alert(i18n.t('bluetoothExportFailed') + ': ' + error.message);
+        alert((window.i18n ? window.i18n.t('bluetoothExportFailed') : 'Bluetooth export failed') + ': ' + error.message);
         showBluetoothModal('select');
     }
 }
 async function handleBluetoothImport() {
     try {
         if (!bluetoothSyncInstance) {
-            alert(i18n.t('bluetoothModuleError'));
+            alert(window.i18n ? window.i18n.t('bluetoothModuleError') : 'Bluetooth module error');
             return;
         }
         if (!bluetoothSyncInstance.isSupported) {
-            alert(i18n.t('bluetoothNotSupported'));
+            alert(window.i18n ? window.i18n.t('bluetoothNotSupported') : 'Bluetooth is not supported in this browser');
             return;
         }
         showBluetoothModal('import');
         await verifyPinAndImport();
     } catch (error) {
         console.error('Bluetooth import error:', error);
-        alert(i18n.t('bluetoothImportFailed') + ': ' + error.message);
+        alert((window.i18n ? window.i18n.t('bluetoothImportFailed') : 'Bluetooth import failed') + ': ' + error.message);
         showBluetoothModal('select');
     }
 }
 async function verifyPinAndImport() {
     try {
         if (!bluetoothSyncInstance) {
-            alert(i18n.t('bluetoothModuleError'));
+            alert(window.i18n ? window.i18n.t('bluetoothModuleError') : 'Bluetooth module error');
             return;
         }
         const progressBar = document.getElementById('bluetooth-import-progress');
@@ -411,14 +485,14 @@ async function verifyPinAndImport() {
             progressBar.style.display = 'block';
             progressText.style.display = 'block';
             progressBarFill.style.width = '0%';
-            progressText.textContent = i18n.t('receiving') + '...';
+            progressText.textContent = (window.i18n ? window.i18n.t('receiving') : 'Receiving') + '...';
         }
         const importedData = await bluetoothSyncInstance.importDataViaBluetooth((bytesReceived, progress, totalSize) => {
             if (progressText) {
                 if (totalSize) {
-                    progressText.textContent = i18n.t('receivingBytesTotal', { bytes: bytesReceived, total: totalSize });
+                    progressText.textContent = (window.i18n ? window.i18n.t('receivingBytesTotal', { bytes: bytesReceived, total: totalSize }) : `Receiving: ${bytesReceived} / ${totalSize} bytes`);
                 } else {
-                    progressText.textContent = i18n.t('receivingBytes', { bytes: bytesReceived });
+                    progressText.textContent = (window.i18n ? window.i18n.t('receivingBytes', { bytes: bytesReceived }) : `Receiving: ${bytesReceived} bytes`);
                 }
             }
             if (progressBarFill && progress !== undefined) {
@@ -429,34 +503,8 @@ async function verifyPinAndImport() {
             progressBarFill.style.width = '100%';
         }
         if (importedData) {
-            if (importedData.gameState) {
-                window.gameState = importedData.gameState;
-            }
-            if (importedData.bestScore !== undefined) {
-                window.bestScore = importedData.bestScore;
-                localStorage.setItem('2048-best-score', importedData.bestScore);
-            }
-            if (importedData.gameSize !== undefined) {
-                window.gameSize = importedData.gameSize;
-                localStorage.setItem('2048-game-size', importedData.gameSize);
-            }
-            if (importedData.theme) {
-                window.theme = importedData.theme;
-                localStorage.setItem('2048-theme', importedData.theme);
-            }
-            if (importedData.music !== undefined) {
-                window.musicEnabled = importedData.music;
-                localStorage.setItem('2048-music', importedData.music);
-            }
-            if (importedData.sound !== undefined) {
-                window.soundEnabled = importedData.sound;
-                localStorage.setItem('2048-sound', importedData.sound);
-            }
-            if (importedData.vibration !== undefined) {
-                window.vibrationEnabled = importedData.vibration;
-                localStorage.setItem('2048-vibration', importedData.vibration);
-            }
-            alert(i18n.t('bluetoothImportSuccess'));
+            applyImportedData(importedData);
+            alert(window.i18n ? window.i18n.t('bluetoothImportSuccess') : 'Bluetooth import successful!');
             hideBluetoothModal();
             if (typeof initGame === 'function') {
                 initGame();
@@ -464,7 +512,7 @@ async function verifyPinAndImport() {
         }
     } catch (error) {
         console.error('Bluetooth import error:', error);
-        alert(i18n.t('bluetoothImportFailed') + ': ' + error.message);
+        alert((window.i18n ? window.i18n.t('bluetoothImportFailed') : 'Bluetooth import failed') + ': ' + error.message);
         showBluetoothModal('select');
     }
 }
@@ -527,6 +575,23 @@ function hideBluetoothModal() {
                 content.classList.remove('modal-enter', 'modal-exit-active');
             }
         }, 300);
+    }
+}
+function saveGameState() {
+    try {
+        localStorage.setItem('2048-game-state', JSON.stringify({
+            grid: window.gameState.grid,
+            gridSize: window.gameState.gridSize,
+            gridRows: window.gameState.gridRows,
+            gridCols: window.gameState.gridCols,
+            score: window.gameState.score,
+            bestScore: window.gameState.bestScore,
+            difficulty: window.gameState.difficulty,
+            isEndlessMode: window.gameState.isEndlessMode,
+            timestamp: new Date().toISOString()
+        }));
+    } catch (e) {
+        console.error('Failed to save game state:', e);
     }
 }
 window.bluetoothSync = {

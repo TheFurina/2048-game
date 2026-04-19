@@ -1,5 +1,147 @@
-const customThemeVersion = '1.1';
+const customThemeVersion = '1.2';
 window.customThemeVersion = customThemeVersion;
+const tileValues = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768];
+const themeFieldConfig = [
+    { id: 'bgColor', elementId: 'custom-bg-color', opacityId: 'custom-bg-opacity', category: 'base', default: '#faf8ef', defaultOpacity: '100' },
+    { id: 'primaryColor', elementId: 'custom-primary-color', opacityId: 'custom-primary-opacity', category: 'base', default: '#faa31b', defaultOpacity: '100' },
+    { id: 'secondaryColor', elementId: 'custom-secondary-color', opacityId: 'custom-secondary-opacity', category: 'base', default: '#8f7a66', defaultOpacity: '100' },
+    { id: 'gridColor', elementId: 'custom-grid-color', opacityId: 'custom-grid-opacity', category: 'base', default: '#bbada0', defaultOpacity: '100' },
+    { id: 'cellEmptyColor', elementId: 'custom-cell-empty-color', opacityId: 'custom-cell-empty-opacity', category: 'base', default: '#cdc1b4', defaultOpacity: '100' },
+    { id: 'scrollbarColor', elementId: 'custom-scrollbar-color', opacityId: 'custom-scrollbar-opacity', category: 'base', default: '#bbbbbb', defaultOpacity: '100' },
+    { id: 'modalBgColor', elementId: 'custom-modal-bg', opacityId: 'custom-modal-bg-opacity', category: 'modal', default: '#ffffff', defaultOpacity: '100' },
+    { id: 'modalTextColor', elementId: 'custom-modal-text', opacityId: 'custom-modal-text-opacity', category: 'modal', default: '#000000', defaultOpacity: '100' }
+];
+const tileDefaultColors = {
+    2: { bg: '#eee4da', text: '#776e65' },
+    4: { bg: '#ede0c8', text: '#776e65' },
+    8: { bg: '#f2b179', text: '#f9f6f2' },
+    16: { bg: '#f59563', text: '#f9f6f2' },
+    32: { bg: '#f67c5f', text: '#f9f6f2' },
+    64: { bg: '#f65e3b', text: '#f9f6f2' },
+    128: { bg: '#edcf72', text: '#f9f6f2' },
+    256: { bg: '#edcc61', text: '#f9f6f2' },
+    512: { bg: '#edc850', text: '#f9f6f2' },
+    1024: { bg: '#edc53f', text: '#f9f6f2' },
+    2048: { bg: '#edc22e', text: '#f9f6f2' },
+    4096: { bg: '#e65100', text: '#ffffff' },
+    8192: { bg: '#bf360c', text: '#ffffff' },
+    16384: { bg: '#880e4f', text: '#ffffff' },
+    32768: { bg: '#4a148c', text: '#ffffff' },
+    'super': { bg: '#311b92', text: '#ffffff' }
+};
+function getThemeFieldConfig() {
+    const config = [...themeFieldConfig];
+    tileValues.forEach(value => {
+        config.push(
+            { id: `tile${value}Bg`, elementId: `custom-tile-${value}-bg`, category: 'tile', default: tileDefaultColors[value].bg },
+            { id: `tile${value}Text`, elementId: `custom-tile-${value}-text`, category: 'tile', default: tileDefaultColors[value].text }
+        );
+    });
+    config.push(
+        { id: 'tileSuperBg', elementId: 'custom-tile-super-bg', category: 'tile', default: tileDefaultColors.super.bg },
+        { id: 'tileSuperText', elementId: 'custom-tile-super-text', category: 'tile', default: tileDefaultColors.super.text }
+    );
+    return config;
+}
+function readThemeValues() {
+    const values = {};
+    const config = getThemeFieldConfig();
+    config.forEach(field => {
+        const element = document.getElementById(field.elementId);
+        if (element) {
+            values[field.id] = element.value;
+        }
+        if (field.opacityId) {
+            const opacityElement = document.getElementById(field.opacityId);
+            if (opacityElement) {
+                values[`${field.id}Opacity`] = opacityElement.value;
+            }
+        }
+    });
+    return values;
+}
+function writeThemeValues(values) {
+    const config = getThemeFieldConfig();
+    config.forEach(field => {
+        if (values[field.id] !== undefined) {
+            const element = document.getElementById(field.elementId);
+            const textElement = document.getElementById(`${field.elementId}-text`);
+            if (element) element.value = values[field.id];
+            if (textElement) textElement.value = values[field.id];
+        }
+        if (field.opacityId && values[`${field.id}Opacity`] !== undefined) {
+            const opacityElement = document.getElementById(field.opacityId);
+            const opacityValueElement = document.getElementById(`${field.opacityId}-value`);
+            if (opacityElement) opacityElement.value = values[`${field.id}Opacity`];
+            if (opacityValueElement) opacityValueElement.textContent = values[`${field.id}Opacity`] + '%';
+        }
+    });
+}
+function getDefaultThemeValues() {
+    const defaults = {};
+    const config = getThemeFieldConfig();
+    config.forEach(field => {
+        if (field.default !== undefined) {
+            defaults[field.id] = field.default;
+        }
+        if (field.defaultOpacity !== undefined) {
+            defaults[`${field.id}Opacity`] = field.defaultOpacity;
+        }
+    });
+    return defaults;
+}
+function generateThemeCSS(values, selector = 'body.bg-bg') {
+    const config = getThemeFieldConfig();
+    let css = `${selector} { background-color: ${values.bgColor}${opacityToHex(values.bgOpacity)} !important; color: ${values.secondaryColor}${opacityToHex(values.secondaryOpacity)} !important; }\n`;
+    css += `${selector} .bg-bg { background-color: ${values.bgColor}${opacityToHex(values.bgOpacity)} !important; }\n`;
+    css += `${selector} .text-secondary { color: ${values.secondaryColor}${opacityToHex(values.secondaryOpacity)} !important; }\n`;
+    css += `${selector} .text-secondary\\/80 { color: ${values.secondaryColor}${opacityToHex(Math.round(parseInt(values.secondaryOpacity) * 0.8))} !important; }\n`;
+    css += `${selector} .bg-grid { background-color: ${values.gridColor}${opacityToHex(values.gridOpacity)} !important; }\n`;
+    css += `${selector} .bg-primary { background-color: ${values.primaryColor}${opacityToHex(values.primaryOpacity)} !important; }\n`;
+    css += `${selector} .bg-secondary { background-color: ${values.secondaryColor}${opacityToHex(values.secondaryOpacity)} !important; }\n`;
+    tileValues.forEach(value => {
+        const bgKey = `tile${value}Bg`;
+        const textKey = `tile${value}Text`;
+        if (values[bgKey] && values[textKey]) {
+            css += `${selector} .tile-${value} { background-color: ${values[bgKey]} !important; color: ${values[textKey]} !important; }\n`;
+        }
+    });
+    if (values.tileSuperBg && values.tileSuperText) {
+        css += `${selector} .tile-super { background-color: ${values.tileSuperBg} !important; color: ${values.tileSuperText} !important; }\n`;
+    }
+    css += `${selector} ::-webkit-scrollbar-track { background: ${values.bgColor}${opacityToHex(values.bgOpacity)} !important; }\n`;
+    css += `${selector} ::-webkit-scrollbar-thumb { background: ${values.scrollbarColor}${opacityToHex(values.scrollbarOpacity)} !important; }\n`;
+    return css;
+}
+function generatePreviewCSS(values) {
+    let css = `body[data-preview="true"] { background-color: ${values.bgColor}${opacityToHex(values.bgOpacity)} !important; color: ${values.secondaryColor}${opacityToHex(values.secondaryOpacity)} !important; }\n`;
+    css += `body[data-preview="true"] .bg-bg { background-color: ${values.bgColor}${opacityToHex(values.bgOpacity)} !important; }\n`;
+    css += `body[data-preview="true"] .text-secondary { color: ${values.secondaryColor}${opacityToHex(values.secondaryOpacity)} !important; }\n`;
+    css += `body[data-preview="true"] .text-secondary\\/80 { color: ${values.secondaryColor}${opacityToHex(Math.round(parseInt(values.secondaryOpacity) * 0.8))} !important; }\n`;
+    css += `body[data-preview="true"] .bg-grid { background-color: ${values.gridColor}${opacityToHex(values.gridOpacity)} !important; }\n`;
+    css += `body[data-preview="true"] .bg-primary { background-color: ${values.primaryColor}${opacityToHex(values.primaryOpacity)} !important; }\n`;
+    css += `body[data-preview="true"] .bg-secondary { background-color: ${values.secondaryColor}${opacityToHex(values.secondaryOpacity)} !important; }\n`;
+    tileValues.forEach(value => {
+        const bgKey = `tile${value}Bg`;
+        const textKey = `tile${value}Text`;
+        if (values[bgKey] && values[textKey]) {
+            css += `body[data-preview="true"] .tile-${value} { background-color: ${values[bgKey]} !important; color: ${values[textKey]} !important; }\n`;
+        }
+    });
+    if (values.tileSuperBg && values.tileSuperText) {
+        css += `body[data-preview="true"] .tile-super { background-color: ${values.tileSuperBg} !important; color: ${values.tileSuperText} !important; }\n`;
+    }
+    css += `body[data-preview="true"] ::-webkit-scrollbar-track { background: ${values.bgColor}${opacityToHex(values.bgOpacity)} !important; }\n`;
+    css += `body[data-preview="true"] ::-webkit-scrollbar-thumb { background: ${values.scrollbarColor}${opacityToHex(values.scrollbarOpacity)} !important; }\n`;
+    css += `body[data-preview="true"] .ai-analysis-modal { background: rgba(0, 0, 0, 0.5) !important; }\n`;
+    css += `body[data-preview="true"] .ai-analysis-content { background: ${values.modalBgColor}${opacityToHex(values.modalBgOpacity)} !important; color: ${values.modalTextColor}${opacityToHex(values.modalTextOpacity)} !important; }\n`;
+    return css;
+}
+function opacityToHex(opacity) {
+    if (!opacity) return 'ff';
+    const value = parseInt(opacity, 10);
+    return Math.floor((value / 100) * 255).toString(16).padStart(2, '0');
+}
 function setupThemeCustomizer() {
     localStorage.removeItem('themeExportSelection');
     const customThemeModal = document.getElementById('custom-theme-modal');
@@ -45,7 +187,6 @@ function setupThemeCustomizer() {
     if (resetButton) {
         resetButton.addEventListener('click', function() {
             resetCustomTheme();
-            previewCustomTheme();
         });
     }
     const saveButton = document.getElementById('save-custom-theme');
@@ -90,122 +231,14 @@ function setupThemeCustomizer() {
     });
 }
 function previewCustomTheme() {
-    const bgColorInput = document.getElementById('custom-bg-color');
-    const bgColor = bgColorInput.value;
-    const bgOpacity = parseOpacityFromColor(bgColor, 'custom-bg-opacity');
-    const primaryColorInput = document.getElementById('custom-primary-color');
-    const primaryColor = primaryColorInput.value;
-    const primaryOpacity = parseOpacityFromColor(primaryColor, 'custom-primary-opacity');
-    const secondaryColorInput = document.getElementById('custom-secondary-color');
-    const secondaryColor = secondaryColorInput.value;
-    const secondaryOpacity = parseOpacityFromColor(secondaryColor, 'custom-secondary-opacity');
-    const gridColorInput = document.getElementById('custom-grid-color');
-    const gridColor = gridColorInput.value;
-    const gridOpacity = parseOpacityFromColor(gridColor, 'custom-grid-opacity');
-    const cellEmptyColorInput = document.getElementById('custom-cell-empty-color');
-    const cellEmptyColor = cellEmptyColorInput.value;
-    const cellEmptyOpacity = parseOpacityFromColor(cellEmptyColor, 'custom-cell-empty-opacity');
-    const scrollbarColorInput = document.getElementById('custom-scrollbar-color');
-    const scrollbarColor = scrollbarColorInput.value;
-    const scrollbarOpacity = parseOpacityFromColor(scrollbarColor, 'custom-scrollbar-opacity');
-    const modalBgColorInput = document.getElementById('custom-modal-bg');
-    const modalBgColor = modalBgColorInput.value;
-    const modalBgOpacity = parseOpacityFromColor(modalBgColor, 'custom-modal-bg-opacity');
-    const modalTextColorInput = document.getElementById('custom-modal-text');
-    const modalTextColor = modalTextColorInput.value;
-    const modalTextOpacity = parseOpacityFromColor(modalTextColor, 'custom-modal-text-opacity');
-    const tile2Bg = document.getElementById('custom-tile-2-bg').value;
-    const tile2Text = document.getElementById('custom-tile-2-text').value;
-    const tile4Bg = document.getElementById('custom-tile-4-bg').value;
-    const tile4Text = document.getElementById('custom-tile-4-text').value;
-    const tile8Bg = document.getElementById('custom-tile-8-bg').value;
-    const tile8Text = document.getElementById('custom-tile-8-text').value;
-    const tile16Bg = document.getElementById('custom-tile-16-bg').value;
-    const tile16Text = document.getElementById('custom-tile-16-text').value;
-    const tile32Bg = document.getElementById('custom-tile-32-bg').value;
-    const tile32Text = document.getElementById('custom-tile-32-text').value;
-    const tile64Bg = document.getElementById('custom-tile-64-bg').value;
-    const tile64Text = document.getElementById('custom-tile-64-text').value;
-    const tile128Bg = document.getElementById('custom-tile-128-bg').value;
-    const tile128Text = document.getElementById('custom-tile-128-text').value;
-    const tile256Bg = document.getElementById('custom-tile-256-bg').value;
-    const tile256Text = document.getElementById('custom-tile-256-text').value;
-    const tile512Bg = document.getElementById('custom-tile-512-bg').value;
-    const tile512Text = document.getElementById('custom-tile-512-text').value;
-    const tile1024Bg = document.getElementById('custom-tile-1024-bg').value;
-    const tile1024Text = document.getElementById('custom-tile-1024-text').value;
-    const tile2048Bg = document.getElementById('custom-tile-2048-bg').value;
-    const tile2048Text = document.getElementById('custom-tile-2048-text').value;
-    const tile4096Bg = document.getElementById('custom-tile-4096-bg').value;
-    const tile4096Text = document.getElementById('custom-tile-4096-text').value;
-    const tile8192Bg = document.getElementById('custom-tile-8192-bg').value;
-    const tile8192Text = document.getElementById('custom-tile-8192-text').value;
-    const tile16384Bg = document.getElementById('custom-tile-16384-bg').value;
-    const tile16384Text = document.getElementById('custom-tile-16384-text').value;
-    const tile32768Bg = document.getElementById('custom-tile-32768-bg').value;
-    const tile32768Text = document.getElementById('custom-tile-32768-text').value;
-    const tileSuperBg = document.getElementById('custom-tile-super-bg').value;
-    const tileSuperText = document.getElementById('custom-tile-super-text').value;
+    const values = readThemeValues();
     let previewStyleElement = document.getElementById('preview-theme-styles');
     if (!previewStyleElement) {
         previewStyleElement = document.createElement('style');
         previewStyleElement.id = 'preview-theme-styles';
         document.head.appendChild(previewStyleElement);
     }
-    const previewStyles = `
-        body[data-preview="true"] {
-            background-color: ${bgColor}${Math.floor(bgOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-            color: ${secondaryColor}${Math.floor(secondaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-        }
-        body[data-preview="true"] .bg-bg {
-            background-color: ${bgColor}${Math.floor(bgOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-        }
-        body[data-preview="true"] .text-secondary {
-            color: ${secondaryColor}${Math.floor(secondaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-        }
-        body[data-preview="true"] .text-secondary\/80 {
-            color: ${secondaryColor}${Math.floor(secondaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-        }
-        body[data-preview="true"] .bg-grid {
-            background-color: ${gridColor}${Math.floor(gridOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-        }
-        body[data-preview="true"] .bg-primary {
-            background-color: ${primaryColor}${Math.floor(primaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-        }
-        body[data-preview="true"] .bg-secondary {
-            background-color: ${secondaryColor}${Math.floor(secondaryOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-        }
-        body[data-preview="true"] .tile-2 { background-color: ${tile2Bg} !important; color: ${tile2Text} !important; }
-        body[data-preview="true"] .tile-4 { background-color: ${tile4Bg} !important; color: ${tile4Text} !important; }
-        body[data-preview="true"] .tile-8 { background-color: ${tile8Bg} !important; color: ${tile8Text} !important; }
-        body[data-preview="true"] .tile-16 { background-color: ${tile16Bg} !important; color: ${tile16Text} !important; }
-        body[data-preview="true"] .tile-32 { background-color: ${tile32Bg} !important; color: ${tile32Text} !important; }
-        body[data-preview="true"] .tile-64 { background-color: ${tile64Bg} !important; color: ${tile64Text} !important; }
-        body[data-preview="true"] .tile-128 { background-color: ${tile128Bg} !important; color: ${tile128Text} !important; }
-        body[data-preview="true"] .tile-256 { background-color: ${tile256Bg} !important; color: ${tile256Text} !important; }
-        body[data-preview="true"] .tile-512 { background-color: ${tile512Bg} !important; color: ${tile512Text} !important; }
-        body[data-preview="true"] .tile-1024 { background-color: ${tile1024Bg} !important; color: ${tile1024Text} !important; }
-        body[data-preview="true"] .tile-2048 { background-color: ${tile2048Bg} !important; color: ${tile2048Text} !important; }
-        body[data-preview="true"] .tile-4096 { background-color: ${tile4096Bg} !important; color: ${tile4096Text} !important; }
-        body[data-preview="true"] .tile-8192 { background-color: ${tile8192Bg} !important; color: ${tile8192Text} !important; }
-        body[data-preview="true"] .tile-16384 { background-color: ${tile16384Bg} !important; color: ${tile16384Text} !important; }
-        body[data-preview="true"] .tile-32768 { background-color: ${tile32768Bg} !important; color: ${tile32768Text} !important; }
-        body[data-preview="true"] .tile-super { background-color: ${tileSuperBg} !important; color: ${tileSuperText} !important; }
-        body[data-preview="true"] ::-webkit-scrollbar-track {
-            background: ${bgColor}${Math.floor(bgOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-        }
-        body[data-preview="true"] ::-webkit-scrollbar-thumb {
-            background: ${scrollbarColor}${Math.floor(scrollbarOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-        }
-        body[data-preview="true"] .ai-analysis-modal {
-            background: rgba(0, 0, 0, 0.5) !important;
-        }
-        body[data-preview="true"] .ai-analysis-content {
-            background: ${modalBgColor}${Math.floor(modalBgOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-            color: ${modalTextColor}${Math.floor(modalTextOpacity * 2.55).toString(16).padStart(2, '0')} !important;
-        }
-    `;
-    previewStyleElement.textContent = previewStyles;
+    previewStyleElement.textContent = generatePreviewCSS(values);
     document.body.setAttribute('data-preview', 'true');
 }
 function removePreviewStyles() {
@@ -237,155 +270,12 @@ function parseOpacityFromColor(color, opacityInputId) {
     }
 }
 function resetCustomTheme() {
-    document.getElementById('custom-bg-color').value = '#faf8ef';
-    document.getElementById('custom-bg-color-text').value = '#faf8ef';
-    document.getElementById('custom-bg-opacity').value = '100';
-    document.getElementById('custom-bg-opacity-value').textContent = '100%';
-    document.getElementById('custom-primary-color').value = '#faa31b';
-    document.getElementById('custom-primary-color-text').value = '#faa31b';
-    document.getElementById('custom-primary-opacity').value = '100';
-    document.getElementById('custom-primary-opacity-value').textContent = '100%';
-    document.getElementById('custom-secondary-color').value = '#8f7a66';
-    document.getElementById('custom-secondary-color-text').value = '#8f7a66';
-    document.getElementById('custom-secondary-opacity').value = '100';
-    document.getElementById('custom-secondary-opacity-value').textContent = '100%';
-    document.getElementById('custom-grid-color').value = '#bbada0';
-    document.getElementById('custom-grid-color-text').value = '#bbada0';
-    document.getElementById('custom-grid-opacity').value = '100';
-    document.getElementById('custom-grid-opacity-value').textContent = '100%';
-    document.getElementById('custom-cell-empty-color').value = '#cdc1b4';
-    document.getElementById('custom-cell-empty-color-text').value = '#cdc1b4';
-    document.getElementById('custom-cell-empty-opacity').value = '100';
-    document.getElementById('custom-cell-empty-opacity-value').textContent = '100%';
-    document.getElementById('custom-scrollbar-color').value = '#bbbbbb';
-    document.getElementById('custom-scrollbar-color-text').value = '#bbbbbb';
-    document.getElementById('custom-scrollbar-opacity').value = '100';
-    document.getElementById('custom-scrollbar-opacity-value').textContent = '100%';
-    document.getElementById('custom-modal-bg').value = '#ffffff';
-    document.getElementById('custom-modal-bg-text').value = '#ffffff';
-    document.getElementById('custom-modal-bg-opacity').value = '100';
-    document.getElementById('custom-modal-bg-opacity-value').textContent = '100%';
-    document.getElementById('custom-modal-text').value = '#000000';
-    document.getElementById('custom-modal-text-text').value = '#000000';
-    document.getElementById('custom-modal-text-opacity').value = '100';
-    document.getElementById('custom-modal-text-opacity-value').textContent = '100%';
-    document.getElementById('custom-tile-2-bg').value = '#eee4da';
-    document.getElementById('custom-tile-2-bg-text').value = '#eee4da';
-    document.getElementById('custom-tile-2-text').value = '#776e65';
-    document.getElementById('custom-tile-2-text-text').value = '#776e65';
-    document.getElementById('custom-tile-4-bg').value = '#ede0c8';
-    document.getElementById('custom-tile-4-bg-text').value = '#ede0c8';
-    document.getElementById('custom-tile-4-text').value = '#776e65';
-    document.getElementById('custom-tile-4-text-text').value = '#776e65';
-    document.getElementById('custom-tile-8-bg').value = '#f2b179';
-    document.getElementById('custom-tile-8-bg-text').value = '#f2b179';
-    document.getElementById('custom-tile-8-text').value = '#f9f6f2';
-    document.getElementById('custom-tile-8-text-text').value = '#f9f6f2';
-    document.getElementById('custom-tile-16-bg').value = '#f59563';
-    document.getElementById('custom-tile-16-bg-text').value = '#f59563';
-    document.getElementById('custom-tile-16-text').value = '#f9f6f2';
-    document.getElementById('custom-tile-16-text-text').value = '#f9f6f2';
-    document.getElementById('custom-tile-32-bg').value = '#f67c5f';
-    document.getElementById('custom-tile-32-bg-text').value = '#f67c5f';
-    document.getElementById('custom-tile-32-text').value = '#f9f6f2';
-    document.getElementById('custom-tile-32-text-text').value = '#f9f6f2';
-    document.getElementById('custom-tile-64-bg').value = '#f65e3b';
-    document.getElementById('custom-tile-64-bg-text').value = '#f65e3b';
-    document.getElementById('custom-tile-64-text').value = '#f9f6f2';
-    document.getElementById('custom-tile-64-text-text').value = '#f9f6f2';
-    document.getElementById('custom-tile-128-bg').value = '#edcf72';
-    document.getElementById('custom-tile-128-bg-text').value = '#edcf72';
-    document.getElementById('custom-tile-128-text').value = '#f9f6f2';
-    document.getElementById('custom-tile-128-text-text').value = '#f9f6f2';
-    document.getElementById('custom-tile-256-bg').value = '#edcc61';
-    document.getElementById('custom-tile-256-bg-text').value = '#edcc61';
-    document.getElementById('custom-tile-256-text').value = '#f9f6f2';
-    document.getElementById('custom-tile-256-text-text').value = '#f9f6f2';
-    document.getElementById('custom-tile-512-bg').value = '#edc850';
-    document.getElementById('custom-tile-512-bg-text').value = '#edc850';
-    document.getElementById('custom-tile-512-text').value = '#f9f6f2';
-    document.getElementById('custom-tile-512-text-text').value = '#f9f6f2';
-    document.getElementById('custom-tile-1024-bg').value = '#edc53f';
-    document.getElementById('custom-tile-1024-bg-text').value = '#edc53f';
-    document.getElementById('custom-tile-1024-text').value = '#f9f6f2';
-    document.getElementById('custom-tile-1024-text-text').value = '#f9f6f2';
-    document.getElementById('custom-tile-2048-bg').value = '#edc22e';
-    document.getElementById('custom-tile-2048-bg-text').value = '#edc22e';
-    document.getElementById('custom-tile-2048-text').value = '#f9f6f2';
-    document.getElementById('custom-tile-2048-text-text').value = '#f9f6f2';
-    document.getElementById('custom-tile-4096-bg').value = '#e65100';
-    document.getElementById('custom-tile-4096-bg-text').value = '#e65100';
-    document.getElementById('custom-tile-4096-text').value = '#ffffff';
-    document.getElementById('custom-tile-4096-text-text').value = '#ffffff';
-    document.getElementById('custom-tile-8192-bg').value = '#bf360c';
-    document.getElementById('custom-tile-8192-bg-text').value = '#bf360c';
-    document.getElementById('custom-tile-8192-text').value = '#ffffff';
-    document.getElementById('custom-tile-8192-text-text').value = '#ffffff';
-    document.getElementById('custom-tile-16384-bg').value = '#880e4f';
-    document.getElementById('custom-tile-16384-bg-text').value = '#880e4f';
-    document.getElementById('custom-tile-16384-text').value = '#ffffff';
-    document.getElementById('custom-tile-16384-text-text').value = '#ffffff';
-    document.getElementById('custom-tile-32768-bg').value = '#4a148c';
-    document.getElementById('custom-tile-32768-bg-text').value = '#4a148c';
-    document.getElementById('custom-tile-32768-text').value = '#ffffff';
-    document.getElementById('custom-tile-32768-text-text').value = '#ffffff';
-    document.getElementById('custom-tile-super-bg').value = '#311b92';
-    document.getElementById('custom-tile-super-bg-text').value = '#311b92';
-    document.getElementById('custom-tile-super-text').value = '#ffffff';
-    document.getElementById('custom-tile-super-text-text').value = '#ffffff';
+    const defaults = getDefaultThemeValues();
+    writeThemeValues(defaults);
 }
 function saveCustomTheme() {
-    const themeData = {
-        bgColor: document.getElementById('custom-bg-color').value,
-        bgOpacity: document.getElementById('custom-bg-opacity').value,
-        primaryColor: document.getElementById('custom-primary-color').value,
-        primaryOpacity: document.getElementById('custom-primary-opacity').value,
-        secondaryColor: document.getElementById('custom-secondary-color').value,
-        secondaryOpacity: document.getElementById('custom-secondary-opacity').value,
-        gridColor: document.getElementById('custom-grid-color').value,
-        gridOpacity: document.getElementById('custom-grid-opacity').value,
-        cellEmptyColor: document.getElementById('custom-cell-empty-color').value,
-        cellEmptyOpacity: document.getElementById('custom-cell-empty-opacity').value,
-        scrollbarColor: document.getElementById('custom-scrollbar-color').value,
-        scrollbarOpacity: document.getElementById('custom-scrollbar-opacity').value,
-        modalBgColor: document.getElementById('custom-modal-bg').value,
-        modalBgOpacity: document.getElementById('custom-modal-bg-opacity').value,
-        modalTextColor: document.getElementById('custom-modal-text').value,
-        modalTextOpacity: document.getElementById('custom-modal-text-opacity').value,
-        tile2Bg: document.getElementById('custom-tile-2-bg').value,
-        tile2Text: document.getElementById('custom-tile-2-text').value,
-        tile4Bg: document.getElementById('custom-tile-4-bg').value,
-        tile4Text: document.getElementById('custom-tile-4-text').value,
-        tile8Bg: document.getElementById('custom-tile-8-bg').value,
-        tile8Text: document.getElementById('custom-tile-8-text').value,
-        tile16Bg: document.getElementById('custom-tile-16-bg').value,
-        tile16Text: document.getElementById('custom-tile-16-text').value,
-        tile32Bg: document.getElementById('custom-tile-32-bg').value,
-        tile32Text: document.getElementById('custom-tile-32-text').value,
-        tile64Bg: document.getElementById('custom-tile-64-bg').value,
-        tile64Text: document.getElementById('custom-tile-64-text').value,
-        tile128Bg: document.getElementById('custom-tile-128-bg').value,
-        tile128Text: document.getElementById('custom-tile-128-text').value,
-        tile256Bg: document.getElementById('custom-tile-256-bg').value,
-        tile256Text: document.getElementById('custom-tile-256-text').value,
-        tile512Bg: document.getElementById('custom-tile-512-bg').value,
-        tile512Text: document.getElementById('custom-tile-512-text').value,
-        tile1024Bg: document.getElementById('custom-tile-1024-bg').value,
-        tile1024Text: document.getElementById('custom-tile-1024-text').value,
-        tile2048Bg: document.getElementById('custom-tile-2048-bg').value,
-        tile2048Text: document.getElementById('custom-tile-2048-text').value,
-        tile4096Bg: document.getElementById('custom-tile-4096-bg').value,
-        tile4096Text: document.getElementById('custom-tile-4096-text').value,
-        tile8192Bg: document.getElementById('custom-tile-8192-bg').value,
-        tile8192Text: document.getElementById('custom-tile-8192-text').value,
-        tile16384Bg: document.getElementById('custom-tile-16384-bg').value,
-        tile16384Text: document.getElementById('custom-tile-16384-text').value,
-        tile32768Bg: document.getElementById('custom-tile-32768-bg').value,
-        tile32768Text: document.getElementById('custom-tile-32768-text').value,
-        tileSuperBg: document.getElementById('custom-tile-super-bg').value,
-        tileSuperText: document.getElementById('custom-tile-super-text').value,
-        timestamp: new Date().getTime()
-    };
+    const themeData = readThemeValues();
+    themeData.timestamp = new Date().getTime();
     localStorage.setItem('customTheme', JSON.stringify(themeData));
     localStorage.setItem('2048-theme', 'custom');
     alert(i18n.t('themeSaved'));
@@ -395,30 +285,12 @@ function exportCustomTheme() {
     const optionsContainer = document.getElementById('theme-export-options');
     const selectAllCheckbox = document.getElementById('select-all-theme-items');
     optionsContainer.innerHTML = '';
-    const themeItems = [
-        { id: 'bgColor', elementId: 'custom-bg-color', label: i18n.t('mainBg') },
-        { id: 'bgOpacity', elementId: 'custom-bg-opacity', label: i18n.t('bgOpacity') },
-        { id: 'primaryColor', elementId: 'custom-primary-color', label: i18n.t('primaryColor') },
-        { id: 'primaryOpacity', elementId: 'custom-primary-opacity', label: i18n.t('primaryOpacity') },
-        { id: 'secondaryColor', elementId: 'custom-secondary-color', label: i18n.t('secondaryColor') },
-        { id: 'secondaryOpacity', elementId: 'custom-secondary-opacity', label: i18n.t('secondaryOpacity') },
-        { id: 'gridColor', elementId: 'custom-grid-color', label: i18n.t('gridColor') },
-        { id: 'gridOpacity', elementId: 'custom-grid-opacity', label: i18n.t('gridOpacity') },
-        { id: 'cellEmptyColor', elementId: 'custom-cell-empty-color', label: i18n.t('cellEmptyColor') },
-        { id: 'cellEmptyOpacity', elementId: 'custom-cell-empty-opacity', label: i18n.t('cellEmptyOpacity') },
-        { id: 'scrollbarColor', elementId: 'custom-scrollbar-color', label: i18n.t('scrollbarColor') },
-        { id: 'scrollbarOpacity', elementId: 'custom-scrollbar-opacity', label: i18n.t('scrollbarOpacity') },
-        { id: 'modalBgColor', elementId: 'custom-modal-bg', label: i18n.t('modalBg') },
-        { id: 'modalBgOpacity', elementId: 'custom-modal-bg-opacity', label: i18n.t('modalBgOpacity') },
-        { id: 'modalTextColor', elementId: 'custom-modal-text', label: i18n.t('modalText') },
-        { id: 'modalTextOpacity', elementId: 'custom-modal-text-opacity', label: i18n.t('modalTextOpacity') }
-    ];
-    for (let i = 2; i <= 32768; i *= 2) {
-        themeItems.push({ id: `tile${i}Bg`, elementId: `custom-tile-${i}-bg`, label: i18n.t(`tile${i}Bg`) });
-        themeItems.push({ id: `tile${i}Text`, elementId: `custom-tile-${i}-text`, label: i18n.t(`tile${i}Text`) });
-    }
-    themeItems.push({ id: 'tileSuperBg', elementId: 'custom-tile-super-bg', label: i18n.t('tileSuperBg') });
-    themeItems.push({ id: 'tileSuperText', elementId: 'custom-tile-super-text', label: i18n.t('tileSuperText') });
+    const config = getThemeFieldConfig();
+    const themeItems = config.map(field => ({
+        id: field.id,
+        elementId: field.elementId,
+        label: i18n.t(field.id)
+    }));
     const savedState = JSON.parse(localStorage.getItem('themeExportSelection'));
     themeItems.forEach(item => {
         const optionDiv = document.createElement('div');
@@ -458,12 +330,16 @@ function exportCustomTheme() {
     document.getElementById('confirm-export-theme').addEventListener('click', function() {
         try {
             const themeData = { timestamp: new Date().getTime() };
+            const currentValues = readThemeValues();
             themeItems.forEach(item => {
                 const checkbox = document.getElementById(`export-${item.id}`);
                 if (checkbox.checked) {
-                    const element = document.getElementById(item.elementId);
-                    if (element) {
-                        themeData[item.id] = element.value;
+                    if (currentValues[item.id] !== undefined) {
+                        themeData[item.id] = currentValues[item.id];
+                    }
+                    const opacityId = `${item.id}Opacity`;
+                    if (currentValues[opacityId] !== undefined) {
+                        themeData[opacityId] = currentValues[opacityId];
                     }
                 }
             });
@@ -499,96 +375,7 @@ function importCustomTheme() {
                 if (!themeData || typeof themeData !== 'object') {
                     throw new Error(i18n.t('invalidThemeFile'));
                 }
-                if (themeData.bgColor) {
-                    document.getElementById('custom-bg-color').value = themeData.bgColor;
-                    document.getElementById('custom-bg-color-text').value = themeData.bgColor;
-                }
-                if (themeData.bgOpacity) {
-                    document.getElementById('custom-bg-opacity').value = themeData.bgOpacity;
-                    document.getElementById('custom-bg-opacity-value').textContent = themeData.bgOpacity + '%';
-                }
-                if (themeData.primaryColor) {
-                    document.getElementById('custom-primary-color').value = themeData.primaryColor;
-                    document.getElementById('custom-primary-color-text').value = themeData.primaryColor;
-                }
-                if (themeData.primaryOpacity) {
-                    document.getElementById('custom-primary-opacity').value = themeData.primaryOpacity;
-                    document.getElementById('custom-primary-opacity-value').textContent = themeData.primaryOpacity + '%';
-                }
-                if (themeData.secondaryColor) {
-                    document.getElementById('custom-secondary-color').value = themeData.secondaryColor;
-                    document.getElementById('custom-secondary-color-text').value = themeData.secondaryColor;
-                }
-                if (themeData.secondaryOpacity) {
-                    document.getElementById('custom-secondary-opacity').value = themeData.secondaryOpacity;
-                    document.getElementById('custom-secondary-opacity-value').textContent = themeData.secondaryOpacity + '%';
-                }
-                if (themeData.gridColor) {
-                    document.getElementById('custom-grid-color').value = themeData.gridColor;
-                    document.getElementById('custom-grid-color-text').value = themeData.gridColor;
-                }
-                if (themeData.gridOpacity) {
-                    document.getElementById('custom-grid-opacity').value = themeData.gridOpacity;
-                    document.getElementById('custom-grid-opacity-value').textContent = themeData.gridOpacity + '%';
-                }
-                if (themeData.cellEmptyColor) {
-                    document.getElementById('custom-cell-empty-color').value = themeData.cellEmptyColor;
-                    document.getElementById('custom-cell-empty-color-text').value = themeData.cellEmptyColor;
-                }
-                if (themeData.cellEmptyOpacity) {
-                    document.getElementById('custom-cell-empty-opacity').value = themeData.cellEmptyOpacity;
-                    document.getElementById('custom-cell-empty-opacity-value').textContent = themeData.cellEmptyOpacity + '%';
-                }
-                if (themeData.scrollbarColor) {
-                    document.getElementById('custom-scrollbar-color').value = themeData.scrollbarColor;
-                    document.getElementById('custom-scrollbar-color-text').value = themeData.scrollbarColor;
-                }
-                if (themeData.scrollbarOpacity) {
-                    document.getElementById('custom-scrollbar-opacity').value = themeData.scrollbarOpacity;
-                    document.getElementById('custom-scrollbar-opacity-value').textContent = themeData.scrollbarOpacity + '%';
-                }
-                if (themeData.modalBgColor) {
-                    document.getElementById('custom-modal-bg').value = themeData.modalBgColor;
-                    document.getElementById('custom-modal-bg-text').value = themeData.modalBgColor;
-                }
-                if (themeData.modalBgOpacity) {
-                    document.getElementById('custom-modal-bg-opacity').value = themeData.modalBgOpacity;
-                    document.getElementById('custom-modal-bg-opacity-value').textContent = themeData.modalBgOpacity + '%';
-                }
-                if (themeData.modalTextColor) {
-                    document.getElementById('custom-modal-text').value = themeData.modalTextColor;
-                    document.getElementById('custom-modal-text-text').value = themeData.modalTextColor;
-                }
-                if (themeData.modalTextOpacity) {
-                    document.getElementById('custom-modal-text-opacity').value = themeData.modalTextOpacity;
-                    document.getElementById('custom-modal-text-opacity-value').textContent = themeData.modalTextOpacity + '%';
-                }
-                for (let i = 2; i <= 32768; i *= 2) {
-                    const bg = document.getElementById(`custom-tile-${i}-bg`);
-                    const bgText = document.getElementById(`custom-tile-${i}-bg-text`);
-                    const text = document.getElementById(`custom-tile-${i}-text`);
-                    const textText = document.getElementById(`custom-tile-${i}-text-text`);
-                    if (bg && themeData[`tile${i}Bg`]) {
-                        bg.value = themeData[`tile${i}Bg`];
-                        bgText.value = themeData[`tile${i}Bg`];
-                    }
-                    if (text && themeData[`tile${i}Text`]) {
-                        text.value = themeData[`tile${i}Text`];
-                        textText.value = themeData[`tile${i}Text`];
-                    }
-                }
-                const superBg = document.getElementById('custom-tile-super-bg');
-                const superBgText = document.getElementById('custom-tile-super-bg-text');
-                const superText = document.getElementById('custom-tile-super-text');
-                const superTextText = document.getElementById('custom-tile-super-text-text');
-                if (superBg && themeData.tileSuperBg) {
-                    superBg.value = themeData.tileSuperBg;
-                    superBgText.value = themeData.tileSuperBg;
-                }
-                if (superText && themeData.tileSuperText) {
-                    superText.value = themeData.tileSuperText;
-                    superTextText.value = themeData.tileSuperText;
-                }
+                writeThemeValues(themeData);
                 previewCustomTheme();
                 alert(i18n.t('themeImported'));
             } catch (e) {
@@ -611,59 +398,7 @@ function loadCustomTheme() {
             styleElement.id = 'custom-theme-styles';
             document.head.appendChild(styleElement);
         }
-        const bgOpacity = themeData.bgOpacity ? Math.floor((themeData.bgOpacity / 100) * 255).toString(16).padStart(2, '0') : 'ff';
-        const primaryOpacity = themeData.primaryOpacity ? Math.floor((themeData.primaryOpacity / 100) * 255).toString(16).padStart(2, '0') : 'ff';
-        const secondaryOpacity = themeData.secondaryOpacity ? Math.floor((themeData.secondaryOpacity / 100) * 255).toString(16).padStart(2, '0') : 'ff';
-        const gridOpacity = themeData.gridOpacity ? Math.floor((themeData.gridOpacity / 100) * 255).toString(16).padStart(2, '0') : 'ff';
-        const cellEmptyOpacity = themeData.cellEmptyOpacity ? Math.floor((themeData.cellEmptyOpacity / 100) * 255).toString(16).padStart(2, '0') : 'ff';
-        const scrollbarOpacity = themeData.scrollbarOpacity ? Math.floor((themeData.scrollbarOpacity / 100) * 255).toString(16).padStart(2, '0') : 'ff';
-        const customStyles = `
-            body.bg-bg {
-                background-color: ${themeData.bgColor}${bgOpacity} !important;
-                color: ${themeData.secondaryColor}${secondaryOpacity} !important;
-            }
-            body.bg-bg .bg-bg {
-                background-color: ${themeData.bgColor}${bgOpacity} !important;
-            }
-            body.bg-bg .text-secondary {
-                color: ${themeData.secondaryColor}${secondaryOpacity} !important;
-            }
-            body.bg-bg .text-secondary\/80 {
-                color: ${themeData.secondaryColor}${Math.floor((parseInt(secondaryOpacity, 16) * 0.8) / 255 * 255).toString(16).padStart(2, '0')} !important;
-            }
-            body.bg-bg .bg-grid {
-                background-color: ${themeData.gridColor}${gridOpacity} !important;
-            }
-            body.bg-bg .bg-primary {
-                background-color: ${themeData.primaryColor}${primaryOpacity} !important;
-            }
-            body.bg-bg .bg-secondary {
-                background-color: ${themeData.secondaryColor}${secondaryOpacity} !important;
-            }
-            body.bg-bg .tile-2 { background-color: ${themeData.tile2Bg} !important; color: ${themeData.tile2Text} !important; }
-            body.bg-bg .tile-4 { background-color: ${themeData.tile4Bg} !important; color: ${themeData.tile4Text} !important; }
-            body.bg-bg .tile-8 { background-color: ${themeData.tile8Bg} !important; color: ${themeData.tile8Text} !important; }
-            body.bg-bg .tile-16 { background-color: ${themeData.tile16Bg} !important; color: ${themeData.tile16Text} !important; }
-            body.bg-bg .tile-32 { background-color: ${themeData.tile32Bg} !important; color: ${themeData.tile32Text} !important; }
-            body.bg-bg .tile-64 { background-color: ${themeData.tile64Bg} !important; color: ${themeData.tile64Text} !important; }
-            body.bg-bg .tile-128 { background-color: ${themeData.tile128Bg} !important; color: ${themeData.tile128Text} !important; }
-            body.bg-bg .tile-256 { background-color: ${themeData.tile256Bg} !important; color: ${themeData.tile256Text} !important; }
-            body.bg-bg .tile-512 { background-color: ${themeData.tile512Bg} !important; color: ${themeData.tile512Text} !important; }
-            body.bg-bg .tile-1024 { background-color: ${themeData.tile1024Bg} !important; color: ${themeData.tile1024Text} !important; }
-            body.bg-bg .tile-2048 { background-color: ${themeData.tile2048Bg} !important; color: ${themeData.tile2048Text} !important; }
-            body.bg-bg .tile-4096 { background-color: ${themeData.tile4096Bg} !important; color: ${themeData.tile4096Text} !important; }
-            body.bg-bg .tile-8192 { background-color: ${themeData.tile8192Bg} !important; color: ${themeData.tile8192Text} !important; }
-            body.bg-bg .tile-16384 { background-color: ${themeData.tile16384Bg} !important; color: ${themeData.tile16384Text} !important; }
-            body.bg-bg .tile-32768 { background-color: ${themeData.tile32768Bg} !important; color: ${themeData.tile32768Text} !important; }
-            body.bg-bg .tile-super { background-color: ${themeData.tileSuperBg} !important; color: ${themeData.tileSuperText} !important; }
-            body.bg-bg ::-webkit-scrollbar-track {
-                background: ${themeData.bgColor}${bgOpacity} !important;
-            }
-            body.bg-bg ::-webkit-scrollbar-thumb {
-                background: ${themeData.scrollbarColor}${scrollbarOpacity} !important;
-            }
-        `;
-        styleElement.textContent = customStyles;
+        styleElement.textContent = generateThemeCSS(themeData);
         document.body.setAttribute('data-theme', 'custom');
     } catch (e) {
         console.error('Failed to load custom theme:', e);
