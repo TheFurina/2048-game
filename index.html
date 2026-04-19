@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="./icon.png">
-    <title>2048 Game</title>
+    <title>2048 Game</title>.
     <meta name="description" content="玩2048游戏，一款流行的在线益智数字游戏。通过滑动合并相同数字，挑战达到2048方块。支持多种难度和网格大小。">
     <meta name="keywords" content="2048游戏,2048,数字游戏,益智游戏,在线游戏,免费游戏,脑力游戏,滑动游戏,合并游戏,挑战游戏">
     <meta name="author" content="2048 Game">
@@ -62,9 +62,37 @@
     <script src="./features/custom-theme.js"></script>
     <script src="./features/ai-analysis.js"></script>
     <script src="./features/i18n.js"></script>
+    <script src="./features/data-transfer.js"></script>
+    <script src="./features/custom-select.js"></script>
     <script src="./features/bluetooth-sync.js"></script>
     <script>
-        const gameVersion = '2.3.0';
+        (function() {
+            try {
+                window.exportGameData = exportGameData;
+                window.importGameData = importGameData;
+                window.copyDataToClipboard = copyDataToClipboard;
+                window.dataTransferModuleLoaded = true;
+            } catch (error) {
+                console.warn('Data transfer module loading failed:', error);
+                window.dataTransferModuleLoaded = false;
+                window.exportGameData = function() { alert(window.i18n && window.i18n.t ? i18n.t('dataTransferModuleMissing') : '数据传输模块未找到，请确保 features/data-transfer.js 文件存在。'); };
+                window.importGameData = function() { alert(window.i18n && window.i18n.t ? i18n.t('dataTransferModuleMissing') : '数据传输模块未找到，请确保 features/data-transfer.js 文件存在。'); };
+                window.copyDataToClipboard = function() { alert(window.i18n && window.i18n.t ? i18n.t('dataTransferModuleMissing') : '数据传输模块未找到，请确保 features/data-transfer.js 文件存在。'); };
+            }
+        })();
+    </script>
+    <script>
+        (function() {
+            try {
+                window.customSelectModuleLoaded = true;
+            } catch (error) {
+                console.warn('Custom select module loading failed:', error);
+                window.customSelectModuleLoaded = false;
+            }
+        })();
+    </script>
+    <script>
+        const gameVersion = '2.4.0';
         window.gameVersion = gameVersion;
         const config = { // Game configuration
             initialTiles: 2, // Initial number of tiles
@@ -1597,11 +1625,12 @@
                             <div class="vibration-toggle-container flex items-center justify-between mb-2 px-2">
                                 <div class="flex items-center">
                                     <span class="text-gray-700 dark:text-dark-muted" data-i18n="vibration">振动反馈</span>
-                                    <div class="relative ml-2">
+                                    <div class="relative ml-2 flex items-center group">
                                         <span id="vibration-warning-icon" class="text-yellow-500 opacity-0 transition-opacity duration-300 cursor-help">
                                             <i class="fa-solid fa-circle-exclamation"></i>
                                         </span>
-                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs p-2 rounded-md shadow-lg opacity-0 invisible transition-all duration-300 z-50">
+                                        <span id="vibration-warning-text" class="text-yellow-500 text-xs ml-1 opacity-0 transition-opacity duration-300" data-i18n="notAvailable">不可用</span>
+                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs p-2 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                                             <span data-i18n="vibrationWarning">当前浏览器不支持振动功能</span>
                                         </div>
                                     </div>
@@ -1717,11 +1746,12 @@
                                 <span class="flex items-center">
                                     <i class="fa-brands fa-bluetooth-b w-5 mr-2"></i>
                                     <span data-i18n="bluetoothSync">蓝牙同步</span>
-                                    <div class="relative ml-2">
+                                    <div class="relative ml-2 flex items-center group">
                                         <span id="bluetooth-warning-icon" class="text-yellow-500 opacity-0 transition-opacity duration-300 cursor-help">
                                             <i class="fa-solid fa-circle-exclamation"></i>
                                         </span>
-                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs p-2 rounded-md shadow-lg opacity-0 invisible transition-all duration-300 z-50">
+                                        <span id="bluetooth-warning-text" class="text-yellow-500 text-xs ml-1 opacity-0 transition-opacity duration-300" data-i18n="notAvailable">不可用</span>
+                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs p-2 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                                             <span data-i18n="bluetoothNotSupported">当前浏览器不支持蓝牙功能</span>
                                         </div>
                                     </div>
@@ -2325,7 +2355,7 @@
         let simulateNoBluetooth = false;
         Object.defineProperty(window, 'gameVersions', {
             get: function() {
-                console.log('2048 v' + gameVersion + '\nCustom Theme ' + (window.customThemeVersion ? 'v' + window.customThemeVersion : 'Not found') + '\nAI Analysis ' + (window.aiAnalysisVersion ? 'v' + window.aiAnalysisVersion : 'Not found') + '\ni18n ' + (window.i18nVersion ? 'v' + window.i18nVersion : 'Not found') + '\nBluetooth Sync ' + (window.bluetoothSyncVersion ? 'v' + window.bluetoothSyncVersion : 'Not found'));
+                console.log('2048 v' + gameVersion + '\nCustom Theme ' + (window.customThemeVersion ? 'v' + window.customThemeVersion : 'Not found') + '\nAI Analysis ' + (window.aiAnalysisVersion ? 'v' + window.aiAnalysisVersion : 'Not found') + '\ni18n ' + (window.i18nVersion ? 'v' + window.i18nVersion : 'Not found') + '\nData Transfer ' + (window.dataTransferVersion ? 'v' + window.dataTransferVersion : 'Not found') + '\nCustom Select ' + (window.customSelectVersion ? 'v' + window.customSelectVersion : 'Not found') + '\nBluetooth Sync ' + (window.bluetoothSyncVersion ? 'v' + window.bluetoothSyncVersion : 'Not found'));
                 return 'Version info displayed above';
             }
         });
@@ -2346,6 +2376,7 @@
                     console.log('Simulating no vibration support');
                     const vibrationToggle = document.getElementById('vibration-toggle');
                     const vibrationWarningIcon = document.getElementById('vibration-warning-icon');
+                    const vibrationWarningText = document.getElementById('vibration-warning-text');
                     const vibrationDetails = document.getElementById('vibration-details');
                     if (vibrationToggle) {
                         vibrationToggle.disabled = true;
@@ -2356,6 +2387,9 @@
                         vibrationToggle.closest('.vibration-toggle-container').classList.remove('mb-2');
                         if (vibrationWarningIcon) {
                             vibrationWarningIcon.classList.remove('opacity-0');
+                        }
+                        if (vibrationWarningText) {
+                            vibrationWarningText.classList.remove('opacity-0');
                         }
                         if (vibrationDetails) {
                             vibrationDetails.classList.add('opacity-50');
@@ -2376,6 +2410,7 @@
                     console.log('Restoring vibration support');
                     const vibrationToggle = document.getElementById('vibration-toggle');
                     const vibrationWarningIcon = document.getElementById('vibration-warning-icon');
+                    const vibrationWarningText = document.getElementById('vibration-warning-text');
                     const vibrationDetails = document.getElementById('vibration-details');
                     if (vibrationToggle) {
                         vibrationToggle.disabled = false;
@@ -2386,6 +2421,9 @@
                         vibrationToggle.closest('.vibration-toggle-container').classList.add('mb-2');
                         if (vibrationWarningIcon) {
                             vibrationWarningIcon.classList.add('opacity-0');
+                        }
+                        if (vibrationWarningText) {
+                            vibrationWarningText.classList.add('opacity-0');
                         }
                         if (vibrationDetails) {
                             vibrationDetails.classList.remove('opacity-50');
@@ -2406,11 +2444,15 @@
                     console.log('Simulating no Bluetooth support');
                     const bluetoothSyncButton = document.getElementById('bluetooth-sync-button');
                     const bluetoothWarningIcon = document.getElementById('bluetooth-warning-icon');
+                    const bluetoothWarningText = document.getElementById('bluetooth-warning-text');
                     if (bluetoothSyncButton) {
                         bluetoothSyncButton.disabled = true;
                         bluetoothSyncButton.classList.add('opacity-50', 'cursor-not-allowed');
                         if (bluetoothWarningIcon) {
                             bluetoothWarningIcon.classList.remove('opacity-0');
+                        }
+                        if (bluetoothWarningText) {
+                            bluetoothWarningText.classList.remove('opacity-0');
                         }
                     }
                     return 'No Bluetooth simulation enabled';
@@ -2427,11 +2469,15 @@
                     console.log('Restoring Bluetooth support');
                     const bluetoothSyncButton = document.getElementById('bluetooth-sync-button');
                     const bluetoothWarningIcon = document.getElementById('bluetooth-warning-icon');
+                    const bluetoothWarningText = document.getElementById('bluetooth-warning-text');
                     if (bluetoothSyncButton) {
                         bluetoothSyncButton.disabled = false;
                         bluetoothSyncButton.classList.remove('opacity-50', 'cursor-not-allowed');
                         if (bluetoothWarningIcon) {
                             bluetoothWarningIcon.classList.add('opacity-0');
+                        }
+                        if (bluetoothWarningText) {
+                            bluetoothWarningText.classList.add('opacity-0');
                         }
                     }
                     return 'Bluetooth support restored';
@@ -2583,165 +2629,6 @@
                 }, 300);
             }
         }
-        const Base91 = {
-            chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~"',
-            decodeTable: null,
-            initDecodeTable: function() {
-                if (this.decodeTable) return;
-                this.decodeTable = new Uint8Array(256);
-                for (let i = 0; i < 256; i++) {
-                    this.decodeTable[i] = 255;
-                }
-                for (let i = 0; i < this.chars.length; i++) {
-                    this.decodeTable[this.chars.charCodeAt(i)] = i;
-                }
-            },
-            encode: function(str) {
-                let b = 0, n = 0, out = '';
-                for (let i = 0; i < str.length; i++) {
-                    b |= str.charCodeAt(i) << n;
-                    n += 8;
-                    if (n > 13) {
-                        let v = b & 8191;
-                        if (v > 88) {
-                            b >>= 13;
-                            n -= 13;
-                        } else {
-                            v = b & 16383;
-                            b >>= 14;
-                            n -= 14;
-                        }
-                        out += this.chars[v % 91] + this.chars[Math.floor(v / 91)];
-                    }
-                }
-                if (n) {
-                    out += this.chars[b % 91];
-                    if (n > 7 || b > 90) {
-                        out += this.chars[Math.floor(b / 91)];
-                    }
-                }
-                return out;
-            },
-            decode: function(str) {
-                this.initDecodeTable();
-                let b = 0, n = 0, out = '';
-                let v = -1;
-                for (let i = 0; i < str.length; i++) {
-                    let c = this.decodeTable[str.charCodeAt(i)];
-                    if (c === 255) continue;
-                    if (v === -1) {
-                        v = c;
-                    } else {
-                        v += c * 91;
-                        b |= v << n;
-                        n += (v & 8191) > 88 ? 13 : 14;
-                        while (n > 7) {
-                            out += String.fromCharCode(b & 255);
-                            b >>= 8;
-                            n -= 8;
-                        }
-                        v = -1;
-                    }
-                }
-                if (v !== -1) {
-                    out += String.fromCharCode((b | v << n) & 255);
-                }
-                return out;
-            }
-        };
-        function exportGameData() {
-            try {
-                const includeSettings = document.getElementById('export-settings-checkbox')?.checked || false;
-                const encoding = document.getElementById('encoding-select')?.value || 'base64';
-                const data = {
-                    grid: gameState.grid,
-                    score: gameState.score,
-                    bestScore: gameState.bestScore,
-                    gridSize: gameState.gridSize,
-                    gridRows: gameState.gridRows,
-                    gridCols: gameState.gridCols,
-                    difficulty: gameState.difficulty,
-                    isEndlessMode: gameState.isEndlessMode,
-                    timestamp: new Date().toISOString(),
-                    encoding: encoding
-                };
-                if (includeSettings) {
-                    data.settings = {
-                        '2048-theme': localStorage.getItem('2048-theme'),
-                        'customTheme': localStorage.getItem('customTheme'),
-                        '2048-gpu-acceleration': localStorage.getItem('2048-gpu-acceleration'),
-                        '2048-tile-animation': localStorage.getItem('2048-tile-animation'),
-                        '2048-tile-appear-animation': localStorage.getItem('2048-tile-appear-animation'),
-                        '2048-tile-move-animation': localStorage.getItem('2048-tile-move-animation'),
-                        '2048-tile-merge-animation': localStorage.getItem('2048-tile-merge-animation'),
-                        '2048-vibration': localStorage.getItem('2048-vibration'),
-                        '2048-vibration-merge': localStorage.getItem('2048-vibration-merge'),
-                        '2048-vibration-win': localStorage.getItem('2048-vibration-win'),
-                        '2048-vibration-loss': localStorage.getItem('2048-vibration-loss'),
-                        '2048-square-grid-locked': localStorage.getItem('2048-square-grid-locked'),
-                        'controlsCollapsed': localStorage.getItem('controlsCollapsed'),
-                        'bestMoveHidden': localStorage.getItem('bestMoveHidden'),
-                        '2048-language': localStorage.getItem('2048-language')
-                    };
-                }
-                const jsonStr = JSON.stringify(data);
-                let dataStr;
-                if (encoding === 'base91') {
-                    dataStr = Base91.encode(jsonStr);
-                } else {
-                    dataStr = btoa(jsonStr);
-                }
-                document.getElementById('data-textarea').value = dataStr;
-                return dataStr;
-            } catch (error) {
-                console.error(i18n.t('exportFailed'), error);
-                alert(i18n.t('exportFailed') + error.message);
-                return null;
-            }
-        }
-        function copyDataToClipboard() {
-            try {
-                const textarea = document.getElementById('data-textarea');
-                if (!textarea.value) {
-                    return;
-                }
-                textarea.select();
-                document.execCommand('copy');
-                const copyButton = document.getElementById('copy-data-button');
-                const originalIcon = copyButton.innerHTML;
-                copyButton.innerHTML = '<i class="fa-solid fa-check text-green-600 dark:text-green-400"></i>';
-                copyButton.setAttribute('title', '已复制');
-                setTimeout(() => {
-                    copyButton.innerHTML = originalIcon;
-                    copyButton.setAttribute('title', '复制数据');
-                }, 2000);
-            } catch (error) {
-                console.error(i18n.t('error'), error);
-                alert(i18n.t('error') + ' ' + error.message);
-            }
-        }
-        document.addEventListener('DOMContentLoaded', () => { 
-            console.log('%c   ____     ___    _  _      ___  \n  |___ \\   / _ \\  | || |    ( _ ) \n    __) | | | | | | || |_   / _ \\ \n   / __/  | |_| | |__   _| | (_) | \n  |_____|  \\___/     |_|    \\___/ \n                                   \n    ____                             \n   / ___|   __ _   _ __ ___     ___ \n  | |  _   / _` | | \'_ ` _ \\   / _ \\ \n  | |_| | | (_| | | | | | | | |  __/ \n   \\____|  \\__,_| |_| |_| |_|  \\___| \n                                     ', 'color: #faa31b; font-size: 14px;');
-            console.log('2048 v' + gameVersion);
-            const versionInfo = document.getElementById('version-info');
-            if (versionInfo) {
-                versionInfo.textContent = i18n.t('versionInfo', { version: gameVersion });
-            }
-            const textarea = document.getElementById('data-textarea');
-            const textareaContainer = textarea ? textarea.closest('.relative') : null;
-            const copyButton = document.getElementById('copy-data-button'); 
-            if (textareaContainer && copyButton) { 
-                textareaContainer.addEventListener('mouseenter', () => { 
-                    copyButton.classList.remove('opacity-0', 'invisible'); 
-                    copyButton.classList.add('opacity-70', 'visible'); 
-                }); 
-                textareaContainer.addEventListener('mouseleave', () => { 
-                    copyButton.classList.add('opacity-0', 'invisible'); 
-                    copyButton.classList.remove('opacity-70', 'visible'); 
-                }); 
-                copyButton.addEventListener('click', copyDataToClipboard); 
-            } 
-        });
         function importGameData(dataStr) {
             try {
                 if (!dataStr) {
@@ -4277,8 +4164,12 @@
                     vibrationToggle.closest('.vibration-toggle-container').classList.add('opacity-50');
                     vibrationToggle.closest('.vibration-toggle-container').classList.remove('mb-2');
                     const vibrationWarningIcon = document.getElementById('vibration-warning-icon');
+                    const vibrationWarningText = document.getElementById('vibration-warning-text');
                     if (vibrationWarningIcon) {
                         vibrationWarningIcon.classList.remove('opacity-0');
+                    }
+                    if (vibrationWarningText) {
+                        vibrationWarningText.classList.remove('opacity-0');
                     }
                     if (vibrationDetails) {
                         vibrationDetails.classList.add('opacity-50');
@@ -4318,12 +4209,16 @@
             }
             const bluetoothSyncButton = document.getElementById('bluetooth-sync-button');
             const bluetoothWarningIcon = document.getElementById('bluetooth-warning-icon');
+            const bluetoothWarningText = document.getElementById('bluetooth-warning-text');
             if (bluetoothSyncButton) {
                 if (!navigator.bluetooth || simulateNoBluetooth) {
                     bluetoothSyncButton.disabled = true;
                     bluetoothSyncButton.classList.add('opacity-50', 'cursor-not-allowed');
                     if (bluetoothWarningIcon) {
                         bluetoothWarningIcon.classList.remove('opacity-0');
+                    }
+                    if (bluetoothWarningText) {
+                        bluetoothWarningText.classList.remove('opacity-0');
                     }
                     bluetoothSyncButton.addEventListener('click', function(e) {
                         e.preventDefault();
@@ -4515,123 +4410,17 @@
             initEventListeners();
             handleResize();
         }
+        console.log('%c   ____     ___    _  _      ___  \n  |___ \\   / _ \\  | || |    ( _ ) \n    __) | | | | | | || |_   / _ \\ \n   / __/  | |_| | |__   _| | (_) | \n  |_____|  \\___/     |_|    \\___/ \n                                   \n    ____                             \n   / ___|   __ _   _ __ ___     ___ \n  | |  _   / _` | | \'_ ` _ \\   / _ \\ \n  | |_| | | (_| | | | | | | | |  __/ \n   \\____|  \\__,_| |_| |_| |_|  \\___| \n                                     ', 'color: #faa31b; font-size: 14px;');
+        console.log('2048 v' + gameVersion);
+        const versionInfo = document.getElementById('version-info');
+        if (versionInfo) {
+            versionInfo.textContent = i18n.t('versionInfo', { version: gameVersion });
+        }
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', startGame);
         } else {
             startGame();
         }
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const customSelects = document.querySelectorAll('.custom-select');
-            customSelects.forEach(customSelect => {
-                if (customSelect.dataset.i18nSelect) return;
-                const selectedValue = customSelect.querySelector('.select-selected span');
-                const selectItems = customSelect.querySelector('.select-items');
-                const selectOptions = customSelect.querySelectorAll('.select-item');
-                let nativeSelect;
-                if (customSelect.parentElement.querySelector('#theme-toggle')) {
-                    nativeSelect = customSelect.parentElement.querySelector('#theme-toggle');
-                } else if (customSelect.parentElement.querySelector('#language-select')) {
-                    nativeSelect = customSelect.parentElement.querySelector('#language-select');
-                }
-                if (selectedValue && nativeSelect) {
-                    selectedValue.textContent = nativeSelect.options[nativeSelect.selectedIndex].text;
-                }
-                selectOptions.forEach(option => {
-                    if (nativeSelect && option.getAttribute('data-value') === nativeSelect.value) {
-                        option.classList.add('selected');
-                    } else {
-                        option.classList.remove('selected');
-                    }
-                });
-                selectItems.classList.add('hidden');
-                selectItems.style.maxHeight = null;
-                selectItems.style.opacity = '0';
-                customSelect.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const selectSelected = this.querySelector('.select-selected');
-                    if (selectItems.style.maxHeight) {
-                        selectItems.style.maxHeight = null;
-                        selectItems.style.opacity = '0';
-                        selectSelected.classList.remove('active');
-                        setTimeout(() => selectItems.classList.add('hidden'), 300);
-                    } else {
-                        const allSelectItems = document.querySelectorAll('.select-items');
-                        let maxZIndex = 20;
-                        allSelectItems.forEach(item => {
-                            const zIndex = parseInt(item.style.zIndex) || 20;
-                            if (zIndex > maxZIndex) {
-                                maxZIndex = zIndex;
-                            }
-                        });
-                        selectItems.style.zIndex = maxZIndex + 1;
-                        
-                        selectItems.classList.remove('hidden');
-                        selectSelected.classList.add('active');
-                        setTimeout(() => {
-                            selectItems.style.maxHeight = "200px";
-                            selectItems.style.opacity = '1';
-                        }, 10);
-                    }
-                });
-                selectOptions.forEach(option => {
-                    option.addEventListener('click', function() {
-                        const value = this.getAttribute('data-value');
-                        const iconEl = this.querySelector('i');
-                        const emojiEl = this.querySelector('.emoji-icon');
-                        const iconHTML = iconEl ? iconEl.outerHTML : '';
-                        const emojiHTML = emojiEl ? emojiEl.outerHTML : '';
-                        const text = this.cloneNode(true);
-                        const iconInClone = text.querySelector('i');
-                        const emojiInClone = text.querySelector('.emoji-icon');
-                        if (iconInClone) iconInClone.remove();
-                        if (emojiInClone) emojiInClone.remove();
-                        const textContent = text.textContent.trim();
-                        if (selectedValue) {
-                            const selectedIcon = selectedValue.querySelector('i') || selectedValue.querySelector('.emoji-icon');
-                            if (selectedIcon) {
-                                selectedIcon.remove();
-                            }
-                            if (iconHTML) {
-                                selectedValue.innerHTML = iconHTML + ' ' + textContent;
-                            } else if (emojiHTML) {
-                                selectedValue.innerHTML = emojiHTML + ' ' + textContent;
-                            } else {
-                                selectedValue.textContent = textContent;
-                            }
-                        }
-                        if (nativeSelect) {
-                            nativeSelect.value = value;
-                            nativeSelect.dispatchEvent(new Event('change'));
-                        }
-                        selectOptions.forEach(opt => opt.classList.remove('selected'));
-                        this.classList.add('selected');
-                        selectItems.classList.add('hidden');
-                    });
-                });
-                if (nativeSelect) {
-                    nativeSelect.addEventListener('change', function() {
-                        if (selectedValue && this.options && this.selectedIndex >= 0 && this.selectedIndex < this.options.length) {
-                            selectedValue.textContent = this.options[this.selectedIndex].text;
-                        }
-                    });
-                }
-            });
-            document.addEventListener('click', function() {
-                document.querySelectorAll('.select-items').forEach(selectItems => {
-                    if (selectItems.style.maxHeight) {
-                        selectItems.style.maxHeight = null;
-                        selectItems.style.opacity = '0';
-                        const selectSelected = selectItems.previousElementSibling;
-                        if (selectSelected) {
-                            selectSelected.classList.remove('active');
-                        }
-                        setTimeout(() => selectItems.classList.add('hidden'), 300);
-                    }
-                });
-            });
-        });
     </script>
         <div id="ai-analysis-modal" class="ai-analysis-modal hidden" role="dialog" aria-labelledby="ai-analysis-modal-title" aria-modal="true">
             <div class="ai-analysis-content max-h-[90vh] overflow-y-auto transition-all duration-300 ease-in-out">
@@ -4666,20 +4455,10 @@
                     <div class="analysis-label" data-i18n="scorePotentialLabel">得分潜力分析</div>
                     <div id="score-potential" class="analysis-value">--</div>
                 </div>
-                <div id="ai-analysis-overlay" class="hidden absolute inset-x-0 top-16 bottom-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm flex items-center justify-center rounded-b-lg">
-                    <div class="text-center">
-                        <i class="fa-solid fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
-                        <p class="text-lg font-semibold text-gray-800 dark:text-gray-200" data-i18n="notSupported">暂不支持</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2" data-i18n="aiSupportNote">AI分析功能仅支持3×3、4×4、5×5网格</p>
-                    </div>
-                </div>
             </div>
         </main>
         <script>
         function analyzeGameState() {
-            const modal = document.getElementById('ai-analysis-modal');
-            const overlay = document.getElementById('ai-analysis-overlay');
-            overlay.classList.add('hidden');
             const directions = ['up', 'down', 'left', 'right'];
             let bestScore = -1;
             let bestDirection = 'up';
