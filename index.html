@@ -3506,7 +3506,7 @@
             saveGameState();
         }
         function toggleTheme() {
-            const currentTheme = localStorage.getItem('2048-theme') || 'light';
+            const currentTheme = localStorage.getItem('2048-theme') || 'auto';
             const styleElement = document.getElementById('custom-theme-styles');
             if (styleElement) {
                 styleElement.remove();
@@ -4339,7 +4339,7 @@
                     mediaQuery: themeMediaQuery,
                     handler: updateTheme
                 };
-                elements.themeToggle.value = savedTheme || 'light';
+                elements.themeToggle.value = savedTheme || 'auto';
             }
             if (savedState) {
                 try {
