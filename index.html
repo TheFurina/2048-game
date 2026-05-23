@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="./icon.png">
-    <title>2048 Game</title>.
+    <title>2048 Game</title>
     <meta name="description" content="玩2048游戏，一款流行的在线益智数字游戏。通过滑动合并相同数字，挑战达到2048方块。支持多种难度和网格大小。">
     <meta name="keywords" content="2048游戏,2048,数字游戏,益智游戏,在线游戏,免费游戏,脑力游戏,滑动游戏,合并游戏,挑战游戏">
     <meta name="author" content="2048 Game">
@@ -92,7 +92,7 @@
         })();
     </script>
     <script>
-        const gameVersion = '2.4.0';
+        const gameVersion = '2.4.1';
         window.gameVersion = gameVersion;
         const config = { // Game configuration
             initialTiles: 2, // Initial number of tiles
@@ -250,11 +250,13 @@
         }
     </script>
     <script>
-        const themeToggle = document.getElementById('theme-toggle');
-        if (themeToggle) {
-            const isDarkMode = document.documentElement.classList.contains('dark');
-            themeToggle.value = isDarkMode ? 'dark' : 'light';
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                const savedTheme = localStorage.getItem('2048-theme') || 'auto';
+                themeToggle.value = savedTheme;
+            }
+        });
     </script>
     <style type="text/tailwindcss">
         .hidden { 
@@ -1408,6 +1410,91 @@
         .dark #score-potential.low {
             background: #e57373;color: #ffebee;
         }
+        .custom-select {
+            position: relative;
+        }
+        .custom-select .relative:hover .absolute {
+            opacity: 1;
+            visibility: visible;
+        }
+        .custom-select .relative:hover .absolute::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #1f2937;
+        }
+        .dark .custom-select .relative:hover .absolute::after {
+            border-top-color: #1f2937;
+        }
+        .select-selected {
+            user-select: none;
+        }
+        .select-selected .fa-chevron-down {
+            transition: transform 0.3s ease;
+        }
+        .select-selected.active .fa-chevron-down {
+            transform: rotate(180deg);
+        }
+        .select-items {
+            user-select: none;
+            overflow-y: auto;
+        }
+        .select-selected.active ~ .select-items {
+            max-height: 200px;
+        }
+        .select-item {
+            display: flex;
+            align-items: center;
+            font-family: 'Font Awesome 6 Free', sans-serif;
+            font-weight: 900;
+        }
+        .select-item.selected {
+            background-color: transparent;
+        }
+        .select-selected.active ~ .select-items .select-item.selected {
+            background-color: #d1d5db;
+        }
+        .dark .select-item.selected {
+            background-color: transparent;
+        }
+        .dark .select-selected.active ~ .select-items .select-item.selected {
+            background-color: #4b5563;
+        }
+        .select-selected span {
+            font-family: 'Font Awesome 6 Free', sans-serif;
+            font-weight: 900;
+        }
+        #controls-container {
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            max-height: 500px;
+        }
+        #controls-container.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-bottom: 0;
+        }
+        #toggle-icon {
+            transition: transform 0.3s ease;
+        }
+        #toggle-icon.rotated {
+            transform: rotate(180deg);
+        }
+        #custom-theme-button-container {
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+            max-height: 0;
+            opacity: 0;
+            margin-top: 0;
+        }
+        #custom-theme-button-container.visible {
+            max-height: 50px;
+            opacity: 1;
+            margin-top: 0.25rem;
+        }
     </style>
 </head>
 <body class="bg-bg font-game min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300">
@@ -1417,81 +1504,6 @@
                 <h1 id="game-title" class="text-[clamp(2.5rem,5vw,3.5rem)] font-bold text-secondary dark:text-dark-text mb-1 tracking-tight">2048</h1>
                 <p class="text-[clamp(1rem,2vw,1.2rem)] text-secondary/80 dark:text-dark-muted">滑动合并方块，创建<span class="font-bold">2048</span>！</p>
             </div>
-        <style>
-            .custom-select {
-                position: relative;
-            }
-            .custom-select .relative:hover .absolute {
-                opacity: 1;
-                visibility: visible;
-            }
-            .custom-select .relative:hover .absolute::after {
-                content: '';
-                position: absolute;
-                top: 100%;
-                left: 50%;
-                transform: translateX(-50%);
-                border: 5px solid transparent;
-                border-top-color: #1f2937;
-            }
-            .dark .custom-select .relative:hover .absolute::after {
-                border-top-color: #1f2937;
-            }
-            .select-selected {
-                user-select: none;
-            }
-            .select-selected .fa-chevron-down {
-                transition: transform 0.3s ease;
-            }
-            .select-selected.active .fa-chevron-down {
-                transform: rotate(180deg);
-            }
-            .select-items {
-                user-select: none;
-                overflow-y: auto;
-            }
-            .select-selected.active ~ .select-items {
-                max-height: 200px;
-            }
-            .select-item {
-                display: flex;
-                align-items: center;
-                font-family: 'Font Awesome 6 Free', sans-serif;
-                font-weight: 900;
-            }
-            .select-item.selected {
-                background-color: transparent;
-            }
-            .select-selected.active ~ .select-items .select-item.selected {
-                background-color: #d1d5db;
-            }
-            .dark .select-item.selected {
-                background-color: transparent;
-            }
-            .dark .select-selected.active ~ .select-items .select-item.selected {
-                background-color: #4b5563;
-            }
-            .select-selected span {
-                font-family: 'Font Awesome 6 Free', sans-serif;
-                font-weight: 900;
-            }
-            #controls-container {
-                overflow: hidden;
-                transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-                max-height: 500px;
-            }
-            #controls-container.collapsed {
-                max-height: 0;
-                opacity: 0;
-                margin-bottom: 0;
-            }
-            #toggle-icon {
-                transition: transform 0.3s ease;
-            }
-            #toggle-icon.rotated {
-                transform: rotate(180deg);
-            }
-        </style>
             <div class="flex gap-2 mt-4 md:mt-0">
                 <button id="undo-button" class="bg-grid hover:bg-grid/80 text-white p-2 rounded-md shadow-md transition-all duration-200 focus:outline-none dark:bg-dark-grid w-[72px]" title="撤销上一步">
                     <i class="fa-solid fa-undo mr-1"></i><span>撤销</span>
@@ -1625,11 +1637,11 @@
                             <div class="vibration-toggle-container flex items-center justify-between mb-2 px-2">
                                 <div class="flex items-center">
                                     <span class="text-gray-700 dark:text-dark-muted" data-i18n="vibration">振动反馈</span>
-                                    <div class="relative ml-2 flex items-center group">
-                                        <span id="vibration-warning-icon" class="text-yellow-500 opacity-0 transition-opacity duration-300 cursor-help">
+                                    <div id="vibration-warning-container" class="relative ml-2 flex items-center group hidden">
+                                        <span id="vibration-warning-icon" class="text-yellow-500 transition-opacity duration-300 cursor-help">
                                             <i class="fa-solid fa-circle-exclamation"></i>
                                         </span>
-                                        <span id="vibration-warning-text" class="text-yellow-500 text-xs ml-1 opacity-0 transition-opacity duration-300" data-i18n="notAvailable">不可用</span>
+                                        <span id="vibration-warning-text" class="text-yellow-500 text-xs ml-1 transition-opacity duration-300" data-i18n="notAvailable">不可用</span>
                                         <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs p-2 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                                             <span data-i18n="vibrationWarning">当前浏览器不支持振动功能</span>
                                         </div>
@@ -1722,8 +1734,8 @@
                                     <option value="custom">&#xf53f; 自定义</option>
                                 </select>
                             </div>
-                            <div id="custom-theme-button-container" class="flex justify-end px-2 mt-1">
-                                <button id="custom-theme-button" style="display: none;" class="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded-md text-sm transition-all duration-200">
+                            <div id="custom-theme-button-container" class="flex justify-end px-2">
+                                <button id="custom-theme-button" class="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded-md text-sm transition-all duration-200">
                                     <i class="fa-solid fa-palette mr-1"></i><span data-i18n="customThemeButton">自定义主题设置</span>
                                 </button>
                             </div>
@@ -1746,11 +1758,12 @@
                                 <span class="flex items-center">
                                     <i class="fa-brands fa-bluetooth-b w-5 mr-2"></i>
                                     <span data-i18n="bluetoothSync">蓝牙同步</span>
-                                    <div class="relative ml-2 flex items-center group">
-                                        <span id="bluetooth-warning-icon" class="text-yellow-500 opacity-0 transition-opacity duration-300 cursor-help">
+                                    <span class="ml-2 px-2 py-0.5 text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full font-semibold shadow-sm dark:from-blue-400 dark:to-purple-400 dark:text-gray-900">Beta</span>
+                                    <div id="bluetooth-warning-container" class="relative ml-2 flex items-center group hidden">
+                                        <span id="bluetooth-warning-icon" class="text-yellow-500 transition-opacity duration-300 cursor-help">
                                             <i class="fa-solid fa-circle-exclamation"></i>
                                         </span>
-                                        <span id="bluetooth-warning-text" class="text-yellow-500 text-xs ml-1 opacity-0 transition-opacity duration-300" data-i18n="notAvailable">不可用</span>
+                                        <span id="bluetooth-warning-text" class="text-yellow-500 text-xs ml-1 transition-opacity duration-300" data-i18n="notAvailable">不可用</span>
                                         <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs p-2 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                                             <span data-i18n="bluetoothNotSupported">当前浏览器不支持蓝牙功能</span>
                                         </div>
@@ -2375,8 +2388,7 @@
                     simulateNoVibration = true;
                     console.log('Simulating no vibration support');
                     const vibrationToggle = document.getElementById('vibration-toggle');
-                    const vibrationWarningIcon = document.getElementById('vibration-warning-icon');
-                    const vibrationWarningText = document.getElementById('vibration-warning-text');
+                    const vibrationWarningContainer = document.getElementById('vibration-warning-container');
                     const vibrationDetails = document.getElementById('vibration-details');
                     if (vibrationToggle) {
                         vibrationToggle.disabled = true;
@@ -2385,11 +2397,8 @@
                         localStorage.setItem('2048-vibration', gameState.vibrationEnabled);
                         vibrationToggle.closest('.vibration-toggle-container').classList.add('opacity-50');
                         vibrationToggle.closest('.vibration-toggle-container').classList.remove('mb-2');
-                        if (vibrationWarningIcon) {
-                            vibrationWarningIcon.classList.remove('opacity-0');
-                        }
-                        if (vibrationWarningText) {
-                            vibrationWarningText.classList.remove('opacity-0');
+                        if (vibrationWarningContainer) {
+                            vibrationWarningContainer.classList.remove('hidden');
                         }
                         if (vibrationDetails) {
                             vibrationDetails.classList.add('opacity-50');
@@ -2409,8 +2418,7 @@
                     simulateNoVibration = false;
                     console.log('Restoring vibration support');
                     const vibrationToggle = document.getElementById('vibration-toggle');
-                    const vibrationWarningIcon = document.getElementById('vibration-warning-icon');
-                    const vibrationWarningText = document.getElementById('vibration-warning-text');
+                    const vibrationWarningContainer = document.getElementById('vibration-warning-container');
                     const vibrationDetails = document.getElementById('vibration-details');
                     if (vibrationToggle) {
                         vibrationToggle.disabled = false;
@@ -2419,11 +2427,8 @@
                         localStorage.setItem('2048-vibration', gameState.vibrationEnabled);
                         vibrationToggle.closest('.vibration-toggle-container').classList.remove('opacity-50');
                         vibrationToggle.closest('.vibration-toggle-container').classList.add('mb-2');
-                        if (vibrationWarningIcon) {
-                            vibrationWarningIcon.classList.add('opacity-0');
-                        }
-                        if (vibrationWarningText) {
-                            vibrationWarningText.classList.add('opacity-0');
+                        if (vibrationWarningContainer) {
+                            vibrationWarningContainer.classList.add('hidden');
                         }
                         if (vibrationDetails) {
                             vibrationDetails.classList.remove('opacity-50');
@@ -2443,16 +2448,12 @@
                     simulateNoBluetooth = true;
                     console.log('Simulating no Bluetooth support');
                     const bluetoothSyncButton = document.getElementById('bluetooth-sync-button');
-                    const bluetoothWarningIcon = document.getElementById('bluetooth-warning-icon');
-                    const bluetoothWarningText = document.getElementById('bluetooth-warning-text');
+                    const bluetoothWarningContainer = document.getElementById('bluetooth-warning-container');
                     if (bluetoothSyncButton) {
                         bluetoothSyncButton.disabled = true;
                         bluetoothSyncButton.classList.add('opacity-50', 'cursor-not-allowed');
-                        if (bluetoothWarningIcon) {
-                            bluetoothWarningIcon.classList.remove('opacity-0');
-                        }
-                        if (bluetoothWarningText) {
-                            bluetoothWarningText.classList.remove('opacity-0');
+                        if (bluetoothWarningContainer) {
+                            bluetoothWarningContainer.classList.remove('hidden');
                         }
                     }
                     return 'No Bluetooth simulation enabled';
@@ -2468,16 +2469,12 @@
                     simulateNoBluetooth = false;
                     console.log('Restoring Bluetooth support');
                     const bluetoothSyncButton = document.getElementById('bluetooth-sync-button');
-                    const bluetoothWarningIcon = document.getElementById('bluetooth-warning-icon');
-                    const bluetoothWarningText = document.getElementById('bluetooth-warning-text');
+                    const bluetoothWarningContainer = document.getElementById('bluetooth-warning-container');
                     if (bluetoothSyncButton) {
                         bluetoothSyncButton.disabled = false;
                         bluetoothSyncButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                        if (bluetoothWarningIcon) {
-                            bluetoothWarningIcon.classList.add('opacity-0');
-                        }
-                        if (bluetoothWarningText) {
-                            bluetoothWarningText.classList.add('opacity-0');
+                        if (bluetoothWarningContainer) {
+                            bluetoothWarningContainer.classList.add('hidden');
                         }
                     }
                     return 'Bluetooth support restored';
@@ -3542,8 +3539,7 @@
             if (confirm(i18n.t('confirmReset'))) {
                 localStorage.removeItem('2048-theme');
                 localStorage.removeItem('customTheme');
-                document.getElementById('custom-theme-button').style.display = 'none';
-                document.getElementById('custom-theme-button-container').classList.remove('mb-2');
+                document.getElementById('custom-theme-button-container').classList.remove('visible');
                 localStorage.removeItem('2048-gpu-acceleration');
                 localStorage.removeItem('2048-tile-animation');
                 localStorage.removeItem('2048-tile-appear-animation');
@@ -3580,15 +3576,9 @@
                 const selectedValue = document.querySelector('.select-selected span');
                 const selectOptions = document.querySelectorAll('.select-item');
                 if (selectedValue && selectOptions.length > 0) {
-                    const nativeSelect = elements.themeToggle;
-                    for (let i = 0; i < nativeSelect.options.length; i++) {
-                        if (nativeSelect.options[i].value === 'auto') {
-                            selectedValue.textContent = nativeSelect.options[i].text;
-                            break;
-                        }
-                    }
                     selectOptions.forEach(option => {
                         if (option.getAttribute('data-value') === 'auto') {
+                            selectedValue.innerHTML = option.innerHTML;
                             option.classList.add('selected');
                         } else {
                             option.classList.remove('selected');
@@ -4163,13 +4153,9 @@
                     localStorage.setItem('2048-vibration', gameState.vibrationEnabled);
                     vibrationToggle.closest('.vibration-toggle-container').classList.add('opacity-50');
                     vibrationToggle.closest('.vibration-toggle-container').classList.remove('mb-2');
-                    const vibrationWarningIcon = document.getElementById('vibration-warning-icon');
-                    const vibrationWarningText = document.getElementById('vibration-warning-text');
-                    if (vibrationWarningIcon) {
-                        vibrationWarningIcon.classList.remove('opacity-0');
-                    }
-                    if (vibrationWarningText) {
-                        vibrationWarningText.classList.remove('opacity-0');
+                    const vibrationWarningContainer = document.getElementById('vibration-warning-container');
+                    if (vibrationWarningContainer) {
+                        vibrationWarningContainer.classList.remove('hidden');
                     }
                     if (vibrationDetails) {
                         vibrationDetails.classList.add('opacity-50');
@@ -4208,17 +4194,13 @@
                 }
             }
             const bluetoothSyncButton = document.getElementById('bluetooth-sync-button');
-            const bluetoothWarningIcon = document.getElementById('bluetooth-warning-icon');
-            const bluetoothWarningText = document.getElementById('bluetooth-warning-text');
             if (bluetoothSyncButton) {
                 if (!navigator.bluetooth || simulateNoBluetooth) {
                     bluetoothSyncButton.disabled = true;
                     bluetoothSyncButton.classList.add('opacity-50', 'cursor-not-allowed');
-                    if (bluetoothWarningIcon) {
-                        bluetoothWarningIcon.classList.remove('opacity-0');
-                    }
-                    if (bluetoothWarningText) {
-                        bluetoothWarningText.classList.remove('opacity-0');
+                    const bluetoothWarningContainer = document.getElementById('bluetooth-warning-container');
+                    if (bluetoothWarningContainer) {
+                        bluetoothWarningContainer.classList.remove('hidden');
                     }
                     bluetoothSyncButton.addEventListener('click', function(e) {
                         e.preventDefault();
@@ -4253,8 +4235,7 @@
                         handler: updateTheme
                     };
                     localStorage.setItem('2048-theme', 'auto');
-                    document.getElementById('custom-theme-button').style.display = 'none';
-                    document.getElementById('custom-theme-button-container').classList.remove('mb-2');
+                    document.getElementById('custom-theme-button-container').classList.remove('visible');
                 } else if (theme === 'custom') {
                     if (!window.customThemeModuleLoaded) {
                         alert(i18n.t('customThemeModuleMissing'));
@@ -4262,13 +4243,12 @@
                         return;
                     }
                     localStorage.setItem('2048-theme', 'custom');
-                    document.getElementById('custom-theme-button').style.display = 'block';
-                    document.getElementById('custom-theme-button-container').classList.add('mb-2');
+                    document.getElementById('custom-theme-button-container').classList.add('visible');
                     document.documentElement.classList.remove('dark');
                     loadCustomTheme();
                     document.body.setAttribute('data-theme', 'custom');
                 } else {
-                    document.getElementById('custom-theme-button').style.display = 'none';
+                    document.getElementById('custom-theme-button-container').classList.remove('visible');
                     const isDark = theme === 'dark';
                     document.documentElement.classList.toggle('dark', isDark);
                     localStorage.setItem('2048-theme', theme);
@@ -4323,8 +4303,7 @@
                     handler: updateTheme
                 };
                 elements.themeToggle.value = 'auto';
-                document.getElementById('custom-theme-button').style.display = 'none';
-                document.getElementById('custom-theme-button-container').classList.remove('mb-2');
+                document.getElementById('custom-theme-button-container').classList.remove('visible');
             } else if (savedTheme === 'custom') {
                 if (!window.customThemeModuleLoaded) {
                     elements.themeToggle.value = 'auto';
@@ -4339,20 +4318,17 @@
                         mediaQuery: themeMediaQuery,
                         handler: updateTheme
                     };
-                    document.getElementById('custom-theme-button').style.display = 'none';
-                    document.getElementById('custom-theme-button-container').classList.remove('mb-2');
+                    document.getElementById('custom-theme-button-container').classList.remove('visible');
                 } else {
                     elements.themeToggle.value = 'custom';
-                    document.getElementById('custom-theme-button').style.display = 'block';
-                    document.getElementById('custom-theme-button-container').classList.add('mb-2');
+                    document.getElementById('custom-theme-button-container').classList.add('visible');
                 }
             } else if (savedTheme === 'dark') {
                 document.documentElement.classList.add('dark');
                 elements.themeToggle.value = 'dark';
-                document.getElementById('custom-theme-button').style.display = 'none';
-                document.getElementById('custom-theme-button-container').classList.remove('mb-2');
+                document.getElementById('custom-theme-button-container').classList.remove('visible');
             } else {
-                document.getElementById('custom-theme-button').style.display = 'none';
+                document.getElementById('custom-theme-button-container').classList.remove('visible');
                 const themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
                 const updateTheme = (e) => {
                     document.documentElement.classList.toggle('dark', e.matches);
@@ -4363,7 +4339,7 @@
                     mediaQuery: themeMediaQuery,
                     handler: updateTheme
                 };
-                elements.themeToggle.value = 'auto';
+                elements.themeToggle.value = savedTheme || 'light';
             }
             if (savedState) {
                 try {
