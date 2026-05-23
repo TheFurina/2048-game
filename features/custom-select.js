@@ -1,4 +1,4 @@
-const customSelectVersion = '1.0';
+const customSelectVersion = '1.1';
 window.customSelectVersion = customSelectVersion;
 (function() {
     try {
@@ -23,11 +23,18 @@ function initCustomSelects() {
         let nativeSelect;
         if (customSelect.parentElement.querySelector('#theme-toggle')) {
             nativeSelect = customSelect.parentElement.querySelector('#theme-toggle');
+            const savedTheme = localStorage.getItem('2048-theme') || 'auto';
+            nativeSelect.value = savedTheme;
         } else if (customSelect.parentElement.querySelector('#language-select')) {
             nativeSelect = customSelect.parentElement.querySelector('#language-select');
         }
         if (selectedValue && nativeSelect) {
-            selectedValue.textContent = nativeSelect.options[nativeSelect.selectedIndex].text;
+            const currentValue = nativeSelect.value;
+            selectOptions.forEach(option => {
+                if (option.getAttribute('data-value') === currentValue) {
+                    selectedValue.innerHTML = option.innerHTML;
+                }
+            });
         }
         selectOptions.forEach(option => {
             if (nativeSelect && option.getAttribute('data-value') === nativeSelect.value) {
@@ -40,7 +47,6 @@ function initCustomSelects() {
         selectItems.style.maxHeight = null;
         selectItems.style.opacity = '0';
         customSelect.addEventListener('click', function(e) {
-            e.stopPropagation();
             const selectSelected = this.querySelector('.select-selected');
             if (selectItems.style.maxHeight) {
                 selectItems.style.maxHeight = null;
@@ -48,9 +54,19 @@ function initCustomSelects() {
                 selectSelected.classList.remove('active');
                 setTimeout(() => selectItems.classList.add('hidden'), 300);
             } else {
-                const allSelectItems = document.querySelectorAll('.select-items');
+                document.querySelectorAll('.select-items').forEach(items => {
+                    if (items !== selectItems && items.style.maxHeight) {
+                        items.style.maxHeight = null;
+                        items.style.opacity = '0';
+                        const prevSibling = items.previousElementSibling;
+                        if (prevSibling) {
+                            prevSibling.classList.remove('active');
+                        }
+                        setTimeout(() => items.classList.add('hidden'), 300);
+                    }
+                });
                 let maxZIndex = 20;
-                allSelectItems.forEach(item => {
+                document.querySelectorAll('.select-items').forEach(item => {
                     const zIndex = parseInt(item.style.zIndex) || 20;
                     if (zIndex > maxZIndex) {
                         maxZIndex = zIndex;
@@ -102,9 +118,12 @@ function initCustomSelects() {
         });
         if (nativeSelect) {
             nativeSelect.addEventListener('change', function() {
-                if (selectedValue && this.options && this.selectedIndex >= 0 && this.selectedIndex < this.options.length) {
-                    selectedValue.textContent = this.options[this.selectedIndex].text;
-                }
+                const currentValue = this.value;
+                selectOptions.forEach(option => {
+                    if (option.getAttribute('data-value') === currentValue) {
+                        selectedValue.innerHTML = option.innerHTML;
+                    }
+                });
             });
         }
     });

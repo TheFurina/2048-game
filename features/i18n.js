@@ -1,4 +1,4 @@
-const i18nVersion = '1.2';
+const i18nVersion = '1.3';
 window.i18nVersion = i18nVersion;
 const translations = {
     zh: {
@@ -517,6 +517,13 @@ function updateAllTranslations() {
                 const span = element.querySelector('span[data-i18n]');
                 if (span) {
                     span.textContent = t(key);
+                }
+            } else if (element.tagName === 'BUTTON') {
+                const span = element.querySelector('span');
+                if (span) {
+                    span.textContent = t(key);
+                } else {
+                    element.textContent = t(key);
                 }
             } else {
                 element.textContent = t(key);
