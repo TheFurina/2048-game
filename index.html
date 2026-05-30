@@ -65,6 +65,7 @@
     <script src="./features/data-transfer.js"></script>
     <script src="./features/custom-select.js"></script>
     <script src="./features/bluetooth-sync.js"></script>
+    <script src="./features/fullscreen-mode.js"></script>
     <script>
         (function() {
             try {
@@ -92,7 +93,7 @@
         })();
     </script>
     <script>
-        const gameVersion = '2.4.1';
+        const gameVersion = '2.5.0';
         window.gameVersion = gameVersion;
         const config = { // Game configuration
             initialTiles: 2, // Initial number of tiles
@@ -2368,7 +2369,17 @@
         let simulateNoBluetooth = false;
         Object.defineProperty(window, 'gameVersions', {
             get: function() {
-                console.log('2048 v' + gameVersion + '\nCustom Theme ' + (window.customThemeVersion ? 'v' + window.customThemeVersion : 'Not found') + '\nAI Analysis ' + (window.aiAnalysisVersion ? 'v' + window.aiAnalysisVersion : 'Not found') + '\ni18n ' + (window.i18nVersion ? 'v' + window.i18nVersion : 'Not found') + '\nData Transfer ' + (window.dataTransferVersion ? 'v' + window.dataTransferVersion : 'Not found') + '\nCustom Select ' + (window.customSelectVersion ? 'v' + window.customSelectVersion : 'Not found') + '\nBluetooth Sync ' + (window.bluetoothSyncVersion ? 'v' + window.bluetoothSyncVersion : 'Not found'));
+                let output = '';
+                if (window.gameVersion) {
+                    output += '2048 Game v' + window.gameVersion + '\n';
+                }
+                for (const prop in window) {
+                    if (prop !== 'gameVersion' && prop.endsWith('Version') && window[prop]) {
+                        const moduleName = prop.replace(/Version$/, '').replace(/^([a-z])/, (m, c) => c.toUpperCase()).replace(/([A-Z])/g, ' $1').trim();
+                        output += moduleName + ' v' + window[prop] + '\n';
+                    }
+                }
+                console.log(output.trim());
                 return 'Version info displayed above';
             }
         });
