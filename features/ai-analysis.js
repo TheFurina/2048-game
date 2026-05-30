@@ -1,4 +1,4 @@
-const aiAnalysisVersion = '2.1';
+const aiAnalysisVersion = '2.2';
 window.aiAnalysisVersion = aiAnalysisVersion;
 function setupAiAnalysis() {
     const aiAnalysisButton = document.getElementById('ai-analysis-button');
@@ -219,73 +219,98 @@ function mergeRowLeft(row) {
     const moved = JSON.stringify(row) !== JSON.stringify(newRow);
     return { row: newRow, score, merges, moved };
 }
-function countEmptyCells(grid) {
-    let count = 0;
-    for (let row of grid) {
-        for (let cell of row) {
-            if (cell === 0 || cell === null) count++;
+function createGridUtils(grid) {
+    const gridRows = grid.length;
+    const gridCols = grid[0].length;
+    return {
+        gridRows,
+        gridCols,
+        isValidCell(row, col) {
+            return row >= 0 && row < gridRows && col >= 0 && col < gridCols;
+        },
+        isEmpty(row, col) {
+            return grid[row][col] === 0 || grid[row][col] === null;
+        },
+        hasEmptyNeighbor(row, col) {
+            const directions = [
+                [-1, 0], [1, 0], [0, -1], [0, 1]
+            ];
+            return directions.some(([dr, dc]) => {
+                const newRow = row + dr;
+                const newCol = col + dc;
+                return this.isValidCell(newRow, newCol) && this.isEmpty(newRow, newCol);
+            });
+        },
+        forEachCell(callback) {
+            for (let i = 0; i < gridRows; i++) {
+                for (let j = 0; j < gridCols; j++) {
+                    callback(grid[i][j], i, j);
+                }
+            }
+        },
+        forEachNonEmptyCell(callback) {
+            this.forEachCell((cell, row, col) => {
+                if (!this.isEmpty(row, col)) {
+                    callback(cell, row, col);
+                }
+            });
         }
-    }
+    };
+}
+function countEmptyCells(grid) {
+    const utils = createGridUtils(grid);
+    let count = 0;
+    utils.forEachCell((cell, row, col) => {
+        if (utils.isEmpty(row, col)) count++;
+    });
     return count;
 }
 function calculatePositionScore(grid) {
-    const gridRows = grid.length;
-    const gridCols = grid[0].length;
+    const utils = createGridUtils(grid);
     let score = 0;
     const weights = [];
-    for (let i = 0; i < gridRows; i++) {
+    for (let i = 0; i < utils.gridRows; i++) {
         weights[i] = [];
-        for (let j = 0; j < gridCols; j++) {
-            weights[i][j] = Math.pow(2, (gridRows - i - 1) + (gridCols - j - 1));
+        for (let j = 0; j < utils.gridCols; j++) {
+            weights[i][j] = Math.pow(2, (utils.gridRows - i - 1) + (utils.gridCols - j - 1));
         }
     }
-    for (let i = 0; i < gridRows; i++) {
-        for (let j = 0; j < gridCols; j++) {
-            if (grid[i][j] !== 0 && grid[i][j] !== null) {
-                score += grid[i][j] * weights[i][j];
-            }
-        }
-    }
+    utils.forEachNonEmptyCell((cell, row, col) => {
+        score += cell * weights[row][col];
+    });
     return score;
 }
 function calculateMaxValueScore(grid) {
+    const utils = createGridUtils(grid);
     let maxValue = 0;
-    for (let row of grid) {
-        for (let cell of row) {
-            if (cell !== 0 && cell !== null && cell > maxValue) maxValue = cell;
-        }
-    }
+    utils.forEachNonEmptyCell((cell) => {
+        if (cell > maxValue) maxValue = cell;
+    });
     return maxValue;
 }
 function calculateContinuityScore(grid) {
-    const gridRows = grid.length;
-    const gridCols = grid[0].length;
+    const utils = createGridUtils(grid);
     let score = 0;
-    for (let i = 0; i < gridRows; i++) {
-        for (let j = 0; j < gridCols - 1; j++) {
-            if (grid[i][j] !== 0 && grid[i][j] !== null && grid[i][j + 1] !== 0 && grid[i][j + 1] !== null) {
-                const ratio = Math.min(grid[i][j], grid[i][j + 1]) / Math.max(grid[i][j], grid[i][j + 1]);
-                score += ratio;
-            }
+    utils.forEachNonEmptyCell((cell, row, col) => {
+        if (utils.isValidCell(row, col + 1) && !utils.isEmpty(row, col + 1)) {
+            const rightCell = grid[row][col + 1];
+            const ratio = Math.min(cell, rightCell) / Math.max(cell, rightCell);
+            score += ratio;
         }
-    }
-    for (let j = 0; j < gridCols; j++) {
-        for (let i = 0; i < gridRows - 1; i++) {
-            if (grid[i][j] !== 0 && grid[i][j] !== null && grid[i + 1][j] !== 0 && grid[i + 1][j] !== null) {
-                const ratio = Math.min(grid[i][j], grid[i + 1][j]) / Math.max(grid[i][j], grid[i + 1][j]);
-                score += ratio;
-            }
+        if (utils.isValidCell(row + 1, col) && !utils.isEmpty(row + 1, col)) {
+            const downCell = grid[row + 1][col];
+            const ratio = Math.min(cell, downCell) / Math.max(cell, downCell);
+            score += ratio;
         }
-    }
+    });
     return score;
 }
 function calculateUniformityScore(grid) {
+    const utils = createGridUtils(grid);
     const values = [];
-    for (let row of grid) {
-        for (let cell of row) {
-            if (cell !== 0 && cell !== null) values.push(cell);
-        }
-    }
+    utils.forEachNonEmptyCell((cell) => {
+        values.push(cell);
+    });
     if (values.length === 0) return 0;
     const avg = values.reduce((a, b) => a + b, 0) / values.length;
     const variance = values.reduce((sum, val) => sum + Math.pow(val - avg, 2), 0) / values.length;
@@ -293,34 +318,29 @@ function calculateUniformityScore(grid) {
     return uniformity;
 }
 function calculateBlockScore(grid) {
-    const gridRows = grid.length;
-    const gridCols = grid[0].length;
+    const utils = createGridUtils(grid);
     let blockScore = 0;
-    for (let i = 0; i < gridRows; i++) {
-        for (let j = 0; j < gridCols; j++) {
-            if (grid[i][j] !== 0 && grid[i][j] !== null) {
-                let blocked = true;
-                if (i > 0 && (grid[i - 1][j] === 0 || grid[i - 1][j] === null)) blocked = false;
-                if (i < gridRows - 1 && (grid[i + 1][j] === 0 || grid[i + 1][j] === null)) blocked = false;
-                if (j > 0 && (grid[i][j - 1] === 0 || grid[i][j - 1] === null)) blocked = false;
-                if (j < gridCols - 1 && (grid[i][j + 1] === 0 || grid[i][j + 1] === null)) blocked = false;
-                if (i > 0 && i < gridRows - 1 && grid[i - 1][j] === grid[i + 1][j] && grid[i - 1][j] !== 0 && grid[i - 1][j] !== null) blocked = false;
-                if (j > 0 && j < gridCols - 1 && grid[i][j - 1] === grid[i][j + 1] && grid[i][j - 1] !== 0 && grid[i][j - 1] !== null) blocked = false;
-                if (blocked) blockScore++;
+    utils.forEachNonEmptyCell((cell, row, col) => {
+        if (!utils.hasEmptyNeighbor(row, col)) {
+            const canMergeVertically = row > 0 && row < utils.gridRows - 1 && 
+                grid[row - 1][col] === grid[row + 1][col] && !utils.isEmpty(row - 1, col);
+            const canMergeHorizontally = col > 0 && col < utils.gridCols - 1 && 
+                grid[row][col - 1] === grid[row][col + 1] && !utils.isEmpty(row, col - 1);
+            if (!canMergeVertically && !canMergeHorizontally) {
+                blockScore++;
             }
         }
-    }
+    });
     return -blockScore;
 }
 function calculateMultiStepScore(grid, direction) {
-    const gridRows = grid.length;
-    const gridCols = grid[0].length;
+    const utils = createGridUtils(grid);
     const tempGameState = {
         grid: JSON.parse(JSON.stringify(grid)),
         score: 0,
-        gridSize: Math.max(gridRows, gridCols),
-        gridRows: gridRows,
-        gridCols: gridCols
+        gridSize: Math.max(utils.gridRows, utils.gridCols),
+        gridRows: utils.gridRows,
+        gridCols: utils.gridCols
     };
     let multiStepScore = 0;
     let steps = 0;
@@ -333,19 +353,18 @@ function calculateMultiStepScore(grid, direction) {
     return multiStepScore;
 }
 function calculateMonotonicityScore(grid) {
-    const gridRows = grid.length;
-    const gridCols = grid[0].length;
+    const utils = createGridUtils(grid);
     let monotonicity = 0;
-    for (let i = 0; i < gridRows; i++) {
-        for (let j = 0; j < gridCols - 1; j++) {
-            if (grid[i][j] !== null && grid[i][j + 1] !== null && grid[i][j] <= grid[i][j + 1]) {
+    for (let i = 0; i < utils.gridRows; i++) {
+        for (let j = 0; j < utils.gridCols - 1; j++) {
+            if (!utils.isEmpty(i, j) && !utils.isEmpty(i, j + 1) && grid[i][j] <= grid[i][j + 1]) {
                 monotonicity++;
             }
         }
     }
-    for (let j = 0; j < gridCols; j++) {
-        for (let i = 0; i < gridRows - 1; i++) {
-            if (grid[i][j] !== null && grid[i + 1][j] !== null && grid[i][j] <= grid[i + 1][j]) {
+    for (let j = 0; j < utils.gridCols; j++) {
+        for (let i = 0; i < utils.gridRows - 1; i++) {
+            if (!utils.isEmpty(i, j) && !utils.isEmpty(i + 1, j) && grid[i][j] <= grid[i + 1][j]) {
                 monotonicity++;
             }
         }
