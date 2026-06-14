@@ -1,6 +1,19 @@
-const fullscreenModeVersion = '0.1';
+const fullscreenModeVersion = '0.2';
 window.fullscreenModeVersion = fullscreenModeVersion;
 let isFullscreenMode = false;
+const FULLSCREEN_HIDDEN_ELEMENTS = [
+    { selector: '#game-header div.flex.gap-2' },
+    { selector: '#controls-container' },
+    { selector: '#toggle-controls' },
+    { selector: '#mode-description' },
+    { selector: '#difficulty-description' },
+    { selector: '#game-touch-area' },
+    { selector: '#ai-analysis-button' },
+    { selector: '#fullscreen-button' },
+    { selector: '#game-title' },
+    { selector: '#game-header p' },
+    { selector: '#mode-description', query: 'parentElement' }
+];
 function toggleFullscreenMode() {
     if (!document.fullscreenElement) {
         enterFullscreenMode();
@@ -17,6 +30,10 @@ function enterFullscreenMode() {
     } else if (elem.msRequestFullscreen) {
         elem.msRequestFullscreen();
     }
+    if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('portrait').catch(() => {
+        });
+    }
 }
 function exitFullscreenMode() {
     if (document.exitFullscreen) {
@@ -26,92 +43,75 @@ function exitFullscreenMode() {
     } else if (document.msExitFullscreen) {
         document.msExitFullscreen();
     }
-}
-function handleFullscreenChange() {
-    isFullscreenMode = !!document.fullscreenElement;
-    const undoButton = document.getElementById('undo-button');
-    const pauseButton = document.getElementById('pause-button');
-    const fullscreenButton = document.getElementById('fullscreen-button');
-    const statsContainer = document.querySelector('.stats-container');
-    const aiAnalysisButton = document.getElementById('ai-analysis-button');
-    if (fullscreenButton) {
-        fullscreenButton.innerHTML = '<i class="fa-solid fa-expand dark:text-[#282828]"></i>';
+    if (screen.orientation && screen.orientation.unlock) {
+        screen.orientation.unlock();
     }
-    if (isFullscreenMode) {
-        const gameHeaderButtons = document.getElementById('game-header')?.querySelector('div.flex.gap-2');
-        if (gameHeaderButtons) {
-            gameHeaderButtons.classList.add('fullscreen-hidden');
+}
+function getElement(config) {
+    if (config.query === 'parentElement') {
+        return document.querySelector(config.selector)?.parentElement;
+    }
+    return document.querySelector(config.selector);
+}
+function toggleElementsVisibility(hide) {
+    FULLSCREEN_HIDDEN_ELEMENTS.forEach(config => {
+        const element = getElement(config);
+        if (element) {
+            if (hide) {
+                element.classList.add('fullscreen-hidden');
+            } else {
+                element.classList.remove('fullscreen-hidden');
+            }
         }
+    });
+}
+function createFullscreenButtonGroup(undoButton, pauseButton, fullscreenButton) {
+    const buttonGroup = document.createElement('div');
+    buttonGroup.id = 'fullscreen-button-group';
+    buttonGroup.className = 'flex gap-2 items-center';
+    const undoClone = undoButton.cloneNode(true);
+    undoClone.id = 'fullscreen-undo-button';
+    undoClone.addEventListener('click', () => document.getElementById('undo-button')?.click());
+    const pauseClone = pauseButton.cloneNode(true);
+    pauseClone.id = 'fullscreen-pause-button';
+    pauseClone.addEventListener('click', () => document.getElementById('pause-button')?.click());
+    const fullscreenClone = fullscreenButton.cloneNode(true);
+    fullscreenClone.id = 'fullscreen-toggle-button';
+    fullscreenClone.addEventListener('click', toggleFullscreenMode);
+    buttonGroup.appendChild(undoClone);
+    buttonGroup.appendChild(pauseClone);
+    buttonGroup.appendChild(fullscreenClone);
+    return buttonGroup;
+}
+function handleFullscreenButtonGroup(show) {
+    const existingButtonGroup = document.getElementById('fullscreen-button-group');
+    if (show) {
+        if (existingButtonGroup) return;
+        const undoButton = document.getElementById('undo-button');
+        const pauseButton = document.getElementById('pause-button');
+        const fullscreenButton = document.getElementById('fullscreen-button');
+        const statsContainer = document.querySelector('.stats-container');
         if (statsContainer && undoButton && pauseButton && fullscreenButton) {
-            const buttonGroup = document.createElement('div');
-            buttonGroup.id = 'fullscreen-button-group';
-            buttonGroup.className = 'flex gap-2 items-center';
-            const undoClone = undoButton.cloneNode(true);
-            undoClone.id = 'fullscreen-undo-button';
-            undoClone.addEventListener('click', function() {
-                document.getElementById('undo-button')?.click();
-            });
-            const pauseClone = pauseButton.cloneNode(true);
-            pauseClone.id = 'fullscreen-pause-button';
-            pauseClone.addEventListener('click', function() {
-                document.getElementById('pause-button')?.click();
-            });
-            const fullscreenClone = fullscreenButton.cloneNode(true);
-            fullscreenClone.id = 'fullscreen-toggle-button';
-            fullscreenClone.addEventListener('click', function() {
-                toggleFullscreenMode();
-            });
-            buttonGroup.appendChild(undoClone);
-            buttonGroup.appendChild(pauseClone);
-            buttonGroup.appendChild(fullscreenClone);
+            const buttonGroup = createFullscreenButtonGroup(undoButton, pauseButton, fullscreenButton);
             statsContainer.parentNode.insertBefore(buttonGroup, statsContainer.nextSibling);
         }
-        const controlsContainer = document.getElementById('controls-container');
-        const toggleControls = document.getElementById('toggle-controls');
-        const modeDescription = document.getElementById('mode-description');
-        const difficultyDescription = document.getElementById('difficulty-description');
-        const gameTouchArea = document.getElementById('game-touch-area');
-        if (controlsContainer) controlsContainer.classList.add('fullscreen-hidden');
-        if (toggleControls) toggleControls.classList.add('fullscreen-hidden');
-        if (modeDescription) modeDescription.classList.add('fullscreen-hidden');
-        if (difficultyDescription) difficultyDescription.classList.add('fullscreen-hidden');
-        if (aiAnalysisButton) aiAnalysisButton.classList.add('fullscreen-hidden');
-        if (gameTouchArea) gameTouchArea.classList.add('fullscreen-hidden');
-        if (fullscreenButton) fullscreenButton.classList.add('fullscreen-hidden');
-        const gameTitle = document.getElementById('game-title');
-        const gameHeaderDesc = document.getElementById('game-header')?.querySelector('p');
-        if (gameTitle) gameTitle.classList.add('fullscreen-hidden');
-        if (gameHeaderDesc) gameHeaderDesc.classList.add('fullscreen-hidden');
-        const statsDescContainer = document.querySelector('#mode-description')?.parentElement;
-        if (statsDescContainer) statsDescContainer.classList.add('fullscreen-hidden');
     } else {
-        const existingButtonGroup = document.getElementById('fullscreen-button-group');
         if (existingButtonGroup) {
             existingButtonGroup.remove();
         }
-        const gameHeaderButtons = document.getElementById('game-header')?.querySelector('div.flex.gap-2');
-        if (gameHeaderButtons) {
-            gameHeaderButtons.classList.remove('fullscreen-hidden');
-        }
-        if (aiAnalysisButton) aiAnalysisButton.classList.remove('fullscreen-hidden');
-        if (fullscreenButton) fullscreenButton.classList.remove('fullscreen-hidden');
-        const gameTitle = document.getElementById('game-title');
-        const gameHeaderDesc = document.getElementById('game-header')?.querySelector('p');
-        if (gameTitle) gameTitle.classList.remove('fullscreen-hidden');
-        if (gameHeaderDesc) gameHeaderDesc.classList.remove('fullscreen-hidden');
-        const controlsContainer = document.getElementById('controls-container');
-        const toggleControls = document.getElementById('toggle-controls');
-        const modeDescription = document.getElementById('mode-description');
-        const difficultyDescription = document.getElementById('difficulty-description');
-        const gameTouchArea = document.getElementById('game-touch-area');
-        if (controlsContainer) controlsContainer.classList.remove('fullscreen-hidden');
-        if (toggleControls) toggleControls.classList.remove('fullscreen-hidden');
-        if (modeDescription) modeDescription.classList.remove('fullscreen-hidden');
-        if (difficultyDescription) difficultyDescription.classList.remove('fullscreen-hidden');
-        if (gameTouchArea) gameTouchArea.classList.remove('fullscreen-hidden');
-        const statsDescContainer = document.querySelector('#mode-description')?.parentElement;
-        if (statsDescContainer) statsDescContainer.classList.remove('fullscreen-hidden');
     }
+}
+function updateFullscreenButtonIcon() {
+    const fullscreenButton = document.getElementById('fullscreen-button');
+    if (fullscreenButton) {
+        fullscreenButton.innerHTML = '<i class="fa-solid fa-expand dark:text-[#282828]"></i>';
+    }
+}
+function handleFullscreenChange() {
+    isFullscreenMode = !!document.fullscreenElement;
+    updateFullscreenButtonIcon();
+    handleFullscreenButtonGroup(isFullscreenMode);
+    toggleElementsVisibility(isFullscreenMode);
 }
 function setupFullscreenMode() {
     document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -170,6 +170,32 @@ function addFullscreenStyles() {
         :-webkit-full-screen .stats-container + .flex,
         :-ms-fullscreen .stats-container + .flex {
             margin-left: auto;
+        }
+        @media (orientation: portrait) {
+            :fullscreen .game-container,
+            :-webkit-full-screen .game-container,
+            :-ms-fullscreen .game-container {
+                padding: 0.5rem !important;
+            }
+            :fullscreen .grid-container,
+            :-webkit-full-screen .grid-container,
+            :-ms-fullscreen .grid-container {
+                max-width: 100% !important;
+            }
+            :fullscreen .stats-container,
+            :-webkit-full-screen .stats-container,
+            :-ms-fullscreen .stats-container {
+                flex-direction: column !important;
+                gap: 0.25rem !important;
+            }
+            :fullscreen #fullscreen-button-group,
+            :-webkit-full-screen #fullscreen-button-group,
+            :-ms-fullscreen #fullscreen-button-group {
+                position: fixed;
+                bottom: 1rem;
+                right: 1rem;
+                z-index: 1000;
+            }
         }
     `;
     document.head.appendChild(styleElement);
