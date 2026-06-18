@@ -59,6 +59,7 @@
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script src="./features/module-loader.js"></script>
     <script src="./features/custom-theme.js"></script>
     <script src="./features/ai-analysis.js"></script>
     <script src="./features/i18n.js"></script>
@@ -68,32 +69,29 @@
     <script src="./features/fullscreen-mode.js"></script>
     <script>
         (function() {
-            try {
+            ModuleLoader.load('dataTransferFallback', null, {
+                exportGameData: function() { alert(window.i18n && window.i18n.t ? i18n.t('dataTransferModuleMissing') : '数据传输模块未找到，请确保 features/data-transfer.js 文件存在。'); },
+                importGameData: function() { alert(window.i18n && window.i18n.t ? i18n.t('dataTransferModuleMissing') : '数据传输模块未找到，请确保 features/data-transfer.js 文件存在。'); },
+                copyDataToClipboard: function() { alert(window.i18n && window.i18n.t ? i18n.t('dataTransferModuleMissing') : '数据传输模块未找到，请确保 features/data-transfer.js 文件存在。'); }
+            });
+            if (typeof exportGameData === 'function') {
                 window.exportGameData = exportGameData;
+            }
+            if (typeof importGameData === 'function') {
                 window.importGameData = importGameData;
+            }
+            if (typeof copyDataToClipboard === 'function') {
                 window.copyDataToClipboard = copyDataToClipboard;
-                window.dataTransferModuleLoaded = true;
-            } catch (error) {
-                console.warn('Data transfer module loading failed:', error);
-                window.dataTransferModuleLoaded = false;
-                window.exportGameData = function() { alert(window.i18n && window.i18n.t ? i18n.t('dataTransferModuleMissing') : '数据传输模块未找到，请确保 features/data-transfer.js 文件存在。'); };
-                window.importGameData = function() { alert(window.i18n && window.i18n.t ? i18n.t('dataTransferModuleMissing') : '数据传输模块未找到，请确保 features/data-transfer.js 文件存在。'); };
-                window.copyDataToClipboard = function() { alert(window.i18n && window.i18n.t ? i18n.t('dataTransferModuleMissing') : '数据传输模块未找到，请确保 features/data-transfer.js 文件存在。'); };
             }
         })();
     </script>
     <script>
-        (function() {
-            try {
-                window.customSelectModuleLoaded = true;
-            } catch (error) {
-                console.warn('Custom select module loading failed:', error);
-                window.customSelectModuleLoaded = false;
-            }
-        })();
+        ModuleLoader.load('customSelect', null, {
+            moduleLoaded: false
+        });
     </script>
     <script>
-        const gameVersion = '2.5.0';
+        const gameVersion = '2.5.1';
         window.gameVersion = gameVersion;
         const config = { // Game configuration
             initialTiles: 2, // Initial number of tiles
@@ -101,6 +99,7 @@
             touchThreshold: 10, // Minimum touch swipe distance
             maxUndoSteps: 10, // Maximum undo steps
             animationDuration: 150, // Tile movement animation duration (milliseconds)
+            aiDefaultFourProbability: 0.1, // AI simulation default 4 appearance probability
             difficultySettings: { // Difficulty settings
                 easy: { // Easy
                     fourProbability: 0.4, // 4 appearance probability: 40%
@@ -116,99 +115,120 @@
                 }
             }
         };
-    </script>
-    <script>
-        (function() {
-            try {
-                window.setupThemeCustomizer = setupThemeCustomizer;
-                window.loadCustomTheme = loadCustomTheme;
-                window.resetCustomTheme = resetCustomTheme;
-                window.customThemeModuleLoaded = true;
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', setupThemeCustomizer);
-                } else {
-                    setupThemeCustomizer();
-                }
-            } catch (error) {
-                console.warn('Custom theme module loading failed:', error);
-                window.customThemeModuleLoaded = false;
-                window.setupThemeCustomizer = function() { alert(window.i18n && window.i18n.t ? i18n.t('customThemeModuleMissing') : '自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); };
-                window.loadCustomTheme = function() { alert(window.i18n && window.i18n.t ? i18n.t('customThemeModuleMissing') : '自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); };
-                window.resetCustomTheme = function() { alert(window.i18n && window.i18n.t ? i18n.t('customThemeModuleMissing') : '自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); };
+        class SettingsManager {
+            constructor() {
+                this.settings = [
+                    { key: 'gpu-acceleration', default: true },
+                    { key: 'tile-animation', default: true },
+                    { key: 'tile-appear-animation', default: true },
+                    { key: 'tile-move-animation', default: true },
+                    { key: 'tile-merge-animation', default: true },
+                    { key: 'vibration', default: true },
+                    { key: 'vibration-merge', default: true },
+                    { key: 'vibration-win', default: true },
+                    { key: 'vibration-loss', default: true }
+                ];
             }
-        })();
-    </script>
-    <script>
-        (function() {
-            try {
-                window.setupAiAnalysis = setupAiAnalysis;
-                window.analyzeGameState = analyzeGameState;
-                window.aiAnalysisModuleLoaded = true;
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', setupAiAnalysis);
-                } else {
-                    setupAiAnalysis();
+            getStorageKey(key) {
+                return `2048-${key}`;
+            }
+            load(key) {
+                const storageKey = this.getStorageKey(key);
+                const value = localStorage.getItem(storageKey);
+                const setting = this.settings.find(s => s.key === key);
+                if (value === null) {
+                    return setting ? setting.default : true;
                 }
-            } catch (error) {
-                console.warn('AI analysis module loading failed:', error);
-                window.aiAnalysisModuleLoaded = false;
-                window.setupAiAnalysis = function() {
-                    const aiAnalysisButton = document.getElementById('ai-analysis-button');
-                    if (aiAnalysisButton) {
-                        aiAnalysisButton.addEventListener('click', function() {
-                            alert(window.i18n && window.i18n.t ? i18n.t('aiAnalysisModuleMissing') : 'AI分析模块未找到，请确保 features/ai-analysis.js 文件存在。');
-                        });
+                return value !== 'false';
+            }
+            save(key, value) {
+                const storageKey = this.getStorageKey(key);
+                localStorage.setItem(storageKey, value);
+            }
+            loadAll() {
+                const result = {};
+                this.settings.forEach(setting => {
+                    result[setting.key] = this.load(setting.key);
+                });
+                return result;
+            }
+            loadTo(target) {
+                const settings = this.loadAll();
+                Object.keys(settings).forEach(key => {
+                    const camelKey = key.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+                    const targetKey = `${camelKey}Enabled`;
+                    if (targetKey in target) {
+                        target[targetKey] = settings[key];
                     }
-                };
-                window.analyzeGameState = function() { alert(window.i18n && window.i18n.t ? i18n.t('aiAnalysisModuleMissing') : 'AI分析模块未找到，请确保 features/ai-analysis.js 文件存在。'); };
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', window.setupAiAnalysis);
-                } else {
-                    window.setupAiAnalysis();
-                }
+                });
             }
-        })();
+        }
+        window.settingsManager = new SettingsManager();
     </script>
     <script>
-        (function() {
-            try {
-                window.i18n = i18n;
-                window.i18nModuleLoaded = true;
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', function() {
-                        i18n.init();
-                    });
-                } else {
-                    i18n.init();
-                }
-            } catch (error) {
-                console.warn('i18n module loading failed:', error);
-                window.i18nModuleLoaded = false;
-                window.i18n = {
-                    t: function(key) { return key; },
-                    init: function() { console.warn('i18n module not found. Please ensure features/i18n.js file exists.'); }
-                };
+        ModuleLoader.load('customTheme', {
+            setupThemeCustomizer: typeof setupThemeCustomizer === 'function' ? setupThemeCustomizer : null,
+            loadCustomTheme: typeof loadCustomTheme === 'function' ? loadCustomTheme : null,
+            resetCustomTheme: typeof resetCustomTheme === 'function' ? resetCustomTheme : null
+        }, {
+            setupThemeCustomizer: function() { alert(window.i18n && window.i18n.t ? i18n.t('customThemeModuleMissing') : '自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); },
+            loadCustomTheme: function() { alert(window.i18n && window.i18n.t ? i18n.t('customThemeModuleMissing') : '自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); },
+            resetCustomTheme: function() { alert(window.i18n && window.i18n.t ? i18n.t('customThemeModuleMissing') : '自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); }
+        });
+        window.setupThemeCustomizer = window.customTheme?.setupThemeCustomizer || window.setupThemeCustomizer;
+        window.loadCustomTheme = window.customTheme?.loadCustomTheme || window.loadCustomTheme;
+        window.resetCustomTheme = window.customTheme?.resetCustomTheme || window.resetCustomTheme;
+        if (window.customThemeModuleLoaded !== false && typeof setupThemeCustomizer === 'function') {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', setupThemeCustomizer);
+            } else {
+                setupThemeCustomizer();
             }
-        })();
+        }
     </script>
     <script>
-        (function() {
-            try {
-                window.bluetoothSync = bluetoothSync;
-                window.bluetoothSyncModuleLoaded = true;
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', function() {
-                        bluetoothSync.init();
+        ModuleLoader.load('aiAnalysis', {
+            setupAiAnalysis: typeof setupAiAnalysis === 'function' ? setupAiAnalysis : null,
+            analyzeGameState: typeof analyzeGameState === 'function' ? analyzeGameState : null
+        }, {
+            setupAiAnalysis: function() {
+                const aiAnalysisButton = document.getElementById('ai-analysis-button');
+                if (aiAnalysisButton) {
+                    aiAnalysisButton.addEventListener('click', function() {
+                        alert(window.i18n && window.i18n.t ? i18n.t('aiAnalysisModuleMissing') : 'AI分析模块未找到，请确保 features/ai-analysis.js 文件存在。');
                     });
-                } else {
-                    bluetoothSync.init();
                 }
-            } catch (error) {
-                console.warn('Bluetooth sync module loading failed:', error);
-                window.bluetoothSyncModuleLoaded = false;
-                window.bluetoothSync = {
-                    init: function() { console.warn('Bluetooth sync module not found. Please ensure features/bluetooth-sync.js file exists.'); }
-                };
+            },
+            analyzeGameState: function() { alert(window.i18n && window.i18n.t ? i18n.t('aiAnalysisModuleMissing') : 'AI分析模块未找到，请确保 features/ai-analysis.js 文件存在。'); }
+        });
+        window.setupAiAnalysis = window.aiAnalysis?.setupAiAnalysis || window.setupAiAnalysis;
+        window.analyzeGameState = window.aiAnalysis?.analyzeGameState || window.analyzeGameState;
+        if (window.aiAnalysisModuleLoaded !== false) {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', window.setupAiAnalysis);
+            } else {
+                window.setupAiAnalysis();
+            }
+        }
+    </script>
+    <script>
+        ModuleLoader.load('i18n', typeof i18n === 'object' ? i18n : null, {
+            t: function(key) { return key; },
+            init: function() { console.warn('i18n module not found. Please ensure features/i18n.js file exists.'); }
+        });
+        window.i18n = window.i18n || { t: function(key) { return key; }, init: function() {} };
+        if (window.i18nModuleLoaded !== false) {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() { window.i18n.init(); });
+            } else {
+                window.i18n.init();
+            }
+        }
+    </script>
+    <script>
+        ModuleLoader.load('bluetoothSync', typeof bluetoothSync === 'object' ? bluetoothSync : null, {
+            init: function() {
+                console.warn('Bluetooth sync module not found. Please ensure features/bluetooth-sync.js file exists.');
                 const bluetoothSyncBtn = document.getElementById('bluetooth-sync-button');
                 if (bluetoothSyncBtn) {
                     bluetoothSyncBtn.addEventListener('click', function() {
@@ -216,7 +236,15 @@
                     });
                 }
             }
-        })();
+        });
+        window.bluetoothSync = window.bluetoothSync || { init: function() {} };
+        if (window.bluetoothSyncModuleLoaded !== false) {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() { window.bluetoothSync.init(); });
+            } else {
+                window.bluetoothSync.init();
+            }
+        }
     </script>
     <script>
         tailwind.config = {
@@ -1782,7 +1810,7 @@
                         <i class="fa-solid fa-times"></i>
                     </button>
                     <div class="flex justify-end">
-                        <a href="https://github.com/TheFurina/2048-game" class="text-primary hover:underline flex items-center gap-1 text-xs" target="_blank"><i class="fa-brands fa-github"></i> <span data-i18n="github">项目主页</span></a>
+                        <a href="https://github.com/TheFurina/2048-game" class="text-primary hover:underline flex items-center gap-1 text-xs" target="_blank"><i class="fa-brands fa-github"></i> <span data-i18n="github">Github</span></a>
                     </div>
                 </div>
             </div>
@@ -2322,10 +2350,10 @@
                 </div>
                 <div class="flex flex-wrap gap-3 justify-center">
                     <button id="apply-custom-grid" class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-md transition-all duration-200 flex-1 sm:flex-none sm:min-w-[120px]">
-                        <i class="fa-solid fa-check mr-1"></i>应用
+                        <i class="fa-solid fa-check mr-1"></i><span data-i18n="apply">应用</span>
                     </button>
                     <button id="cancel-custom-grid" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-md transition-all duration-200 flex-1 sm:flex-none sm:min-w-[120px]">
-                        <i class="fa-solid fa-times mr-1"></i>取消
+                        <i class="fa-solid fa-times mr-1"></i><span data-i18n="cancel">取消</span>
                     </button>
                 </div>
             </div>
@@ -2336,15 +2364,15 @@
     </div>
     <script>
         window.gameState = {
-            gpuAccelerationEnabled: localStorage.getItem('2048-gpu-acceleration') !== 'false',
-            tileAnimationEnabled: localStorage.getItem('2048-tile-animation') !== 'false',
-            tileAppearAnimationEnabled: localStorage.getItem('2048-tile-appear-animation') !== 'false',
-            tileMoveAnimationEnabled: localStorage.getItem('2048-tile-move-animation') !== 'false',
-            tileMergeAnimationEnabled: localStorage.getItem('2048-tile-merge-animation') !== 'false',
-            vibrationEnabled: localStorage.getItem('2048-vibration') !== 'false',
-            vibrationMergeEnabled: localStorage.getItem('2048-vibration-merge') !== 'false',
-            vibrationWinEnabled: localStorage.getItem('2048-vibration-win') !== 'false',
-            vibrationLossEnabled: localStorage.getItem('2048-vibration-loss') !== 'false',
+            gpuAccelerationEnabled: true,
+            tileAnimationEnabled: true,
+            tileAppearAnimationEnabled: true,
+            tileMoveAnimationEnabled: true,
+            tileMergeAnimationEnabled: true,
+            vibrationEnabled: true,
+            vibrationMergeEnabled: true,
+            vibrationWinEnabled: true,
+            vibrationLossEnabled: true,
             grid: [],
             gridSize: 4,
             gridRows: 4,
@@ -2362,6 +2390,7 @@
             touchEndX: 0,
             touchEndY: 0
         };
+        window.settingsManager.loadTo(gameState);
         let lastFocusedElement = null;
         const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
         let isDebugMode = false;
@@ -2717,15 +2746,7 @@
                             localStorage.setItem(key, value);
                         }
                     }
-                    gameState.gpuAccelerationEnabled = localStorage.getItem('2048-gpu-acceleration') !== 'false';
-                    gameState.tileAnimationEnabled = localStorage.getItem('2048-tile-animation') !== 'false';
-                    gameState.tileAppearAnimationEnabled = localStorage.getItem('2048-tile-appear-animation') !== 'false';
-                    gameState.tileMoveAnimationEnabled = localStorage.getItem('2048-tile-move-animation') !== 'false';
-                    gameState.tileMergeAnimationEnabled = localStorage.getItem('2048-tile-merge-animation') !== 'false';
-                    gameState.vibrationEnabled = localStorage.getItem('2048-vibration') !== 'false';
-                    gameState.vibrationMergeEnabled = localStorage.getItem('2048-vibration-merge') !== 'false';
-                    gameState.vibrationWinEnabled = localStorage.getItem('2048-vibration-win') !== 'false';
-                    gameState.vibrationLossEnabled = localStorage.getItem('2048-vibration-loss') !== 'false';
+                    window.settingsManager.loadTo(gameState);
                     const importedTheme = data.settings['2048-theme'];
                     if (importedTheme) {
                         if (importedTheme === 'auto') {
@@ -2759,11 +2780,11 @@
                     }
                     const gpuAccelCheckbox = document.getElementById('gpu-acceleration');
                     if (gpuAccelCheckbox) {
-                        gpuAccelCheckbox.checked = localStorage.getItem('2048-gpu-acceleration') !== 'false';
+                        gpuAccelCheckbox.checked = window.settingsManager.load('gpu-acceleration');
                     }
                     const tileAnimationCheckbox = document.getElementById('tile-animation');
                     if (tileAnimationCheckbox) {
-                        tileAnimationCheckbox.checked = localStorage.getItem('2048-tile-animation') !== 'false';
+                        tileAnimationCheckbox.checked = window.settingsManager.load('tile-animation');
                         const animationDetails = document.getElementById('animation-details');
                         if (animationDetails) {
                             if (tileAnimationCheckbox.checked) {
@@ -2775,15 +2796,15 @@
                     }
                     const appearAnimationCheckbox = document.getElementById('tile-appear-animation');
                     if (appearAnimationCheckbox) {
-                        appearAnimationCheckbox.checked = localStorage.getItem('2048-tile-appear-animation') !== 'false';
+                        appearAnimationCheckbox.checked = window.settingsManager.load('tile-appear-animation');
                     }
                     const moveAnimationCheckbox = document.getElementById('tile-move-animation');
                     if (moveAnimationCheckbox) {
-                        moveAnimationCheckbox.checked = localStorage.getItem('2048-tile-move-animation') !== 'false';
+                        moveAnimationCheckbox.checked = window.settingsManager.load('tile-move-animation');
                     }
                     const mergeAnimationCheckbox = document.getElementById('tile-merge-animation');
                     if (mergeAnimationCheckbox) {
-                        mergeAnimationCheckbox.checked = localStorage.getItem('2048-tile-merge-animation') !== 'false';
+                        mergeAnimationCheckbox.checked = window.settingsManager.load('tile-merge-animation');
                     }
                     const vibrationToggle = document.getElementById('vibration-toggle');
                     const vibrationMergeToggle = document.getElementById('vibration-merge');
@@ -2791,16 +2812,16 @@
                     const vibrationLossToggle = document.getElementById('vibration-loss');
                     const vibrationDetails = document.getElementById('vibration-details');
                     if (vibrationToggle) {
-                        vibrationToggle.checked = localStorage.getItem('2048-vibration') !== 'false';
+                        vibrationToggle.checked = window.settingsManager.load('vibration');
                     }
                     if (vibrationMergeToggle) {
-                        vibrationMergeToggle.checked = localStorage.getItem('2048-vibration-merge') !== 'false';
+                        vibrationMergeToggle.checked = window.settingsManager.load('vibration-merge');
                     }
                     if (vibrationWinToggle) {
-                        vibrationWinToggle.checked = localStorage.getItem('2048-vibration-win') !== 'false';
+                        vibrationWinToggle.checked = window.settingsManager.load('vibration-win');
                     }
                     if (vibrationLossToggle) {
-                        vibrationLossToggle.checked = localStorage.getItem('2048-vibration-loss') !== 'false';
+                        vibrationLossToggle.checked = window.settingsManager.load('vibration-loss');
                     }
                     if (vibrationDetails) {
                         if (gameState.vibrationEnabled) {
@@ -2831,6 +2852,10 @@
                 return false;
             }
         }
+        let isSmallScreen = window.matchMedia('(max-width: 400px) and (max-height: 400px)').matches;
+        window.matchMedia('(max-width: 400px) and (max-height: 400px)').addEventListener('change', (e) => {
+            isSmallScreen = e.matches;
+        });
         window.elements = {
             gridContainer: document.getElementById('grid-container'),
             tileContainer: document.getElementById('tile-container'),
@@ -2901,15 +2926,7 @@
             return grid;
         }
         function generateGridStyles(gridSize, gridRows, gridCols) {
-            for (let i = 3; i <= 10; i++) {
-                for (let j = 3; j <= 10; j++) {
-                    const customStyleId = `grid-${i}x${j}-styles`;
-                    const existingCustomStyle = document.getElementById(customStyleId);
-                    if (existingCustomStyle) {
-                        existingCustomStyle.remove();
-                    }
-                }
-            }
+            document.querySelectorAll('style[id^="grid-"]').forEach(style => style.remove());
             if (gridRows === gridCols && (gridRows === 3 || gridRows === 4 || gridRows === 5)) {
                 return;
             }
@@ -2920,36 +2937,30 @@
             }
             const style = document.createElement('style');
             style.id = styleId;
-            const isSmallScreen = window.matchMedia('(max-width: 400px) and (max-height: 400px)').matches;
             const gapSize = isSmallScreen ? 'clamp(2px, 1.5vw, 4px)' : 'clamp(8px, 3vw, 16px)';
             const totalHorizontalGap = `(${gridCols} - 1) * ${gapSize}`;
             const totalVerticalGap = `(${gridRows} - 1) * ${gapSize}`;
-            const mediaQuery = isSmallScreen ? 
-                `@media (max-width: 400px) and (max-height: 400px)` : 
-                `@media (min-width: 401px), (min-height: 401px)`;
             style.textContent = `
-                ${mediaQuery} {
-                    .grid-${gridRows}x${gridCols} .grid-row {
-                        height: calc((100% - ${totalVerticalGap}) / ${gridRows});
-                        margin-bottom: ${gapSize} !important;
-                    }
-                    .grid-${gridRows}x${gridCols} .grid-row:last-child {
-                        margin-bottom: 0 !important;
-                    }
-                    .grid-${gridRows}x${gridCols} .grid-cell {
-                        width: calc((100% - ${totalHorizontalGap}) / ${gridCols});
-                        margin-right: ${gapSize} !important;
-                    }
-                    .grid-${gridRows}x${gridCols} .grid-cell:last-child {
-                        margin-right: 0 !important;
-                    }
-                    .grid-${gridRows}x${gridCols} .tile {
-                        width: calc((100% - ${totalHorizontalGap}) / ${gridCols});
-                        height: calc((100% - ${totalVerticalGap}) / ${gridRows});
-                        font-size: ${Math.max(0.6, 2.5 - Math.max(gridRows, gridCols) * 0.2)}rem;
-                    }
-                    ${generateTilePositions(gridRows, gridCols, isSmallScreen)}
+                .grid-${gridRows}x${gridCols} .grid-row {
+                    height: calc((100% - ${totalVerticalGap}) / ${gridRows});
+                    margin-bottom: ${gapSize} !important;
                 }
+                .grid-${gridRows}x${gridCols} .grid-row:last-child {
+                    margin-bottom: 0 !important;
+                }
+                .grid-${gridRows}x${gridCols} .grid-cell {
+                    width: calc((100% - ${totalHorizontalGap}) / ${gridCols});
+                    margin-right: ${gapSize} !important;
+                }
+                .grid-${gridRows}x${gridCols} .grid-cell:last-child {
+                    margin-right: 0 !important;
+                }
+                .grid-${gridRows}x${gridCols} .tile {
+                    width: calc((100% - ${totalHorizontalGap}) / ${gridCols});
+                    height: calc((100% - ${totalVerticalGap}) / ${gridRows});
+                    font-size: ${Math.max(0.6, 2.5 - Math.max(gridRows, gridCols) * 0.2)}rem;
+                }
+                ${generateTilePositions(gridRows, gridCols, isSmallScreen)}
             `;
             document.head.appendChild(style);
         }
@@ -3008,7 +3019,6 @@
         function renderTile(x, y, animate = true) {
             const tile = gameState.grid[y][x];
             if (!tile) return;
-            const isSmallScreen = window.matchMedia('(max-width: 400px) and (max-height: 400px)').matches;
             const gapSize = isSmallScreen ? 'clamp(2px, 1.5vw, 4px)' : 'clamp(8px, 3vw, 16px)';
             const totalHorizontalGap = `(${gameState.gridCols} - 1) * ${gapSize}`;
             const totalVerticalGap = `(${gameState.gridRows} - 1) * ${gapSize}`;
@@ -3053,6 +3063,10 @@
                     if (gameState.grid[y][x]) {
                         const posKey = `${x}-${y}`;
                         preservedPositions.add(posKey);
+                        if (removeTileTimers[posKey]) {
+                            clearTimeout(removeTileTimers[posKey]);
+                            delete removeTileTimers[posKey];
+                        }
                         renderTile(x, y, animate);
                     }
                 }
@@ -3060,13 +3074,17 @@
             Object.keys(currentTiles).forEach(pos => {
                 if (!preservedPositions.has(pos)) {
                     const tile = currentTiles[pos];
+                    if (removeTileTimers[pos]) {
+                        clearTimeout(removeTileTimers[pos]);
+                    }
                     if (gameState.tileAnimationEnabled && gameState.tileMoveAnimationEnabled && animate) {
                         tile.style.transition = 'opacity 200ms cubic-bezier(0.34, 1.56, 0.64, 1)'
                         tile.style.opacity = '0';
-                        setTimeout(() => {
+                        removeTileTimers[pos] = setTimeout(() => {
                             if (tile.parentNode === elements.tileContainer) {
                                 elements.tileContainer.removeChild(tile);
                             }
+                            delete removeTileTimers[pos];
                         }, 150);
                     } else {
                         if (tile.parentNode === elements.tileContainer) {
@@ -3076,22 +3094,21 @@
                 }
             });
         }
+        let moveInProgress = false;
+        let moveTimer = null;
+        let mergeTimer = null;
+        let removeTileTimers = {};
         function move(direction) {
             const modal = document.getElementById('ai-analysis-modal');
             if (gameState.isPaused || gameState.gameOver || !elements.gameMessage.classList.contains('hidden') || !modal.classList.contains('hidden')) return false;
+            if (moveInProgress) return false;
+            moveInProgress = true;
             saveHistory();
             let moved = false;
-            const moveLog = [];
             for (let y = 0; y < gameState.gridRows; y++) {
                 for (let x = 0; x < gameState.gridCols; x++) {
                     if (gameState.grid[y][x]) {
                         gameState.grid[y][x].merged = false;
-                        moveLog.push({
-                            originalX: x,
-                            originalY: y,
-                            value: gameState.grid[y][x].value,
-                            tile: { ...gameState.grid[y][x] }
-                        });
                     }
                 }
             }
@@ -3188,7 +3205,8 @@
             if (moved) {
                 if (gameState.tileAnimationEnabled) {
                     renderAllTiles(true);
-                    setTimeout(() => {
+                    if (mergeTimer) clearTimeout(mergeTimer);
+                    mergeTimer = setTimeout(() => {
                         if (gameState.tileAnimationEnabled && gameState.tileMergeAnimationEnabled) {
                             for (let y = 0; y < gameState.gridRows; y++) {
                                 for (let x = 0; x < gameState.gridCols; x++) {
@@ -3215,25 +3233,35 @@
                             }
                         }
                     }, 10);
-                    setTimeout(() => {
+                    if (moveTimer) clearTimeout(moveTimer);
+                    moveTimer = setTimeout(() => {
                         generateRandomTile();
                         if (!gameState.gameWon) {
                             checkWin();
                         }
-                        checkGameOver();
+                        if (!gameState.gameWon || gameState.isEndlessMode) {
+                            checkGameOver();
+                        }
                         saveGameState();
+                        moveInProgress = false;
                     }, config.animationDuration);
                 } else {
                     renderAllTiles(false);
-                    setTimeout(() => {
+                    if (moveTimer) clearTimeout(moveTimer);
+                    moveTimer = setTimeout(() => {
                         generateRandomTile();
                         if (!gameState.gameWon) {
                             checkWin();
                         }
-                        checkGameOver();
+                        if (!gameState.gameWon || gameState.isEndlessMode) {
+                            checkGameOver();
+                        }
                         saveGameState();
+                        moveInProgress = false;
                     }, 10);
                 }
+            } else {
+                moveInProgress = false;
             }
             updateUndoButtonState();
             return moved;
@@ -3256,20 +3284,36 @@
             }
         }
         function handleTileMerge(targetY, targetX, sourceY, sourceX) {
-            gameState.grid[targetY][targetX].value *= 2;
-            gameState.grid[targetY][targetX].merged = true;
-            const mergedTile = gameState.grid[targetY][targetX];
-            mergedTile.mergedAnimation = true;
-            gameState.grid[sourceY][sourceX] = null;
-            const difficulty = config.difficultySettings[gameState.difficulty] || { scoreMultiplier: 1 };
-            gameState.score += gameState.grid[targetY][targetX].value * difficulty.scoreMultiplier;
-            if (gameState.score > gameState.bestScore) {
-                gameState.bestScore = gameState.score;
-                elements.bestScoreDisplay.textContent = gameState.bestScore;
+            processMerge(gameState.grid, targetY, targetX, sourceY, sourceX, {
+                scoreMultiplier: config.difficultySettings[gameState.difficulty]?.scoreMultiplier || 1,
+                onScoreUpdate: (addedScore) => {
+                    gameState.score += addedScore;
+                    if (gameState.score > gameState.bestScore) {
+                        gameState.bestScore = gameState.score;
+                        elements.bestScoreDisplay.textContent = gameState.bestScore;
+                    }
+                    elements.scoreDisplay.textContent = gameState.score;
+                    updateDocumentTitle();
+                },
+                onMergeComplete: () => {
+                    gameState.grid[targetY][targetX].mergedAnimation = true;
+                    vibrate(50, 'merge');
+                }
+            });
+        }
+        function processMerge(grid, targetY, targetX, sourceY, sourceX, options = {}) {
+            const { scoreMultiplier = 1, onScoreUpdate, onMergeComplete } = options;
+            grid[targetY][targetX].value *= 2;
+            grid[targetY][targetX].merged = true;
+            const mergedTile = grid[targetY][targetX];
+            grid[sourceY][sourceX] = null;
+            if (onScoreUpdate) {
+                onScoreUpdate(mergedTile.value * scoreMultiplier);
             }
-            elements.scoreDisplay.textContent = gameState.score;
-            updateDocumentTitle();
-            vibrate(50, 'merge');
+            if (onMergeComplete) {
+                onMergeComplete();
+            }
+            return mergedTile;
         }
         function checkWin() {
             for (let y = 0; y < gameState.gridRows; y++) {
@@ -3353,7 +3397,7 @@
             }
         }
         function saveHistory() {
-            const gridCopy = JSON.parse(JSON.stringify(gameState.grid));
+            const gridCopy = cloneGrid(gameState.grid);
             gameState.history.push({
                 grid: gridCopy,
                 score: gameState.score
@@ -3793,166 +3837,122 @@
                 }
             }, { passive: true });
         }
-        function setupModeButtons() {
-            const modeButtonStates = {
-                'new-game': { needsConfirm: false, originalText: elements.newGameButton.textContent },
-                'endless-mode': { needsConfirm: false, originalText: elements.endlessModeButton.textContent }
-            };
-            const modeButtonClasses = {
-                'new-game': elements.newGameButton.className,
-                'endless-mode': elements.endlessModeButton.className
-            };
-            const modeButtonIconClasses = {
-                'new-game': elements.newGameButton.querySelector('i').className,
-                'endless-mode': elements.endlessModeButton.querySelector('i').className
-            };
-            function resetModeButtonStates() {
-                modeButtonStates['new-game'].needsConfirm = false;
-                const newGameSpan = elements.newGameButton.querySelector('span');
-                if (newGameSpan) {
-                    newGameSpan.textContent = '标准模式';
+        function createConfirmButton(options) {
+            const { buttonId, element, hasIcon, i18nKey, onConfirm, resetAll } = options;
+            const state = { needsConfirm: false };
+            const originalClassName = element.className;
+            const originalIconClass = hasIcon ? element.querySelector('i').className : null;
+            const originalHTML = element.innerHTML;
+            function reset() {
+                state.needsConfirm = false;
+                element.className = originalClassName;
+                if (hasIcon) {
+                    const icon = element.querySelector('i');
+                    if (icon) {
+                        icon.className = originalIconClass;
+                        icon.style.display = '';
+                    }
                 }
-                const newGameIcon = elements.newGameButton.querySelector('i');
-                if (newGameIcon) {
-                    newGameIcon.className = modeButtonIconClasses['new-game'];
-                    newGameIcon.style.display = '';
-                }
-                elements.newGameButton.className = modeButtonClasses['new-game'];
-                modeButtonStates['endless-mode'].needsConfirm = false;
-                const endlessModeSpan = elements.endlessModeButton.querySelector('span');
-                if (endlessModeSpan) {
-                    endlessModeSpan.textContent = '无尽模式';
-                }
-                const endlessModeIcon = elements.endlessModeButton.querySelector('i');
-                if (endlessModeIcon) {
-                    endlessModeIcon.className = modeButtonIconClasses['endless-mode'];
-                    endlessModeIcon.style.display = '';
-                }
-                elements.endlessModeButton.className = modeButtonClasses['endless-mode'];
+                element.innerHTML = originalHTML;
             }
-            function handleModeButtonClick(buttonId, isEndlessMode) {
-                const button = document.getElementById(buttonId);
-                const state = modeButtonStates[buttonId];
+            function handleClick() {
                 if (state.needsConfirm) {
-                    initGame(isEndlessMode, gameState.gridRows, gameState.gridCols);
-                    resetModeButtonStates();
+                    onConfirm();
+                    resetAll();
                 } else {
                     if (gameState.score > 0) {
-                        resetModeButtonStates();
+                        resetAll();
                         state.needsConfirm = true;
-                        const spanElement = button.querySelector('span');
-                        if (spanElement) {
-                            spanElement.textContent = '确认';
+                        if (hasIcon) {
+                            const span = element.querySelector('span');
+                            if (span) span.textContent = i18n.t('confirm');
+                            const icon = element.querySelector('i');
+                            if (icon) {
+                                icon.className = 'fa-solid fa-exclamation-triangle mr-2';
+                                icon.style.display = '';
+                            }
+                        } else {
+                            element.innerHTML = i18n.t('confirm');
                         }
-                        const iconElement = button.querySelector('i');
-                        if (iconElement) {
-                            iconElement.className = 'fa-solid fa-exclamation-triangle mr-2';
-                            iconElement.style.display = '';
-                        }
-                        button.classList.add('bg-red-500', 'hover:bg-red-600');
+                        element.classList.add('bg-red-500', 'hover:bg-red-600');
                     } else {
-                        initGame(isEndlessMode, gameState.gridRows, gameState.gridCols);
+                        onConfirm();
                     }
                 }
             }
-            elements.newGameButton.addEventListener('click', () => {
-                handleModeButtonClick('new-game', false);
-            });
-            elements.newGameButton.addEventListener('blur', () => {
-                if (modeButtonStates['new-game'].needsConfirm) {
-                    resetModeButtonStates();
+            element.addEventListener('click', handleClick);
+            element.addEventListener('blur', () => {
+                if (state.needsConfirm) {
+                    resetAll();
                 }
             });
-            elements.endlessModeButton.addEventListener('click', () => {
-                handleModeButtonClick('endless-mode', true);
-            });
-            elements.endlessModeButton.addEventListener('blur', () => {
-                if (modeButtonStates['endless-mode'].needsConfirm) {
-                    resetModeButtonStates();
-                }
-            });
-            window.resetModeButtonStates = resetModeButtonStates;
+            return { reset, state };
+        }
+        function setupModeButtons() {
+            const buttons = [];
+            buttons.push(createConfirmButton({
+                buttonId: 'new-game',
+                element: elements.newGameButton,
+                hasIcon: true,
+                i18nKey: 'newGame',
+                onConfirm: () => initGame(false, gameState.gridRows, gameState.gridCols),
+                resetAll: () => buttons.forEach(b => b.reset())
+            }));
+            buttons.push(createConfirmButton({
+                buttonId: 'endless-mode',
+                element: elements.endlessModeButton,
+                hasIcon: true,
+                i18nKey: 'endlessMode',
+                onConfirm: () => initGame(true, gameState.gridRows, gameState.gridCols),
+                resetAll: () => buttons.forEach(b => b.reset())
+            }));
+            window.resetModeButtonStates = () => buttons.forEach(b => b.reset());
         }
         function setupGridButtons() {
-            const buttonStates = {
-                'grid-3x3': { needsConfirm: false, originalText: elements.grid3x3Button.textContent },
-                'grid-4x4': { needsConfirm: false, originalText: elements.grid4x4Button.textContent },
-                'grid-5x5': { needsConfirm: false, originalText: elements.grid5x5Button.textContent },
-                'custom-grid': { needsConfirm: false, originalHTML: elements.applyCustomGridButton.innerHTML }
-            };
-            const buttonClasses = {
-                'grid-3x3': elements.grid3x3Button.className,
-                'grid-4x4': elements.grid4x4Button.className,
-                'grid-5x5': elements.grid5x5Button.className,
-                'custom-grid': elements.applyCustomGridButton.className
-            };
-            function resetButtonStates() {
-                buttonStates['grid-3x3'].needsConfirm = false;
-                elements.grid3x3Button.textContent = buttonStates['grid-3x3'].originalText;
-                elements.grid3x3Button.className = buttonClasses['grid-3x3'];
-                buttonStates['grid-4x4'].needsConfirm = false;
-                elements.grid4x4Button.textContent = buttonStates['grid-4x4'].originalText;
-                elements.grid4x4Button.className = buttonClasses['grid-4x4'];
-                buttonStates['grid-5x5'].needsConfirm = false;
-                elements.grid5x5Button.textContent = buttonStates['grid-5x5'].originalText;
-                elements.grid5x5Button.className = buttonClasses['grid-5x5'];
-                buttonStates['custom-grid'].needsConfirm = false;
-                elements.applyCustomGridButton.innerHTML = buttonStates['custom-grid'].originalHTML;
-                elements.applyCustomGridButton.className = buttonClasses['custom-grid'];
-            }
-            function handleGridButtonClick(buttonId, gridSize) {
-                const button = document.getElementById(buttonId);
-                const state = buttonStates[buttonId];
-                if (state.needsConfirm) {
-                    const rows = gridSize;
-                    const cols = gridSize;
-                    gameState.gridSize = gridSize;
-                    gameState.gridRows = rows;
-                    gameState.gridCols = cols;
-                    updateGridButtonState(gridSize);
-                    elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${rows}×${cols}` + i18n.t('grid');
-                    initGame(gameState.isEndlessMode, rows, cols);
-                    resetButtonStates();
-                } else {
-                    if (gameState.score > 0) {
-                        resetButtonStates();
-                        state.needsConfirm = true;
-                        button.innerHTML = '确认';
-                        button.classList.add('bg-red-500', 'hover:bg-red-600');
-                    } else {
+            const buttons = [];
+            function createGridButton(buttonId, element, gridSize) {
+                buttons.push(createConfirmButton({
+                    buttonId,
+                    element,
+                    hasIcon: false,
+                    i18nKey: null,
+                    onConfirm: () => {
                         gameState.gridSize = gridSize;
                         gameState.gridRows = gridSize;
                         gameState.gridCols = gridSize;
                         updateGridButtonState(gridSize);
-                        elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${gameState.gridRows}×${gameState.gridCols}` + i18n.t('grid');
+                        elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${gridSize}×${gridSize}` + i18n.t('grid');
                         initGame(gameState.isEndlessMode, gridSize, gridSize);
-                    }
-                }
+                    },
+                    resetAll: () => buttons.forEach(b => b.reset())
+                }));
             }
-            elements.grid3x3Button.addEventListener('click', () => {
-                handleGridButtonClick('grid-3x3', 3);
-            });
-            elements.grid3x3Button.addEventListener('blur', () => {
-                if (buttonStates['grid-3x3'].needsConfirm) {
-                    resetButtonStates();
-                }
-            });
-            elements.grid4x4Button.addEventListener('click', () => {
-                handleGridButtonClick('grid-4x4', 4);
-            });
-            elements.grid4x4Button.addEventListener('blur', () => {
-                if (buttonStates['grid-4x4'].needsConfirm) {
-                    resetButtonStates();
-                }
-            });
-            elements.grid5x5Button.addEventListener('click', () => {
-                handleGridButtonClick('grid-5x5', 5);
-            });
-            elements.grid5x5Button.addEventListener('blur', () => {
-                if (buttonStates['grid-5x5'].needsConfirm) {
-                    resetButtonStates();
-                }
-            });
+            createGridButton('grid-3x3', elements.grid3x3Button, 3);
+            createGridButton('grid-4x4', elements.grid4x4Button, 4);
+            createGridButton('grid-5x5', elements.grid5x5Button, 5);
+            buttons.push(createConfirmButton({
+                buttonId: 'custom-grid',
+                element: elements.applyCustomGridButton,
+                hasIcon: false,
+                i18nKey: null,
+                onConfirm: () => {
+                    const rows = parseInt(elements.gridSizeInput.value);
+                    const cols = elements.squareGridCheckbox.checked ? rows : parseInt(elements.gridSizeInput2.value);
+                    if (isNaN(rows) || isNaN(cols) || rows < 3 || rows > 10 || cols < 3 || cols > 10) {
+                        alert(i18n.t('gridSizeInput'));
+                        return;
+                    }
+                    gameState.gridSize = Math.max(rows, cols);
+                    gameState.gridRows = rows;
+                    gameState.gridCols = cols;
+                    updateGridButtonState(Math.max(rows, cols));
+                    elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${rows}×${cols}` + i18n.t('grid');
+                    initGame(gameState.isEndlessMode, rows, cols);
+                    hideModal('custom-grid-modal');
+                },
+                resetAll: () => buttons.forEach(b => b.reset())
+            }));
+            window.resetButtonStates = () => buttons.forEach(b => b.reset());
             elements.customGridButton.addEventListener('click', () => {
                 elements.gridSizeInput.value = gameState.gridRows;
                 elements.gridSizeInput2.value = gameState.gridCols;
@@ -3977,52 +3977,10 @@
                     elements.gridSizeInput2.value = elements.gridSizeInput.value;
                 }
             });
-            elements.applyCustomGridButton.addEventListener('click', () => {
-                const buttonId = 'custom-grid';
-                const button = elements.applyCustomGridButton;
-                const state = buttonStates[buttonId];
-                
-                if (state.needsConfirm) {
-                    const rows = parseInt(elements.gridSizeInput.value);
-                    const cols = elements.squareGridCheckbox.checked ? rows : parseInt(elements.gridSizeInput2.value);
-                    if (isNaN(rows) || isNaN(cols) || rows < 3 || rows > 10 || cols < 3 || cols > 10) {
-                        alert('请输入3到10之间的有效数字');
-                        return;
-                    }
-                    updateGridButtonState(Math.max(rows, cols));
-                    elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${rows}×${cols}` + i18n.t('grid');
-                    initGame(gameState.isEndlessMode, rows, cols);
-                    hideModal('custom-grid-modal');
-                    resetButtonStates();
-                } else {
-                    const rows = parseInt(elements.gridSizeInput.value);
-                    const cols = elements.squareGridCheckbox.checked ? rows : parseInt(elements.gridSizeInput2.value);
-                    if (isNaN(rows) || isNaN(cols) || rows < 3 || rows > 10 || cols < 3 || cols > 10) {
-                        alert('请输入3到10之间的有效数字');
-                        return;
-                    }
-                    if (gameState.score > 0) {
-                        state.needsConfirm = true;
-                        button.innerHTML = '<i class="fa-solid fa-exclamation-triangle mr-1"></i>确认';
-                        button.classList.add('bg-red-500', 'hover:bg-red-600');
-                    } else {
-                        updateGridButtonState(Math.max(rows, cols));
-                        elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${rows}×${cols}` + i18n.t('grid');
-                        initGame(gameState.isEndlessMode, rows, cols);
-                        hideModal('custom-grid-modal');
-                    }
-                }
-            });
             elements.cancelCustomGridButton.addEventListener('click', () => {
                 hideModal('custom-grid-modal');
                 resetButtonStates();
             });
-            elements.applyCustomGridButton.addEventListener('blur', () => {
-                if (buttonStates['custom-grid'].needsConfirm) {
-                    resetButtonStates();
-                }
-            });
-            window.resetButtonStates = resetButtonStates;
         }
         function setupDifficultyButtons() {
             elements.easyModeButton.addEventListener('click', () => {
@@ -4063,12 +4021,12 @@
                 if (isControlsCollapsed) {
                     elements.controlsContainer.classList.add('collapsed');
                     elements.toggleIcon.classList.add('rotated');
-                    elements.toggleText.textContent = '展开控制';
+                    elements.toggleText.textContent = window.i18n ? window.i18n.t('expandControls') : '展开控制';
                     localStorage.setItem('controlsCollapsed', 'true');
                 } else {
                     elements.controlsContainer.classList.remove('collapsed');
                     elements.toggleIcon.classList.remove('rotated');
-                    elements.toggleText.textContent = '收起控制';
+                    elements.toggleText.textContent = window.i18n ? window.i18n.t('toggleControls') : '收起控制';
                     localStorage.setItem('controlsCollapsed', 'false');
                 }
             }
@@ -4091,13 +4049,13 @@
             elements.gpuAccelerationToggle.checked = gameState.gpuAccelerationEnabled;
             elements.gpuAccelerationToggle.addEventListener('change', (e) => {
                 gameState.gpuAccelerationEnabled = e.target.checked;
-                localStorage.setItem('2048-gpu-acceleration', gameState.gpuAccelerationEnabled);
+                window.settingsManager.save('gpu-acceleration', gameState.gpuAccelerationEnabled);
                 renderAllTiles();
             });
             elements.tileAnimation.checked = gameState.tileAnimationEnabled;
             elements.tileAnimation.addEventListener('change', (e) => {
                 gameState.tileAnimationEnabled = e.target.checked;
-                localStorage.setItem('2048-tile-animation', gameState.tileAnimationEnabled);
+                window.settingsManager.save('tile-animation', gameState.tileAnimationEnabled);
                 const animationDetails = document.getElementById('animation-details');
                 if (animationDetails) {
                     if (e.target.checked) {
@@ -4116,17 +4074,17 @@
             elements.tileAppearAnimation.checked = gameState.tileAppearAnimationEnabled;
             elements.tileAppearAnimation.addEventListener('change', (e) => {
                 gameState.tileAppearAnimationEnabled = e.target.checked;
-                localStorage.setItem('2048-tile-appear-animation', gameState.tileAppearAnimationEnabled);
+                window.settingsManager.save('tile-appear-animation', gameState.tileAppearAnimationEnabled);
             });
             elements.tileMoveAnimation.checked = gameState.tileMoveAnimationEnabled;
             elements.tileMoveAnimation.addEventListener('change', (e) => {
                 gameState.tileMoveAnimationEnabled = e.target.checked;
-                localStorage.setItem('2048-tile-move-animation', gameState.tileMoveAnimationEnabled);
+                window.settingsManager.save('tile-move-animation', gameState.tileMoveAnimationEnabled);
             });
             elements.tileMergeAnimation.checked = gameState.tileMergeAnimationEnabled;
             elements.tileMergeAnimation.addEventListener('change', (e) => {
                 gameState.tileMergeAnimationEnabled = e.target.checked;
-                localStorage.setItem('2048-tile-merge-animation', gameState.tileMergeAnimationEnabled);
+                window.settingsManager.save('tile-merge-animation', gameState.tileMergeAnimationEnabled);
             });
             const vibrationToggle = document.getElementById('vibration-toggle');
             const vibrationMergeToggle = document.getElementById('vibration-merge');
@@ -4137,7 +4095,7 @@
                 vibrationToggle.checked = gameState.vibrationEnabled;
                 vibrationToggle.addEventListener('change', (e) => {
                     gameState.vibrationEnabled = e.target.checked;
-                    localStorage.setItem('2048-vibration', gameState.vibrationEnabled);
+                    window.settingsManager.save('vibration', gameState.vibrationEnabled);
                     if (e.target.checked) {
                         vibrate(50, 'merge');
                     }
@@ -4161,7 +4119,7 @@
                     vibrationToggle.disabled = true;
                     vibrationToggle.checked = false;
                     gameState.vibrationEnabled = false;
-                    localStorage.setItem('2048-vibration', gameState.vibrationEnabled);
+                    window.settingsManager.save('vibration', gameState.vibrationEnabled);
                     vibrationToggle.closest('.vibration-toggle-container').classList.add('opacity-50');
                     vibrationToggle.closest('.vibration-toggle-container').classList.remove('mb-2');
                     const vibrationWarningContainer = document.getElementById('vibration-warning-container');
@@ -4178,7 +4136,7 @@
                 vibrationMergeToggle.checked = gameState.vibrationMergeEnabled;
                 vibrationMergeToggle.addEventListener('change', (e) => {
                     gameState.vibrationMergeEnabled = e.target.checked;
-                    localStorage.setItem('2048-vibration-merge', gameState.vibrationMergeEnabled);
+                    window.settingsManager.save('vibration-merge', gameState.vibrationMergeEnabled);
                 });
                 if (!navigator.vibrate || simulateNoVibration) {
                     vibrationMergeToggle.disabled = true;
@@ -4188,7 +4146,7 @@
                 vibrationWinToggle.checked = gameState.vibrationWinEnabled;
                 vibrationWinToggle.addEventListener('change', (e) => {
                     gameState.vibrationWinEnabled = e.target.checked;
-                    localStorage.setItem('2048-vibration-win', gameState.vibrationWinEnabled);
+                    window.settingsManager.save('vibration-win', gameState.vibrationWinEnabled);
                 });
                 if (!navigator.vibrate || simulateNoVibration) {
                     vibrationWinToggle.disabled = true;
@@ -4198,7 +4156,7 @@
                 vibrationLossToggle.checked = gameState.vibrationLossEnabled;
                 vibrationLossToggle.addEventListener('change', (e) => {
                     gameState.vibrationLossEnabled = e.target.checked;
-                    localStorage.setItem('2048-vibration-loss', gameState.vibrationLossEnabled);
+                    window.settingsManager.save('vibration-loss', gameState.vibrationLossEnabled);
                 });
                 if (!navigator.vibrate || simulateNoVibration) {
                     vibrationLossToggle.disabled = true;
@@ -4450,7 +4408,7 @@
             let bestScore = -1;
             let bestDirection = 'up';
             let mergeOpportunities = 0;
-            const gridCopy = JSON.parse(JSON.stringify(gameState.grid));
+            const gridCopy = cloneGrid(gameState.grid);
             const originalScore = gameState.score;
             const gridSize = gameState.gridSize;
             let scoreDiffWeight, emptyCellsWeight, mergesWeight, positionWeight, maxValueWeight, continuityWeight, uniformityWeight, blockWeight, multiStepWeight, monotonicityWeight;
@@ -4508,7 +4466,7 @@
             }
             directions.forEach(direction => {
                 const simulatedState = {
-                    grid: JSON.parse(JSON.stringify(gridCopy)),
+                    grid: cloneGrid(gridCopy),
                     score: originalScore,
                     gridSize: gridSize
                 };
@@ -4532,12 +4490,12 @@
             });
             mergeOpportunities = countMergeOpportunities(gridCopy);
             const emptyCells = countEmptyCells(gridCopy);
-            let gameStateAssessment = i18n.t('good');
-            if (emptyCells < dangerThreshold) gameStateAssessment = i18n.t('danger');
-            else if (emptyCells < warningThreshold) gameStateAssessment = i18n.t('average');
-            let scorePotential = i18n.t('low');
-            if (mergeOpportunities >= highPotentialThreshold) scorePotential = i18n.t('high');
-            else if (mergeOpportunities >= mediumPotentialThreshold) scorePotential = i18n.t('mediumScore');
+            let gameStateAssessment = 'good';
+            if (emptyCells < dangerThreshold) gameStateAssessment = 'danger';
+            else if (emptyCells < warningThreshold) gameStateAssessment = 'average';
+            let scorePotential = 'low';
+            if (mergeOpportunities >= highPotentialThreshold) scorePotential = 'high';
+            else if (mergeOpportunities >= mediumPotentialThreshold) scorePotential = 'medium';
             const bestMoveText = document.querySelector('#best-move-direction .best-move-text');
             if (bestMoveText) {
                 bestMoveText.textContent = i18n.t(bestDirection);
@@ -4545,7 +4503,7 @@
                 document.getElementById('best-move-direction').innerHTML = `<span class="best-move-text">${i18n.t(bestDirection)}</span>`;
             }
             const mergeOpportunitiesElement = document.getElementById('merge-opportunities');
-            mergeOpportunitiesElement.textContent = `${mergeOpportunities}处`;
+            mergeOpportunitiesElement.textContent = `${mergeOpportunities}${i18n.t('mergeOpportunitiesSuffix')}`;
             mergeOpportunitiesElement.className = 'analysis-value';
             if (mergeOpportunities >= 3) {
                 mergeOpportunitiesElement.classList.add('high');
@@ -4555,34 +4513,38 @@
                 mergeOpportunitiesElement.classList.add('low');
             }
             const gameStateElement = document.getElementById('game-state-assessment');
-            gameStateElement.textContent = gameStateAssessment;
+            gameStateElement.textContent = i18n.t(gameStateAssessment);
             gameStateElement.className = 'analysis-value';
-            if (gameStateAssessment === '良好') {
+            if (gameStateAssessment === 'good') {
                 gameStateElement.classList.add('good');
-            } else if (gameStateAssessment === '一般') {
+            } else if (gameStateAssessment === 'average') {
                 gameStateElement.classList.add('average');
             } else {
                 gameStateElement.classList.add('danger');
             }
+            const scorePotentialDescriptions = {
+                high: i18n.t('scorePotentialHigh'),
+                medium: i18n.t('scorePotentialMedium'),
+                low: i18n.t('limitedMergeOpportunities')
+            };
             const scorePotentialElement = document.getElementById('score-potential');
-            scorePotentialElement.textContent = `${scorePotential} (${
-                scorePotential === '高' ? '预计可合并多个高价值方块' : 
-                scorePotential === '中' ? '有一定合并机会' : 
-                i18n.t('limitedMergeOpportunities')
-            })`;
+            scorePotentialElement.textContent = `${i18n.t(scorePotential)} (${scorePotentialDescriptions[scorePotential]})`;
             scorePotentialElement.className = 'analysis-value';
-            if (scorePotential === '高') {
+            if (scorePotential === 'high') {
                 scorePotentialElement.classList.add('high');
-            } else if (scorePotential === '中') {
+            } else if (scorePotential === 'medium') {
                 scorePotentialElement.classList.add('medium');
             } else {
                 scorePotentialElement.classList.add('low');
             }
             document.getElementById('ai-analysis-modal').classList.remove('hidden');
         }
+        function cloneGrid(grid) {
+            return grid.map(row => row.map(cell => cell ? { ...cell } : null));
+        }
         function simulateMove(state, direction) {
             let moved = false;
-            state.grid = JSON.parse(JSON.stringify(state.grid));
+            state.grid = cloneGrid(state.grid);
             const gridRows = state.grid.length;
             const gridCols = state.grid[0].length;
             for (let y = 0; y < gridRows; y++) {
@@ -4604,10 +4566,9 @@
                                 if (newY > 0 && state.grid[newY - 1][x] && 
                                     state.grid[newY - 1][x].value === state.grid[y][x].value && 
                                     !state.grid[newY - 1][x].merged) {
-                                    state.grid[newY - 1][x].value *= 2;
-                                    state.grid[newY - 1][x].merged = true;
-                                    state.grid[y][x] = null;
-                                    state.score += state.grid[newY - 1][x].value;
+                                    processMerge(state.grid, newY - 1, x, y, x, {
+                                        onScoreUpdate: (addedScore) => { state.score += addedScore; }
+                                    });
                                     moved = true;
                                 } else if (newY !== y) {
                                     state.grid[newY][x] = state.grid[y][x];
@@ -4629,10 +4590,9 @@
                                 if (newY < gridRows - 1 && state.grid[newY + 1][x] && 
                                     state.grid[newY + 1][x].value === state.grid[y][x].value && 
                                     !state.grid[newY + 1][x].merged) {
-                                    state.grid[newY + 1][x].value *= 2;
-                                    state.grid[newY + 1][x].merged = true;
-                                    state.grid[y][x] = null;
-                                    state.score += state.grid[newY + 1][x].value;
+                                    processMerge(state.grid, newY + 1, x, y, x, {
+                                        onScoreUpdate: (addedScore) => { state.score += addedScore; }
+                                    });
                                     moved = true;
                                 } else if (newY !== y) {
                                     state.grid[newY][x] = state.grid[y][x];
@@ -4654,10 +4614,9 @@
                                 if (newX > 0 && state.grid[y][newX - 1] && 
                                     state.grid[y][newX - 1].value === state.grid[y][x].value && 
                                     !state.grid[y][newX - 1].merged) {
-                                    state.grid[y][newX - 1].value *= 2;
-                                    state.grid[y][newX - 1].merged = true;
-                                    state.grid[y][x] = null;
-                                    state.score += state.grid[y][newX - 1].value;
+                                    processMerge(state.grid, y, newX - 1, y, x, {
+                                        onScoreUpdate: (addedScore) => { state.score += addedScore; }
+                                    });
                                     moved = true;
                                 } else if (newX !== x) {
                                     state.grid[y][newX] = state.grid[y][x];
@@ -4679,10 +4638,9 @@
                                 if (newX < gridCols - 1 && state.grid[y][newX + 1] && 
                                     state.grid[y][newX + 1].value === state.grid[y][x].value && 
                                     !state.grid[y][newX + 1].merged) {
-                                    state.grid[y][newX + 1].value *= 2;
-                                    state.grid[y][newX + 1].merged = true;
-                                    state.grid[y][x] = null;
-                                    state.score += state.grid[y][newX + 1].value;
+                                    processMerge(state.grid, y, newX + 1, y, x, {
+                                        onScoreUpdate: (addedScore) => { state.score += addedScore; }
+                                    });
                                     moved = true;
                                 } else if (newX !== x) {
                                     state.grid[y][newX] = state.grid[y][x];
@@ -4697,252 +4655,252 @@
             return moved;
         }
         function calculatePositionScore(grid, gridSize) {
-                let score = 0;
-                let maxValue = 0;
-                let maxValuePos = {x: 0, y: 0};
-                const gridRows = grid.length;
-                const gridCols = grid[0].length;
-                for (let y = 0; y < gridRows; y++) {
-                    for (let x = 0; x < gridCols; x++) {
-                        if (grid[y][x] && grid[y][x].value > maxValue) {
+            let score = 0;
+            let maxValue = 0;
+            let maxValuePos = {x: 0, y: 0};
+            const gridRows = grid.length;
+            const gridCols = grid[0].length;
+            for (let y = 0; y < gridRows; y++) {
+                for (let x = 0; x < gridCols; x++) {
+                    if (grid[y][x] && grid[y][x].value > maxValue) {
+                        maxValue = grid[y][x].value;
+                        maxValuePos = {x, y};
+                    }
+                }
+            }
+            if (maxValue > 0) {
+                const cornerDistance = Math.min(
+                    maxValuePos.x + maxValuePos.y,
+                    (gridCols - 1 - maxValuePos.x) + maxValuePos.y,
+                    maxValuePos.x + (gridRows - 1 - maxValuePos.y),
+                    (gridCols - 1 - maxValuePos.x) + (gridRows - 1 - maxValuePos.y)
+                );
+                const maxDistance = Math.max(gridRows, gridCols) - 1;
+                score = (maxDistance - cornerDistance) / maxDistance * 10;
+            }
+            return score;
+        }
+        function calculateMaxValueScore(grid) {
+            let maxValue = 0;
+            let secondMaxValue = 0;
+            for (let y = 0; y < grid.length; y++) {
+                for (let x = 0; x < grid[y].length; x++) {
+                    if (grid[y][x]) {
+                        if (grid[y][x].value > maxValue) {
+                            secondMaxValue = maxValue;
                             maxValue = grid[y][x].value;
-                            maxValuePos = {x, y};
+                        } else if (grid[y][x].value > secondMaxValue) {
+                            secondMaxValue = grid[y][x].value;
                         }
                     }
                 }
-                if (maxValue > 0) {
-                    const cornerDistance = Math.min(
-                        maxValuePos.x + maxValuePos.y,
-                        (gridCols - 1 - maxValuePos.x) + maxValuePos.y,
-                        maxValuePos.x + (gridRows - 1 - maxValuePos.y),
-                        (gridCols - 1 - maxValuePos.x) + (gridRows - 1 - maxValuePos.y)
-                    );
-                    const maxDistance = Math.max(gridRows, gridCols) - 1;
-                    score = (maxDistance - cornerDistance) / maxDistance * 10;
-                }
-                return score;
             }
-            function calculateMaxValueScore(grid) {
-                let maxValue = 0;
-                let secondMaxValue = 0;
-                for (let y = 0; y < grid.length; y++) {
-                    for (let x = 0; x < grid[y].length; x++) {
-                        if (grid[y][x]) {
-                            if (grid[y][x].value > maxValue) {
-                                secondMaxValue = maxValue;
-                                maxValue = grid[y][x].value;
-                            } else if (grid[y][x].value > secondMaxValue) {
-                                secondMaxValue = grid[y][x].value;
-                            }
-                        }
-                    }
-                }
-                if (maxValue === 0) return 0;
-                const ratio = secondMaxValue / maxValue;
-                return ratio * 5;
-            }
-            function countEmptyCells(grid) {
-                let count = 0;
-                const gridRows = grid.length;
-                const gridCols = grid[0].length;
-                for (let y = 0; y < gridRows; y++) {
-                    for (let x = 0; x < gridCols; x++) {
-                        if (!grid[y][x]) {
-                            count++;
-                        }
-                    }
-                }
-                return count;
-            }
-            function countMergeOpportunities(grid) {
-                let count = 0;
-                const gridRows = grid.length;
-                const gridCols = grid[0].length;
-                for (let y = 0; y < gridRows; y++) {
-                    for (let x = 0; x < gridCols - 1; x++) {
-                        if (grid[y][x] && grid[y][x+1] && grid[y][x].value === grid[y][x+1].value) {
-                            count++;
-                            const power = Math.log2(grid[y][x].value);
-                            if (power >= 10) count += 0.5;
-                            else if (power >= 8) count += 0.3;
-                        }
-                    }
-                }
+            if (maxValue === 0) return 0;
+            const ratio = secondMaxValue / maxValue;
+            return ratio * 5;
+        }
+        function countEmptyCells(grid) {
+            let count = 0;
+            const gridRows = grid.length;
+            const gridCols = grid[0].length;
+            for (let y = 0; y < gridRows; y++) {
                 for (let x = 0; x < gridCols; x++) {
-                    for (let y = 0; y < gridRows - 1; y++) {
-                        if (grid[y][x] && grid[y+1][x] && grid[y][x].value === grid[y+1][x].value) {
-                            count++;
-                            const power = Math.log2(grid[y][x].value);
-                            if (power >= 10) count += 0.5;
-                            else if (power >= 8) count += 0.3;
-                        }
+                    if (!grid[y][x]) {
+                        count++;
                     }
                 }
-                return count;
             }
-            function calculateContinuityScore(grid, gridSize) {
-                let score = 0;
-                const gridRows = grid.length;
-                const gridCols = grid[0].length;
-                for (let y = 0; y < gridRows; y++) {
-                    for (let x = 0; x < gridCols - 2; x++) {
-                        if (grid[y][x] && grid[y][x+1] && grid[y][x+2] && grid[y][x].value === grid[y][x+1].value && grid[y][x+1].value === grid[y][x+2].value) {
-                            score += 2;
-                            const power = Math.log2(grid[y][x].value);
-                            if (power >= 8) score += 1;
-                        }
+            return count;
+        }
+        function countMergeOpportunities(grid) {
+            let count = 0;
+            const gridRows = grid.length;
+            const gridCols = grid[0].length;
+            for (let y = 0; y < gridRows; y++) {
+                for (let x = 0; x < gridCols - 1; x++) {
+                    if (grid[y][x] && grid[y][x+1] && grid[y][x].value === grid[y][x+1].value) {
+                        count++;
+                        const power = Math.log2(grid[y][x].value);
+                        if (power >= 10) count += 0.5;
+                        else if (power >= 8) count += 0.3;
                     }
                 }
-                for (let x = 0; x < gridCols; x++) {
-                    for (let y = 0; y < gridRows - 2; y++) {
-                        if (grid[y][x] && grid[y+1][x] && grid[y+2][x] && grid[y][x].value === grid[y+1][x].value && grid[y+1][x].value === grid[y+2][x].value) {
-                            score += 2;
-                            const power = Math.log2(grid[y][x].value);
-                            if (power >= 8) score += 1;
-                        }
-                    }
-                }
-                return score;
             }
-            function calculateUniformityScore(grid, gridSize) {
-                let values = [];
-                const gridRows = grid.length;
-                const gridCols = grid[0].length;
-                for (let y = 0; y < gridRows; y++) {
-                    for (let x = 0; x < gridCols; x++) {
-                        if (grid[y][x]) {
-                            values.push(grid[y][x].value);
-                        }
-                    }
-                }
-        if (values.length === 0) return 10;
-        const avgValue = values.reduce((a, b) => a + b, 0) / values.length;
-        const variance = values.reduce((a, b) => a + Math.pow(b - avgValue, 2), 0) / values.length;
-        const stdDev = Math.sqrt(variance);
-        const uniformity = 10 - Math.min(stdDev / avgValue * 10, 9);
-        return uniformity;
-    }
-    function calculateBlockScore(grid, gridSize, direction) {
-        let blockCount = 0;
-        const gridRows = grid.length;
-        const gridCols = grid[0].length;
-        for (let y = 0; y < gridRows; y++) {
             for (let x = 0; x < gridCols; x++) {
-                if (grid[y][x]) {
-                    switch (direction) {
-                        case 'up':
-                            if (y > 0 && grid[y-1][x] && grid[y-1][x].value > grid[y][x].value) {
-                                blockCount++;
-                            }
-                            break;
-                        case 'down':
-                            if (y < gridRows-1 && grid[y+1][x] && grid[y+1][x].value > grid[y][x].value) {
-                                blockCount++;
-                            }
-                            break;
-                        case 'left':
-                            if (x > 0 && grid[y][x-1] && grid[y][x-1].value > grid[y][x].value) {
-                                blockCount++;
-                            }
-                            break;
-                        case 'right':
-                            if (x < gridCols-1 && grid[y][x+1] && grid[y][x+1].value > grid[y][x].value) {
-                                blockCount++;
-                            }
-                            break;
+                for (let y = 0; y < gridRows - 1; y++) {
+                    if (grid[y][x] && grid[y+1][x] && grid[y][x].value === grid[y+1][x].value) {
+                        count++;
+                        const power = Math.log2(grid[y][x].value);
+                        if (power >= 10) count += 0.5;
+                        else if (power >= 8) count += 0.3;
                     }
                 }
             }
+            return count;
         }
-        const maxPossibleBlocks = (gridRows * (gridRows - 1)) + (gridCols * (gridCols - 1));
-        return 10 - (blockCount / maxPossibleBlocks * 10);
-    }
-    function calculateMultiStepScore(state, initialDirection) {
-        return minimaxSearch(state, 3, -Infinity, Infinity, true);
-    }
-    function minimaxSearch(state, depth, alpha, beta, isMaximizingPlayer) {
-        if (depth === 0) {
-            const emptyCells = countEmptyCells(state.grid);
-            const merges = countMergeOpportunities(state.grid);
-            const positionScore = calculatePositionScore(state.grid, state.gridSize);
-            const uniformityScore = calculateUniformityScore(state.grid, state.gridSize);
-            return (emptyCells * 2 + merges * 3 + positionScore + uniformityScore) / 10;
+        function calculateContinuityScore(grid, gridSize) {
+            let score = 0;
+            const gridRows = grid.length;
+            const gridCols = grid[0].length;
+            for (let y = 0; y < gridRows; y++) {
+                for (let x = 0; x < gridCols - 2; x++) {
+                    if (grid[y][x] && grid[y][x+1] && grid[y][x+2] && grid[y][x].value === grid[y][x+1].value && grid[y][x+1].value === grid[y][x+2].value) {
+                        score += 2;
+                        const power = Math.log2(grid[y][x].value);
+                        if (power >= 8) score += 1;
+                    }
+                }
+            }
+            for (let x = 0; x < gridCols; x++) {
+                for (let y = 0; y < gridRows - 2; y++) {
+                    if (grid[y][x] && grid[y+1][x] && grid[y+2][x] && grid[y][x].value === grid[y+1][x].value && grid[y+1][x].value === grid[y+2][x].value) {
+                        score += 2;
+                        const power = Math.log2(grid[y][x].value);
+                        if (power >= 8) score += 1;
+                    }
+                }
+            }
+            return score;
         }
-        const directions = ['up', 'down', 'left', 'right'];
-        if (isMaximizingPlayer) {
-            let maxScore = -Infinity;
-            directions.forEach(direction => {
+        function calculateUniformityScore(grid, gridSize) {
+            let values = [];
+            const gridRows = grid.length;
+            const gridCols = grid[0].length;
+            for (let y = 0; y < gridRows; y++) {
+                for (let x = 0; x < gridCols; x++) {
+                    if (grid[y][x]) {
+                        values.push(grid[y][x].value);
+                    }
+                }
+            }
+            if (values.length === 0) return 10;
+            const avgValue = values.reduce((a, b) => a + b, 0) / values.length;
+            const variance = values.reduce((a, b) => a + Math.pow(b - avgValue, 2), 0) / values.length;
+            const stdDev = Math.sqrt(variance);
+            const uniformity = 10 - Math.min(stdDev / avgValue * 10, 9);
+            return uniformity;
+        }
+        function calculateBlockScore(grid, gridSize, direction) {
+            let blockCount = 0;
+            const gridRows = grid.length;
+            const gridCols = grid[0].length;
+            for (let y = 0; y < gridRows; y++) {
+                for (let x = 0; x < gridCols; x++) {
+                    if (grid[y][x]) {
+                        switch (direction) {
+                            case 'up':
+                                if (y > 0 && grid[y-1][x] && grid[y-1][x].value > grid[y][x].value) {
+                                    blockCount++;
+                                }
+                                break;
+                            case 'down':
+                                if (y < gridRows-1 && grid[y+1][x] && grid[y+1][x].value > grid[y][x].value) {
+                                    blockCount++;
+                                }
+                                break;
+                            case 'left':
+                                if (x > 0 && grid[y][x-1] && grid[y][x-1].value > grid[y][x].value) {
+                                    blockCount++;
+                                }
+                                break;
+                            case 'right':
+                                if (x < gridCols-1 && grid[y][x+1] && grid[y][x+1].value > grid[y][x].value) {
+                                    blockCount++;
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
+            const maxPossibleBlocks = (gridRows * (gridRows - 1)) + (gridCols * (gridCols - 1));
+            return 10 - (blockCount / maxPossibleBlocks * 10);
+        }
+        function calculateMultiStepScore(state, initialDirection) {
+            return minimaxSearch(state, 3, -Infinity, Infinity, true);
+        }
+        function minimaxSearch(state, depth, alpha, beta, isMaximizingPlayer) {
+            if (depth === 0) {
+                const emptyCells = countEmptyCells(state.grid);
+                const merges = countMergeOpportunities(state.grid);
+                const positionScore = calculatePositionScore(state.grid, state.gridSize);
+                const uniformityScore = calculateUniformityScore(state.grid, state.gridSize);
+                return (emptyCells * 2 + merges * 3 + positionScore + uniformityScore) / 10;
+            }
+            const directions = ['up', 'down', 'left', 'right'];
+            if (isMaximizingPlayer) {
+                let maxScore = -Infinity;
+                directions.forEach(direction => {
+                    const newState = {
+                        grid: cloneGrid(state.grid),
+                        score: state.score,
+                        gridSize: state.gridSize
+                    };
+                    if (simulateMove(newState, direction)) {
+                        const score = minimaxSearch(newState, depth - 1, alpha, beta, false);
+                        maxScore = Math.max(maxScore, score);
+                        alpha = Math.max(alpha, score);
+                        if (beta <= alpha) return maxScore;
+                    }
+                });
+                return maxScore;
+            } else {
+                let minScore = Infinity;
+                const emptyPositions = [];
+                const gridRows = state.grid.length;
+                const gridCols = state.grid[0].length;
+                for (let y = 0; y < gridRows; y++) {
+                    for (let x = 0; x < gridCols; x++) {
+                        if (!state.grid[y][x]) {
+                            emptyPositions.push({x, y});
+                        }
+                    }
+                }
+                if (emptyPositions.length === 0) return 0;
+                const randomPos = emptyPositions[Math.floor(Math.random() * emptyPositions.length)];
                 const newState = {
-                    grid: JSON.parse(JSON.stringify(state.grid)),
+                    grid: cloneGrid(state.grid),
                     score: state.score,
                     gridSize: state.gridSize
                 };
-                if (simulateMove(newState, direction)) {
-                    const score = minimaxSearch(newState, depth - 1, alpha, beta, false);
-                    maxScore = Math.max(maxScore, score);
-                    alpha = Math.max(alpha, score);
-                    if (beta <= alpha) return maxScore;
-                }
-            });
-            return maxScore;
-        } else {
-            let minScore = Infinity;
-            const emptyPositions = [];
-            const gridRows = state.grid.length;
-            const gridCols = state.grid[0].length;
+                newState.grid[randomPos.y][randomPos.x] = {
+                    value: Math.random() >= config.aiDefaultFourProbability ? 2 : 4,
+                    merged: false
+                };
+                const score = minimaxSearch(newState, depth - 1, alpha, beta, true);
+                minScore = Math.min(minScore, score);
+                beta = Math.min(beta, score);
+                if (beta <= alpha) return minScore;
+                return minScore;
+            }
+        }
+        function calculateMonotonicityScore(grid, gridSize) {
+            let score = 0;
+            const gridRows = grid.length;
+            const gridCols = grid[0].length;
             for (let y = 0; y < gridRows; y++) {
-                for (let x = 0; x < gridCols; x++) {
-                    if (!state.grid[y][x]) {
-                        emptyPositions.push({x, y});
-                    }
+                let rowIncreasing = true;
+                let rowDecreasing = true;
+                for (let x = 0; x < gridCols - 1; x++) {
+                    const curr = grid[y][x] ? grid[y][x].value : 0;
+                    const next = grid[y][x+1] ? grid[y][x+1].value : 0;
+                    rowIncreasing = rowIncreasing && (curr <= next);
+                    rowDecreasing = rowDecreasing && (curr >= next);
                 }
+                score += rowIncreasing || rowDecreasing ? 2 : 0;
             }
-            if (emptyPositions.length === 0) return 0;
-            const randomPos = emptyPositions[Math.floor(Math.random() * emptyPositions.length)];
-            const newState = {
-                grid: JSON.parse(JSON.stringify(state.grid)),
-                score: state.score,
-                gridSize: state.gridSize
-            };
-            newState.grid[randomPos.y][randomPos.x] = {
-                value: Math.random() < 0.9 ? 2 : 4,
-                merged: false
-            };
-            const score = minimaxSearch(newState, depth - 1, alpha, beta, true);
-            minScore = Math.min(minScore, score);
-            beta = Math.min(beta, score);
-            if (beta <= alpha) return minScore;
-            return minScore;
-        }
-    }
-    function calculateMonotonicityScore(grid, gridSize) {
-        let score = 0;
-        const gridRows = grid.length;
-        const gridCols = grid[0].length;
-        for (let y = 0; y < gridRows; y++) {
-            let rowIncreasing = true;
-            let rowDecreasing = true;
-            for (let x = 0; x < gridCols - 1; x++) {
-                const curr = grid[y][x] ? grid[y][x].value : 0;
-                const next = grid[y][x+1] ? grid[y][x+1].value : 0;
-                rowIncreasing = rowIncreasing && (curr <= next);
-                rowDecreasing = rowDecreasing && (curr >= next);
+            for (let x = 0; x < gridCols; x++) {
+                let colIncreasing = true;
+                let colDecreasing = true;
+                for (let y = 0; y < gridRows - 1; y++) {
+                    const curr = grid[y][x] ? grid[y][x].value : 0;
+                    const next = grid[y+1][x] ? grid[y+1][x].value : 0;
+                    colIncreasing = colIncreasing && (curr <= next);
+                    colDecreasing = colDecreasing && (curr >= next);
+                }
+                score += colIncreasing || colDecreasing ? 2 : 0;
             }
-            score += rowIncreasing || rowDecreasing ? 2 : 0;
+            return score;
         }
-        for (let x = 0; x < gridCols; x++) {
-            let colIncreasing = true;
-            let colDecreasing = true;
-            for (let y = 0; y < gridRows - 1; y++) {
-                const curr = grid[y][x] ? grid[y][x].value : 0;
-                const next = grid[y+1][x] ? grid[y+1][x].value : 0;
-                colIncreasing = colIncreasing && (curr <= next);
-                colDecreasing = colDecreasing && (curr >= next);
-            }
-            score += colIncreasing || colDecreasing ? 2 : 0;
-        }
-        return score;
-    }
     </script>
 </body>
 </html>
