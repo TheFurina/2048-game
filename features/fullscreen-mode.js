@@ -1,4 +1,4 @@
-const fullscreenModeVersion = '0.2';
+const fullscreenModeVersion = '0.3';
 window.fullscreenModeVersion = fullscreenModeVersion;
 let isFullscreenMode = false;
 const FULLSCREEN_HIDDEN_ELEMENTS = [
@@ -65,7 +65,7 @@ function toggleElementsVisibility(hide) {
         }
     });
 }
-function createFullscreenButtonGroup(undoButton, pauseButton, fullscreenButton) {
+function createFullscreenButtonGroup(undoButton, pauseButton, fullscreenButton, aiAnalysisButton) {
     const buttonGroup = document.createElement('div');
     buttonGroup.id = 'fullscreen-button-group';
     buttonGroup.className = 'flex gap-2 items-center';
@@ -78,9 +78,13 @@ function createFullscreenButtonGroup(undoButton, pauseButton, fullscreenButton) 
     const fullscreenClone = fullscreenButton.cloneNode(true);
     fullscreenClone.id = 'fullscreen-toggle-button';
     fullscreenClone.addEventListener('click', toggleFullscreenMode);
+    const aiAnalysisClone = aiAnalysisButton.cloneNode(true);
+    aiAnalysisClone.id = 'fullscreen-ai-analysis-button';
+    aiAnalysisClone.addEventListener('click', () => document.getElementById('ai-analysis-button')?.click());
     buttonGroup.appendChild(undoClone);
     buttonGroup.appendChild(pauseClone);
     buttonGroup.appendChild(fullscreenClone);
+    buttonGroup.appendChild(aiAnalysisClone);
     return buttonGroup;
 }
 function handleFullscreenButtonGroup(show) {
@@ -90,9 +94,10 @@ function handleFullscreenButtonGroup(show) {
         const undoButton = document.getElementById('undo-button');
         const pauseButton = document.getElementById('pause-button');
         const fullscreenButton = document.getElementById('fullscreen-button');
+        const aiAnalysisButton = document.getElementById('ai-analysis-button');
         const statsContainer = document.querySelector('.stats-container');
-        if (statsContainer && undoButton && pauseButton && fullscreenButton) {
-            const buttonGroup = createFullscreenButtonGroup(undoButton, pauseButton, fullscreenButton);
+        if (statsContainer && undoButton && pauseButton && fullscreenButton && aiAnalysisButton) {
+            const buttonGroup = createFullscreenButtonGroup(undoButton, pauseButton, fullscreenButton, aiAnalysisButton);
             statsContainer.parentNode.insertBefore(buttonGroup, statsContainer.nextSibling);
         }
     } else {
@@ -131,12 +136,16 @@ function setupFullscreenMode() {
     if (!aiAnalysisButton) return;
     const buttonContainer = aiAnalysisButton.parentElement;
     if (!buttonContainer) return;
+    const buttonGroup = document.createElement('div');
+    buttonGroup.className = 'flex gap-2 justify-end';
     const fullscreenButton = document.createElement('button');
     fullscreenButton.id = 'fullscreen-button';
     fullscreenButton.className = 'bg-primary dark:bg-dark-primary hover:bg-primary/90 text-white w-12 h-12 rounded-full shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center justify-center';
     fullscreenButton.innerHTML = '<i class="fa-solid fa-expand dark:text-[#282828]"></i>';
     fullscreenButton.addEventListener('click', toggleFullscreenMode);
-    buttonContainer.insertBefore(fullscreenButton, aiAnalysisButton);
+    buttonGroup.appendChild(fullscreenButton);
+    buttonGroup.appendChild(aiAnalysisButton);
+    buttonContainer.appendChild(buttonGroup);
     addFullscreenStyles();
 }
 function addFullscreenStyles() {

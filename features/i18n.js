@@ -1,4 +1,4 @@
-const i18nVersion = '1.3';
+const i18nVersion = '1.4';
 window.i18nVersion = i18nVersion;
 const translations = {
     zh: {
@@ -48,9 +48,10 @@ const translations = {
         squareGrid: '正方形网格 (锁定宽高比)',
         apply: '应用',
         cancel: '取消',
+        confirm: '确认',
         resetSettings: '重置所有设置',
         versionInfo: '2048 v{version} | by TheFurina',
-        github: '项目主页',
+        github: 'Github',
         footer: '滑动之间 数字新生',
         customTheme: '自定义主题',
         save: '保存',
@@ -174,7 +175,10 @@ const translations = {
         gameStateAssessment: '游戏状态评估',
         scorePotentialLabel: '得分潜力分析',
         noMergeOpportunities: '无',
+        mergeOpportunitiesSuffix: '处',
         safe: '安全',
+        scorePotentialHigh: '预计可合并多个高价值方块',
+        scorePotentialMedium: '有一定合并机会',
         hideBestMove: '隐藏最佳移动方向',
         showBestMove: '显示最佳移动方向',
         up: '向上',
@@ -283,9 +287,10 @@ const translations = {
         squareGrid: 'Square Grid (Lock aspect ratio)',
         apply: 'Apply',
         cancel: 'Cancel',
+        confirm: 'Confirm',
         resetSettings: 'Reset All Settings',
         versionInfo: '2048 v{version} | by TheFurina',
-        github: 'Project Home',
+        github: 'Github',
         footer: 'Numbers reborn with each swipe',
         customTheme: 'Custom Theme',
         save: 'Save',
@@ -409,7 +414,10 @@ const translations = {
         gameStateAssessment: 'Game State Assessment',
         scorePotentialLabel: 'Score Potential Analysis',
         noMergeOpportunities: 'None',
+        mergeOpportunitiesSuffix: '',
         safe: 'Safe',
+        scorePotentialHigh: 'Multiple high-value tiles can be merged',
+        scorePotentialMedium: 'Some merge opportunities available',
         hideBestMove: 'Hide Best Move Direction',
         showBestMove: 'Show Best Move Direction',
         up: 'Up',
@@ -495,7 +503,7 @@ function setLang(lang) {
 }
 function t(key, params = {}) {
     const lang = getLang();
-    let text = translations[lang][key] || translations['zh'][key] || key;
+    let text = key in translations[lang] ? translations[lang][key] : (key in translations['zh'] ? translations['zh'][key] : key);
     for (const [param, value] of Object.entries(params)) {
         text = text.replace(`{${param}}`, value);
     }
@@ -505,7 +513,25 @@ function t(key, params = {}) {
 function updateAllTranslations() {
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n');
-        if (key) {
+        if (!key) return;
+        const mode = element.getAttribute('data-i18n-mode');
+        if (mode === 'icon+text') {
+            const icon = element.querySelector('i');
+            if (icon) {
+                element.innerHTML = `<i class="${icon.className}"></i> ${t(key)}`;
+            } else {
+                element.textContent = t(key);
+            }
+        } else if (mode === 'span-text') {
+            const span = element.querySelector('span[data-i18n]') || element.querySelector('span');
+            if (span) {
+                span.textContent = t(key);
+            } else {
+                element.textContent = t(key);
+            }
+        } else if (mode === 'text' || mode) {
+            element.textContent = t(key);
+        } else {
             if (key === 'footer') {
                 const icon = element.querySelector('i');
                 if (icon) {
