@@ -35,16 +35,18 @@
 <details>
   <summary>点击展开游戏截图</summary>
 
-  <div align="center">
-    <div style="display: inline-block; margin: 10px; text-align: center; max-width: 400px; width: 45%; min-width: 250px;">
-      <img src="https://i.stardots.io/443298972/StarDots-2026072523303823086.jpg" alt="lightmode2.5.1" style="width: 100%; display: block;">
-      <p style="font-size: 13px; color: #999; margin-top: 6px; text-align: center;">浅色</p>
-    </div>
-    <div style="display: inline-block; margin: 10px; text-align: center; max-width: 400px; width: 45%; min-width: 250px;">
-      <img src="https://i.stardots.io/443298972/StarDots-2026072600075352625.jpg" alt="darkmode2.5.1" style="width: 100%; display: block;">
-      <p style="font-size: 13px; color: #999; margin-top: 6px; text-align: center;">深色</p>
-    </div>
-  </div>
+  <table align="center" style="border: none; border-collapse: collapse;">
+    <tr>
+      <td align="center" style="padding: 10px; border: none;">
+        <img src="https://i.stardots.io/443298972/StarDots-2026072523303823086.jpg" alt="lightmode2.5.1" style="display: block;">
+        <p style="font-size: 13px; color: #999; margin-top: 6px; text-align: center;">浅色</p>
+      </td>
+      <td align="center" style="padding: 10px; border: none;">
+        <img src="https://i.stardots.io/443298972/StarDots-2026072600075352625.jpg" alt="darkmode2.5.1" style="display: block;">
+        <p style="font-size: 13px; color: #999; margin-top: 6px; text-align: center;">深色</p>
+      </td>
+    </tr>
+  </table>
   
   *（图为v2.5.1）*
 </details>
