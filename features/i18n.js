@@ -1,4 +1,4 @@
-const i18nVersion = '1.4';
+const i18nVersion = '1.5';
 window.i18nVersion = i18nVersion;
 const translations = {
     zh: {
@@ -32,13 +32,13 @@ const translations = {
         tryAgain: '再玩一次',
         toggleControls: '收起控制',
         expandControls: '展开控制',
-        gamePerformance: '游戏性能',
+        gamePerformance: '性能',
         gpuAcceleration: 'GPU加速',
         vibration: '振动反馈',
         tileAnimation: '滑块动画',
-        appearance: '外观设置',
+        appearance: '外观',
         theme: '主题',
-        dataManagement: '数据与管理',
+        dataManagement: '数据',
         dataTransfer: '数据管理',
         exportData: '导出数据',
         importData: '导入数据',
@@ -238,7 +238,36 @@ const translations = {
         receiving: '接收中',
         receivingBytes: '接收中: {bytes} 字节',
         receivingBytesTotal: '接收中: {bytes} / {total} 字节',
-        includeSettings: '包含设置数据'
+        includeSettings: '包含设置数据',
+        aiApiSettings: 'AI',
+        aiApiSettingsItem: 'API设置',
+        aiApiBaseUrl: 'API Base URL',
+        aiApiKey: 'API Key',
+        aiApiModel: '模型',
+        aiApiSettingsSaved: 'API设置保存成功！',
+        aiApiSaved: '已保存',
+        aiApiSettingsSaveFailed: 'API设置保存失败！',
+        aiApiConfirmReset: '确定要重置AI设置吗？',
+        aiApiBaseUrlEmpty: 'API Base URL不能为空',
+        aiApiBaseUrlInvalid: 'API Base URL格式无效',
+        aiApiKeyEmpty: 'API Key不能为空',
+        aiApiModelEmpty: '模型不能为空',
+        aiApiRequestFailed: 'AI请求失败',
+        aiApiParseError: 'AI响应解析失败',
+        aiApiNetworkError: '网络错误',
+        aiApiModuleMissing: 'AI API模块未找到，请确保 features/ai-api.js 文件存在。',
+        aiApiLoading: '加载中...',
+        aiApiModelsFailed: '无法获取模型列表',
+        aiApiCheck: '检查可用性',
+        aiApiChecking: '检查中...',
+        aiApiAvailable: 'API可用',
+        aiApiUnavailable: 'API不可用',
+        aiApiMissingConfig: '缺少必要配置',
+        aiAlgorithmAnalysis: '算法分析',
+        aiAiAnalysis: 'AI分析',
+        aiSuggestionLabel: 'AI建议',
+        regenerate: '重新生成',
+        regenerating: '重新生成中...'
     },
     en: {
         gameTitle: '2048',
@@ -271,13 +300,13 @@ const translations = {
         tryAgain: 'Play Again',
         toggleControls: 'Hide Controls',
         expandControls: 'Show Controls',
-        gamePerformance: 'Game Performance',
+        gamePerformance: 'Performance',
         gpuAcceleration: 'GPU Acceleration',
         vibration: 'Vibration Feedback',
         tileAnimation: 'Tile Animation',
-        appearance: 'Appearance Settings',
+        appearance: 'Appearance',
         theme: 'Theme',
-        dataManagement: 'Data & Management',
+        dataManagement: 'Data',
         dataTransfer: 'Data Management',
         exportData: 'Export Data',
         importData: 'Import Data',
@@ -477,7 +506,36 @@ const translations = {
         receiving: 'Receiving',
         receivingBytes: 'Receiving: {bytes} bytes',
         receivingBytesTotal: 'Receiving: {bytes} / {total} bytes',
-        includeSettings: 'Include settings data'
+        includeSettings: 'Include settings data',
+        aiApiSettings: 'AI',
+        aiApiSettingsItem: 'API Settings',
+        aiApiBaseUrl: 'API Base URL',
+        aiApiKey: 'API Key',
+        aiApiModel: 'Model',
+        aiApiSettingsSaved: 'API settings saved successfully!',
+        aiApiSaved: 'Saved',
+        aiApiSettingsSaveFailed: 'Failed to save API settings!',
+        aiApiConfirmReset: 'Are you sure you want to reset AI settings?',
+        aiApiBaseUrlEmpty: 'API Base URL cannot be empty',
+        aiApiBaseUrlInvalid: 'Invalid API Base URL format',
+        aiApiKeyEmpty: 'API Key cannot be empty',
+        aiApiModelEmpty: 'Model cannot be empty',
+        aiApiRequestFailed: 'AI request failed',
+        aiApiParseError: 'AI response parse error',
+        aiApiNetworkError: 'Network error',
+        aiApiModuleMissing: 'AI API module not found. Please ensure features/ai-api.js file exists.',
+        aiApiLoading: 'Loading...',
+        aiApiModelsFailed: 'Failed to fetch models',
+        aiApiCheck: 'Check Availability',
+        aiApiChecking: 'Checking...',
+        aiApiAvailable: 'API Available',
+        aiApiUnavailable: 'API Unavailable',
+        aiApiMissingConfig: 'Missing required configuration',
+        aiAlgorithmAnalysis: 'Algorithm Analysis',
+        aiAiAnalysis: 'AI Analysis',
+        aiSuggestionLabel: 'AI Suggestion',
+        regenerate: 'Regenerate',
+        regenerating: 'Regenerating...'
     }
 };
 let currentLanguage = localStorage.getItem('2048-language') || 'auto';
@@ -565,6 +623,11 @@ function updateButtonWidths() {
     const undoButton = document.getElementById('undo-button');
     const pauseButton = document.getElementById('pause-button');
     const customGridButton = document.getElementById('custom-grid');
+    const gridButtons = [
+        document.getElementById('grid-3x3'),
+        document.getElementById('grid-4x4'),
+        document.getElementById('grid-5x5')
+    ];
     if (undoButton && pauseButton) {
         if (lang === 'en') {
             undoButton.style.width = '88px';
@@ -581,6 +644,10 @@ function updateButtonWidths() {
             customGridButton.style.width = '80px';
         }
     }
+    gridButtons.forEach(btn => {
+        if (!btn) return;
+        btn.style.width = lang === 'en' ? '80px' : '';
+    });
 }
 function updateHtmlLangAttribute() {
     const lang = getLang();
@@ -879,6 +946,7 @@ const i18nConfig = {
         ['custom-theme-modal-title', 'customTheme'],
         ['export-theme-modal-title', 'exportThemeModal'],
         ['bluetooth-modal-title', 'bluetoothModalTitle'],
+        ['ai-settings-modal-title', 'aiApiSettingsItem'],
         ['easy-mode', 'easy'],
         ['medium-mode', 'medium'],
         ['hard-mode', 'hard'],
@@ -914,7 +982,9 @@ const i18nConfig = {
         ['verify-pin-button', 'verify'],
         ['cancel-bluetooth-button', 'cancel'],
         ['export-bluetooth-button', 'exportViaBluetooth'],
-        ['import-bluetooth-button', 'importViaBluetooth']
+        ['import-bluetooth-button', 'importViaBluetooth'],
+        ['save-ai-settings', 'save'],
+        ['reset-ai-settings', 'reset']
     ],
     selectors: [
         ['#game-header p', 'gameDescription'],

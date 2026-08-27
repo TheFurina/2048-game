@@ -1,4 +1,4 @@
-const moduleLoaderVersion = '1.0';
+const moduleLoaderVersion = '2.0';
 window.moduleLoaderVersion = moduleLoaderVersion;
 (function() {
     'use strict';
@@ -41,7 +41,46 @@ window.moduleLoaderVersion = moduleLoaderVersion;
         }
         return fallback || null;
     }
-    window.ModuleLoader = { load: loadModule, isLoaded, getOrFallback, version: moduleLoaderVersion };
+    function loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.async = false;
+            script.onload = () => resolve(src);
+            script.onerror = () => reject(new Error('[ModuleLoader] Failed to load script: ' + src));
+            document.head.appendChild(script);
+        });
+    }
+    function loadModuleList(modules, baseUrl) {
+        return modules.reduce((promise, name) => {
+            const src = name.indexOf('/') !== -1 || name.indexOf('http') === 0 ? name : baseUrl + name;
+            return promise.then(() => {
+                if (window.debugMode) {
+                    console.log('[ModuleLoader] Loading module:', src);
+                }
+                return loadScript(src);
+            });
+        }, Promise.resolve());
+    }
+    function loadAll(manifestUrl) {
+        const url = manifestUrl || './features/manifest.js';
+        const baseUrl = url.slice(0, url.lastIndexOf('/') + 1);
+        return loadScript(url).then(() => {
+            const manifest = window.__modulesManifest;
+            if (!manifest || !Array.isArray(manifest.modules)) {
+                throw new Error('[ModuleLoader] Invalid manifest: missing "modules" array in ' + url);
+            }
+            if (window.debugMode) {
+                console.log('[ModuleLoader] Manifest loaded:', manifest.modules);
+            }
+            return loadModuleList(manifest.modules, baseUrl);
+        }).then(() => {
+            if (window.debugMode) {
+                console.log('[ModuleLoader] All modules from manifest loaded');
+            }
+        });
+    }
+    window.ModuleLoader = { load: loadModule, isLoaded, getOrFallback, loadAll, version: moduleLoaderVersion };
     window.moduleLoaderModuleLoaded = true;
     console.log('ModuleLoader v' + moduleLoaderVersion + ' loaded');
 })();

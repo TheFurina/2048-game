@@ -1,4 +1,4 @@
-const dataTransferVersion = '1.0';
+const dataTransferVersion = '1.1';
 window.dataTransferVersion = dataTransferVersion;
 const Base91 = {
     chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~"',
@@ -66,6 +66,80 @@ const Base91 = {
         return out;
     }
 };
+const SETTINGS_CONFIG = [
+    { storageKey: '2048-gpu-acceleration', gameStateProp: 'gpuAccelerationEnabled', uiElementId: 'gpu-acceleration', type: 'checkbox' },
+    { storageKey: '2048-tile-animation', gameStateProp: 'tileAnimationEnabled', uiElementId: 'tile-animation', type: 'checkbox', hasDetails: 'animation-details' },
+    { storageKey: '2048-tile-appear-animation', gameStateProp: 'tileAppearAnimationEnabled', uiElementId: 'tile-appear-animation', type: 'checkbox' },
+    { storageKey: '2048-tile-move-animation', gameStateProp: 'tileMoveAnimationEnabled', uiElementId: 'tile-move-animation', type: 'checkbox' },
+    { storageKey: '2048-tile-merge-animation', gameStateProp: 'tileMergeAnimationEnabled', uiElementId: 'tile-merge-animation', type: 'checkbox' },
+    { storageKey: '2048-vibration', gameStateProp: 'vibrationEnabled', uiElementId: 'vibration-toggle', type: 'checkbox', hasDetails: 'vibration-details', containerClass: 'vibration-toggle-container' },
+    { storageKey: '2048-vibration-merge', gameStateProp: 'vibrationMergeEnabled', uiElementId: 'vibration-merge', type: 'checkbox' },
+    { storageKey: '2048-vibration-win', gameStateProp: 'vibrationWinEnabled', uiElementId: 'vibration-win', type: 'checkbox' },
+    { storageKey: '2048-vibration-loss', gameStateProp: 'vibrationLossEnabled', uiElementId: 'vibration-loss', type: 'checkbox' }
+];
+function importSettingsToGameState(settingsConfig) {
+    settingsConfig.forEach(config => {
+        const value = localStorage.getItem(config.storageKey);
+        window.gameState[config.gameStateProp] = value !== 'false';
+    });
+}
+function updateSettingsUI(settingsConfig) {
+    settingsConfig.forEach(config => {
+        if (config.uiElementId) {
+            const element = document.getElementById(config.uiElementId);
+            if (element && config.type === 'checkbox') {
+                element.checked = window.gameState[config.gameStateProp];
+                if (config.hasDetails) {
+                    const details = document.getElementById(config.hasDetails);
+                    if (details) {
+                        if (element.checked) {
+                            details.classList.remove('collapsed');
+                            if (config.containerClass != null) {
+                                element.closest('.' + config.containerClass.split(' ')[0])?.classList.add('mb-2');
+                            }
+                        } else {
+                            details.classList.add('collapsed');
+                            if (config.containerClass != null) {
+                                element.closest('.' + config.containerClass.split(' ')[0])?.classList.remove('mb-2');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+function handleThemeChange(theme) {
+    if (!theme) return;
+    if (theme === 'auto') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark', prefersDark);
+    } else if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        themeToggle.value = theme;
+    }
+    const selectSelected = document.querySelector('.select-selected span');
+    const selectItems = document.querySelectorAll('.select-item');
+    if (selectSelected) {
+        selectItems.forEach(item => {
+            if (item.getAttribute('data-value') === theme) {
+                selectSelected.innerHTML = item.innerHTML;
+            }
+        });
+    }
+    if (theme === 'custom' && typeof loadCustomTheme === 'function') {
+        loadCustomTheme();
+    }
+}
+function handleLanguageChange(language) {
+    if (!language || !window.i18n) return;
+    window.i18n.setLang(language);
+}
 function exportGameData() {
     try {
         const includeSettings = document.getElementById('export-settings-checkbox')?.checked || false;
@@ -142,18 +216,26 @@ function importGameData(dataStr) {
         }
         let decodedData;
         let data;
-        try {
-            decodedData = atob(dataStr);
-            data = JSON.parse(decodedData);
-        } catch (e) {
-            console.error(window.i18n ? window.i18n.t('consoleBase64Failed') : 'Base64 decode failed', e);
+        const trimmedStr = dataStr.trim();
+        if (trimmedStr.startsWith('~G')) {
             try {
-                decodedData = Base91.decode(dataStr);
+                decodedData = Base91.decode(trimmedStr);
                 data = JSON.parse(decodedData);
-            } catch (e2) {
-                console.error(window.i18n ? window.i18n.t('consoleBase91Failed') : 'Base91 decode failed', e2);
+            } catch (e) {
+                console.error(window.i18n ? window.i18n.t('consoleBase91Failed') : 'Base91 decode failed', e);
                 throw new Error((window.i18n ? window.i18n.t('importFailed') : 'Import failed') + ' ' + (window.i18n ? window.i18n.t('importFailedDecode') : 'Decode failed'));
             }
+        } else if (trimmedStr.startsWith('ey')) {
+            try {
+                decodedData = atob(trimmedStr);
+                data = JSON.parse(decodedData);
+            } catch (e) {
+                console.error(window.i18n ? window.i18n.t('consoleBase64Failed') : 'Base64 decode failed', e);
+                throw new Error((window.i18n ? window.i18n.t('importFailed') : 'Import failed') + ' ' + (window.i18n ? window.i18n.t('importFailedDecode') : 'Decode failed'));
+            }
+        } else {
+            console.error(window.i18n ? window.i18n.t('consoleBase64Failed') : 'Base64 decode failed', 'Unrecognized encoding prefix');
+            throw new Error((window.i18n ? window.i18n.t('importFailed') : 'Import failed') + ' ' + (window.i18n ? window.i18n.t('importFailedDecode') : 'Decode failed'));
         }
         if (!data || typeof data !== 'object') {
             console.error(window.i18n ? window.i18n.t('consoleInvalidObject') : 'Invalid object', { data: data, type: typeof data });
@@ -234,104 +316,10 @@ function importGameData(dataStr) {
                     localStorage.setItem(key, value);
                 }
             }
-            window.gameState.gpuAccelerationEnabled = localStorage.getItem('2048-gpu-acceleration') !== 'false';
-            window.gameState.tileAnimationEnabled = localStorage.getItem('2048-tile-animation') !== 'false';
-            window.gameState.tileAppearAnimationEnabled = localStorage.getItem('2048-tile-appear-animation') !== 'false';
-            window.gameState.tileMoveAnimationEnabled = localStorage.getItem('2048-tile-move-animation') !== 'false';
-            window.gameState.tileMergeAnimationEnabled = localStorage.getItem('2048-tile-merge-animation') !== 'false';
-            window.gameState.vibrationEnabled = localStorage.getItem('2048-vibration') !== 'false';
-            window.gameState.vibrationMergeEnabled = localStorage.getItem('2048-vibration-merge') !== 'false';
-            window.gameState.vibrationWinEnabled = localStorage.getItem('2048-vibration-win') !== 'false';
-            window.gameState.vibrationLossEnabled = localStorage.getItem('2048-vibration-loss') !== 'false';
-            const importedTheme = data.settings['2048-theme'];
-            if (importedTheme) {
-                if (importedTheme === 'auto') {
-                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    document.documentElement.classList.toggle('dark', prefersDark);
-                } else if (importedTheme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
-                const themeToggle = document.getElementById('theme-toggle');
-                if (themeToggle) {
-                    themeToggle.value = importedTheme;
-                }
-                const selectSelected = document.querySelector('.select-selected span');
-                const selectItems = document.querySelectorAll('.select-item');
-                if (selectSelected) {
-                    selectItems.forEach(item => {
-                        if (item.getAttribute('data-value') === importedTheme) {
-                            selectSelected.innerHTML = item.innerHTML;
-                        }
-                    });
-                }
-                if (importedTheme === 'custom' && typeof loadCustomTheme === 'function') {
-                    loadCustomTheme();
-                }
-            }
-            const importedLanguage = data.settings['2048-language'];
-            if (importedLanguage && window.i18n) {
-                window.i18n.setLang(importedLanguage);
-            }
-            const gpuAccelCheckbox = document.getElementById('gpu-acceleration');
-            if (gpuAccelCheckbox) {
-                gpuAccelCheckbox.checked = localStorage.getItem('2048-gpu-acceleration') !== 'false';
-            }
-            const tileAnimationCheckbox = document.getElementById('tile-animation');
-            if (tileAnimationCheckbox) {
-                tileAnimationCheckbox.checked = localStorage.getItem('2048-tile-animation') !== 'false';
-                const animationDetails = document.getElementById('animation-details');
-                if (animationDetails) {
-                    if (tileAnimationCheckbox.checked) {
-                        animationDetails.classList.remove('collapsed');
-                    } else {
-                        animationDetails.classList.add('collapsed');
-                    }
-                }
-            }
-            const appearAnimationCheckbox = document.getElementById('tile-appear-animation');
-            if (appearAnimationCheckbox) {
-                appearAnimationCheckbox.checked = localStorage.getItem('2048-tile-appear-animation') !== 'false';
-            }
-            const moveAnimationCheckbox = document.getElementById('tile-move-animation');
-            if (moveAnimationCheckbox) {
-                moveAnimationCheckbox.checked = localStorage.getItem('2048-tile-move-animation') !== 'false';
-            }
-            const mergeAnimationCheckbox = document.getElementById('tile-merge-animation');
-            if (mergeAnimationCheckbox) {
-                mergeAnimationCheckbox.checked = localStorage.getItem('2048-tile-merge-animation') !== 'false';
-            }
-            const vibrationToggle = document.getElementById('vibration-toggle');
-            const vibrationMergeToggle = document.getElementById('vibration-merge');
-            const vibrationWinToggle = document.getElementById('vibration-win');
-            const vibrationLossToggle = document.getElementById('vibration-loss');
-            const vibrationDetails = document.getElementById('vibration-details');
-            if (vibrationToggle) {
-                vibrationToggle.checked = localStorage.getItem('2048-vibration') !== 'false';
-            }
-            if (vibrationMergeToggle) {
-                vibrationMergeToggle.checked = localStorage.getItem('2048-vibration-merge') !== 'false';
-            }
-            if (vibrationWinToggle) {
-                vibrationWinToggle.checked = localStorage.getItem('2048-vibration-win') !== 'false';
-            }
-            if (vibrationLossToggle) {
-                vibrationLossToggle.checked = localStorage.getItem('2048-vibration-loss') !== 'false';
-            }
-            if (vibrationDetails) {
-                if (window.gameState.vibrationEnabled) {
-                    vibrationDetails.classList.remove('collapsed');
-                    if (vibrationToggle) {
-                        vibrationToggle.closest('.vibration-toggle-container').classList.add('mb-2');
-                    }
-                } else {
-                    vibrationDetails.classList.add('collapsed');
-                    if (vibrationToggle) {
-                        vibrationToggle.closest('.vibration-toggle-container').classList.remove('mb-2');
-                    }
-                }
-            }
+            importSettingsToGameState(SETTINGS_CONFIG);
+            updateSettingsUI(SETTINGS_CONFIG);
+            handleThemeChange(data.settings['2048-theme']);
+            handleLanguageChange(data.settings['2048-language']);
             return;
         }
         alert(window.i18n ? window.i18n.t('importSuccess') : 'Import success');

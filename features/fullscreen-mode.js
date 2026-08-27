@@ -1,4 +1,4 @@
-const fullscreenModeVersion = '0.3';
+const fullscreenModeVersion = '0.4';
 window.fullscreenModeVersion = fullscreenModeVersion;
 let isFullscreenMode = false;
 const FULLSCREEN_HIDDEN_ELEMENTS = [
@@ -212,7 +212,7 @@ function addFullscreenStyles() {
 window.setupFullscreenMode = setupFullscreenMode;
 window.toggleFullscreenMode = toggleFullscreenMode;
 window.isFullscreenMode = function() { return !!document.fullscreenElement; };
-document.addEventListener('DOMContentLoaded', function() {
+function initFullscreenMode() {
     try {
         setupFullscreenMode();
         window.fullscreenModeModuleLoaded = true;
@@ -220,4 +220,9 @@ document.addEventListener('DOMContentLoaded', function() {
         console.warn('Fullscreen mode module loading failed:', error);
         window.fullscreenModeModuleLoaded = false;
     }
-});
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFullscreenMode);
+} else {
+    initFullscreenMode();
+}

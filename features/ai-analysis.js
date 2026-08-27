@@ -1,20 +1,374 @@
-const aiAnalysisVersion = '2.2';
+const aiAnalysisVersion = '2.3';
 window.aiAnalysisVersion = aiAnalysisVersion;
+let cachedAlgorithmResults = null;
+let cachedAiResults = null;
+let cachedGameStateSignature = null;
+function getGameStateSignature(state) {
+    if (!state) return '';
+    return JSON.stringify({
+        grid: state.grid,
+        score: state.score,
+        gridSize: state.gridSize,
+        difficulty: state.difficulty
+    });
+}
+function isGameStateChanged(state) {
+    const signature = getGameStateSignature(state);
+    return signature !== cachedGameStateSignature;
+}
+function updateGameStateCache(state, algorithmResults, aiResults) {
+    cachedGameStateSignature = getGameStateSignature(state);
+    if (algorithmResults !== undefined) cachedAlgorithmResults = algorithmResults;
+    if (aiResults !== undefined) cachedAiResults = aiResults;
+}
+function loadAnalysisMode() {
+    try {
+        const saved = localStorage.getItem('2048-analysis-mode');
+        return saved && (saved === 'ai' || saved === 'algorithm') ? saved : 'algorithm';
+    } catch (e) {
+        return 'algorithm';
+    }
+}
+function saveAnalysisMode(mode) {
+    try {
+        localStorage.setItem('2048-analysis-mode', mode);
+    } catch (e) {
+        console.error('Failed to save analysis mode:', e);
+    }
+}
+let currentAnalysisMode = loadAnalysisMode();
 function setupAiAnalysis() {
     const aiAnalysisButton = document.getElementById('ai-analysis-button');
     if (!aiAnalysisButton) return;
     aiAnalysisButton.addEventListener('click', analyzeGameState);
+    const algorithmBtn = document.getElementById('analysis-mode-algorithm');
+    const aiBtn = document.getElementById('analysis-mode-ai');
+    const analysisSlider = document.getElementById('analysis-slider');
+    const sliderContainer = document.getElementById('analysis-switch-container');
+    if (algorithmBtn && aiBtn && analysisSlider && sliderContainer) {
+        let hasMoved = false;
+        let startX, startLeft;
+        const regenerateBtn = document.getElementById('ai-regenerate-button');
+        const setRegenerateButtonLoading = (loading) => {
+            if (!regenerateBtn) return;
+            const icon = regenerateBtn.querySelector('i');
+            const label = regenerateBtn.querySelector('span');
+            if (loading) {
+                regenerateBtn.disabled = true;
+                regenerateBtn.classList.add('opacity-70', 'cursor-not-allowed');
+                if (icon) icon.classList.add('fa-spin');
+                if (label) label.textContent = i18n.t('regenerating');
+            } else {
+                regenerateBtn.disabled = false;
+                regenerateBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                if (icon) icon.classList.remove('fa-spin');
+                if (label) label.textContent = i18n.t('regenerate');
+            }
+        };
+        const toggleRegenerateButton = (show) => {
+            if (!regenerateBtn) return;
+            if (show) {
+                regenerateBtn.classList.remove('hidden');
+            } else {
+                regenerateBtn.classList.add('hidden');
+            }
+        };
+        if (regenerateBtn) {
+            regenerateBtn.addEventListener('click', async () => {
+                if (currentAnalysisMode !== 'ai') return;
+                showAnalysisLoading();
+                setRegenerateButtonLoading(true);
+                cachedAiResults = null;
+                try {
+                    const language = i18n.getLang();
+                    const result = await window.aiRequest?.sendGameAnalysis(gameState, language);
+                    if (result && result.success) {
+                        cachedAiResults = result.data;
+                        updateGameStateCache(gameState, undefined, result.data);
+                        updateAnalysisResults(result.data);
+                    } else {
+                        let errorMsg = result?.error ? i18n.t(result.error) : i18n.t('aiApiRequestFailed');
+                        if (result?.message) {
+                            errorMsg += ': ' + result.message;
+                        }
+                        cachedAiResults = {
+                            bestMove: '--',
+                            mergeOpportunities: 0,
+                            gameStateAssessment: 'safe',
+                            scorePotential: 'medium',
+                            aiSuggestion: errorMsg
+                        };
+                        updateGameStateCache(gameState, undefined, cachedAiResults);
+                        updateAnalysisResults(cachedAiResults);
+                    }
+                } finally {
+                    setRegenerateButtonLoading(false);
+                }
+            });
+        }
+        analysisSlider.classList.remove('left-0.5', 'transition-all', 'duration-300', 'ease-out');
+        analysisSlider.style.transition = 'none';
+        if (currentAnalysisMode === 'ai') {
+            aiBtn.className = 'px-3 py-1 text-xs font-medium text-gray-800 dark:text-gray-200 rounded transition-colors relative z-10 bg-transparent';
+            algorithmBtn.className = 'px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded transition-colors relative z-10 bg-transparent';
+            analysisSlider.style.left = 'calc(50% - 1px)';
+            toggleRegenerateButton(true);
+        } else {
+            algorithmBtn.className = 'px-3 py-1 text-xs font-medium text-gray-800 dark:text-gray-200 rounded transition-colors relative z-10 bg-transparent';
+            aiBtn.className = 'px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded transition-colors relative z-10 bg-transparent';
+            analysisSlider.style.left = '2px';
+            toggleRegenerateButton(false);
+        }
+        toggleAiSuggestionVisibility(currentAnalysisMode === 'ai', true);
+        analysisSlider.offsetHeight;
+        analysisSlider.style.transition = 'left 0.3s ease-out';
+        const updateMode = (mode, isInitializing = false) => {
+            currentAnalysisMode = mode;
+            saveAnalysisMode(mode);
+            if (mode === 'algorithm') {
+                algorithmBtn.className = 'px-3 py-1 text-xs font-medium text-gray-800 dark:text-gray-200 rounded transition-colors relative z-10 bg-transparent';
+                aiBtn.className = 'px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded transition-colors relative z-10 bg-transparent';
+                toggleRegenerateButton(false);
+            } else {
+                aiBtn.className = 'px-3 py-1 text-xs font-medium text-gray-800 dark:text-gray-200 rounded transition-colors relative z-10 bg-transparent';
+                algorithmBtn.className = 'px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded transition-colors relative z-10 bg-transparent';
+                toggleRegenerateButton(true);
+            }
+            toggleAiSuggestionVisibility(mode === 'ai', isInitializing);
+            if (!isInitializing) {
+                const gameChanged = isGameStateChanged(gameState);
+                if (gameChanged) {
+                    cachedAlgorithmResults = null;
+                    cachedAiResults = null;
+                }
+                (async () => {
+                    if (mode === 'algorithm') {
+                        if (cachedAlgorithmResults && !gameChanged) {
+                            updateAnalysisResults(cachedAlgorithmResults);
+                        } else {
+                            showAnalysisLoading();
+                            toggleAiSuggestionVisibility(false, true);
+                            const results = analyzeGameStateWithAlgorithm();
+                            cachedAlgorithmResults = results;
+                            updateGameStateCache(gameState, results, undefined);
+                            updateAnalysisResults(results);
+                        }
+                    } else {
+                        if (cachedAiResults && !gameChanged) {
+                            updateAnalysisResults(cachedAiResults);
+                        } else {
+                            showAnalysisLoading();
+                            toggleAiSuggestionVisibility(true, true);
+                            const language = i18n.getLang();
+                            const result = await window.aiRequest?.sendGameAnalysis(gameState, language);
+                            if (result && result.success) {
+                                cachedAiResults = result.data;
+                                updateGameStateCache(gameState, undefined, result.data);
+                                updateAnalysisResults(result.data);
+                            } else {
+                                let errorMsg = result?.error ? i18n.t(result.error) : i18n.t('aiApiRequestFailed');
+                                if (result?.message) {
+                                    errorMsg += ': ' + result.message;
+                                }
+                                cachedAiResults = {
+                                    bestMove: '--',
+                                    mergeOpportunities: 0,
+                                    gameStateAssessment: 'safe',
+                                    scorePotential: 'medium',
+                                    aiSuggestion: errorMsg
+                                };
+                                updateGameStateCache(gameState, undefined, cachedAiResults);
+                                updateAnalysisResults(cachedAiResults);
+                            }
+                        }
+                    }
+                })();
+            }
+        };
+        const getSliderWidth = () => {
+            return analysisSlider.offsetWidth || (sliderContainer.offsetWidth / 2 - 2);
+        };
+        window.initAnalysisModeState = () => {
+            const containerWidth = sliderContainer.offsetWidth;
+            const sliderWidth = getSliderWidth();
+            analysisSlider.style.transition = 'none';
+            if (currentAnalysisMode === 'ai') {
+                analysisSlider.style.left = Math.max(2, containerWidth - sliderWidth - 2) + 'px';
+            } else {
+                analysisSlider.style.left = '2px';
+            }
+            analysisSlider.offsetHeight;
+            analysisSlider.style.transition = 'left 0.3s ease-out';
+        };
+        const setSliderPosition = (left) => {
+            const containerWidth = sliderContainer.offsetWidth;
+            const sliderWidth = getSliderWidth();
+            const minLeft = 2;
+            const maxLeft = containerWidth - sliderWidth - 2;
+            const clampedLeft = Math.max(minLeft, Math.min(left, maxLeft));
+            analysisSlider.style.left = clampedLeft + 'px';
+            const sliderCenter = clampedLeft + sliderWidth / 2;
+            const containerCenter = containerWidth / 2;
+            if (sliderCenter < containerCenter) {
+                if (currentAnalysisMode !== 'algorithm') updateMode('algorithm');
+            } else {
+                if (currentAnalysisMode !== 'ai') updateMode('ai');
+            }
+        };
+        sliderContainer.addEventListener('mousedown', (e) => {
+            window.isSliderDragging = true;
+            hasMoved = false;
+            startX = e.clientX;
+            const rect = analysisSlider.getBoundingClientRect();
+            const containerRect = sliderContainer.getBoundingClientRect();
+            startLeft = rect.left - containerRect.left;
+            analysisSlider.style.transition = 'none';
+            e.stopPropagation();
+            if (e.target.tagName !== 'BUTTON') {
+                e.preventDefault();
+            }
+        });
+        sliderContainer.addEventListener('click', (e) => {
+            if (hasMoved) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+            hasMoved = false;
+        }, true);
+        document.addEventListener('mousemove', (e) => {
+            if (!window.isSliderDragging) return;
+            const deltaX = e.clientX - startX;
+            if (Math.abs(deltaX) > 2) hasMoved = true;
+            setSliderPosition(startLeft + deltaX);
+        });
+        document.addEventListener('mouseup', () => {
+            if (window.isSliderDragging) {
+                window.isSliderDragging = false;
+                analysisSlider.style.transition = 'left 0.3s ease-out';
+                const containerWidth = sliderContainer.offsetWidth;
+                const sliderWidth = getSliderWidth();
+                const sliderCenter = parseInt(analysisSlider.style.left) + sliderWidth / 2;
+                const containerCenter = containerWidth / 2;
+                if (sliderCenter < containerCenter) {
+                    analysisSlider.style.left = '2px';
+                    updateMode('algorithm');
+                } else {
+                    analysisSlider.style.left = (containerWidth - sliderWidth - 2) + 'px';
+                    updateMode('ai');
+                }
+                hasMoved = false;
+            }
+        });
+        sliderContainer.addEventListener('touchstart', (e) => {
+            window.isSliderDragging = true;
+            hasMoved = false;
+            startX = e.touches[0].clientX;
+            const rect = analysisSlider.getBoundingClientRect();
+            const containerRect = sliderContainer.getBoundingClientRect();
+            startLeft = rect.left - containerRect.left;
+            analysisSlider.style.transition = 'none';
+            e.stopPropagation();
+        }, { passive: true });
+        document.addEventListener('touchmove', (e) => {
+            if (!window.isSliderDragging) return;
+            const deltaX = e.touches[0].clientX - startX;
+            if (Math.abs(deltaX) > 2) hasMoved = true;
+            setSliderPosition(startLeft + deltaX);
+        }, { passive: false });
+        document.addEventListener('touchend', () => {
+            if (window.isSliderDragging) {
+                window.isSliderDragging = false;
+                analysisSlider.style.transition = 'left 0.3s ease-out';
+                const containerWidth = sliderContainer.offsetWidth;
+                const sliderWidth = getSliderWidth();
+                const sliderCenter = parseInt(analysisSlider.style.left) + sliderWidth / 2;
+                const containerCenter = containerWidth / 2;
+                if (sliderCenter < containerCenter) {
+                    analysisSlider.style.left = '2px';
+                    updateMode('algorithm');
+                } else {
+                    analysisSlider.style.left = (containerWidth - sliderWidth - 2) + 'px';
+                    updateMode('ai');
+                }
+                hasMoved = false;
+            }
+        });
+        algorithmBtn.addEventListener('click', () => {
+            analysisSlider.style.transition = 'left 0.3s ease-out';
+            analysisSlider.style.left = '2px';
+            updateMode('algorithm');
+        });
+        aiBtn.addEventListener('click', () => {
+            analysisSlider.style.transition = 'left 0.3s ease-out';
+            const containerWidth = sliderContainer.offsetWidth;
+            const sliderWidth = getSliderWidth();
+            analysisSlider.style.left = (containerWidth - sliderWidth - 2) + 'px';
+            updateMode('ai');
+        });
+    }
     const closeAiModalButton = document.getElementById('close-ai-modal');
     if (closeAiModalButton) {
         closeAiModalButton.addEventListener('click', function() {
-            document.getElementById('ai-analysis-modal').classList.add('hidden');
+            const content = document.querySelector('.ai-analysis-content');
+            if (content) {
+                content.style.left = '';
+                content.style.top = '';
+                content.style.transform = '';
+                content.style.transition = '';
+            }
+            document.getElementById('ai-analysis-modal').classList.add('ai-modal-closed');
         });
     }
     const aiAnalysisModal = document.getElementById('ai-analysis-modal');
     if (aiAnalysisModal) {
         aiAnalysisModal.addEventListener('click', function(e) {
             if (e.target === aiAnalysisModal) {
-                aiAnalysisModal.classList.add('hidden');
+                const content = document.querySelector('.ai-analysis-content');
+                if (content) {
+                    content.style.left = '';
+                    content.style.top = '';
+                    content.style.transform = '';
+                    content.style.transition = '';
+                }
+                aiAnalysisModal.classList.add('ai-modal-closed');
+            }
+        });
+    }
+    const aiAnalysisContent = document.querySelector('.ai-analysis-content');
+    const aiAnalysisTitle = document.getElementById('ai-analysis-modal-title');
+    if (aiAnalysisTitle && aiAnalysisContent) {
+        aiAnalysisTitle.style.cursor = 'move';
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+        aiAnalysisTitle.addEventListener('mousedown', function(e) {
+            if (e.target.closest('button') || e.target.closest('#analysis-switch-container') || window.isSliderDragging) return;
+            isDragging = true;
+            const rect = aiAnalysisContent.getBoundingClientRect();
+            startX = e.clientX;
+            startY = e.clientY;
+            initialLeft = rect.left;
+            initialTop = rect.top;
+            aiAnalysisContent.style.transition = 'none';
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            let newLeft = initialLeft + deltaX;
+            let newTop = initialTop + deltaY;
+            const containerRect = aiAnalysisModal.getBoundingClientRect();
+            const maxLeft = containerRect.width - aiAnalysisContent.offsetWidth;
+            const maxTop = containerRect.height - aiAnalysisContent.offsetHeight;
+            newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+            newTop = Math.max(0, Math.min(newTop, maxTop));
+            aiAnalysisContent.style.left = newLeft + 'px';
+            aiAnalysisContent.style.top = newTop + 'px';
+            aiAnalysisContent.style.transform = 'none';
+        });
+        document.addEventListener('mouseup', function() {
+            if (isDragging) {
+                isDragging = false;
+                aiAnalysisContent.style.transition = 'none';
             }
         });
     }
@@ -53,17 +407,117 @@ function setupAiAnalysis() {
         }
     }
 }
-function analyzeGameState() {
-    const modal = document.getElementById('ai-analysis-modal');
-    const overlay = document.getElementById('ai-analysis-overlay');
-    overlay.classList.add('hidden');
-    const directions = ['up', 'down', 'left', 'right'];
+let aiSuggestionHideTimer = null;
+function toggleAiSuggestionVisibility(show, isInitializing = false) {
+    const aiSuggestionItem = document.querySelector('.analysis-item:last-child');
+    if (!aiSuggestionItem) return;
+    if (aiSuggestionHideTimer) {
+        clearTimeout(aiSuggestionHideTimer);
+        aiSuggestionHideTimer = null;
+    }
+    aiSuggestionItem.style.overflow = 'hidden';
+    if (isInitializing) {
+        aiSuggestionItem.style.transition = 'none';
+        if (show) {
+            aiSuggestionItem.style.display = 'block';
+            aiSuggestionItem.style.opacity = '1';
+            aiSuggestionItem.style.transform = 'translateY(0)';
+            aiSuggestionItem.style.maxHeight = '200px';
+            aiSuggestionItem.style.marginBottom = '15px';
+        } else {
+            aiSuggestionItem.style.display = 'none';
+            aiSuggestionItem.style.opacity = '0';
+            aiSuggestionItem.style.transform = 'translateY(-10px)';
+            aiSuggestionItem.style.maxHeight = '0';
+            aiSuggestionItem.style.marginBottom = '0';
+        }
+        aiSuggestionItem.offsetHeight;
+        aiSuggestionItem.style.transition = 'all 0.3s ease-out';
+    } else {
+        aiSuggestionItem.style.transition = 'all 0.3s ease-out';
+        if (show) {
+            if (aiSuggestionItem.style.display === 'none' || aiSuggestionItem.style.opacity === '0') {
+                aiSuggestionItem.style.opacity = '0';
+                aiSuggestionItem.style.transform = 'translateY(-10px)';
+                aiSuggestionItem.style.maxHeight = '0';
+                aiSuggestionItem.style.marginBottom = '0';
+                aiSuggestionItem.style.display = 'block';
+                requestAnimationFrame(() => {
+                    aiSuggestionItem.style.opacity = '1';
+                    aiSuggestionItem.style.transform = 'translateY(0)';
+                    aiSuggestionItem.style.maxHeight = '200px';
+                    aiSuggestionItem.style.marginBottom = '15px';
+                });
+            }
+        } else {
+            aiSuggestionItem.style.opacity = '0';
+            aiSuggestionItem.style.transform = 'translateY(-10px)';
+            aiSuggestionItem.style.maxHeight = '0';
+            aiSuggestionItem.style.marginBottom = '0';
+            aiSuggestionHideTimer = setTimeout(() => {
+                aiSuggestionItem.style.display = 'none';
+                aiSuggestionHideTimer = null;
+            }, 300);
+        }
+    }
+}
+function showAnalysisLoading() {
     const directionNames = {
         up: i18n.t('up'), 
         down: i18n.t('down'), 
         left: i18n.t('left'), 
         right: i18n.t('right')
     };
+    document.getElementById('best-move-direction').innerHTML = `<span class="best-move-text">${i18n.t('loading')}</span>`;
+    document.getElementById('merge-opportunities').textContent = i18n.t('loading');
+    document.getElementById('game-state-assessment').textContent = i18n.t('loading');
+    document.getElementById('score-potential').textContent = i18n.t('loading');
+    const aiSuggestionElement = document.getElementById('ai-suggestion');
+    if (aiSuggestionElement) {
+        aiSuggestionElement.textContent = i18n.t('loading');
+    }
+}
+function updateAnalysisResults(results) {
+    const directionNames = {
+        up: i18n.t('up'), 
+        down: i18n.t('down'), 
+        left: i18n.t('left'), 
+        right: i18n.t('right')
+    };
+    document.getElementById('best-move-direction').innerHTML = `<span class="best-move-text">${directionNames[results.bestMove] || results.bestMove}</span>`;
+    const mergeOpportunitiesElement = document.getElementById('merge-opportunities');
+    mergeOpportunitiesElement.className = 'analysis-value';
+    mergeOpportunitiesElement.textContent = results.mergeOpportunities > 0 ? results.mergeOpportunities + i18n.t('mergeOpportunitiesSuffix') : i18n.t('noMergeOpportunities');
+    const mergeCount = typeof results.mergeOpportunities === 'number' ? results.mergeOpportunities : 0;
+    if (results.mergeOpportunitiesLevel === 'high' || mergeCount >= 3) mergeOpportunitiesElement.classList.add('high');
+    else if (results.mergeOpportunitiesLevel === 'medium' || mergeCount >= 1) mergeOpportunitiesElement.classList.add('medium');
+    else mergeOpportunitiesElement.classList.add('low');
+    const gameStateElement = document.getElementById('game-state-assessment');
+    gameStateElement.className = 'analysis-value';
+    gameStateElement.textContent = i18n.t(results.gameStateAssessment) || results.gameStateAssessment;
+    const assessment = results.gameStateAssessment || 'safe';
+    if (assessment === 'danger' || assessment === 'danger') gameStateElement.classList.add('danger');
+    else if (assessment === 'warning' || assessment === 'average') gameStateElement.classList.add('average');
+    else gameStateElement.classList.add('good');
+    const scorePotentialElement = document.getElementById('score-potential');
+    scorePotentialElement.className = 'analysis-value';
+    const scorePotential = results.scorePotential || 'medium';
+    const scorePotentialDescriptions = {
+        high: i18n.t('scorePotentialHigh'),
+        medium: i18n.t('scorePotentialMedium'),
+        low: i18n.t('limitedMergeOpportunities')
+    };
+    scorePotentialElement.textContent = `${i18n.t(scorePotential === 'medium' ? 'mediumScore' : scorePotential) || scorePotential} (${scorePotentialDescriptions[scorePotential] || ''})`;
+    if (scorePotential === 'high') scorePotentialElement.classList.add('high');
+    else if (scorePotential === 'medium') scorePotentialElement.classList.add('medium');
+    else scorePotentialElement.classList.add('low');
+    const aiSuggestionElement = document.getElementById('ai-suggestion');
+    if (aiSuggestionElement) {
+        aiSuggestionElement.textContent = results.aiSuggestion || i18n.t('notAvailable');
+    }
+}
+function analyzeGameStateWithAlgorithm() {
+    const directions = ['up', 'down', 'left', 'right'];
     let bestScore = -1;
     let bestDirection = 'up';
     let mergeOpportunities = 0;
@@ -130,17 +584,73 @@ function analyzeGameState() {
             mergeOpportunities += merges;
         }
     });
-    document.getElementById('best-move-direction').innerHTML = `<span class="best-move-text">${directionNames[bestDirection]}</span>`;
-    document.getElementById('merge-opportunities').textContent = mergeOpportunities > 0 ? mergeOpportunities : i18n.t('noMergeOpportunities');
     const assessment = evaluateGameState(gameState, dangerThreshold, warningThreshold);
-    document.getElementById('game-state-assessment').textContent = assessment;
     const potential = assessScorePotential(gameState, highPotentialThreshold, mediumPotentialThreshold);
-    document.getElementById('score-potential').textContent = potential;
-    modal.classList.remove('hidden');
+    return {
+        bestMove: bestDirection,
+        mergeOpportunities: mergeOpportunities,
+        gameStateAssessment: assessment === i18n.t('danger') ? 'danger' : (assessment === i18n.t('warning') ? 'warning' : 'safe'),
+        scorePotential: potential === i18n.t('high') ? 'high' : (potential === i18n.t('mediumScore') ? 'medium' : 'low'),
+        aiSuggestion: ''
+    };
+}
+async function analyzeGameState() {
+    const modal = document.getElementById('ai-analysis-modal');
+    const overlay = document.getElementById('ai-analysis-overlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+    }
+    showAnalysisLoading();
+    modal.classList.remove('ai-modal-closed');
     setTimeout(() => {
-        modal.classList.add('opacity-100', 'scale-100');
-        modal.classList.remove('opacity-0', 'scale-95');
-    }, 10);
+        initAnalysisModeState();
+        toggleAiSuggestionVisibility(currentAnalysisMode === 'ai', true);
+    }, 50);
+    const gameChanged = isGameStateChanged(gameState);
+    if (!gameChanged) {
+        if (currentAnalysisMode === 'ai') {
+            if (cachedAiResults) {
+                updateAnalysisResults(cachedAiResults);
+                return;
+            }
+        } else {
+            if (cachedAlgorithmResults) {
+                updateAnalysisResults(cachedAlgorithmResults);
+                return;
+            }
+        }
+    } else {
+        cachedAlgorithmResults = null;
+        cachedAiResults = null;
+    }
+    if (currentAnalysisMode === 'ai') {
+        const language = i18n.getLang();
+        const result = await window.aiRequest?.sendGameAnalysis(gameState, language);
+        if (result && result.success) {
+            cachedAiResults = result.data;
+            updateGameStateCache(gameState, undefined, result.data);
+            updateAnalysisResults(result.data);
+        } else {
+            let errorMsg = result?.error ? i18n.t(result.error) : i18n.t('aiApiRequestFailed');
+            if (result?.message) {
+                errorMsg += ': ' + result.message;
+            }
+            cachedAiResults = {
+                bestMove: '--',
+                mergeOpportunities: 0,
+                gameStateAssessment: 'safe',
+                scorePotential: 'medium',
+                aiSuggestion: errorMsg
+            };
+            updateGameStateCache(gameState, undefined, cachedAiResults);
+            updateAnalysisResults(cachedAiResults);
+        }
+    } else {
+        const results = analyzeGameStateWithAlgorithm();
+        cachedAlgorithmResults = results;
+        updateGameStateCache(gameState, results, undefined);
+        updateAnalysisResults(results);
+    }
 }
 function simulateMove(gameState, direction) {
     let moved = false;
