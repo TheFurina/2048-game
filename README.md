@@ -175,13 +175,22 @@
 ## 项目结构
 
 ```
-2048_v2.3.0/
-├── 2048_v2.3.0.html           # 主HTML文件（包含所有游戏逻辑）
-└── features/                  # 功能模块目录
-    ├── custom-theme.js        # 自定义主题功能
-    ├── ai-analysis.js         # AI分析功能
-    ├── i18n.js                # i18n国际化
-    └── bluetooth-sync.js      # 蓝牙导出/导入数据
+2048_v2.6.0/
+├── 2048_v2.6.0.html            # 主HTML文件（包含游戏入口和UI结构）
+├── icon.png                    # 网站图标
+├── css/
+│   └── 2048.css                # 主样式表
+└── features/                   # 功能模块目录
+    ├── ai-analysis.js          # AI分析功能（网格评估、最佳移动建议）
+    ├── ai-request.js           # AI API请求与设置管理（含状态管理器）
+    ├── bluetooth-sync.js       # 蓝牙数据导出/导入同步
+    ├── custom-select.js        # 自定义下拉选择器组件
+    ├── custom-theme.js         # 自定义主题颜色功能
+    ├── data-transfer.js        # 数据导入/导出（JSON格式）
+    ├── fullscreen-mode.js      # 全屏模式切换
+    ├── i18n.js                 # 国际化多语言支持
+    ├── manifest.js             # PWA清单配置
+    └── module-loader.js        # 模块加载器
 ```
 
 ## 贡献指南
@@ -210,6 +219,6 @@
 ---
 
 **项目作者**: TheFurina  
-**最后更新**: v2.5.1  
+**最后更新**: v2.6.0  
 
 享受游戏吧！滑动之间，数字新生 🎮
