@@ -1,4 +1,4 @@
-const aiRequestVersion = '1.0';
+const aiRequestVersion = '1.1';
 window.aiRequestVersion = aiRequestVersion;
 const DEFAULT_CONFIG = {
     baseUrl: 'https://api.openai.com/v1',
@@ -230,7 +230,11 @@ function setupAiRequestSettings() {
         if (refreshBtn) {
             refreshBtn.style.display = 'none';
         }
-        const config = getAiConfig();
+        const config = {
+            baseUrl: baseUrlInput?.value || DEFAULT_CONFIG.baseUrl,
+            apiKey: apiKeyInput?.value || '',
+            model: modelInput?.value || DEFAULT_CONFIG.model
+        };
         const result = await fetchModels(config);
         const modelsContainer = modelDropdown.querySelector('.models-container');
         if (result.success && result.models.length > 0) {
