@@ -1,0 +1,44 @@
+name: Sync main to seo
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: source
+          fetch-depth: 1
+
+      - name: Checkout seo
+        uses: actions/checkout@v4
+        with:
+          ref: seo
+          path: target
+          fetch-depth: 1
+
+      - name: Sync files (keep SEO index.html, exclude .github)
+        run: |
+          rsync -av --delete \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='index.html' \
+            source/ target/
+
+      - name: Commit and push
+        run: |
+          cd target
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "Sync from main (keep SEO index.html)"
+          git push origin seo
