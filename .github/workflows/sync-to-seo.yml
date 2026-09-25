@@ -26,7 +26,25 @@ jobs:
           path: target
           fetch-depth: 1
 
-      - name: Sync files (keep SEO index.html, exclude .github)
+      - name: Generate SEO index.html from main/index.html
+        run: |
+          python3 - <<'EOF'
+          import pathlib
+
+          src = pathlib.Path("source/index.html").read_text(encoding="utf-8")
+          seo_head = pathlib.Path("source/.github/seo-head.html").read_text(encoding="utf-8")
+
+          marker = "</head>"
+          if marker not in src:
+              raise SystemExit("index.html 中找不到 </head>")
+
+          out = src.replace(marker, seo_head + "\n" + marker, 1)
+
+          pathlib.Path("target/index.html").write_text(out, encoding="utf-8")
+          print("SEO index.html generated, size =", len(out))
+          EOF
+
+      - name: Sync other files (exclude index.html and .github)
         run: |
           rsync -av --delete \
             --exclude='.git' \
@@ -40,5 +58,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          git diff --cached --quiet || git commit -m "Sync from main (keep SEO index.html)"
+          git diff --cached --quiet || git commit -m "Sync from main (auto SEO index.html)"
           git push origin seo
