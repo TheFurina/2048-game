@@ -1,4 +1,4 @@
-const webRTCSyncVersion = '0.1';
+const webRTCSyncVersion = '0.2';
 window.webRTCSyncVersion = webRTCSyncVersion;
 class WebRTCSync {
     constructor() {
@@ -98,11 +98,14 @@ class WebRTCSync {
             this.pc.addEventListener('icegatheringstatechange', onStateChange);
         });
     }
-    sendData(gameData) {
+    send(message) {
         if (!this.connected || !this.channel) {
             throw new Error('Not connected');
         }
-        this.channel.send(JSON.stringify({ type: 'gameData', data: gameData }));
+        this.channel.send(JSON.stringify(message));
+    }
+    sendData(gameData) {
+        this.send({ type: 'gameData', data: gameData });
     }
     close() {
         if (this.channel) {
@@ -157,15 +160,62 @@ function webrtcT(key, fallback) {
 }
 function initWebRTCSync() {
     webRTCSyncInstance = new WebRTCSync();
-    webRTCSyncInstance.onConnected = () => {
-        showWebRTCModal('connected');
-        setWebrtcStatus('webrtc-connected-status', webrtcT('webrtcConnectedReady', '已连接，可以发送游戏数据'));
-    };
+    webRTCSyncInstance.onConnected = handleWebRTCConnected;
     webRTCSyncInstance.onMessage = handleWebRTCMessage;
-    webRTCSyncInstance.onDisconnected = () => {
-        setWebrtcStatus('webrtc-connected-status', webrtcT('webrtcDisconnected', '连接已断开'));
-    };
+    webRTCSyncInstance.onDisconnected = handleWebRTCDisconnected;
     setupWebRTCUI();
+    window.SyncLive.register('webrtc', {
+        includeSettings: true,
+        enabled: true,
+        isConnected: () => !!(webRTCSyncInstance && webRTCSyncInstance.connected),
+        send: message => Promise.resolve().then(() => webRTCSyncInstance.send(message)),
+        disconnect: () => handleWebRTCManualDisconnect(),
+        onSendError: () => handleWebRTCDisconnected()
+    });
+}
+function handleWebRTCConnected() {
+    window.SyncIndicator.set('webrtc');
+    const checkbox = document.getElementById('webrtc-settings-checkbox');
+    window.SyncLive.setIncludeSettings('webrtc', checkbox ? checkbox.checked : true);
+    const liveSyncCheckbox = document.getElementById('webrtc-live-sync-checkbox');
+    window.SyncLive.setEnabled('webrtc', liveSyncCheckbox ? liveSyncCheckbox.checked : true);
+    showWebRTCModal('connected');
+    setWebrtcStatus('webrtc-connected-status', webrtcT('webrtcConnectedReady', '已连接，可以发送游戏数据'));
+    setTimeout(() => {
+        if (webRTCSyncInstance && webRTCSyncInstance.connected) {
+            window.SyncLive.flushTransport('webrtc');
+        }
+    }, 400);
+}
+function handleWebRTCDisconnected() {
+    window.SyncIndicator.clear('webrtc');
+    setWebrtcStatus('webrtc-connected-status', webrtcT('webrtcDisconnected', '连接已断开'));
+    updateWebRTCSelectPanel();
+    const modal = document.getElementById('webrtc-modal');
+    if (modal && !modal.classList.contains('hidden') && modal._webrtcMode === 'connected') {
+        showWebRTCModal('select');
+    }
+}
+function handleWebRTCManualDisconnect() {
+    if (webRTCSyncInstance) {
+        webRTCSyncInstance.close();
+    }
+    handleWebRTCDisconnected();
+    const modal = document.getElementById('webrtc-modal');
+    if (modal && !modal.classList.contains('hidden')) {
+        showWebRTCModal('select');
+    }
+}
+function updateWebRTCSelectPanel() {
+    const live = !!(webRTCSyncInstance && webRTCSyncInstance.connected);
+    const actions = document.getElementById('webrtc-select-actions');
+    const panel = document.getElementById('webrtc-connected-panel');
+    if (actions) {
+        actions.style.display = live ? 'none' : 'flex';
+    }
+    if (panel) {
+        panel.style.display = live ? 'block' : 'none';
+    }
 }
 function setupWebRTCUI() {
     const webrtcSyncBtn = document.getElementById('webrtc-sync-button');
@@ -182,7 +232,7 @@ function setupWebRTCUI() {
     const webrtcConnectedBack = document.getElementById('webrtc-connected-back');
     if (webrtcSyncBtn) {
         webrtcSyncBtn.addEventListener('click', () => {
-            showWebRTCModal('select');
+            showWebRTCModal(webRTCSyncInstance && webRTCSyncInstance.connected ? 'connected' : 'select');
         });
     }
     if (webrtcHostBtn) {
@@ -215,8 +265,32 @@ function setupWebRTCUI() {
     if (closeWebrtcModal) {
         closeWebrtcModal.addEventListener('click', () => {
             hideWebRTCModal();
-            if (webRTCSyncInstance) {
+            if (webRTCSyncInstance && !webRTCSyncInstance.connected) {
                 webRTCSyncInstance.close();
+            }
+        });
+    }
+    ['webrtc-disconnect-button', 'webrtc-select-disconnect-button'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.addEventListener('click', handleWebRTCManualDisconnect);
+        }
+    });
+    const webrtcSettingsCheckbox = document.getElementById('webrtc-settings-checkbox');
+    if (webrtcSettingsCheckbox) {
+        webrtcSettingsCheckbox.addEventListener('change', () => {
+            window.SyncLive.setIncludeSettings('webrtc', webrtcSettingsCheckbox.checked);
+            if (webRTCSyncInstance && webRTCSyncInstance.connected) {
+                window.SyncLive.flushTransport('webrtc');
+            }
+        });
+    }
+    const webrtcLiveSyncCheckbox = document.getElementById('webrtc-live-sync-checkbox');
+    if (webrtcLiveSyncCheckbox) {
+        webrtcLiveSyncCheckbox.addEventListener('change', () => {
+            window.SyncLive.setEnabled('webrtc', webrtcLiveSyncCheckbox.checked);
+            if (webrtcLiveSyncCheckbox.checked && webRTCSyncInstance && webRTCSyncInstance.connected) {
+                window.SyncLive.flushTransport('webrtc');
             }
         });
     }
@@ -285,10 +359,19 @@ function handleWebRTCSend() {
 function handleWebRTCMessage(raw) {
     try {
         const message = JSON.parse(raw);
+        if (message.type === 'stateUpdate') {
+            window.SyncLive.handleRemoteMessage('webrtc', message);
+            return;
+        }
         if (message.type === 'gameData') {
             const apply = window.confirm(webrtcT('webrtcConfirmApply', '收到对方发来的游戏数据，是否应用？'));
             if (apply) {
-                applyImportedData(message.data);
+                window.__remoteSyncApply = true;
+                try {
+                    applyImportedData(message.data);
+                } finally {
+                    window.__remoteSyncApply = false;
+                }
                 if (typeof loadGameState === 'function') {
                     loadGameState();
                 }
@@ -345,6 +428,7 @@ function showWebRTCModal(mode) {
         target.style.display = 'block';
     }
     modal._webrtcMode = mode;
+    updateWebRTCSelectPanel();
     if (isOpen) {
         if (target) {
             void target.offsetWidth;
