@@ -1,10 +1,11 @@
-const bluetoothSyncVersion = '0.3';
+const bluetoothSyncVersion = '0.4';
 window.bluetoothSyncVersion = bluetoothSyncVersion;
 class BluetoothSync {
     constructor() {
         this.isSupported = 'bluetooth' in navigator && !window.simulateNoBluetooth;
         this.server = null;
         this.characteristic = null;
+        this.device = null;
         this.currentPin = null;
         this.isVerified = false;
         this.maxRetries = 3;
@@ -12,6 +13,13 @@ class BluetoothSync {
         this.discoverAllDevices = false;
         this.lastDevice = null;
         this.lastDeviceVerified = false;
+        this.liveMode = false;
+        this.connectedDeviceName = null;
+        this.dismissed = false;
+        this.onConnected = null;
+        this.onDisconnected = null;
+        this._txChain = Promise.resolve();
+        this._gattDisconnectHandler = null;
         this.checkBluetoothSupport();
     }
     updateSupportStatus() {
@@ -98,6 +106,15 @@ class BluetoothSync {
                     this.timeoutDuration,
                     'Connection timeout'
                 );
+                this.device = device;
+                if (!this._gattDisconnectHandler) {
+                    this._gattDisconnectHandler = () => {
+                        if (this.liveMode) {
+                            this.handleUnexpectedDisconnect();
+                        }
+                    };
+                }
+                device.addEventListener('gattserverdisconnected', this._gattDisconnectHandler);
                 const service = await this.withTimeout(
                     this.server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb'),
                     this.timeoutDuration,
@@ -225,8 +242,12 @@ class BluetoothSync {
             const frame = this._rxFrame;
             this._rxFrame = '';
             this._rxTotalSize = null;
-            this._rxQueue.push(frame);
-            this.drainRxWaiters();
+            if (this.liveMode) {
+                this.dispatchLiveFrame(frame);
+            } else {
+                this._rxQueue.push(frame);
+                this.drainRxWaiters();
+            }
             return;
         }
         if (line.startsWith('D:')) {
@@ -352,8 +373,8 @@ class BluetoothSync {
             await this.waitReady(60000);
             await this.sendData({ type: 'pin', pin: this.currentPin });
             await this.sendData({ type: 'gameData', data: gameData }, onProgress);
-            await this.stopReceiving();
             this.lastDeviceVerified = true;
+            this.enterLiveMode(device.name || 'Unknown Device');
             return {
                 success: true,
                 pin: this.currentPin,
@@ -405,7 +426,6 @@ class BluetoothSync {
             }
             this.isVerified = true;
             const frame = await this.receiveFrame(onProgress);
-            await this.stopReceiving();
             const payload = JSON.parse(frame);
             const calculatedChecksum = this.calculateChecksum(payload.data);
             if (calculatedChecksum !== payload.checksum) {
@@ -416,6 +436,7 @@ class BluetoothSync {
                 throw new Error('Invalid data type received');
             }
             this.lastDeviceVerified = true;
+            this.enterLiveMode((this.device && this.device.name) || 'Unknown Device');
             return gameData.data;
         } catch (error) {
             console.error('Bluetooth import failed:', error);
@@ -432,24 +453,322 @@ class BluetoothSync {
         }
         return false;
     }
-    disconnect() {
+    enterLiveMode(deviceName) {
+        this.liveMode = true;
+        this.connectedDeviceName = deviceName || (this.device && this.device.name) || null;
+        this._readyPending = false;
+        this._rxQueue = [];
+        const pendingWaiters = this._rxWaiters;
+        this._rxWaiters = [];
+        pendingWaiters.forEach(waiter => {
+            clearTimeout(waiter.timer);
+            waiter.resolve(null);
+        });
+        if (this.onConnected) {
+            this.onConnected(this.connectedDeviceName);
+        }
+    }
+    dispatchLiveFrame(frame) {
+        try {
+            const payload = JSON.parse(frame);
+            if (payload.checksum && this.calculateChecksum(payload.data) !== payload.checksum) {
+                console.warn('Live sync checksum mismatch');
+                return;
+            }
+            const message = JSON.parse(payload.data);
+            if (message && message.type === 'stateUpdate' && window.SyncLive) {
+                window.SyncLive.handleRemoteMessage('bluetooth', message);
+            }
+        } catch (error) {
+            console.warn('Live sync frame parse failed:', error);
+        }
+    }
+    enqueueSend(message) {
+        const run = this._txChain.then(() => this.sendData(message));
+        this._txChain = run.catch(() => {});
+        return run;
+    }
+    handleLinkFailure() {
+        if (this.liveMode) {
+            this.disconnect();
+        }
+    }
+    handleUnexpectedDisconnect() {
+        const callback = this.onDisconnected;
+        this.liveMode = false;
         if (this._rxActive) {
             this.stopReceiving();
         }
-        if (this.server && this.server.connected) {
-            this.server.disconnect();
+        if (this.device && this._gattDisconnectHandler) {
+            try {
+                this.device.removeEventListener('gattserverdisconnected', this._gattDisconnectHandler);
+            } catch (e) {}
         }
         this.server = null;
         this.characteristic = null;
+        this.device = null;
+        this.connectedDeviceName = null;
         this.currentPin = null;
         this.isVerified = false;
         this._readyPending = false;
+        this._rxQueue = [];
+        this._rxWaiters = [];
+        this._txChain = Promise.resolve();
+        if (callback) {
+            callback();
+        }
+    }
+    disconnect() {
+        const wasLive = this.liveMode;
+        this.liveMode = false;
+        if (this._rxActive) {
+            this.stopReceiving();
+        }
+        if (this.device && this._gattDisconnectHandler) {
+            try {
+                this.device.removeEventListener('gattserverdisconnected', this._gattDisconnectHandler);
+            } catch (e) {}
+        }
+        if (this.server && this.server.connected) {
+            try {
+                this.server.disconnect();
+            } catch (e) {}
+        }
+        this.server = null;
+        this.characteristic = null;
+        this.device = null;
+        this.connectedDeviceName = null;
+        this.currentPin = null;
+        this.isVerified = false;
+        this._readyPending = false;
+        this._rxQueue = [];
+        this._rxWaiters = [];
+        this._txChain = Promise.resolve();
+        if (wasLive && this.onDisconnected) {
+            this.onDisconnected();
+        }
     }
 }
+window.SyncLive = window.SyncLive || {
+    _transports: {},
+    _timer: null,
+    _saveHookInstalled: false,
+    _storageHookInstalled: false,
+    register(name, transport) {
+        this._transports[name] = transport;
+    },
+    setIncludeSettings(name, value) {
+        const transport = this._transports[name];
+        if (transport) {
+            transport.includeSettings = !!value;
+        }
+    },
+    setEnabled(name, value) {
+        const transport = this._transports[name];
+        if (transport) {
+            transport.enabled = !!value;
+        }
+    },
+    notifyStateChanged() {
+        this._schedule(500);
+    },
+    notifySettingsChanged() {
+        this._schedule(250);
+    },
+    flushTransport(name) {
+        const transport = this._transports[name];
+        if (transport && transport.isConnected() && transport.enabled !== false) {
+            this._sendTo(transport);
+        }
+    },
+    _schedule(delay) {
+        if (!this._hasConnectedTransport()) {
+            return;
+        }
+        clearTimeout(this._timer);
+        this._timer = setTimeout(() => this._flush(), delay);
+    },
+    _hasConnectedTransport() {
+        return Object.keys(this._transports).some(name => {
+            const transport = this._transports[name];
+            return !!(transport && transport.isConnected() && transport.enabled !== false);
+        });
+    },
+    _flush() {
+        Object.keys(this._transports).forEach(name => {
+            const transport = this._transports[name];
+            if (transport && transport.isConnected() && transport.enabled !== false) {
+                this._sendTo(transport);
+            }
+        });
+    },
+    _sendTo(transport) {
+        try {
+            const snapshot = getGameDataForExport(transport.includeSettings !== false);
+            Promise.resolve(transport.send({ type: 'stateUpdate', data: snapshot })).catch(error => {
+                console.warn('Live sync send failed:', error);
+                if (transport.onSendError) {
+                    transport.onSendError(error);
+                }
+            });
+        } catch (error) {
+            console.warn('Live sync snapshot failed:', error);
+        }
+    },
+    handleRemoteMessage(name, message) {
+        const transport = this._transports[name];
+        if (!message || !message.data || (transport && transport.enabled === false)) {
+            return;
+        }
+        this._applyRemote(message.data);
+    },
+    _applyRemote(data) {
+        window.__remoteSyncApply = true;
+        try {
+            applyImportedData(data);
+        } catch (error) {
+            console.warn('Apply remote sync data failed:', error);
+        } finally {
+            window.__remoteSyncApply = false;
+        }
+        try {
+            if (typeof loadGameState === 'function') {
+                loadGameState();
+            }
+        } catch (error) {
+            console.warn('Reload game state after sync failed:', error);
+        }
+    },
+    installHooks() {
+        if (!this._saveHookInstalled && typeof window.saveGameState === 'function') {
+            this._saveHookInstalled = true;
+            const originalSave = window.saveGameState;
+            window.saveGameState = function() {
+                const result = originalSave.apply(this, arguments);
+                if (!window.__remoteSyncApply) {
+                    window.SyncLive.notifyStateChanged();
+                }
+                return result;
+            };
+        }
+        if (!this._storageHookInstalled) {
+            try {
+                const prefix = window.SETTING_PREFIX || '2048-setting-';
+                const originalSetItem = localStorage.setItem.bind(localStorage);
+                localStorage.setItem = function(key, value) {
+                    const result = originalSetItem(key, value);
+                    if (!window.__remoteSyncApply && typeof key === 'string' && key.indexOf(prefix) === 0) {
+                        window.SyncLive.notifySettingsChanged();
+                    }
+                    return result;
+                };
+                this._storageHookInstalled = true;
+            } catch (error) {
+                console.warn('Install settings sync hook failed:', error);
+            }
+        }
+    }
+};
+window.SyncIndicator = window.SyncIndicator || {
+    current: null,
+    meta: {
+        bluetooth: { labelKey: 'bluetoothConnectedBadge', icon: 'fa-brands fa-bluetooth-b' },
+        webrtc: { labelKey: 'webrtcConnectedBadge', icon: 'fa-solid fa-tower-broadcast' }
+    },
+    set(name) {
+        this.current = name;
+        this.render();
+    },
+    clear(name) {
+        if (name && this.current !== name) {
+            return;
+        }
+        this.current = null;
+        this.render();
+    },
+    refresh() {
+        this.render();
+    },
+    render() {
+        const indicator = document.getElementById('sync-indicator');
+        if (!indicator) {
+            return;
+        }
+        const meta = this.current ? this.meta[this.current] : null;
+        if (!meta) {
+            indicator.classList.add('hidden');
+            indicator.classList.remove('flex');
+            return;
+        }
+        indicator.classList.remove('hidden');
+        indicator.classList.add('flex');
+        const icon = document.getElementById('sync-indicator-icon');
+        const text = document.getElementById('sync-indicator-text');
+        if (icon) {
+            icon.className = meta.icon + ' mr-1';
+        }
+        if (text) {
+            text.textContent = window.i18n ? window.i18n.t(meta.labelKey) : meta.labelKey;
+        }
+        const disconnectBtn = document.getElementById('sync-indicator-disconnect');
+        if (disconnectBtn) {
+            disconnectBtn.title = window.i18n ? window.i18n.t('disconnectConnection') : '';
+        }
+    }
+};
 let bluetoothSyncInstance = null;
 function initBluetoothSync() {
     bluetoothSyncInstance = new BluetoothSync();
     setupBluetoothUI();
+    setupSyncIndicator();
+    window.SyncLive.installHooks();
+    if (typeof window.saveGameState !== 'function') {
+        const retryInstall = () => window.SyncLive.installHooks();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', retryInstall, { once: true });
+        }
+        setTimeout(retryInstall, 1000);
+    }
+    bluetoothSyncInstance.onConnected = () => {
+        window.SyncIndicator.set('bluetooth');
+    };
+    bluetoothSyncInstance.onDisconnected = () => {
+        window.SyncIndicator.clear('bluetooth');
+        updateBluetoothSelectPanel();
+    };
+    window.SyncLive.register('bluetooth', {
+        includeSettings: true,
+        enabled: true,
+        isConnected: () => !!(bluetoothSyncInstance && bluetoothSyncInstance.liveMode),
+        send: message => bluetoothSyncInstance.enqueueSend(message),
+        disconnect: () => bluetoothSyncInstance.disconnect(),
+        onSendError: () => bluetoothSyncInstance.handleLinkFailure()
+    });
+}
+function setupSyncIndicator() {
+    const openBtn = document.getElementById('sync-indicator-open');
+    if (openBtn && !openBtn._syncBound) {
+        openBtn._syncBound = true;
+        openBtn.addEventListener('click', () => {
+            const current = window.SyncIndicator.current;
+            if (current === 'bluetooth') {
+                showBluetoothModal('select');
+            } else if (current === 'webrtc') {
+                showWebRTCModal('connected');
+            }
+        });
+    }
+    const disconnectBtn = document.getElementById('sync-indicator-disconnect');
+    if (disconnectBtn && !disconnectBtn._syncBound) {
+        disconnectBtn._syncBound = true;
+        disconnectBtn.addEventListener('click', () => {
+            const current = window.SyncIndicator.current;
+            const transport = window.SyncLive._transports[current];
+            if (transport && transport.disconnect) {
+                transport.disconnect();
+            }
+        });
+    }
 }
 function setupBluetoothUI() {
     const bluetoothSyncBtn = document.getElementById('bluetooth-sync-button');
@@ -483,10 +802,57 @@ function setupBluetoothUI() {
     if (closeBluetoothModal) {
         closeBluetoothModal.addEventListener('click', () => {
             hideBluetoothModal();
-            if (bluetoothSyncInstance) {
+            if (bluetoothSyncInstance && !bluetoothSyncInstance.liveMode) {
+                bluetoothSyncInstance.dismissed = true;
                 bluetoothSyncInstance.disconnect();
             }
         });
+    }
+    const bluetoothDisconnectBtn = document.getElementById('bluetooth-disconnect-button');
+    if (bluetoothDisconnectBtn) {
+        bluetoothDisconnectBtn.addEventListener('click', () => {
+            if (bluetoothSyncInstance) {
+                bluetoothSyncInstance.disconnect();
+            }
+            updateBluetoothSelectPanel();
+        });
+    }
+    const bindSettingsCheckbox = (id) => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) {
+            checkbox.addEventListener('change', () => {
+                window.SyncLive.setIncludeSettings('bluetooth', checkbox.checked);
+                if (bluetoothSyncInstance && bluetoothSyncInstance.liveMode) {
+                    window.SyncLive.flushTransport('bluetooth');
+                }
+            });
+        }
+    };
+    bindSettingsCheckbox('bluetooth-export-settings-checkbox');
+    bindSettingsCheckbox('bluetooth-import-settings-checkbox');
+    const liveSyncCheckbox = document.getElementById('bluetooth-live-sync-checkbox');
+    if (liveSyncCheckbox) {
+        liveSyncCheckbox.addEventListener('change', () => {
+            window.SyncLive.setEnabled('bluetooth', liveSyncCheckbox.checked);
+            if (liveSyncCheckbox.checked && bluetoothSyncInstance && bluetoothSyncInstance.liveMode) {
+                window.SyncLive.flushTransport('bluetooth');
+            }
+        });
+    }
+}
+function updateBluetoothSelectPanel() {
+    const panel = document.getElementById('bluetooth-connected-panel');
+    const actions = document.getElementById('bluetooth-select-actions');
+    const live = !!(bluetoothSyncInstance && bluetoothSyncInstance.liveMode);
+    if (panel) {
+        panel.style.display = live ? 'block' : 'none';
+    }
+    if (actions) {
+        actions.style.display = live ? 'none' : 'flex';
+    }
+    const nameEl = document.getElementById('bluetooth-live-device-name');
+    if (nameEl && live) {
+        nameEl.textContent = bluetoothSyncInstance.connectedDeviceName || '-';
     }
 }
 function getGameDataForExport(includeSettings) {
@@ -567,6 +933,7 @@ async function handleBluetoothExport() {
             alert(window.i18n ? window.i18n.t('bluetoothNotSupported') : 'Bluetooth is not supported in this browser');
             return;
         }
+        bluetoothSyncInstance.dismissed = false;
         showBluetoothModal('export');
         const pin = bluetoothSyncInstance.generatePin();
         bluetoothSyncInstance.currentPin = pin;
@@ -582,6 +949,7 @@ async function handleBluetoothExport() {
             progressText.textContent = '0%';
         }
         const includeSettings = document.getElementById('bluetooth-export-settings-checkbox').checked;
+        window.SyncLive.setIncludeSettings('bluetooth', includeSettings);
         const gameData = getGameDataForExport(includeSettings);
         const result = await bluetoothSyncInstance.exportDataViaBluetooth(gameData, (progress) => {
             if (progressBar && progressText && progressBarFill) {
@@ -598,13 +966,19 @@ async function handleBluetoothExport() {
             }
             document.getElementById('bluetooth-device-name').textContent = `${window.i18n ? window.i18n.t('connected') : 'Connected'}: ${result.device}`;
             setTimeout(() => {
-                alert(window.i18n ? window.i18n.t('bluetoothExportSuccess') : 'Bluetooth export successful!');
-                bluetoothSyncInstance.disconnect();
+                if (!bluetoothSyncInstance.dismissed) {
+                    alert(window.i18n ? window.i18n.t('bluetoothExportSuccess') : 'Bluetooth export successful!');
+                }
                 hideBluetoothModal();
             }, 1000);
         }
     } catch (error) {
         console.error('Bluetooth export error:', error);
+        if (bluetoothSyncInstance.dismissed) {
+            bluetoothSyncInstance.dismissed = false;
+            hideBluetoothModal();
+            return;
+        }
         alert((window.i18n ? window.i18n.t('bluetoothExportFailed') : 'Bluetooth export failed') + ': ' + error.message);
         showBluetoothModal('select');
     }
@@ -619,10 +993,16 @@ async function handleBluetoothImport() {
             alert(window.i18n ? window.i18n.t('bluetoothNotSupported') : 'Bluetooth is not supported in this browser');
             return;
         }
+        bluetoothSyncInstance.dismissed = false;
         showBluetoothModal('import');
         await verifyPinAndImport();
     } catch (error) {
         console.error('Bluetooth import error:', error);
+        if (bluetoothSyncInstance.dismissed) {
+            bluetoothSyncInstance.dismissed = false;
+            hideBluetoothModal();
+            return;
+        }
         alert((window.i18n ? window.i18n.t('bluetoothImportFailed') : 'Bluetooth import failed') + ': ' + error.message);
         showBluetoothModal('select');
     }
@@ -633,6 +1013,8 @@ async function verifyPinAndImport() {
             alert(window.i18n ? window.i18n.t('bluetoothModuleError') : 'Bluetooth module error');
             return;
         }
+        const importCheckbox = document.getElementById('bluetooth-import-settings-checkbox');
+        window.SyncLive.setIncludeSettings('bluetooth', importCheckbox ? importCheckbox.checked : true);
         const progressBar = document.getElementById('bluetooth-import-progress');
         const progressText = document.getElementById('bluetooth-import-progress-text');
         const progressBarFill = progressBar ? progressBar.querySelector('.bg-green-600') : null;
@@ -658,8 +1040,15 @@ async function verifyPinAndImport() {
             progressBarFill.style.width = '100%';
         }
         if (importedData) {
-            applyImportedData(importedData);
-            alert(window.i18n ? window.i18n.t('bluetoothImportSuccess') : 'Bluetooth import successful!');
+            window.__remoteSyncApply = true;
+            try {
+                applyImportedData(importedData);
+            } finally {
+                window.__remoteSyncApply = false;
+            }
+            if (!bluetoothSyncInstance.dismissed) {
+                alert(window.i18n ? window.i18n.t('bluetoothImportSuccess') : 'Bluetooth import successful!');
+            }
             hideBluetoothModal();
             if (typeof loadGameState === 'function') {
                 loadGameState();
@@ -667,11 +1056,16 @@ async function verifyPinAndImport() {
         }
     } catch (error) {
         console.error('Bluetooth import error:', error);
+        if (bluetoothSyncInstance.dismissed) {
+            hideBluetoothModal();
+            return;
+        }
         alert((window.i18n ? window.i18n.t('bluetoothImportFailed') : 'Bluetooth import failed') + ': ' + error.message);
         showBluetoothModal('select');
     }
 }
 function showBluetoothModal(mode) {
+    updateBluetoothSelectPanel();
     const modal = document.getElementById('bluetooth-modal');
     const selectSection = document.getElementById('bluetooth-select-section');
     const exportSection = document.getElementById('bluetooth-export-section');

@@ -1,4 +1,4 @@
-const i18nVersion = '1.6';
+const i18nVersion = '1.7';
 window.i18nVersion = i18nVersion;
 const translations = {
     zh: {
@@ -146,6 +146,9 @@ const translations = {
         mediumScore: '中',
         low: '低',
         loading: '加载中...',
+        loadingFailed: '资源加载失败',
+        loadingFailedDetail: '请检查网络连接后刷新页面',
+        reloadPage: '重新加载',
         error: '错误',
         success: '成功',
         info: '信息',
@@ -263,6 +266,11 @@ const translations = {
         receivingBytes: '接收中: {bytes} 字节',
         receivingBytesTotal: '接收中: {bytes} / {total} 字节',
         includeSettings: '包含设置数据',
+        disconnectConnection: '断开连接',
+        bluetoothConnectedBadge: '蓝牙已连接',
+        webrtcConnectedBadge: '局域网已连接',
+        syncLiveHint: '连接保持中，游戏状态与设置更改将自动同步',
+        liveSyncData: '实时同步数据',
         aiApiSettings: 'AI',
         aiApiSettingsItem: 'API设置',
         aiApiBaseUrl: 'API Base URL',
@@ -457,6 +465,9 @@ const translations = {
         mediumScore: 'Medium',
         low: 'Low',
         loading: 'Loading...',
+        loadingFailed: 'Failed to load resources',
+        loadingFailedDetail: 'Check your network connection and refresh the page',
+        reloadPage: 'Reload',
         error: 'Error',
         success: 'Success',
         info: 'Info',
@@ -574,6 +585,11 @@ const translations = {
         receivingBytes: 'Receiving: {bytes} bytes',
         receivingBytesTotal: 'Receiving: {bytes} / {total} bytes',
         includeSettings: 'Include settings data',
+        disconnectConnection: 'Disconnect',
+        bluetoothConnectedBadge: 'Bluetooth connected',
+        webrtcConnectedBadge: 'LAN connected',
+        syncLiveHint: 'Connection active. Game and setting changes sync automatically.',
+        liveSyncData: 'Live sync data',
         aiApiSettings: 'AI',
         aiApiSettingsItem: 'API Settings',
         aiApiBaseUrl: 'API Base URL',
@@ -772,6 +788,9 @@ function updateDynamicContent() {
         if (window.renderKeybindingsList && document.getElementById('keybindings-list')) {
             window.renderKeybindingsList();
         }
+    }
+    if (window.SyncIndicator) {
+        window.SyncIndicator.refresh();
     }
     updateLanguageSelector();
     updateThemeSelector();
