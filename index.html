@@ -6,16 +6,87 @@
     <link rel="icon" href="./icon.png">
     <title>2048 Game</title>
     <script>
+        document.documentElement.classList.add('loading-active');
+        window.SETTING_PREFIX = '2048-setting-';
+        window.SETTING_LEGACY_KEYS = {
+            '2048-theme': '2048-setting-theme',
+            'customTheme': '2048-setting-custom-theme',
+            '2048-language': '2048-setting-language',
+            '2048-gpu-acceleration': '2048-setting-gpu-acceleration',
+            '2048-tile-animation': '2048-setting-tile-animation',
+            '2048-tile-appear-animation': '2048-setting-tile-appear-animation',
+            '2048-tile-move-animation': '2048-setting-tile-move-animation',
+            '2048-tile-merge-animation': '2048-setting-tile-merge-animation',
+            '2048-vibration': '2048-setting-vibration',
+            '2048-vibration-merge': '2048-setting-vibration-merge',
+            '2048-vibration-win': '2048-setting-vibration-win',
+            '2048-vibration-loss': '2048-setting-vibration-loss',
+            '2048-ai-config': '2048-setting-ai-config'
+        };
+        window.SettingStore = {
+            migrate: function() {
+                for (var legacy in window.SETTING_LEGACY_KEYS) {
+                    var next = window.SETTING_LEGACY_KEYS[legacy];
+                    if (localStorage.getItem(next) === null) {
+                        var legacyValue = localStorage.getItem(legacy);
+                        if (legacyValue !== null) {
+                            localStorage.setItem(next, legacyValue);
+                        }
+                    }
+                }
+            },
+            resolveKey: function(key) {
+                return window.SETTING_LEGACY_KEYS[key] || key;
+            },
+            keys: function() {
+                var result = [];
+                for (var i = 0; i < localStorage.length; i++) {
+                    var key = localStorage.key(i);
+                    if (key && key.indexOf(window.SETTING_PREFIX) === 0) {
+                        result.push(key);
+                    }
+                }
+                return result;
+            },
+            getAll: function() {
+                var result = {};
+                this.keys().forEach(function(key) {
+                    result[key] = localStorage.getItem(key);
+                });
+                return result;
+            },
+            set: function(key, value) {
+                localStorage.setItem(this.resolveKey(key), value);
+            },
+            get: function(key) {
+                return localStorage.getItem(this.resolveKey(key));
+            },
+            remove: function(key) {
+                localStorage.removeItem(this.resolveKey(key));
+            },
+            removeAll: function() {
+                this.keys().forEach(function(key) {
+                    localStorage.removeItem(key);
+                });
+                for (var legacy in window.SETTING_LEGACY_KEYS) {
+                    localStorage.removeItem(legacy);
+                }
+            }
+        };
+        try {
+            window.SettingStore.migrate();
+        } catch (e) {}
         (function() {
             try {
-                var savedTheme = localStorage.getItem('2048-theme') || 'auto';
+                var savedTheme = localStorage.getItem('2048-setting-theme') || 'auto';
                 var isDark = false;
                 if (savedTheme === 'dark') isDark = true;
                 else if (savedTheme === 'light') isDark = false;
+                else if (savedTheme === 'custom') isDark = false;
                 else isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                 if (isDark) document.documentElement.classList.add('dark');
                 if (savedTheme === 'custom') {
-                    var raw = localStorage.getItem('customTheme');
+                    var raw = localStorage.getItem('2048-setting-custom-theme');
                     if (raw) {
                         var data = JSON.parse(raw);
                         function op2hex(op) {
@@ -43,7 +114,7 @@
         })();
         (function() {
             try {
-                var savedLang = localStorage.getItem('2048-language') || 'auto';
+                var savedLang = localStorage.getItem('2048-setting-language') || 'auto';
                 var lang = savedLang;
                 if (lang === 'auto') {
                     var browserLang = (navigator.language || navigator.userLanguage || '').split('-')[0];
@@ -66,7 +137,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
     <script src="./features/module-loader.js"></script>
     <script>
-        const gameVersion = '2.6.0';
+        const gameVersion = '2.7.0';
         window.gameVersion = gameVersion;
         function loadCssVersion() {
             try {
@@ -81,7 +152,7 @@
             winningValue: 2048, // Winning target value
             touchThreshold: 10, // Minimum touch swipe distance
             maxUndoSteps: 10, // Maximum undo steps
-            animationDuration: 150, // Tile movement animation duration (milliseconds)
+            animationDuration: 100, // Tile movement animation duration (milliseconds)
             aiDefaultFourProbability: 0.1, // AI simulation default 4 appearance probability
             difficultySettings: { // Difficulty settings
                 easy: { // Easy
@@ -147,6 +218,65 @@
             }
         }
         window.settingsManager = new SettingsManager();
+        const defaultKeyBindings = {
+            up: 'w',
+            down: 's',
+            left: 'a',
+            right: 'd',
+            pause: 'p',
+            undo: 'z',
+            restart: 'r',
+            newGame: 'n',
+            endless: 'e',
+            grid: 'g',
+            aiAnalyze: 'l'
+        };
+        const keyBindingActions = [
+            { action: 'up', key: 'kbUp' },
+            { action: 'down', key: 'kbDown' },
+            { action: 'left', key: 'kbLeft' },
+            { action: 'right', key: 'kbRight' },
+            { action: 'pause', key: 'kbPause' },
+            { action: 'undo', key: 'kbUndo' },
+            { action: 'restart', key: 'restart' },
+            { action: 'newGame', key: 'kbNewGame' },
+            { action: 'endless', key: 'endlessMode' },
+            { action: 'grid', key: 'kbGrid' },
+            { action: 'aiAnalyze', key: 'aiAiAnalysis' }
+        ];
+        let keyBindings = { ...defaultKeyBindings };
+        function loadKeyBindings() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('2048-setting-keybindings'));
+                if (saved) {
+                    Object.keys(defaultKeyBindings).forEach(action => {
+                        if (typeof saved[action] === 'string') {
+                            keyBindings[action] = saved[action];
+                        }
+                    });
+                }
+            } catch (e) {}
+        }
+        function saveKeyBindings() {
+            localStorage.setItem('2048-setting-keybindings', JSON.stringify(keyBindings));
+        }
+        loadKeyBindings();
+        function formatKeyName(k) {
+            if (!k) return window.i18n ? i18n.t('notSet') : '未设置';
+            const nameMap = {
+                ' ': 'Space',
+                'escape': 'Esc',
+                'arrowup': '↑',
+                'arrowdown': '↓',
+                'arrowleft': '←',
+                'arrowright': '→',
+                'enter': 'Enter',
+                'tab': 'Tab',
+                'backspace': 'Backspace',
+                'delete': 'Del'
+            };
+            return nameMap[k] || k.toUpperCase();
+        }
     </script>
     <script>
         window.modulesReadyPromise = ModuleLoader.loadAll().then(() => {
@@ -169,7 +299,7 @@
             ModuleLoader.load('customSelect', null, {
                 moduleLoaded: false
             });
-            ModuleLoader.load('customTheme', {
+            ModuleLoader.load('2048-setting-custom-theme', {
                 setupThemeCustomizer: typeof setupThemeCustomizer === 'function' ? setupThemeCustomizer : null,
                 loadCustomTheme: typeof loadCustomTheme === 'function' ? loadCustomTheme : null,
                 resetCustomTheme: typeof resetCustomTheme === 'function' ? resetCustomTheme : null
@@ -263,6 +393,25 @@
                     window.bluetoothSync.init();
                 }
             }
+            ModuleLoader.load('webrtcSync', typeof webrtcSync === 'object' ? webrtcSync : null, {
+                init: function() {
+                    console.warn('WebRTC sync module not found. Please ensure features/webrtc-sync.js file exists.');
+                    const webrtcSyncBtn = document.getElementById('webrtc-sync-button');
+                    if (webrtcSyncBtn) {
+                        webrtcSyncBtn.addEventListener('click', function() {
+                            alert(window.i18n && window.i18n.t ? i18n.t('webrtcModuleMissing') : '局域网同步模块未找到，请确保 features/webrtc-sync.js 文件存在。');
+                        });
+                    }
+                }
+            });
+            window.webrtcSync = window.webrtcSync || { init: function() {} };
+            if (window.webrtcSyncModuleLoaded !== false) {
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', function() { window.webrtcSync.init(); });
+                } else {
+                    window.webrtcSync.init();
+                }
+            }
         }).catch(err => console.error('[ModuleLoader] manifest load failed:', err));
     </script>
     <script>
@@ -301,7 +450,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const themeToggle = document.getElementById('theme-toggle');
             if (themeToggle) {
-                const savedTheme = localStorage.getItem('2048-theme') || 'auto';
+                const savedTheme = localStorage.getItem('2048-setting-theme') || 'auto';
                 themeToggle.value = savedTheme;
             }
         });
@@ -417,8 +566,8 @@
         </div>
         <div id="game-touch-area" class="mt-4 h-5 bg-transparent"></div>
         <div id="game-message" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="game-message-title" aria-modal="true">
-            <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0">
-                <h2 id="game-message-title" class="text-2xl font-bold text-secondary mb-4" data-i18n="gameWon">恭喜你获胜！</h2>
+            <div class="bg-white dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0">
+                <h2 id="game-message-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4" data-i18n="gameWon">恭喜你获胜！</h2>
                 <p id="game-message-text" class="text-secondary/80 mb-6" data-i18n="gameWonText">你达到了2048分，可以继续游戏挑战更高分数，或者重新开始。</p>
                 <button id="game-message-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50">
                     <i class="fa-solid fa-refresh mr-2"></i><span data-i18n="tryAgain">再玩一次</span>
@@ -426,8 +575,8 @@
             </div>
         </div>
         <div id="pause-menu" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="pause-menu-title" aria-modal="true">
-            <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0">
-                <h2 id="pause-menu-title" class="text-2xl font-bold text-secondary mb-4" data-i18n="gamePaused">游戏暂停</h2>
+            <div class="bg-white dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0">
+                <h2 id="pause-menu-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4" data-i18n="gamePaused">游戏暂停</h2>
                 <div class="flex flex-col gap-4">
                     <button id="resume-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50">
                         <i class="fa-solid fa-play mr-2"></i><span>继续游戏</span>
@@ -445,7 +594,7 @@
         </div>
         <div id="settings-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="settings-modal-title" aria-modal="true">
             <div class="bg-gray-50 dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 scale-95 opacity-0">
-                <h2 id="settings-modal-title" class="text-2xl font-bold text-secondary mb-4">设置</h2>
+                <h2 id="settings-modal-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4">设置</h2>
                 <div class="flex flex-col gap-3">
                     <div class="setting-category">
                         <h3 class="text-base font-semibold text-secondary mb-2 text-left category-title flex items-center">
@@ -597,6 +746,15 @@
                                 </span>
                                 <i class="fa-solid fa-chevron-right text-xs"></i>
                             </button>
+                            <div class="border-b border-gray-200 dark:border-gray-700 my-2 mx-2"></div>
+                            <button id="webrtc-sync-button" class="flex items-center justify-between w-full px-4 py-3 text-gray-700 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-all duration-200 rounded-lg">
+                                <span class="flex items-center">
+                                    <i class="fa-solid fa-wifi w-5 mr-2"></i>
+                                    <span data-i18n="webrtcModalTitle">局域网同步</span>
+                                    <span class="ml-2 px-2 py-0.5 text-xs bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-full font-semibold shadow-sm dark:from-green-400 dark:to-teal-400 dark:text-gray-900">Beta</span>
+                                </span>
+                                <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </button>
                         </div>
                     </div>
                     <div class="setting-category">
@@ -608,6 +766,20 @@
                                 <span class="flex items-center">
                                     <i class="fa-solid fa-gear w-5 mr-2"></i>
                                     <span data-i18n="aiApiSettingsItem">API设置</span>
+                                </span>
+                                <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="setting-category">
+                        <h3 class="text-base font-semibold text-secondary mb-2 text-left category-title flex items-center">
+                            <i class="fa-solid fa-keyboard mr-2"></i><span data-i18n="operations">操作</span>
+                        </h3>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-2 shadow-sm">
+                            <button id="keybindings-button" class="flex items-center justify-between w-full px-4 py-3 text-gray-700 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-all duration-200 rounded-lg">
+                                <span class="flex items-center">
+                                    <i class="fa-solid fa-keyboard w-5 mr-2"></i>
+                                    <span data-i18n="keybindingsSettings">快捷键设置</span>
                                 </span>
                                 <i class="fa-solid fa-chevron-right text-xs"></i>
                             </button>
@@ -626,9 +798,9 @@
                 </div>
             </div>
         </div>
-        <div id="ai-settings-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="ai-settings-modal-title" aria-modal="true">
+        <div id="ai-settings-modal" data-no-autofocus="true" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="ai-settings-modal-title" aria-modal="true">
             <div class="bg-gray-50 dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-visible text-center shadow-xl transform transition-all duration-300 scale-95 opacity-0">
-                <h2 id="ai-settings-modal-title" class="text-2xl font-bold text-secondary mb-4" data-i18n="aiApiSettingsItem">API设置</h2>
+                <h2 id="ai-settings-modal-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4" data-i18n="aiApiSettingsItem">API设置</h2>
                 <div class="flex flex-col gap-4">
                     <div class="text-left">
                         <label for="ai-api-base-url" class="block text-sm font-medium text-gray-700 dark:text-dark-muted mb-1" data-i18n="aiApiBaseUrl">API Base URL</label>
@@ -669,6 +841,20 @@
                 </button>
             </div>
         </div>
+        <div id="keybindings-modal" data-no-autofocus="true" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="keybindings-modal-title" aria-modal="true">
+            <div class="bg-gray-50 dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 scale-95 opacity-0">
+                <h2 id="keybindings-modal-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4" data-i18n="keybindingsSettings">快捷键设置</h2>
+                <div id="keybindings-list" class="space-y-1 text-left"></div>
+                <p class="text-xs text-secondary/60 dark:text-dark-muted mt-3" data-i18n="keybindingsTip">方向键与 Esc 始终可用；点击按键按钮后按下新键即可修改，按 Esc 取消。</p>
+                <div class="flex justify-center gap-2 mt-6">
+                    <button id="reset-keybindings-button" class="px-6 py-2 text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-sm transition-colors flex items-center justify-center gap-2 min-w-[80px]"><i class="fa-solid fa-rotate-right"></i><span data-i18n="resetToDefault">重置默认</span></button>
+                    <button id="close-keybindings-button" class="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-md text-sm transition-colors flex items-center justify-center gap-2 w-[100px]"><i class="fa-solid fa-check"></i><span data-i18n="done">完成</span></button>
+                </div>
+                <button id="close-keybindings-x" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl" title="关闭">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+        </div>
         <div id="custom-theme-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="custom-theme-modal-title" aria-modal="true">
             <div class="bg-gray-50 dark:bg-dark-surface rounded-lg max-w-2xl w-full max-h-[90vh] shadow-xl transform transition-all duration-300 scale-95 opacity-0 flex flex-col">
                 <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
@@ -688,7 +874,7 @@
                             <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="mainBg">主背景色</label>
                             <div class="flex items-center gap-2 mb-2">
                                 <input type="color" id="custom-bg-color" value="#faf8ef" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                <input type="text" id="custom-bg-color-text" value="#faf8ef" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                <input type="text" id="custom-bg-color-text" value="#faf8ef" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                             </div>
                             <div class="flex items-center gap-2">
                                 <label class="text-xs text-gray-500 dark:text-gray-400 w-12" data-i18n="opacity">不透明度</label>
@@ -700,7 +886,7 @@
                             <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="primaryColor">主色调</label>
                             <div class="flex items-center gap-2 mb-2">
                                 <input type="color" id="custom-primary-color" value="#faa31b" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                <input type="text" id="custom-primary-color-text" value="#faa31b" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                <input type="text" id="custom-primary-color-text" value="#faa31b" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                             </div>
                             <div class="flex items-center gap-2">
                                 <label class="text-xs text-gray-500 dark:text-gray-400 w-12" data-i18n="opacity">不透明度</label>
@@ -712,7 +898,7 @@
                             <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="secondaryColor">次色调</label>
                             <div class="flex items-center gap-2 mb-2">
                                 <input type="color" id="custom-secondary-color" value="#8f7a66" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                <input type="text" id="custom-secondary-color-text" value="#8f7a66" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                <input type="text" id="custom-secondary-color-text" value="#8f7a66" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                             </div>
                             <div class="flex items-center gap-2">
                                 <label class="text-xs text-gray-500 dark:text-gray-400 w-12" data-i18n="opacity">不透明度</label>
@@ -724,7 +910,7 @@
                             <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="gridColor">网格颜色</label>
                             <div class="flex items-center gap-2 mb-2">
                                 <input type="color" id="custom-grid-color" value="#bbada0" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                <input type="text" id="custom-grid-color-text" value="#bbada0" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                <input type="text" id="custom-grid-color-text" value="#bbada0" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                             </div>
                             <div class="flex items-center gap-2">
                                 <label class="text-xs text-gray-500 dark:text-gray-400 w-12" data-i18n="opacity">不透明度</label>
@@ -736,7 +922,7 @@
                             <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="cellEmptyColor">空单元格颜色</label>
                             <div class="flex items-center gap-2 mb-2">
                                 <input type="color" id="custom-cell-empty-color" value="#cdc1b4" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                <input type="text" id="custom-cell-empty-color-text" value="#cdc1b4" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                <input type="text" id="custom-cell-empty-color-text" value="#cdc1b4" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                             </div>
                             <div class="flex items-center gap-2">
                                 <label class="text-xs text-gray-500 dark:text-gray-400 w-12" data-i18n="opacity">不透明度</label>
@@ -748,7 +934,7 @@
                             <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="scrollbarColor">滚动条颜色</label>
                             <div class="flex items-center gap-2 mb-2">
                                 <input type="color" id="custom-scrollbar-color" value="#bbbbbb" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                <input type="text" id="custom-scrollbar-color-text" value="#bbbbbb" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                <input type="text" id="custom-scrollbar-color-text" value="#bbbbbb" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                             </div>
                             <div class="flex items-center gap-2">
                                 <label class="text-xs text-gray-500 dark:text-gray-400 w-12" data-i18n="opacity">不透明度</label>
@@ -765,7 +951,7 @@
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="modalBg">模态框背景色</label>
                                 <div class="flex items-center gap-2 mb-2">
                                     <input type="color" id="custom-modal-bg" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-modal-bg-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-modal-bg-text" value="#ffffff" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <label class="text-xs text-gray-500 dark:text-gray-400 w-12" data-i18n="opacity">不透明度</label>
@@ -777,7 +963,7 @@
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="modalText">模态框文字颜色</label>
                                 <div class="flex items-center gap-2 mb-2">
                                     <input type="color" id="custom-modal-text" value="#333333" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-modal-text-text" value="#333333" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-modal-text-text" value="#333333" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <label class="text-xs text-gray-500 dark:text-gray-400 w-12" data-i18n="opacity">不透明度</label>
@@ -794,224 +980,224 @@
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile2Bg">数字 2 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-2-bg" value="#eee4da" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-2-bg-text" value="#eee4da" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-2-bg-text" value="#eee4da" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile2Text">数字 2 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-2-text" value="#776e65" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-2-text-text" value="#776e65" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-2-text-text" value="#776e65" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile4Bg">数字 4 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-4-bg" value="#ede0c8" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-4-bg-text" value="#ede0c8" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-4-bg-text" value="#ede0c8" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile4Text">数字 4 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-4-text" value="#776e65" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-4-text-text" value="#776e65" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-4-text-text" value="#776e65" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile8Bg">数字 8 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-8-bg" value="#f2b179" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-8-bg-text" value="#f2b179" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-8-bg-text" value="#f2b179" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile8Text">数字 8 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-8-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-8-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-8-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile16Bg">数字 16 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-16-bg" value="#f59563" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-16-bg-text" value="#f59563" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-16-bg-text" value="#f59563" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile16Text">数字 16 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-16-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-16-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-16-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile32Bg">数字 32 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-32-bg" value="#f67c5f" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-32-bg-text" value="#f67c5f" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-32-bg-text" value="#f67c5f" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile32Text">数字 32 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-32-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-32-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-32-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile64Bg">数字 64 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-64-bg" value="#f65e3b" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-64-bg-text" value="#f65e3b" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-64-bg-text" value="#f65e3b" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile64Text">数字 64 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-64-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-64-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-64-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile128Bg">数字 128 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-128-bg" value="#edcf72" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-128-bg-text" value="#edcf72" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-128-bg-text" value="#edcf72" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile128Text">数字 128 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-128-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-128-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-128-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile256Bg">数字 256 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-256-bg" value="#edcc61" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-256-bg-text" value="#edcc61" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-256-bg-text" value="#edcc61" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile256Text">数字 256 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-256-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-256-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-256-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile512Bg">数字 512 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-512-bg" value="#edc850" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-512-bg-text" value="#edc850" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-512-bg-text" value="#edc850" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile512Text">数字 512 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-512-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-512-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-512-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile1024Bg">数字 1024 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-1024-bg" value="#edc53f" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-1024-bg-text" value="#edc53f" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-1024-bg-text" value="#edc53f" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile1024Text">数字 1024 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-1024-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-1024-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-1024-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile2048Bg">数字 2048 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-2048-bg" value="#edc22e" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-2048-bg-text" value="#edc22e" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-2048-bg-text" value="#edc22e" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile2048Text">数字 2048 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-2048-text" value="#f9f6f2" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-2048-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-2048-text-text" value="#f9f6f2" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile4096Bg">数字 4096 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-4096-bg" value="#e65100" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-4096-bg-text" value="#e65100" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-4096-bg-text" value="#e65100" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile4096Text">数字 4096 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-4096-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-4096-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-4096-text-text" value="#ffffff" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile8192Bg">数字 8192 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-8192-bg" value="#bf360c" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-8192-bg-text" value="#bf360c" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-8192-bg-text" value="#bf360c" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile8192Text">数字 8192 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-8192-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-8192-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-8192-text-text" value="#ffffff" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile16384Bg">数字 16384 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-16384-bg" value="#880e4f" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-16384-bg-text" value="#880e4f" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-16384-bg-text" value="#880e4f" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile16384Text">数字 16384 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-16384-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-16384-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-16384-text-text" value="#ffffff" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile32768Bg">数字 32768 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-32768-bg" value="#4a148c" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-32768-bg-text" value="#4a148c" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-32768-bg-text" value="#4a148c" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tile32768Text">数字 32768 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-32768-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-32768-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-32768-text-text" value="#ffffff" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tileSuperBg">更大数字 背景色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-super-bg" value="#311b92" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-super-bg-text" value="#311b92" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-super-bg-text" value="#311b92" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="text-sm text-gray-700 dark:text-dark-muted mb-1" data-i18n="tileSuperText">更大数字 文字颜色</label>
                                 <div class="flex items-center gap-2">
                                     <input type="color" id="custom-tile-super-text" value="#ffffff" class="w-10 h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <input type="text" id="custom-tile-super-text-text" value="#ffffff" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm">
+                                    <input type="text" id="custom-tile-super-text-text" value="#ffffff" class="flex-1 px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md text-sm">
                                 </div>
                             </div>
                         </div>
@@ -1082,8 +1268,8 @@
             </div>
         </div>
         <div id="data-transfer-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="data-transfer-modal-title" aria-modal="true">
-            <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0 relative">
-                <h2 id="data-transfer-modal-title" class="text-2xl font-bold text-secondary mb-4" data-i18n="dataTransfer">数据管理</h2>
+            <div class="bg-white dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0 relative">
+                <h2 id="data-transfer-modal-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4" data-i18n="dataTransfer">数据管理</h2>
                 <button id="close-data-modal" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl dark:text-dark-muted dark:hover:text-white" title="关闭设置">
                     <i class="fa-solid fa-times"></i>
                 </button>
@@ -1114,11 +1300,16 @@
                         </select>
                     </div>
                 </div>
+                <div class="flex justify-start">
+                    <button id="export-link-button" class="text-primary hover:text-primary/80 text-sm flex items-center gap-1 transition-colors duration-200 focus:outline-none">
+                        <i class="fa-solid fa-link"></i><span data-i18n="exportAsLink">导出为链接</span>
+                    </button>
+                </div>
             </div>
         </div>
         <div id="bluetooth-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="bluetooth-modal-title" aria-modal="true">
-            <div class="bluetooth-content bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl relative">
-                <h2 id="bluetooth-modal-title" class="text-2xl font-bold text-secondary mb-4" data-i18n="bluetoothModalTitle">蓝牙同步</h2>
+            <div class="bluetooth-content bg-white dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl relative">
+                <h2 id="bluetooth-modal-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4" data-i18n="bluetoothModalTitle">蓝牙同步</h2>
                 <button id="close-bluetooth-modal" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl dark:text-dark-muted dark:hover:text-white" title="关闭">
                     <i class="fa-solid fa-times"></i>
                 </button>
@@ -1159,7 +1350,7 @@
                         </div>
                     </div>
                     <div class="flex justify-center">
-                        <button id="back-to-select-from-export" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        <button id="back-to-select-from-export" class="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text dark:focus:ring-gray-600 text-gray-800 font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
                             <i class="fa-solid fa-arrow-left mr-2"></i><span data-i18n="cancel">返回</span>
                         </button>
                     </div>
@@ -1178,10 +1369,67 @@
                         </div>
                     </div>
                     <div class="flex justify-center">
-                        <button id="back-to-select-from-import" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        <button id="back-to-select-from-import" class="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text dark:focus:ring-gray-600 text-gray-800 font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
                             <i class="fa-solid fa-arrow-left mr-2"></i><span data-i18n="cancel">返回</span>
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div id="webrtc-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="webrtc-modal-title" aria-modal="true">
+            <div class="bg-white dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl relative transform transition-all duration-300 scale-95 opacity-0">
+                <h2 id="webrtc-modal-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4" data-i18n="webrtcModalTitle">局域网同步</h2>
+                <button id="close-webrtc-modal" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl dark:text-dark-muted dark:hover:text-white" title="关闭">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+                <div id="webrtc-select-section">
+                    <p class="text-gray-700 dark:text-dark-muted mb-4" data-i18n="webrtcSelectDesc">与同一 Wi-Fi/热点下的另一台设备直连同步，无需服务器。双方互换连接码即可配对。</p>
+                    <div class="flex flex-col gap-4 mb-6">
+                        <button id="webrtc-host-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-md shadow-md transition-all duration-200">
+                            <i class="fa-solid fa-tower-broadcast mr-2"></i><span data-i18n="webrtcCreateConnection">创建连接</span>
+                        </button>
+                        <button id="webrtc-join-button" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-4 px-6 rounded-md shadow-md transition-all duration-200">
+                            <i class="fa-solid fa-link mr-2"></i><span data-i18n="webrtcJoinConnection">加入连接</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="webrtc-host-section" style="display: none;">
+                    <p class="text-gray-600 dark:text-dark-muted text-sm mb-2" data-i18n="webrtcHostStep1">第 1 步：将此连接码发给对方</p>
+                    <textarea id="webrtc-offer-code" readonly class="w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2"></textarea>
+                    <button id="webrtc-copy-offer" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 text-sm font-bold py-2 px-4 rounded-md mb-4">
+                        <i class="fa-solid fa-copy mr-1"></i><span data-i18n="webrtcCopyOffer">复制连接码</span>
+                    </button>
+                    <p class="text-gray-600 dark:text-dark-muted text-sm mb-2" data-i18n="webrtcHostStep2">第 2 步：粘贴对方的应答码</p>
+                    <textarea id="webrtc-answer-input" class="w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2" placeholder="粘贴对方的应答码"></textarea>
+                    <button id="webrtc-accept-answer-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-md mb-4"><span data-i18n="webrtcFinishConnection">完成连接</span></button>
+                    <p id="webrtc-host-status" class="text-sm text-gray-500 dark:text-dark-muted whitespace-pre-line mb-4"></p>
+                    <button id="webrtc-host-back" class="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 font-bold py-3 px-6 rounded-md"><span data-i18n="cancel">返回</span></button>
+                </div>
+                <div id="webrtc-join-section" style="display: none;">
+                    <p class="text-gray-600 dark:text-dark-muted text-sm mb-2" data-i18n="webrtcJoinPasteOffer">粘贴对方的连接码</p>
+                    <textarea id="webrtc-offer-input" class="w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2" placeholder="粘贴对方的连接码"></textarea>
+                    <button id="webrtc-generate-answer-button" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-6 rounded-md mb-4"><span data-i18n="webrtcGenerateAnswer">生成应答码</span></button>
+                    <div id="webrtc-answer-box" style="display: none;">
+                        <p class="text-gray-600 dark:text-dark-muted text-sm mb-2" data-i18n="webrtcJoinStep2">将此应答码发回给对方</p>
+                        <textarea id="webrtc-answer-code" readonly class="w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2"></textarea>
+                        <button id="webrtc-copy-answer" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 text-sm font-bold py-2 px-4 rounded-md mb-4">
+                            <i class="fa-solid fa-copy mr-1"></i><span data-i18n="webrtcCopyAnswer">复制应答码</span>
+                        </button>
+                    </div>
+                    <p id="webrtc-join-status" class="text-sm text-gray-500 dark:text-dark-muted whitespace-pre-line mb-4"></p>
+                    <button id="webrtc-join-back" class="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 font-bold py-3 px-6 rounded-md"><span data-i18n="cancel">返回</span></button>
+                </div>
+                <div id="webrtc-connected-section" style="display: none;">
+                    <p class="text-green-600 font-bold mb-4" data-i18n="webrtcConnected" data-i18n-mode="icon+text"><i class="fa-solid fa-circle-check mr-1"></i>已建立连接</p>
+                    <div class="flex items-center justify-center gap-2 mb-4">
+                        <input type="checkbox" id="webrtc-settings-checkbox" class="w-4 h-4 text-primary bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded" checked>
+                        <label for="webrtc-settings-checkbox" class="text-sm text-gray-700 dark:text-dark-text" data-i18n="includeSettings">包含设置数据</label>
+                    </div>
+                    <button id="webrtc-send-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-md shadow-md mb-4">
+                        <i class="fa-solid fa-paper-plane mr-2"></i><span data-i18n="webrtcSendData">发送游戏数据</span>
+                    </button>
+                    <p id="webrtc-connected-status" class="text-sm text-gray-500 dark:text-dark-muted mb-4"></p>
+                    <button id="webrtc-connected-back" class="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 font-bold py-3 px-6 rounded-md"><span data-i18n="cancel">返回</span></button>
                 </div>
             </div>
         </div>
@@ -1291,7 +1539,7 @@
                         vibrationToggle.disabled = true;
                         vibrationToggle.checked = false;
                         gameState.vibrationEnabled = false;
-                        localStorage.setItem('2048-vibration', gameState.vibrationEnabled);
+                        localStorage.setItem('2048-setting-vibration', gameState.vibrationEnabled);
                         vibrationToggle.closest('.vibration-toggle-container').classList.add('opacity-50');
                         vibrationToggle.closest('.vibration-toggle-container').classList.remove('mb-2');
                         if (vibrationWarningContainer) {
@@ -1321,7 +1569,7 @@
                         vibrationToggle.disabled = false;
                         vibrationToggle.checked = true;
                         gameState.vibrationEnabled = true;
-                        localStorage.setItem('2048-vibration', gameState.vibrationEnabled);
+                        localStorage.setItem('2048-setting-vibration', gameState.vibrationEnabled);
                         vibrationToggle.closest('.vibration-toggle-container').classList.remove('opacity-50');
                         vibrationToggle.closest('.vibration-toggle-container').classList.add('mb-2');
                         if (vibrationWarningContainer) {
@@ -1502,7 +1750,7 @@
                     modal.querySelector('div').classList.remove('scale-95', 'opacity-0');
                     modal.querySelector('div').classList.add('scale-100', 'opacity-100');
                     const focusable = modal.querySelectorAll(focusableElements);
-                    if (focusable.length > 0) {
+                    if (focusable.length > 0 && !modal.dataset.noAutofocus) {
                         focusable[0].focus();
                     }
                     modal.addEventListener('keydown', handleModalKeyDown);
@@ -1604,7 +1852,7 @@
                         }
                     }
                     window.settingsManager.loadTo(gameState);
-                    const importedTheme = data.settings['2048-theme'];
+                    const importedTheme = data.settings['2048-setting-theme'];
                     if (importedTheme) {
                         if (importedTheme === 'auto') {
                             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -1631,7 +1879,7 @@
                             loadCustomTheme();
                         }
                     }
-                    const importedLanguage = data.settings['2048-language'];
+                    const importedLanguage = data.settings['2048-setting-language'];
                     if (importedLanguage && window.i18n) {
                         window.i18n.setLang(importedLanguage);
                     }
@@ -1850,7 +2098,8 @@
                 elements.gridContainer.appendChild(gridRow);
             }
         }
-        function generateRandomTile() {
+        let nextTileId = 0;
+        function generateRandomTile(animate = true) {
             const availableCells = [];
             for (let y = 0; y < gameState.gridRows; y++) {
                 for (let x = 0; x < gameState.gridCols; x++) {
@@ -1866,83 +2115,118 @@
                 gameState.grid[cell.y][cell.x] = {
                     value,
                     merged: false,
-                    new: true
+                    new: true,
+                    id: ++nextTileId
                 };
-                renderTile(cell.x, cell.y);
+                renderTile(cell.x, cell.y, animate);
                 return true;
             }
             return false;
         }
-        function renderTile(x, y, animate = true) {
-            const tile = gameState.grid[y][x];
-            if (!tile) return;
+        function getTilePosition(x, y) {
             const gapSize = isSmallScreen ? 'clamp(2px, 1.5vw, 4px)' : 'clamp(8px, 3vw, 16px)';
             const totalHorizontalGap = `(${gameState.gridCols} - 1) * ${gapSize}`;
             const totalVerticalGap = `(${gameState.gridRows} - 1) * ${gapSize}`;
             const tileSize = `calc((100% - ${totalHorizontalGap}) / ${gameState.gridCols})`;
             const tileHeight = `calc((100% - ${totalVerticalGap}) / ${gameState.gridRows})`;
-            const leftPos = `calc(${x} * (${tileSize} + ${gapSize}))`;
-            const topPos = `calc(${y} * (${tileHeight} + ${gapSize}))`;
-            let tileElement = elements.tileContainer.querySelector(`.tile[data-pos="${x}-${y}"]`);
+            return {
+                leftPos: `calc(${x} * (${tileSize} + ${gapSize}))`,
+                topPos: `calc(${y} * (${tileHeight} + ${gapSize}))`
+            };
+        }
+        function renderTile(x, y, animate = true) {
+            const tile = gameState.grid[y][x];
+            if (!tile) return;
+            if (!tile.id) tile.id = ++nextTileId;
+            const { leftPos, topPos } = getTilePosition(x, y);
+            let tileElement = elements.tileContainer.querySelector(`.tile[data-tile-id="${tile.id}"]`);
             if (!tileElement) {
                 tileElement = document.createElement('div');
+                tileElement.dataset.tileId = tile.id;
                 tileElement.dataset.pos = `${x}-${y}`;
-                elements.tileContainer.appendChild(tileElement);
-                tileElement.style.transition = 'none';
                 tileElement.style.left = leftPos;
                 tileElement.style.top = topPos;
+                tileElement.style.transition = 'none';
+                elements.tileContainer.appendChild(tileElement);
                 void tileElement.offsetWidth;
             }
-            const animationClass = gameState.tileAnimationEnabled && gameState.tileMoveAnimationEnabled && animate ? 'transition-all duration-150' : '';
-            tileElement.className = `tile tile-${tile.value} ${gameState.tileAnimationEnabled && gameState.tileAppearAnimationEnabled && tile.new ? 'tile-appear' : ''} ${tile.value > 32768 ? 'tile-super' : ''} ${tile.value >= 10000 ? 'tile-5digit' : ''} ${gameState.gpuAccelerationEnabled ? 'gpu-accelerated' : ''} ${animationClass}`;
+            const appearClass = gameState.tileAnimationEnabled && gameState.tileAppearAnimationEnabled && tile.new ? 'tile-appear' : '';
+            const mergeClass = gameState.tileAnimationEnabled && gameState.tileMergeAnimationEnabled && tile.mergedAnimation ? 'tile-merge' : '';
+            tileElement.className = `tile tile-${tile.value} ${appearClass} ${mergeClass} ${tile.value > 32768 ? 'tile-super' : ''} ${tile.value >= 10000 ? 'tile-5digit' : ''} ${gameState.gpuAccelerationEnabled ? 'gpu-accelerated' : ''}`;
             tileElement.textContent = tile.value;
             if (gameState.tileAnimationEnabled && gameState.tileMoveAnimationEnabled && animate) {
-                tileElement.style.transition = 'left 200ms cubic-bezier(0.34, 1.56, 0.64, 1), top 200ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1)'
+                tileElement.style.transition = 'left 100ms ease-in-out, top 100ms ease-in-out, transform 100ms ease-in-out';
+            } else {
+                tileElement.style.transition = 'none';
             }
             tileElement.style.left = leftPos;
             tileElement.style.top = topPos;
-            if (tile.new) {
-                setTimeout(() => {
-                    tile.new = false;
-                }, 200);
-            }
+            tileElement.dataset.pos = `${x}-${y}`;
         }
         function renderAllTiles(animate = true) {
             const currentTiles = {};
             const tileElements = elements.tileContainer.querySelectorAll('.tile');
             tileElements.forEach(tile => {
-                const pos = tile.dataset.pos;
-                currentTiles[pos] = tile;
+                const id = tile.dataset.tileId;
+                currentTiles[id] = tile;
             });
-            const preservedPositions = new Set();
+            const preservedIds = new Set();
+            const slidingTiles = [];
             for (let y = 0; y < gameState.gridRows; y++) {
                 for (let x = 0; x < gameState.gridCols; x++) {
-                    if (gameState.grid[y][x]) {
-                        const posKey = `${x}-${y}`;
-                        preservedPositions.add(posKey);
-                        if (removeTileTimers[posKey]) {
-                            clearTimeout(removeTileTimers[posKey]);
-                            delete removeTileTimers[posKey];
+                    const tile = gameState.grid[y][x];
+                    if (tile) {
+                        if (!tile.id) tile.id = ++nextTileId;
+                        const tileId = String(tile.id);
+                        preservedIds.add(tileId);
+                        if (removeTileTimers[tileId]) {
+                            clearTimeout(removeTileTimers[tileId]);
+                            delete removeTileTimers[tileId];
                         }
+                        if (animate && tile.mergedFrom) {
+                            tile.mergedFrom.forEach(src => slidingTiles.push({ src, toX: x, toY: y }));
+                        }
+                        tile.mergedFrom = null;
                         renderTile(x, y, animate);
                     }
                 }
             }
-            Object.keys(currentTiles).forEach(pos => {
-                if (!preservedPositions.has(pos)) {
-                    const tile = currentTiles[pos];
-                    if (removeTileTimers[pos]) {
-                        clearTimeout(removeTileTimers[pos]);
+            slidingTiles.forEach(({ src, toX, toY }) => {
+                const el = currentTiles[String(src.id)];
+                if (el) {
+                    const srcId = String(src.id);
+                    preservedIds.add(srcId);
+                    if (removeTileTimers[srcId]) {
+                        clearTimeout(removeTileTimers[srcId]);
+                        delete removeTileTimers[srcId];
+                    }
+                    const pos = getTilePosition(toX, toY);
+                    el.style.transition = 'left 100ms ease-in-out, top 100ms ease-in-out';
+                    el.style.left = pos.leftPos;
+                    el.style.top = pos.topPos;
+                    removeTileTimers[srcId] = setTimeout(() => {
+                        if (el.parentNode === elements.tileContainer) {
+                            elements.tileContainer.removeChild(el);
+                        }
+                        delete removeTileTimers[srcId];
+                    }, 300);
+                }
+            });
+            Object.keys(currentTiles).forEach(id => {
+                if (!preservedIds.has(id)) {
+                    const tile = currentTiles[id];
+                    if (removeTileTimers[id]) {
+                        clearTimeout(removeTileTimers[id]);
                     }
                     if (gameState.tileAnimationEnabled && gameState.tileMoveAnimationEnabled && animate) {
-                        tile.style.transition = 'opacity 200ms cubic-bezier(0.34, 1.56, 0.64, 1)'
+                        tile.style.transition = 'opacity 100ms ease-in-out';
                         tile.style.opacity = '0';
-                        removeTileTimers[pos] = setTimeout(() => {
+                        removeTileTimers[id] = setTimeout(() => {
                             if (tile.parentNode === elements.tileContainer) {
                                 elements.tileContainer.removeChild(tile);
                             }
-                            delete removeTileTimers[pos];
-                        }, 150);
+                            delete removeTileTimers[id];
+                        }, 100);
                     } else {
                         if (tile.parentNode === elements.tileContainer) {
                             elements.tileContainer.removeChild(tile);
@@ -1960,15 +2244,17 @@
             if (gameState.isPaused || gameState.gameOver || !elements.gameMessage.classList.contains('hidden') || !modal.classList.contains('ai-modal-closed')) return false;
             if (moveInProgress) return false;
             moveInProgress = true;
-            saveHistory();
             let moved = false;
             for (let y = 0; y < gameState.gridRows; y++) {
                 for (let x = 0; x < gameState.gridCols; x++) {
                     if (gameState.grid[y][x]) {
                         gameState.grid[y][x].merged = false;
+                        gameState.grid[y][x].new = false;
+                        gameState.grid[y][x].mergedAnimation = false;
                     }
                 }
             }
+            saveHistory();
             switch(direction) {
                 case 'up':
                     for (let x = 0; x < gameState.gridCols; x++) {
@@ -2061,38 +2347,24 @@
             }
             if (moved) {
                 if (gameState.tileAnimationEnabled) {
+                    generateRandomTile(true);
                     renderAllTiles(true);
                     if (mergeTimer) clearTimeout(mergeTimer);
                     mergeTimer = setTimeout(() => {
-                        if (gameState.tileAnimationEnabled && gameState.tileMergeAnimationEnabled) {
-                            for (let y = 0; y < gameState.gridRows; y++) {
-                                for (let x = 0; x < gameState.gridCols; x++) {
-                                    if (gameState.grid[y][x] && gameState.grid[y][x].mergedAnimation) {
-                                        const tileElement = elements.tileContainer.querySelector(`.tile[data-pos="${x}-${y}"]`);
-                                        if (tileElement) {
-                                            tileElement.classList.add('tile-merge');
-                                            setTimeout(() => {
-                                                if (gameState.grid[y][x]) {
-                                                    gameState.grid[y][x].mergedAnimation = false;
-                                                }
-                                            }, config.animationDuration);
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            for (let y = 0; y < gameState.gridRows; y++) {
-                                for (let x = 0; x < gameState.gridCols; x++) {
-                                    if (gameState.grid[y][x]) {
-                                        gameState.grid[y][x].mergedAnimation = false;
+                        for (let y = 0; y < gameState.gridRows; y++) {
+                            for (let x = 0; x < gameState.gridCols; x++) {
+                                if (gameState.grid[y][x] && gameState.grid[y][x].mergedAnimation) {
+                                    gameState.grid[y][x].mergedAnimation = false;
+                                    const tileElement = elements.tileContainer.querySelector(`.tile[data-tile-id="${gameState.grid[y][x].id}"]`);
+                                    if (tileElement) {
+                                        tileElement.classList.remove('tile-merge');
                                     }
                                 }
                             }
                         }
-                    }, 10);
+                    }, 300);
                     if (moveTimer) clearTimeout(moveTimer);
                     moveTimer = setTimeout(() => {
-                        generateRandomTile();
                         if (!gameState.gameWon) {
                             checkWin();
                         }
@@ -2103,10 +2375,10 @@
                         moveInProgress = false;
                     }, config.animationDuration);
                 } else {
+                    generateRandomTile(false);
                     renderAllTiles(false);
                     if (moveTimer) clearTimeout(moveTimer);
                     moveTimer = setTimeout(() => {
-                        generateRandomTile();
                         if (!gameState.gameWon) {
                             checkWin();
                         }
@@ -2141,6 +2413,8 @@
             }
         }
         function handleTileMerge(targetY, targetX, sourceY, sourceX) {
+            const sourceTile = gameState.grid[sourceY][sourceX];
+            const targetTile = gameState.grid[targetY][targetX];
             processMerge(gameState.grid, targetY, targetX, sourceY, sourceX, {
                 scoreMultiplier: config.difficultySettings[gameState.difficulty]?.scoreMultiplier || 1,
                 onScoreUpdate: (addedScore) => {
@@ -2153,7 +2427,8 @@
                     updateDocumentTitle();
                 },
                 onMergeComplete: () => {
-                    gameState.grid[targetY][targetX].mergedAnimation = true;
+                    targetTile.mergedAnimation = true;
+                    targetTile.mergedFrom = [sourceTile];
                     vibrate(50, 'merge');
                 }
             });
@@ -2333,6 +2608,7 @@
         elements.dataTransferModal = document.getElementById('data-transfer-modal');
         elements.exportDataButton = document.getElementById('export-data-button');
         elements.importDataButton = document.getElementById('import-data-button');
+        elements.exportLinkButton = document.getElementById('export-link-button');
         elements.dataTextarea = document.getElementById('data-textarea');
         elements.closeDataModal = document.getElementById('close-data-modal');
         function setupDataTransfer() {
@@ -2355,6 +2631,9 @@
             });
             elements.importDataButton.removeEventListener('click', handleImportClick);
             elements.importDataButton.addEventListener('click', handleImportClick);
+            elements.exportLinkButton.addEventListener('click', () => {
+                exportGameDataAsLink();
+            });
             elements.closeDataModal.addEventListener('click', () => {
                 const modal = document.getElementById('data-transfer-modal');
                 modal.classList.add('modal-exit-active');
@@ -2363,6 +2642,7 @@
                     modal.classList.remove('modal-exit-active', 'modal-enter', 'modal-enter-active');
                 }, 300);
             });
+            autoImportFromUrl();
         }
         window.addEventListener('load', setupDataTransfer);
         function saveGameState() {
@@ -2406,7 +2686,7 @@
             initGridContainer();
             elements.tileContainer.innerHTML = '';
             for (let i = 0; i < config.initialTiles; i++) {
-                generateRandomTile();
+                generateRandomTile(false);
             }
             updateDifficultyButtons();
             updateGridButtonState(Math.max(gridRows, gridCols));
@@ -2418,7 +2698,7 @@
             saveGameState();
         }
         function toggleTheme() {
-            const currentTheme = localStorage.getItem('2048-theme') || 'auto';
+            const currentTheme = localStorage.getItem('2048-setting-theme') || 'auto';
             const styleElement = document.getElementById('custom-theme-styles');
             if (styleElement) {
                 styleElement.remove();
@@ -2430,7 +2710,7 @@
                 newTheme = 'dark';
                 elements.themeToggle.querySelector('i').className = 'fa-solid fa-sun';
             } else if (currentTheme === 'dark' || currentTheme === 'auto') {
-                const hasCustomTheme = localStorage.getItem('customTheme') !== null;
+                const hasCustomTheme = localStorage.getItem('2048-setting-custom-theme') !== null;
                 if (hasCustomTheme) {
                     loadCustomTheme();
                     newTheme = 'custom';
@@ -2445,23 +2725,12 @@
                 newTheme = 'light';
                 elements.themeToggle.querySelector('i').className = 'fa-solid fa-moon';
             }
-            localStorage.setItem('2048-theme', newTheme);
+            localStorage.setItem('2048-setting-theme', newTheme);
         }
         function resetAllSettings() {
             if (confirm(i18n.t('confirmReset'))) {
-                localStorage.removeItem('2048-theme');
-                localStorage.removeItem('customTheme');
+                window.SettingStore.removeAll();
                 document.getElementById('custom-theme-button-container').classList.remove('visible');
-                localStorage.removeItem('2048-gpu-acceleration');
-                localStorage.removeItem('2048-tile-animation');
-                localStorage.removeItem('2048-tile-appear-animation');
-                localStorage.removeItem('2048-tile-move-animation');
-                localStorage.removeItem('2048-tile-merge-animation');
-                localStorage.removeItem('2048-vibration');
-                localStorage.removeItem('2048-vibration-merge');
-                localStorage.removeItem('2048-vibration-win');
-                localStorage.removeItem('2048-vibration-loss');
-                localStorage.removeItem('2048-language');
                 gameState.gpuAccelerationEnabled = true;
                 gameState.tileAnimationEnabled = true;
                 gameState.tileAppearAnimationEnabled = true;
@@ -2483,7 +2752,7 @@
                     window.themeMediaQueryListener.mediaQuery.removeEventListener('change', window.themeMediaQueryListener.handler);
                     window.themeMediaQueryListener = null;
                 }
-                localStorage.setItem('2048-theme', 'auto');
+                localStorage.setItem('2048-setting-theme', 'auto');
                 elements.themeToggle.value = 'auto';
                 const selectedValue = document.querySelector('.select-selected span');
                 const selectOptions = document.querySelectorAll('.select-item');
@@ -2568,43 +2837,95 @@
             setupThemeListeners();
             setupOtherListeners();
         }
+        function renderKeybindingsList() {
+            const list = document.getElementById('keybindings-list');
+            if (!list) return;
+            list.innerHTML = '';
+            keyBindingActions.forEach(({ action, key }) => {
+                const row = document.createElement('div');
+                row.className = 'flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors';
+                const labelSpan = document.createElement('span');
+                labelSpan.className = 'text-sm text-gray-700 dark:text-dark-text';
+                labelSpan.textContent = window.i18n ? i18n.t(key) : key;
+                const btn = document.createElement('button');
+                btn.className = 'px-3 py-1 min-w-[64px] bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white rounded-md text-sm font-mono transition-colors hover:bg-gray-300 dark:hover:bg-gray-500';
+                btn.textContent = formatKeyName(keyBindings[action]);
+                btn.dataset.action = action;
+                btn.addEventListener('click', () => startKeyCapture(action));
+                row.appendChild(labelSpan);
+                if (action === 'undo') {
+                    const wrap = document.createElement('span');
+                    wrap.className = 'flex items-center gap-1';
+                    const prefix = document.createElement('span');
+                    prefix.className = 'text-sm text-gray-500 dark:text-dark-muted font-mono';
+                    prefix.textContent = 'Ctrl/⌘ +';
+                    wrap.appendChild(prefix);
+                    wrap.appendChild(btn);
+                    row.appendChild(wrap);
+                } else {
+                    row.appendChild(btn);
+                }
+                list.appendChild(row);
+            });
+        }
+        function startKeyCapture(action) {
+            const list = document.getElementById('keybindings-list');
+            if (!list) return;
+            const btn = list.querySelector(`button[data-action="${action}"]`);
+            if (!btn) return;
+            btn.textContent = window.i18n ? i18n.t('pressKey') : '按下按键...';
+            btn.classList.add('bg-primary', 'text-white', 'animate-pulse');
+            const handler = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (['shift', 'control', 'alt', 'meta'].includes(e.key.toLowerCase())) return;
+                document.removeEventListener('keydown', handler, true);
+                if (e.key !== 'Escape') {
+                    const newKey = e.key.toLowerCase();
+                    Object.keys(keyBindings).forEach(a => {
+                        if (a !== action && keyBindings[a] === newKey) {
+                            keyBindings[a] = '';
+                        }
+                    });
+                    keyBindings[action] = newKey;
+                    saveKeyBindings();
+                }
+                renderKeybindingsList();
+            };
+            document.addEventListener('keydown', handler, true);
+        }
         function setupKeyboardListeners() {
             document.addEventListener('keydown', (e) => {
                 if (gameState.isPaused || gameState.gameOver || (gameState.gameWon && !gameState.isEndlessMode)) return;
-                if ([37, 38, 39, 40, 87, 65, 83, 68, 80, 27, 90, 72, 76].includes(e.keyCode)) {
-                    e.preventDefault();
-                }
-                let shouldPreventDefault = false;
-                if ([82, 78, 69, 71].includes(e.keyCode)) {
-                    e.preventDefault();
-                }
-                switch(e.keyCode) {
-                    case 38:
-                    case 87:
+                const key = e.key.toLowerCase();
+                const arrowMap = { arrowup: 'up', arrowdown: 'down', arrowleft: 'left', arrowright: 'right' };
+                let action = arrowMap[key];
+                if (!action && key === 'escape') action = 'pause';
+                if (!action) action = Object.keys(keyBindings).find(a => keyBindings[a] === key);
+                if (!action) return;
+                e.preventDefault();
+                switch(action) {
+                    case 'up':
                         move('up');
                         break;
-                    case 40:
-                    case 83:
+                    case 'down':
                         move('down');
                         break;
-                    case 37:
-                    case 65:
+                    case 'left':
                         move('left');
                         break;
-                    case 39:
-                    case 68:
+                    case 'right':
                         move('right');
                         break;
-                    case 80:
-                    case 27:
+                    case 'pause':
                         togglePause();
                         break;
-                    case 90:
+                    case 'undo':
                         if (e.ctrlKey || e.metaKey) {
                             undoMove();
                         }
                         break;
-                    case 82:
+                    case 'restart':
                         if (!e.ctrlKey && !e.metaKey && !e.altKey) {
                             if (gameState.score > 0 && confirm(i18n.t('confirmRestart'))) {
                                 initGame(gameState.isEndlessMode, gameState.gridRows, gameState.gridCols);
@@ -2613,7 +2934,7 @@
                             }
                         }
                         break;
-                    case 78:
+                    case 'newGame':
                         if (!e.ctrlKey && !e.metaKey && !e.altKey) {
                             const newGameText = i18n.t('newGame');
                             const confirmMessage = i18n.t('confirmModeSwitch', { mode: newGameText });
@@ -2624,7 +2945,7 @@
                             }
                         }
                         break;
-                    case 69:
+                    case 'endless':
                         if (!e.ctrlKey && !e.metaKey && !e.altKey) {
                             const endlessModeText = i18n.t('endlessMode');
                             const confirmMessage = i18n.t('confirmModeSwitch', { mode: endlessModeText });
@@ -2635,7 +2956,7 @@
                             }
                         }
                         break;
-                    case 71:
+                    case 'grid':
                         if (!e.ctrlKey && !e.metaKey && !e.altKey) {
                             if (gameState.score > 0 && confirm(i18n.t('confirmGridChange'))) {
                                 const currentIndex = [3, 4, 5].indexOf(gameState.gridSize);
@@ -2660,7 +2981,7 @@
                             }
                         }
                         break;
-                    case 76:
+                    case 'aiAnalyze':
                         if (!e.ctrlKey && !e.metaKey && !e.altKey) {
                             analyzeGameState();
                         }
@@ -2907,6 +3228,29 @@
             elements.closeSettingsButton.addEventListener('click', () => {
                 hideModal('settings-modal');
             });
+            const keybindingsButton = document.getElementById('keybindings-button');
+            if (keybindingsButton) {
+                keybindingsButton.addEventListener('click', () => {
+                    renderKeybindingsList();
+                    showModal('keybindings-modal');
+                });
+            }
+            const closeKeybindingsButton = document.getElementById('close-keybindings-button');
+            if (closeKeybindingsButton) {
+                closeKeybindingsButton.addEventListener('click', () => hideModal('keybindings-modal'));
+            }
+            const closeKeybindingsX = document.getElementById('close-keybindings-x');
+            if (closeKeybindingsX) {
+                closeKeybindingsX.addEventListener('click', () => hideModal('keybindings-modal'));
+            }
+            const resetKeybindingsButton = document.getElementById('reset-keybindings-button');
+            if (resetKeybindingsButton) {
+                resetKeybindingsButton.addEventListener('click', () => {
+                    keyBindings = { ...defaultKeyBindings };
+                    saveKeyBindings();
+                    renderKeybindingsList();
+                });
+            }
             elements.gpuAccelerationToggle = document.getElementById('gpu-acceleration');
             elements.gpuAccelerationToggle.checked = gameState.gpuAccelerationEnabled;
             elements.gpuAccelerationToggle.addEventListener('change', (e) => {
@@ -3065,15 +3409,15 @@
                         mediaQuery: themeMediaQuery,
                         handler: updateTheme
                     };
-                    localStorage.setItem('2048-theme', 'auto');
+                    localStorage.setItem('2048-setting-theme', 'auto');
                     document.getElementById('custom-theme-button-container').classList.remove('visible');
                 } else if (theme === 'custom') {
                     if (!window.customThemeLoaded) {
                         alert(i18n.t('customThemeModuleMissing'));
-                        this.value = localStorage.getItem('2048-theme');
+                        this.value = localStorage.getItem('2048-setting-theme');
                         return;
                     }
-                    localStorage.setItem('2048-theme', 'custom');
+                    localStorage.setItem('2048-setting-theme', 'custom');
                     document.getElementById('custom-theme-button-container').classList.add('visible');
                     document.documentElement.classList.remove('dark');
                     loadCustomTheme();
@@ -3082,7 +3426,7 @@
                     document.getElementById('custom-theme-button-container').classList.remove('visible');
                     const isDark = theme === 'dark';
                     document.documentElement.classList.toggle('dark', isDark);
-                    localStorage.setItem('2048-theme', theme);
+                    localStorage.setItem('2048-setting-theme', theme);
                 }
                 if (typeof updateThemeSelector === 'function') {
                     updateThemeSelector();
@@ -3117,7 +3461,7 @@
         }
         function loadGameState() {
             const savedState = localStorage.getItem('2048-game-state');
-            const savedTheme = localStorage.getItem('2048-theme');
+            const savedTheme = localStorage.getItem('2048-setting-theme');
             if (window.themeMediaQueryListener) {
                 window.themeMediaQueryListener.mediaQuery.removeEventListener('change', window.themeMediaQueryListener.handler);
                 window.themeMediaQueryListener = null;
@@ -3138,7 +3482,11 @@
             } else if (savedTheme === 'custom') {
                 if (!window.customThemeLoaded) {
                 elements.themeToggle.value = 'auto';
-                localStorage.setItem('2048-theme', 'auto');
+                localStorage.setItem('2048-setting-theme', 'auto');
+                const earlyStyle = document.getElementById('early-custom-theme');
+                if (earlyStyle) {
+                    earlyStyle.remove();
+                }
                 const themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
                     const updateTheme = (e) => {
                         document.documentElement.classList.toggle('dark', e.matches);
@@ -3153,6 +3501,7 @@
                 } else {
                     elements.themeToggle.value = 'custom';
                     document.getElementById('custom-theme-button-container').classList.add('visible');
+                    document.documentElement.classList.remove('dark');
                     if (typeof loadCustomTheme === 'function') loadCustomTheme();
                 }
             } else if (savedTheme === 'dark') {
@@ -3215,6 +3564,7 @@
         }
         function hideLoadingScreen() {
             const loadingScreen = document.getElementById('loading-screen');
+            document.documentElement.classList.remove('loading-active');
             if (loadingScreen) {
                 loadingScreen.classList.add('loading-hidden');
                 setTimeout(() => {
