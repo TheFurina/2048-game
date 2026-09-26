@@ -1,4 +1,4 @@
-const customSelectVersion = '1.1';
+const customSelectVersion = '1.2';
 window.customSelectVersion = customSelectVersion;
 (function() {
     try {
@@ -23,7 +23,7 @@ function initCustomSelects() {
         let nativeSelect;
         if (customSelect.parentElement.querySelector('#theme-toggle')) {
             nativeSelect = customSelect.parentElement.querySelector('#theme-toggle');
-            const savedTheme = localStorage.getItem('2048-theme') || 'auto';
+            const savedTheme = localStorage.getItem('2048-setting-theme') || 'auto';
             nativeSelect.value = savedTheme;
         } else if (customSelect.parentElement.querySelector('#language-select')) {
             nativeSelect = customSelect.parentElement.querySelector('#language-select');

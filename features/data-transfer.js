@@ -1,4 +1,4 @@
-const dataTransferVersion = '1.1';
+const dataTransferVersion = '1.2';
 window.dataTransferVersion = dataTransferVersion;
 const Base91 = {
     chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~"',
@@ -67,15 +67,15 @@ const Base91 = {
     }
 };
 const SETTINGS_CONFIG = [
-    { storageKey: '2048-gpu-acceleration', gameStateProp: 'gpuAccelerationEnabled', uiElementId: 'gpu-acceleration', type: 'checkbox' },
-    { storageKey: '2048-tile-animation', gameStateProp: 'tileAnimationEnabled', uiElementId: 'tile-animation', type: 'checkbox', hasDetails: 'animation-details' },
-    { storageKey: '2048-tile-appear-animation', gameStateProp: 'tileAppearAnimationEnabled', uiElementId: 'tile-appear-animation', type: 'checkbox' },
-    { storageKey: '2048-tile-move-animation', gameStateProp: 'tileMoveAnimationEnabled', uiElementId: 'tile-move-animation', type: 'checkbox' },
-    { storageKey: '2048-tile-merge-animation', gameStateProp: 'tileMergeAnimationEnabled', uiElementId: 'tile-merge-animation', type: 'checkbox' },
-    { storageKey: '2048-vibration', gameStateProp: 'vibrationEnabled', uiElementId: 'vibration-toggle', type: 'checkbox', hasDetails: 'vibration-details', containerClass: 'vibration-toggle-container' },
-    { storageKey: '2048-vibration-merge', gameStateProp: 'vibrationMergeEnabled', uiElementId: 'vibration-merge', type: 'checkbox' },
-    { storageKey: '2048-vibration-win', gameStateProp: 'vibrationWinEnabled', uiElementId: 'vibration-win', type: 'checkbox' },
-    { storageKey: '2048-vibration-loss', gameStateProp: 'vibrationLossEnabled', uiElementId: 'vibration-loss', type: 'checkbox' }
+    { storageKey: '2048-setting-gpu-acceleration', gameStateProp: 'gpuAccelerationEnabled', uiElementId: 'gpu-acceleration', type: 'checkbox' },
+    { storageKey: '2048-setting-tile-animation', gameStateProp: 'tileAnimationEnabled', uiElementId: 'tile-animation', type: 'checkbox', hasDetails: 'animation-details' },
+    { storageKey: '2048-setting-tile-appear-animation', gameStateProp: 'tileAppearAnimationEnabled', uiElementId: 'tile-appear-animation', type: 'checkbox' },
+    { storageKey: '2048-setting-tile-move-animation', gameStateProp: 'tileMoveAnimationEnabled', uiElementId: 'tile-move-animation', type: 'checkbox' },
+    { storageKey: '2048-setting-tile-merge-animation', gameStateProp: 'tileMergeAnimationEnabled', uiElementId: 'tile-merge-animation', type: 'checkbox' },
+    { storageKey: '2048-setting-vibration', gameStateProp: 'vibrationEnabled', uiElementId: 'vibration-toggle', type: 'checkbox', hasDetails: 'vibration-details', containerClass: 'vibration-toggle-container' },
+    { storageKey: '2048-setting-vibration-merge', gameStateProp: 'vibrationMergeEnabled', uiElementId: 'vibration-merge', type: 'checkbox' },
+    { storageKey: '2048-setting-vibration-win', gameStateProp: 'vibrationWinEnabled', uiElementId: 'vibration-win', type: 'checkbox' },
+    { storageKey: '2048-setting-vibration-loss', gameStateProp: 'vibrationLossEnabled', uiElementId: 'vibration-loss', type: 'checkbox' }
 ];
 function importSettingsToGameState(settingsConfig) {
     settingsConfig.forEach(config => {
@@ -157,20 +157,7 @@ function exportGameData() {
             encoding: encoding
         };
         if (includeSettings) {
-            data.settings = {
-                '2048-theme': localStorage.getItem('2048-theme'),
-                'customTheme': localStorage.getItem('customTheme'),
-                '2048-gpu-acceleration': localStorage.getItem('2048-gpu-acceleration'),
-                '2048-tile-animation': localStorage.getItem('2048-tile-animation'),
-                '2048-tile-appear-animation': localStorage.getItem('2048-tile-appear-animation'),
-                '2048-tile-move-animation': localStorage.getItem('2048-tile-move-animation'),
-                '2048-tile-merge-animation': localStorage.getItem('2048-tile-merge-animation'),
-                '2048-vibration': localStorage.getItem('2048-vibration'),
-                '2048-vibration-merge': localStorage.getItem('2048-vibration-merge'),
-                '2048-vibration-win': localStorage.getItem('2048-vibration-win'),
-                '2048-vibration-loss': localStorage.getItem('2048-vibration-loss'),
-                '2048-language': localStorage.getItem('2048-language')
-            };
+            data.settings = window.SettingStore.getAll();
         }
         const jsonStr = JSON.stringify(data);
         let dataStr;
@@ -185,6 +172,72 @@ function exportGameData() {
         console.error(window.i18n ? window.i18n.t('exportFailed') : 'Export failed', error);
         alert((window.i18n ? window.i18n.t('exportFailed') : 'Export failed') + error.message);
         return null;
+    }
+}
+function exportGameDataAsLink() {
+    try {
+        const includeSettings = document.getElementById('export-settings-checkbox')?.checked || false;
+        const data = {
+            grid: window.gameState.grid,
+            score: window.gameState.score,
+            bestScore: window.gameState.bestScore,
+            gridSize: window.gameState.gridSize,
+            gridRows: window.gameState.gridRows,
+            gridCols: window.gameState.gridCols,
+            difficulty: window.gameState.difficulty,
+            isEndlessMode: window.gameState.isEndlessMode,
+            timestamp: Date.now(),
+            encoding: 'base64url'
+        };
+        if (includeSettings) {
+            data.settings = window.SettingStore.getAll();
+        }
+        const jsonStr = JSON.stringify(data);
+        const dataStr = btoa(jsonStr).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        const baseUrl = window.location.href.split('#')[0].split('?')[0];
+        const link = baseUrl + '#data=' + encodeURIComponent(dataStr);
+        const textarea = document.getElementById('data-textarea');
+        if (textarea) {
+            textarea.value = link;
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link).then(() => {
+                alert(window.i18n ? window.i18n.t('linkCopied') : '链接已复制到剪贴板');
+            }).catch(() => {
+                alert(window.i18n ? window.i18n.t('linkExportSuccess') : '链接已生成');
+            });
+        } else {
+            alert(window.i18n ? window.i18n.t('linkExportSuccess') : '链接已生成');
+        }
+        return link;
+    } catch (error) {
+        console.error(window.i18n ? window.i18n.t('exportFailed') : 'Export failed', error);
+        alert((window.i18n ? window.i18n.t('exportFailed') : 'Export failed') + error.message);
+        return null;
+    }
+}
+function normalizeBase64Url(dataStr) {
+    let str = dataStr.replace(/-/g, '+').replace(/_/g, '/');
+    const pad = str.length % 4;
+    if (pad) {
+        str += '='.repeat(4 - pad);
+    }
+    return str;
+}
+function autoImportFromUrl() {
+    try {
+        const hash = window.location.hash;
+        if (hash && hash.startsWith('#data=')) {
+            const dataStr = decodeURIComponent(hash.substring(6));
+            if (dataStr) {
+                if (confirm(window.i18n ? window.i18n.t('confirmImport') : '确定要导入数据吗？这将覆盖当前游戏状态。')) {
+                    importGameData(normalizeBase64Url(dataStr));
+                }
+                history.replaceState(null, '', window.location.href.split('#')[0]);
+            }
+        }
+    } catch (e) {
+        console.error('Auto import from URL failed:', e);
     }
 }
 function copyDataToClipboard() {
@@ -313,13 +366,13 @@ function importGameData(dataStr) {
         if (shouldImportSettings) {
             for (const [key, value] of Object.entries(data.settings)) {
                 if (value !== null && value !== undefined) {
-                    localStorage.setItem(key, value);
+                    window.SettingStore.set(key, value);
                 }
             }
             importSettingsToGameState(SETTINGS_CONFIG);
             updateSettingsUI(SETTINGS_CONFIG);
-            handleThemeChange(data.settings['2048-theme']);
-            handleLanguageChange(data.settings['2048-language']);
+            handleThemeChange(localStorage.getItem('2048-setting-theme'));
+            handleLanguageChange(localStorage.getItem('2048-setting-language'));
             return;
         }
         alert(window.i18n ? window.i18n.t('importSuccess') : 'Import success');

@@ -1,5 +1,6 @@
-const customThemeVersion = '1.2';
+const customThemeVersion = '1.3';
 window.customThemeVersion = customThemeVersion;
+window.customThemeLoaded = true;
 const tileValues = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768];
 const themeFieldConfig = [
     { id: 'bgColor', elementId: 'custom-bg-color', opacityId: 'custom-bg-opacity', category: 'base', default: '#faf8ef', defaultOpacity: '100' },
@@ -143,7 +144,6 @@ function opacityToHex(opacity) {
     return Math.floor((value / 100) * 255).toString(16).padStart(2, '0');
 }
 function setupThemeCustomizer() {
-    localStorage.removeItem('themeExportSelection');
     const customThemeModal = document.getElementById('custom-theme-modal');
     if (!customThemeModal) return;
     const closeButton = document.getElementById('close-custom-theme-modal');
@@ -247,7 +247,7 @@ function removePreviewStyles() {
         previewStyleElement.remove();
     }
     document.body.removeAttribute('data-preview');
-    const currentTheme = localStorage.getItem('2048-theme');
+    const currentTheme = localStorage.getItem('2048-setting-theme');
     if (currentTheme === 'custom') {
         loadCustomTheme();
     }
@@ -276,8 +276,8 @@ function resetCustomTheme() {
 function saveCustomTheme() {
     const themeData = readThemeValues();
     themeData.timestamp = new Date().getTime();
-    localStorage.setItem('customTheme', JSON.stringify(themeData));
-    localStorage.setItem('2048-theme', 'custom');
+    localStorage.setItem('2048-setting-custom-theme', JSON.stringify(themeData));
+    localStorage.setItem('2048-setting-theme', 'custom');
     alert(i18n.t('themeSaved'));
 }
 function exportCustomTheme() {
@@ -291,13 +291,11 @@ function exportCustomTheme() {
         elementId: field.elementId,
         label: i18n.t(field.id)
     }));
-    const savedState = JSON.parse(localStorage.getItem('themeExportSelection'));
     themeItems.forEach(item => {
         const optionDiv = document.createElement('div');
         optionDiv.className = 'flex items-center gap-2';
-        const isChecked = savedState ? (savedState[item.id] !== undefined ? savedState[item.id] : true) : true;
         optionDiv.innerHTML = `
-            <input type="checkbox" id="export-${item.id}" class="theme-export-checkbox w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:bg-dark-surface dark:border-dark-muted" ${isChecked ? 'checked' : ''}>
+            <input type="checkbox" id="export-${item.id}" class="theme-export-checkbox w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:bg-dark-surface dark:border-dark-muted" checked>
             <label for="export-${item.id}" class="text-sm text-gray-700 dark:text-dark-text">${item.label}</label>
         `;
         optionsContainer.appendChild(optionDiv);
@@ -307,7 +305,7 @@ function exportCustomTheme() {
         const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
         selectAllCheckbox.checked = allChecked;
     };
-    selectAllCheckbox.checked = savedState ? (savedState.selectAll !== undefined ? savedState.selectAll : true) : true;
+    selectAllCheckbox.checked = true;
     selectAllCheckbox.addEventListener('change', function() {
         const checkboxes = document.querySelectorAll('.theme-export-checkbox');
         checkboxes.forEach(checkbox => {
@@ -316,12 +314,6 @@ function exportCustomTheme() {
     });
     optionsContainer.addEventListener('change', updateSelectAllState);
     const saveAndClose = function() {
-        const selectionState = { selectAll: selectAllCheckbox.checked };
-        themeItems.forEach(item => {
-            const checkbox = document.getElementById(`export-${item.id}`);
-            selectionState[item.id] = checkbox.checked;
-        });
-        localStorage.setItem('themeExportSelection', JSON.stringify(selectionState));
         hideModal('export-theme-modal');
     };
     showModal('export-theme-modal');
@@ -388,7 +380,7 @@ function importCustomTheme() {
     input.click();
 }
 function loadCustomTheme() {
-    const customTheme = localStorage.getItem('customTheme');
+    const customTheme = localStorage.getItem('2048-setting-custom-theme');
     if (!customTheme) return;
     try {
         const themeData = JSON.parse(customTheme);
@@ -400,9 +392,13 @@ function loadCustomTheme() {
         }
         styleElement.textContent = generateThemeCSS(themeData);
         document.body.setAttribute('data-theme', 'custom');
+        const earlyStyle = document.getElementById('early-custom-theme');
+        if (earlyStyle) {
+            earlyStyle.remove();
+        }
     } catch (e) {
         console.error('Failed to load custom theme:', e);
-        localStorage.removeItem('customTheme');
-        localStorage.setItem('2048-theme', 'light');
+        localStorage.removeItem('2048-setting-custom-theme');
+        localStorage.setItem('2048-setting-theme', 'light');
     }
 }

@@ -1,4 +1,4 @@
-const bluetoothSyncVersion = '2.0';
+const bluetoothSyncVersion = '0.3';
 window.bluetoothSyncVersion = bluetoothSyncVersion;
 class BluetoothSync {
     constructor() {
@@ -10,6 +10,8 @@ class BluetoothSync {
         this.maxRetries = 3;
         this.timeoutDuration = 30000;
         this.discoverAllDevices = false;
+        this.lastDevice = null;
+        this.lastDeviceVerified = false;
         this.checkBluetoothSupport();
     }
     updateSupportStatus() {
@@ -43,18 +45,46 @@ class BluetoothSync {
             if (this.discoverAllDevices) {
                 requestOptions.acceptAllDevices = true;
             } else {
-                requestOptions.filters = [{ services: ['0000ffe0-0000-1000-8000-00805f9b34fb'] }];
+                requestOptions.filters = [
+                    { services: ['0000ffe0-0000-1000-8000-00805f9b34fb'] },
+                    { namePrefix: '2048' }
+                ];
             }
-            const device = await this.withTimeout(
-                navigator.bluetooth.requestDevice(requestOptions),
-                this.timeoutDuration,
-                'Device selection timeout'
-            );
+            const device = await navigator.bluetooth.requestDevice(requestOptions);
+            if (!this.lastDevice || this.lastDevice.id !== device.id) {
+                this.lastDeviceVerified = false;
+            }
+            this.lastDevice = device;
             return device;
         } catch (error) {
             console.error('Bluetooth device selection failed:', error);
             throw error;
         }
+    }
+    async getRememberedDevice() {
+        if (!this.lastDevice || !navigator.bluetooth.getDevices) {
+            return null;
+        }
+        try {
+            const devices = await navigator.bluetooth.getDevices();
+            return devices.find(device => device.id === this.lastDevice.id) || null;
+        } catch (e) {
+            return null;
+        }
+    }
+    async getConnectableDevice() {
+        if (this.lastDeviceVerified) {
+            const remembered = await this.getRememberedDevice();
+            if (remembered) {
+                try {
+                    await this.connect(remembered);
+                    return remembered;
+                } catch (error) {
+                    console.warn('Reconnect to remembered device failed, opening chooser', error);
+                }
+            }
+        }
+        return this.requestDevice();
     }
     async connect(device) {
         if (!device || !device.gatt) {
@@ -100,22 +130,27 @@ class BluetoothSync {
                 checksum: checksum,
                 timestamp: Date.now()
             };
-            const payloadString = JSON.stringify(payload);
-            const totalSize = payloadString.length;
+            const payloadBytes = encoder.encode(JSON.stringify(payload));
+            const totalSize = payloadBytes.length;
             await this.withTimeout(
                 this.characteristic.writeValue(encoder.encode('SIZE:' + totalSize + '\n')),
                 this.timeoutDuration,
                 'Size send timeout'
             );
-            await this.delay(100);
-            const chunks = this.chunkData(payloadString, 20);
+            await this.delay(30);
+            const chunks = this.chunkDataBytes(payloadBytes, 17);
             for (let i = 0; i < chunks.length; i++) {
+                const frame = new Uint8Array(chunks[i].length + 3);
+                frame[0] = 0x44;
+                frame[1] = 0x3A;
+                frame.set(chunks[i], 2);
+                frame[frame.length - 1] = 0x0A;
                 await this.withTimeout(
-                    this.characteristic.writeValue(encoder.encode(chunks[i] + '\n')),
+                    this.characteristic.writeValue(frame),
                     this.timeoutDuration,
                     'Data send timeout'
                 );
-                await this.delay(100);
+                await this.delay(30);
                 if (onProgress) {
                     const progress = Math.round(((i + 1) / chunks.length) * 100);
                     onProgress(progress);
@@ -132,69 +167,162 @@ class BluetoothSync {
             throw error;
         }
     }
-    async receiveData(onProgress) {
-        try {
-            let receivedData = '';
-            let isComplete = false;
-            let totalSize = null;
-            let receivedSize = 0;
-            const decoder = new TextDecoder();
-            const self = this;
-            const notificationCallback = function(event) {
-                const value = event.target.value;
-                const chunk = decoder.decode(value);
-                if (chunk.startsWith('SIZE:')) {
-                    const sizeStr = chunk.substring(5).trim();
-                    totalSize = parseInt(sizeStr, 10);
-                    return;
-                }
-                if (chunk.trim() === 'END') {
-                    isComplete = true;
-                    return;
-                }
-                receivedData += chunk;
-                receivedSize += chunk.length;
-                if (onProgress) {
-                    if (totalSize) {
-                        const progress = Math.min(Math.round((receivedSize / totalSize) * 100), 99);
-                        onProgress(receivedSize, progress, totalSize);
-                    } else {
-                        onProgress(receivedSize);
-                    }
-                }
-            };
-            await this.withTimeout(
-                this.characteristic.startNotifications(),
-                this.timeoutDuration,
-                'Notification start timeout'
-            );
-            this.characteristic.addEventListener('characteristicvaluechanged', notificationCallback);
-            const startTime = Date.now();
-            while (!isComplete && (Date.now() - startTime) < self.timeoutDuration) {
-                await this.delay(100);
-            }
-            this.characteristic.removeEventListener('characteristicvaluechanged', notificationCallback);
-            await this.characteristic.stopNotifications();
-            if (!isComplete) {
-                throw new Error('Data receive timeout');
-            }
-            const payload = JSON.parse(receivedData);
-            const calculatedChecksum = this.calculateChecksum(payload.data);
-            if (calculatedChecksum !== payload.checksum) {
-                throw new Error('Data integrity check failed');
-            }
-            return JSON.parse(payload.data);
-        } catch (error) {
-            console.error('Data receiving failed:', error);
-            throw error;
-        }
-    }
-    chunkData(data, chunkSize) {
+    chunkDataBytes(bytes, chunkSize) {
         const chunks = [];
-        for (let i = 0; i < data.length; i += chunkSize) {
-            chunks.push(data.slice(i, i + chunkSize));
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+            chunks.push(bytes.subarray(i, i + chunkSize));
         }
         return chunks;
+    }
+    async startReceiving() {
+        this._rxQueue = [];
+        this._rxWaiters = [];
+        this._rxFrame = '';
+        this._rxBytes = new Uint8Array(0);
+        this._rxTotalSize = null;
+        this._rxReceived = 0;
+        this._rxProgress = null;
+        this._readyPending = false;
+        this._readyResolve = null;
+        this._readyTimer = null;
+        this._lineDecoder = new TextDecoder();
+        this._rxDataDecoder = new TextDecoder();
+        this._rxHandler = this.handleRxValue.bind(this);
+        await this.withTimeout(
+            this.characteristic.startNotifications(),
+            this.timeoutDuration,
+            'Notification start timeout'
+        );
+        this.characteristic.addEventListener('characteristicvaluechanged', this._rxHandler);
+        this._rxActive = true;
+    }
+    handleRxValue(event) {
+        const value = event.target.value;
+        const incoming = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+        const merged = new Uint8Array(this._rxBytes.length + incoming.length);
+        merged.set(this._rxBytes);
+        merged.set(incoming, this._rxBytes.length);
+        this._rxBytes = merged;
+        let start = 0;
+        for (let i = 0; i < this._rxBytes.length; i++) {
+            if (this._rxBytes[i] === 0x0A) {
+                this.handleRxLine(this._rxBytes.subarray(start, i));
+                start = i + 1;
+            }
+        }
+        this._rxBytes = this._rxBytes.subarray(start);
+    }
+    handleRxLine(lineBytes) {
+        const line = this._lineDecoder.decode(lineBytes);
+        if (line.startsWith('SIZE:')) {
+            this._rxTotalSize = parseInt(line.substring(5), 10) || null;
+            this._rxReceived = 0;
+            this._rxFrame = '';
+            this._rxDataDecoder = new TextDecoder();
+            return;
+        }
+        if (line === 'END') {
+            const frame = this._rxFrame;
+            this._rxFrame = '';
+            this._rxTotalSize = null;
+            this._rxQueue.push(frame);
+            this.drainRxWaiters();
+            return;
+        }
+        if (line.startsWith('D:')) {
+            this._rxFrame += this._rxDataDecoder.decode(lineBytes.subarray(2), { stream: true });
+            this._rxReceived += lineBytes.length - 2;
+            if (this._rxProgress) {
+                if (this._rxTotalSize) {
+                    const progress = Math.min(Math.round((this._rxReceived / this._rxTotalSize) * 100), 99);
+                    this._rxProgress(this._rxReceived, progress, this._rxTotalSize);
+                } else {
+                    this._rxProgress(this._rxReceived);
+                }
+            }
+            return;
+        }
+        if (line === 'READY') {
+            if (this._readyResolve) {
+                const resolve = this._readyResolve;
+                this._readyResolve = null;
+                clearTimeout(this._readyTimer);
+                resolve(true);
+            } else {
+                this._readyPending = true;
+            }
+        }
+    }
+    drainRxWaiters() {
+        while (this._rxQueue.length && this._rxWaiters.length) {
+            const waiter = this._rxWaiters.shift();
+            clearTimeout(waiter.timer);
+            waiter.resolve(this._rxQueue.shift());
+        }
+    }
+    receiveFrame(onProgress) {
+        this._rxProgress = onProgress || null;
+        if (this._rxQueue.length) {
+            return Promise.resolve(this._rxQueue.shift());
+        }
+        return new Promise((resolve, reject) => {
+            const waiter = {
+                resolve: resolve,
+                timer: setTimeout(() => {
+                    const index = this._rxWaiters.indexOf(waiter);
+                    if (index !== -1) {
+                        this._rxWaiters.splice(index, 1);
+                    }
+                    reject(new Error('Data receive timeout'));
+                }, this.timeoutDuration)
+            };
+            this._rxWaiters.push(waiter);
+        });
+    }
+    async stopReceiving() {
+        if (!this._rxActive) {
+            return;
+        }
+        this._rxActive = false;
+        this.characteristic.removeEventListener('characteristicvaluechanged', this._rxHandler);
+        try {
+            await this.characteristic.stopNotifications();
+        } catch (e) {}
+        this._rxProgress = null;
+        if (this._readyResolve) {
+            clearTimeout(this._readyTimer);
+            this._readyResolve = null;
+        }
+        const waiters = this._rxWaiters;
+        this._rxQueue = [];
+        this._rxWaiters = [];
+        waiters.forEach(waiter => {
+            clearTimeout(waiter.timer);
+            waiter.reject(new Error('Receiving stopped'));
+        });
+    }
+    async notifyReady() {
+        const encoder = new TextEncoder();
+        await this.withTimeout(
+            this.characteristic.writeValue(encoder.encode('READY\n')),
+            this.timeoutDuration,
+            'Ready signal send timeout'
+        );
+    }
+    waitReady(maxWait) {
+        if (this._readyPending) {
+            this._readyPending = false;
+            return Promise.resolve(true);
+        }
+        return new Promise((resolve, reject) => {
+            this._readyResolve = resolve;
+            this._readyTimer = setTimeout(() => {
+                if (this._readyResolve) {
+                    this._readyResolve = null;
+                    reject(new Error('Receiver not ready timeout'));
+                }
+            }, maxWait || this.timeoutDuration);
+        });
     }
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -212,12 +340,20 @@ class BluetoothSync {
             if (!this.isSupported) {
                 throw new Error(window.i18n ? window.i18n.t('bluetoothNotSupported') : 'Bluetooth is not supported in this browser');
             }
-            this.currentPin = this.generatePin();
+            if (!this.currentPin) {
+                this.currentPin = this.generatePin();
+            }
             this.isVerified = true;
-            const device = await this.requestDevice();
-            await this.connect(device);
+            const device = await this.getConnectableDevice();
+            if (!this.server || !this.server.connected) {
+                await this.connect(device);
+            }
+            await this.startReceiving();
+            await this.waitReady(60000);
             await this.sendData({ type: 'pin', pin: this.currentPin });
             await this.sendData({ type: 'gameData', data: gameData }, onProgress);
+            await this.stopReceiving();
+            this.lastDeviceVerified = true;
             return {
                 success: true,
                 pin: this.currentPin,
@@ -225,6 +361,9 @@ class BluetoothSync {
             };
         } catch (error) {
             console.error('Bluetooth export failed:', error);
+            try {
+                await this.stopReceiving();
+            } catch (e) {}
             throw error;
         }
     }
@@ -233,30 +372,56 @@ class BluetoothSync {
             if (!this.isSupported) {
                 throw new Error(window.i18n ? window.i18n.t('bluetoothNotSupported') : 'Bluetooth is not supported in this browser');
             }
-            const device = await this.requestDevice();
-            await this.connect(device);
-            const pinData = await this.receiveData();
-            if (pinData.type === 'pin') {
-                this.currentPin = pinData.pin;
-                const userPin = prompt(
-                    (window.i18n ? window.i18n.t('bluetoothImportPin') : 'Please enter the PIN shown on the sending device') + ':\n' + pinData.pin + '\n' + (window.i18n ? window.i18n.t('enterPinToVerify') : 'Please enter the above PIN to verify')
-                );
-                if (userPin === pinData.pin) {
-                    this.isVerified = true;
-                    const gameData = await this.receiveData(onProgress);
-                    if (gameData.type === 'gameData') {
-                        return gameData.data;
-                    } else {
-                        throw new Error('Invalid data type received');
-                    }
-                } else {
-                    throw new Error('PIN verification failed');
+            const device = await this.getConnectableDevice();
+            if (!this.server || !this.server.connected) {
+                await this.connect(device);
+            }
+            await this.startReceiving();
+            let waitingForPin = true;
+            const readyLoop = (async () => {
+                while (waitingForPin) {
+                    try {
+                        await this.notifyReady();
+                    } catch (e) {}
+                    await this.delay(2000);
                 }
-            } else {
+            })();
+            let pinFrame;
+            try {
+                pinFrame = await this.receiveFrame();
+            } finally {
+                waitingForPin = false;
+            }
+            const pinData = JSON.parse(pinFrame);
+            if (pinData.type !== 'pin') {
                 throw new Error('Expected PIN data but received something else');
             }
+            this.currentPin = pinData.pin;
+            const userPin = prompt(
+                (window.i18n ? window.i18n.t('bluetoothImportPin') : 'Please enter the PIN shown on the sending device') + ':\n' + pinData.pin + '\n' + (window.i18n ? window.i18n.t('enterPinToVerify') : 'Please enter the above PIN to verify')
+            );
+            if (userPin !== pinData.pin) {
+                throw new Error('PIN verification failed');
+            }
+            this.isVerified = true;
+            const frame = await this.receiveFrame(onProgress);
+            await this.stopReceiving();
+            const payload = JSON.parse(frame);
+            const calculatedChecksum = this.calculateChecksum(payload.data);
+            if (calculatedChecksum !== payload.checksum) {
+                throw new Error('Data integrity check failed');
+            }
+            const gameData = JSON.parse(payload.data);
+            if (gameData.type !== 'gameData') {
+                throw new Error('Invalid data type received');
+            }
+            this.lastDeviceVerified = true;
+            return gameData.data;
         } catch (error) {
             console.error('Bluetooth import failed:', error);
+            try {
+                await this.stopReceiving();
+            } catch (e) {}
             throw error;
         }
     }
@@ -268,6 +433,9 @@ class BluetoothSync {
         return false;
     }
     disconnect() {
+        if (this._rxActive) {
+            this.stopReceiving();
+        }
         if (this.server && this.server.connected) {
             this.server.disconnect();
         }
@@ -275,6 +443,7 @@ class BluetoothSync {
         this.characteristic = null;
         this.currentPin = null;
         this.isVerified = false;
+        this._readyPending = false;
     }
 }
 let bluetoothSyncInstance = null;
@@ -339,22 +508,7 @@ function getGameDataForExport(includeSettings) {
         bestScore: gameState.bestScore
     };
     if (includeSettings) {
-        gameData.settings = {
-            '2048-theme': localStorage.getItem('2048-theme'),
-            '2048-language': localStorage.getItem('2048-language'),
-            '2048-gpu-acceleration': localStorage.getItem('2048-gpu-acceleration'),
-            '2048-tile-animation': localStorage.getItem('2048-tile-animation'),
-            '2048-tile-appear-animation': localStorage.getItem('2048-tile-appear-animation'),
-            '2048-tile-move-animation': localStorage.getItem('2048-tile-move-animation'),
-            '2048-tile-merge-animation': localStorage.getItem('2048-tile-merge-animation'),
-            '2048-vibration': localStorage.getItem('2048-vibration'),
-            '2048-vibration-merge': localStorage.getItem('2048-vibration-merge'),
-            '2048-vibration-win': localStorage.getItem('2048-vibration-win'),
-            '2048-vibration-loss': localStorage.getItem('2048-vibration-loss'),
-            '2048-square-grid-locked': localStorage.getItem('2048-square-grid-locked'),
-            'controlsCollapsed': localStorage.getItem('controlsCollapsed'),
-            'bestMoveHidden': localStorage.getItem('bestMoveHidden')
-        };
+        gameData.settings = window.SettingStore.getAll();
     }
     return gameData;
 }
@@ -397,7 +551,7 @@ function applyImportedData(importedData) {
     if (importedData.settings) {
         for (const [key, value] of Object.entries(importedData.settings)) {
             if (value !== null) {
-                localStorage.setItem(key, value);
+                window.SettingStore.set(key, value);
             }
         }
     }
@@ -445,6 +599,7 @@ async function handleBluetoothExport() {
             document.getElementById('bluetooth-device-name').textContent = `${window.i18n ? window.i18n.t('connected') : 'Connected'}: ${result.device}`;
             setTimeout(() => {
                 alert(window.i18n ? window.i18n.t('bluetoothExportSuccess') : 'Bluetooth export successful!');
+                bluetoothSyncInstance.disconnect();
                 hideBluetoothModal();
             }, 1000);
         }
@@ -506,8 +661,8 @@ async function verifyPinAndImport() {
             applyImportedData(importedData);
             alert(window.i18n ? window.i18n.t('bluetoothImportSuccess') : 'Bluetooth import successful!');
             hideBluetoothModal();
-            if (typeof initGame === 'function') {
-                initGame();
+            if (typeof loadGameState === 'function') {
+                loadGameState();
             }
         }
     } catch (error) {
@@ -575,23 +730,6 @@ function hideBluetoothModal() {
                 content.classList.remove('modal-enter', 'modal-exit-active');
             }
         }, 300);
-    }
-}
-function saveGameState() {
-    try {
-        localStorage.setItem('2048-game-state', JSON.stringify({
-            grid: window.gameState.grid,
-            gridSize: window.gameState.gridSize,
-            gridRows: window.gameState.gridRows,
-            gridCols: window.gameState.gridCols,
-            score: window.gameState.score,
-            bestScore: window.gameState.bestScore,
-            difficulty: window.gameState.difficulty,
-            isEndlessMode: window.gameState.isEndlessMode,
-            timestamp: new Date().toISOString()
-        }));
-    } catch (e) {
-        console.error('Failed to save game state:', e);
     }
 }
 window.bluetoothSync = {

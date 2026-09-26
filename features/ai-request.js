@@ -1,4 +1,4 @@
-const aiRequestVersion = '1.1';
+const aiRequestVersion = '1.2';
 window.aiRequestVersion = aiRequestVersion;
 const DEFAULT_CONFIG = {
     baseUrl: 'https://api.openai.com/v1',
@@ -7,7 +7,7 @@ const DEFAULT_CONFIG = {
 };
 function getAiConfig() {
     try {
-        const saved = localStorage.getItem('2048-ai-config');
+        const saved = localStorage.getItem('2048-setting-ai-config');
         if (saved) {
             const parsed = JSON.parse(saved);
             return { ...DEFAULT_CONFIG, baseUrl: parsed.baseUrl, apiKey: parsed.apiKey, model: parsed.model };
@@ -19,7 +19,7 @@ function getAiConfig() {
 }
 function saveAiConfig(config) {
     try {
-        localStorage.setItem('2048-ai-config', JSON.stringify(config));
+        localStorage.setItem('2048-setting-ai-config', JSON.stringify(config));
         return true;
     } catch (e) {
         console.error('Failed to save AI config:', e);
