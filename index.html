@@ -137,7 +137,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
     <script src="./features/module-loader.js"></script>
     <script>
-        const gameVersion = '2.7.0';
+        const gameVersion = '2.8.0';
         window.gameVersion = gameVersion;
         function loadCssVersion() {
             try {
@@ -279,7 +279,42 @@
         }
     </script>
     <script>
-        window.modulesReadyPromise = ModuleLoader.loadAll().then(() => {
+        window.modulesReadyPromise = ModuleLoader.loadAll().catch(function(error) {
+            console.error('Module loading failed:', error);
+            var show = function() {
+                var loadingScreen = document.getElementById('loading-screen');
+                if (!loadingScreen) return;
+                var spinnerWrap = loadingScreen.querySelector('.loading-spinner-container');
+                if (spinnerWrap) spinnerWrap.style.display = 'none';
+                var errBox = document.getElementById('loading-error');
+                if (errBox) errBox.style.display = 'flex';
+                var savedLang = 'auto';
+                try { savedLang = localStorage.getItem('2048-setting-language') || 'auto'; } catch (e) {}
+                var lang = savedLang;
+                if (lang === 'auto') {
+                    var browserLang = (navigator.language || navigator.userLanguage || '').split('-')[0];
+                    lang = browserLang === 'en' ? 'en' : 'zh';
+                }
+                var text = lang === 'en'
+                    ? { title: 'Failed to load resources', detail: 'Check your network connection and refresh the page', reload: 'Reload' }
+                    : { title: '资源加载失败', detail: '请检查网络连接后刷新页面', reload: '重新加载' };
+                var titleEl = document.getElementById('loading-error-text');
+                if (titleEl) titleEl.textContent = text.title;
+                var detailEl = document.getElementById('loading-error-detail');
+                if (detailEl) detailEl.textContent = text.detail + (error && error.message ? ' (' + error.message + ')' : '');
+                var btn = document.getElementById('loading-reload-btn');
+                if (btn) {
+                    btn.textContent = text.reload;
+                    btn.onclick = function() { location.reload(); };
+                }
+            };
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', show);
+            } else {
+                show();
+            }
+            throw error;
+        }).then(() => {
             (function() {
                 ModuleLoader.load('dataTransferFallback', null, {
                     exportGameData: function() { alert(window.i18n && window.i18n.t ? i18n.t('dataTransferModuleMissing') : '数据传输模块未找到，请确保 features/data-transfer.js 文件存在。'); },
@@ -471,6 +506,12 @@
                 <div class="loading-spinner"></div>
                 <span class="text-secondary/80 dark:text-dark-muted text-lg font-medium" data-i18n="loading">加载中...</span>
             </div>
+            <div id="loading-error" class="flex-col items-center gap-3 text-center px-6" style="display: none;">
+                <i class="fa-solid fa-triangle-exclamation text-4xl text-red-500"></i>
+                <span id="loading-error-text" class="text-secondary dark:text-dark-text text-lg font-medium"></span>
+                <span id="loading-error-detail" class="text-secondary/60 dark:text-dark-muted text-sm"></span>
+                <button type="button" id="loading-reload-btn" class="bg-primary dark:bg-dark-primary hover:opacity-90 text-white font-bold py-2 px-6 rounded-md transition-opacity"></button>
+            </div>
         </div>
     </div>
     <main class="max-w-md w-full mx-auto">
@@ -493,6 +534,14 @@
                 <i class="fa-solid fa-chevron-up mr-2" id="toggle-icon"></i>
                 <span id="toggle-text">收起控制</span>
             </button>
+            <div id="sync-indicator" class="hidden items-center gap-1 pr-1 text-sm">
+                <button type="button" id="sync-indicator-open" class="flex items-center text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold transition-colors focus:outline-none">
+                    <i class="fa-solid fa-circle-check mr-1"></i><i id="sync-indicator-icon" class="fa-brands fa-bluetooth-b mr-1"></i><span id="sync-indicator-text"></span>
+                </button>
+                <button type="button" id="sync-indicator-disconnect" class="text-secondary/40 hover:text-red-500 dark:text-dark-muted/60 dark:hover:text-red-400 transition-colors focus:outline-none" title="">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
         </div>
         <div id="controls-container" class="transition-all duration-300 ease-in-out">
             <div id="game-buttons" class="flex flex-wrap gap-2 mb-4">
@@ -1314,12 +1363,24 @@
                     <i class="fa-solid fa-times"></i>
                 </button>
                 <div id="bluetooth-select-section">
-                    <div class="flex flex-col gap-4 mb-6">
+                    <div id="bluetooth-select-actions" class="flex flex-col gap-4 mb-6">
                         <button id="bluetooth-export-select" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300">
                             <i class="fa-brands fa-bluetooth-b mr-2"></i><span data-i18n="exportViaBluetooth">蓝牙导出</span>
                         </button>
                         <button id="bluetooth-import-select" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
                             <i class="fa-brands fa-bluetooth mr-2"></i><span data-i18n="importViaBluetooth">蓝牙导入</span>
+                        </button>
+                    </div>
+                    <div id="bluetooth-connected-panel" style="display: none;" class="mb-6">
+                        <p class="text-green-600 dark:text-green-400 font-bold mb-2"><i class="fa-solid fa-circle-check mr-1"></i><span data-i18n="connected">已连接</span></p>
+                        <p class="text-gray-600 dark:text-dark-muted text-sm mb-1"><span data-i18n="bluetoothDevice">设备</span>: <span id="bluetooth-live-device-name" class="font-semibold">-</span></p>
+                        <p class="text-gray-500 dark:text-dark-muted text-xs mb-3" data-i18n="syncLiveHint">连接保持中，游戏状态与设置更改将自动同步</p>
+                        <div class="flex items-center justify-center gap-2 mb-4">
+                            <input type="checkbox" id="bluetooth-live-sync-checkbox" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:bg-dark-surface dark:border-dark-muted" checked>
+                            <label for="bluetooth-live-sync-checkbox" class="text-sm text-gray-700 dark:text-dark-text" data-i18n="liveSyncData">实时同步数据</label>
+                        </div>
+                        <button id="bluetooth-disconnect-button" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-300">
+                            <i class="fa-solid fa-link-slash mr-2"></i><span data-i18n="disconnectConnection">断开连接</span>
                         </button>
                     </div>
                 </div>
@@ -1358,6 +1419,10 @@
                 <div id="bluetooth-import-section" style="display: none;">
                     <div class="mb-4">
                         <p class="text-gray-700 dark:text-dark-muted mb-4" data-i18n="searchingAndVerifying">正在搜索设备并验证...请稍候</p>
+                        <div class="flex items-center justify-center gap-2 mb-4">
+                            <input type="checkbox" id="bluetooth-import-settings-checkbox" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:bg-dark-surface dark:border-dark-muted" checked>
+                            <label for="bluetooth-import-settings-checkbox" class="text-sm text-gray-700 dark:text-dark-text" data-i18n="includeSettings">包含设置数据</label>
+                        </div>
                         <div class="mb-4" style="display: none;" id="bluetooth-import-progress">
                             <div class="flex items-center justify-between mb-2">
                                 <p class="text-gray-600 dark:text-dark-muted" data-i18n="importProgress">导入进度:</p>
@@ -1384,12 +1449,19 @@
                 </button>
                 <div id="webrtc-select-section">
                     <p class="text-gray-700 dark:text-dark-muted mb-4" data-i18n="webrtcSelectDesc">与同一 Wi-Fi/热点下的另一台设备直连同步，无需服务器。双方互换连接码即可配对。</p>
-                    <div class="flex flex-col gap-4 mb-6">
+                    <div id="webrtc-select-actions" class="flex flex-col gap-4 mb-6">
                         <button id="webrtc-host-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-md shadow-md transition-all duration-200">
                             <i class="fa-solid fa-tower-broadcast mr-2"></i><span data-i18n="webrtcCreateConnection">创建连接</span>
                         </button>
                         <button id="webrtc-join-button" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-4 px-6 rounded-md shadow-md transition-all duration-200">
                             <i class="fa-solid fa-link mr-2"></i><span data-i18n="webrtcJoinConnection">加入连接</span>
+                        </button>
+                    </div>
+                    <div id="webrtc-connected-panel" style="display: none;" class="mb-6">
+                        <p class="text-green-600 dark:text-green-400 font-bold mb-2"><i class="fa-solid fa-circle-check mr-1"></i><span data-i18n="webrtcConnected">已建立连接</span></p>
+                        <p class="text-gray-500 dark:text-dark-muted text-xs mb-4" data-i18n="syncLiveHint">连接保持中，游戏状态与设置更改将自动同步</p>
+                        <button id="webrtc-select-disconnect-button" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200">
+                            <i class="fa-solid fa-link-slash mr-2"></i><span data-i18n="disconnectConnection">断开连接</span>
                         </button>
                     </div>
                 </div>
@@ -1403,7 +1475,7 @@
                     <textarea id="webrtc-answer-input" class="w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2" placeholder="粘贴对方的应答码"></textarea>
                     <button id="webrtc-accept-answer-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-md mb-4"><span data-i18n="webrtcFinishConnection">完成连接</span></button>
                     <p id="webrtc-host-status" class="text-sm text-gray-500 dark:text-dark-muted whitespace-pre-line mb-4"></p>
-                    <button id="webrtc-host-back" class="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 font-bold py-3 px-6 rounded-md"><span data-i18n="cancel">返回</span></button>
+                    <button id="webrtc-host-back" class="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 font-bold py-3 px-6 rounded-md"><i class="fa-solid fa-arrow-left mr-2"></i><span data-i18n="cancel">返回</span></button>
                 </div>
                 <div id="webrtc-join-section" style="display: none;">
                     <p class="text-gray-600 dark:text-dark-muted text-sm mb-2" data-i18n="webrtcJoinPasteOffer">粘贴对方的连接码</p>
@@ -1417,19 +1489,28 @@
                         </button>
                     </div>
                     <p id="webrtc-join-status" class="text-sm text-gray-500 dark:text-dark-muted whitespace-pre-line mb-4"></p>
-                    <button id="webrtc-join-back" class="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 font-bold py-3 px-6 rounded-md"><span data-i18n="cancel">返回</span></button>
+                    <button id="webrtc-join-back" class="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 font-bold py-3 px-6 rounded-md"><i class="fa-solid fa-arrow-left mr-2"></i><span data-i18n="cancel">返回</span></button>
                 </div>
                 <div id="webrtc-connected-section" style="display: none;">
                     <p class="text-green-600 font-bold mb-4" data-i18n="webrtcConnected" data-i18n-mode="icon+text"><i class="fa-solid fa-circle-check mr-1"></i>已建立连接</p>
-                    <div class="flex items-center justify-center gap-2 mb-4">
+                    <div class="flex items-center justify-center gap-2 mb-2">
                         <input type="checkbox" id="webrtc-settings-checkbox" class="w-4 h-4 text-primary bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded" checked>
                         <label for="webrtc-settings-checkbox" class="text-sm text-gray-700 dark:text-dark-text" data-i18n="includeSettings">包含设置数据</label>
+                    </div>
+                    <div class="flex items-center justify-center gap-2 mb-4">
+                        <input type="checkbox" id="webrtc-live-sync-checkbox" class="w-4 h-4 text-primary bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded" checked>
+                        <label for="webrtc-live-sync-checkbox" class="text-sm text-gray-700 dark:text-dark-text" data-i18n="liveSyncData">实时同步数据</label>
                     </div>
                     <button id="webrtc-send-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-md shadow-md mb-4">
                         <i class="fa-solid fa-paper-plane mr-2"></i><span data-i18n="webrtcSendData">发送游戏数据</span>
                     </button>
                     <p id="webrtc-connected-status" class="text-sm text-gray-500 dark:text-dark-muted mb-4"></p>
-                    <button id="webrtc-connected-back" class="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 font-bold py-3 px-6 rounded-md"><span data-i18n="cancel">返回</span></button>
+                    <div class="flex flex-wrap gap-3 justify-center">
+                        <button id="webrtc-disconnect-button" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200">
+                            <i class="fa-solid fa-link-slash mr-2"></i><span data-i18n="disconnectConnection">断开连接</span>
+                        </button>
+                        <button id="webrtc-connected-back" class="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 font-bold py-3 px-6 rounded-md"><i class="fa-solid fa-arrow-left mr-2"></i><span data-i18n="cancel">返回</span></button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1829,6 +1910,7 @@
                 gameState.gridSize = data.gridSize;
                 gameState.gridRows = gridRows;
                 gameState.gridCols = gridCols;
+                syncNextTileId();
                 gameState.difficulty = data.difficulty;
                 gameState.isEndlessMode = data.isEndlessMode;
                 const gameContainer = document.querySelector('.game-container');
@@ -2099,6 +2181,20 @@
             }
         }
         let nextTileId = 0;
+        function syncNextTileId() {
+            let maxId = 0;
+            for (let y = 0; y < gameState.gridRows; y++) {
+                for (let x = 0; x < gameState.gridCols; x++) {
+                    const tile = gameState.grid[y][x];
+                    if (tile && tile.id && tile.id > maxId) {
+                        maxId = tile.id;
+                    }
+                }
+            }
+            if (maxId >= nextTileId) {
+                nextTileId = maxId;
+            }
+        }
         function generateRandomTile(animate = true) {
             const availableCells = [];
             for (let y = 0; y < gameState.gridRows; y++) {
@@ -2544,6 +2640,7 @@
             const lastState = gameState.history.pop();
             gameState.grid = lastState.grid;
             gameState.score = lastState.score;
+            syncNextTileId();
             elements.scoreDisplay.textContent = gameState.score;
             renderAllTiles();
             gameState.gameOver = false;
@@ -3529,6 +3626,7 @@
                     gameState.gridSize = state.gridSize || 4;
                     gameState.gridRows = state.gridRows || state.gridSize || 4;
                     gameState.gridCols = state.gridCols || state.gridSize || 4;
+                    syncNextTileId();
                     gameState.score = state.score || 0;
                     gameState.bestScore = state.bestScore || 0;
                     gameState.gameOver = state.gameOver || false;
@@ -3562,6 +3660,45 @@
             updateDocumentTitle();
             updateUndoButtonState();
         }
+        function showLoadingError(error) {
+            try {
+                var loadingScreen = document.getElementById('loading-screen');
+                if (!loadingScreen) return;
+                var spinnerWrap = loadingScreen.querySelector('.loading-spinner-container');
+                if (spinnerWrap) spinnerWrap.style.display = 'none';
+                var errBox = document.getElementById('loading-error');
+                if (errBox) errBox.style.display = 'flex';
+                var savedLang = 'auto';
+                try { savedLang = localStorage.getItem('2048-setting-language') || 'auto'; } catch (e) {}
+                var lang = savedLang;
+                if (lang === 'auto') {
+                    var browserLang = (navigator.language || navigator.userLanguage || '').split('-')[0];
+                    lang = browserLang === 'en' ? 'en' : 'zh';
+                }
+                var fallback = lang === 'en'
+                    ? { title: 'Failed to load resources', detail: 'Check your network connection and refresh the page', reload: 'Reload' }
+                    : { title: '资源加载失败', detail: '请检查网络连接后刷新页面', reload: '重新加载' };
+                var text = {
+                    title: window.i18n && window.i18n.t ? window.i18n.t('loadingFailed') : fallback.title,
+                    detail: window.i18n && window.i18n.t ? window.i18n.t('loadingFailedDetail') : fallback.detail,
+                    reload: window.i18n && window.i18n.t ? window.i18n.t('reloadPage') : fallback.reload
+                };
+                if (text.title === 'loadingFailed') text.title = fallback.title;
+                if (text.detail === 'loadingFailedDetail') text.detail = fallback.detail;
+                if (text.reload === 'reloadPage') text.reload = fallback.reload;
+                var titleEl = document.getElementById('loading-error-text');
+                if (titleEl) titleEl.textContent = text.title;
+                var detailEl = document.getElementById('loading-error-detail');
+                if (detailEl) detailEl.textContent = text.detail + (error && error.message ? ' (' + error.message + ')' : '');
+                var btn = document.getElementById('loading-reload-btn');
+                if (btn) {
+                    btn.textContent = text.reload;
+                    btn.onclick = function() { location.reload(); };
+                }
+            } catch (e) {
+                console.error('Failed to show loading error:', e);
+            }
+        }
         function hideLoadingScreen() {
             const loadingScreen = document.getElementById('loading-screen');
             document.documentElement.classList.remove('loading-active');
@@ -3592,6 +3729,14 @@
                 document.addEventListener('DOMContentLoaded', startGame);
             } else {
                 startGame();
+            }
+        }).catch(function(error) {
+            console.error('Module loading failed:', error);
+            var show = function() { showLoadingError(error); };
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', show);
+            } else {
+                show();
             }
         });
     </script>
