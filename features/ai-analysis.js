@@ -1,4 +1,4 @@
-const aiAnalysisVersion = '2.3';
+const aiAnalysisVersion = '2.4';
 window.aiAnalysisVersion = aiAnalysisVersion;
 let cachedAlgorithmResults = null;
 let cachedAiResults = null;

@@ -1,4 +1,4 @@
-const i18nVersion = '1.5';
+const i18nVersion = '1.6';
 window.i18nVersion = i18nVersion;
 const translations = {
     zh: {
@@ -61,12 +61,15 @@ const translations = {
         baseColors: '基础颜色',
         modalColors: '模态框颜色',
         tileColors: '滑块颜色',
+        bgColor: '主背景色',
         mainBg: '主背景色',
         primaryColor: '主色调',
         secondaryColor: '次色调',
         gridColor: '网格颜色',
         cellEmptyColor: '空单元格颜色',
         scrollbarColor: '滚动条颜色',
+        modalBgColor: '模态框背景色',
+        modalTextColor: '模态框文字颜色',
         modalBg: '模态框背景色',
         modalText: '模态框文字颜色',
         opacity: '不透明度',
@@ -189,14 +192,6 @@ const translations = {
         followBrowser: '跟随浏览器',
         lightTheme: '浅色',
         darkTheme: '深色',
-        bgOpacity: '主背景不透明度',
-        primaryOpacity: '主色调不透明度',
-        secondaryOpacity: '次色调不透明度',
-        gridOpacity: '网格不透明度',
-        cellEmptyOpacity: '空单元格不透明度',
-        scrollbarOpacity: '滚动条不透明度',
-        modalBgOpacity: '模态框背景不透明度',
-        modalTextOpacity: '模态框文字不透明度',
         themeSaved: '主题保存成功！',
         themeImported: '主题导入成功！',
         themeExported: '主题导出成功！',
@@ -233,6 +228,35 @@ const translations = {
         importProgress: '导入进度',
         bluetoothExportSuccess: '蓝牙导出成功！',
         bluetoothImportSuccess: '蓝牙导入成功！',
+        webrtcModalTitle: '局域网同步',
+        webrtcSelectDesc: '与同一 Wi-Fi/热点下的另一台设备直连同步，无需服务器。双方互换连接码即可配对。',
+        webrtcCreateConnection: '创建连接',
+        webrtcJoinConnection: '加入连接',
+        webrtcHostStep1: '第 1 步：将此连接码发给对方',
+        webrtcCopyOffer: '复制连接码',
+        webrtcHostStep2: '第 2 步：粘贴对方的应答码',
+        webrtcFinishConnection: '完成连接',
+        webrtcJoinPasteOffer: '粘贴对方的连接码',
+        webrtcGenerateAnswer: '生成应答码',
+        webrtcJoinStep2: '将此应答码发回给对方',
+        webrtcCopyAnswer: '复制应答码',
+        webrtcConnected: '已建立连接',
+        webrtcSendData: '发送游戏数据',
+        webrtcModuleMissing: '局域网同步模块未找到，请确保 features/webrtc-sync.js 文件存在。',
+        webrtcConnectedReady: '已连接，可以发送游戏数据',
+        webrtcDisconnected: '连接已断开',
+        webrtcGeneratingCode: '正在生成连接码...',
+        webrtcHostInstructions: '1. 将连接码发送给对方\n2. 把对方回传的应答码粘贴到下方并点击"完成连接"',
+        webrtcGenerateFailed: '生成连接码失败',
+        webrtcConnecting: '正在建立连接...',
+        webrtcInvalidAnswer: '应答码无效',
+        webrtcGeneratingAnswer: '正在生成应答码...',
+        webrtcSendAnswerBack: '将应答码发回给对方，等待连接建立...',
+        webrtcInvalidOffer: '连接码无效',
+        webrtcDataSent: '已发送游戏数据',
+        webrtcSendFailed: '发送失败',
+        webrtcConfirmApply: '收到对方发来的游戏数据，是否应用？',
+        webrtcPasteAnswer: '粘贴对方的应答码',
         ready: '准备就绪',
         connected: '已连接',
         receiving: '接收中',
@@ -267,7 +291,26 @@ const translations = {
         aiAiAnalysis: 'AI分析',
         aiSuggestionLabel: 'AI建议',
         regenerate: '重新生成',
-        regenerating: '重新生成中...'
+        regenerating: '重新生成中...',
+        operations: '操作',
+        keybindingsSettings: '快捷键设置',
+        keybindingsTip: '方向键与 Esc 始终可用；点击按键按钮后按下新键即可修改，按 Esc 取消。',
+        resetToDefault: '重置默认',
+        done: '完成',
+        pressKey: '按下按键...',
+        notSet: '未设置',
+        kbUp: '向上移动',
+        kbDown: '向下移动',
+        kbLeft: '向左移动',
+        kbRight: '向右移动',
+        kbPause: '暂停/继续',
+        kbUndo: '撤销',
+        kbNewGame: '新游戏',
+        kbGrid: '切换网格大小',
+        exportAsLink: '导出为链接',
+        copyLink: '复制链接',
+        linkCopied: '链接已复制到剪贴板',
+        linkExportSuccess: '链接已生成'
     },
     en: {
         gameTitle: '2048',
@@ -329,12 +372,15 @@ const translations = {
         baseColors: 'Base Colors',
         modalColors: 'Modal Colors',
         tileColors: 'Tile Colors',
+        bgColor: 'Main Background',
         mainBg: 'Main Background',
         primaryColor: 'Primary Color',
         secondaryColor: 'Secondary Color',
         gridColor: 'Grid Color',
         cellEmptyColor: 'Empty Cell Color',
         scrollbarColor: 'Scrollbar Color',
+        modalBgColor: 'Modal Background',
+        modalTextColor: 'Modal Text',
         modalBg: 'Modal Background',
         modalText: 'Modal Text',
         opacity: 'Opacity',
@@ -457,14 +503,6 @@ const translations = {
         followBrowser: 'Follow Browser',
         lightTheme: 'Light',
         darkTheme: 'Dark',
-        bgOpacity: 'Main Background Opacity',
-        primaryOpacity: 'Primary Color Opacity',
-        secondaryOpacity: 'Secondary Color Opacity',
-        gridOpacity: 'Grid Opacity',
-        cellEmptyOpacity: 'Empty Cell Opacity',
-        scrollbarOpacity: 'Scrollbar Opacity',
-        modalBgOpacity: 'Modal Background Opacity',
-        modalTextOpacity: 'Modal Text Opacity',
         themeSaved: 'Theme saved successfully!',
         themeImported: 'Theme imported successfully!',
         themeExported: 'Theme exported successfully!',
@@ -501,6 +539,35 @@ const translations = {
         importProgress: 'Import Progress',
         bluetoothExportSuccess: 'Bluetooth export successful!',
         bluetoothImportSuccess: 'Bluetooth import successful!',
+        webrtcModalTitle: 'LAN Sync',
+        webrtcSelectDesc: 'Sync directly with another device on the same Wi-Fi/hotspot. No server needed. Exchange connection codes to pair.',
+        webrtcCreateConnection: 'Create Connection',
+        webrtcJoinConnection: 'Join Connection',
+        webrtcHostStep1: 'Step 1: Send this code to the other device',
+        webrtcCopyOffer: 'Copy Code',
+        webrtcHostStep2: 'Step 2: Paste the answer code from the other device',
+        webrtcFinishConnection: 'Finish Connection',
+        webrtcJoinPasteOffer: 'Paste the connection code',
+        webrtcGenerateAnswer: 'Generate Answer Code',
+        webrtcJoinStep2: 'Send this answer code back',
+        webrtcCopyAnswer: 'Copy Answer Code',
+        webrtcConnected: 'Connected',
+        webrtcSendData: 'Send Game Data',
+        webrtcModuleMissing: 'LAN sync module not found. Please ensure features/webrtc-sync.js file exists.',
+        webrtcConnectedReady: 'Connected. You can send game data now',
+        webrtcDisconnected: 'Disconnected',
+        webrtcGeneratingCode: 'Generating connection code...',
+        webrtcHostInstructions: '1. Send the code to the other device\n2. Paste the answer code below and click "Finish Connection"',
+        webrtcGenerateFailed: 'Failed to generate code',
+        webrtcConnecting: 'Connecting...',
+        webrtcInvalidAnswer: 'Invalid answer code',
+        webrtcGeneratingAnswer: 'Generating answer code...',
+        webrtcSendAnswerBack: 'Send the answer code back and wait for connection...',
+        webrtcInvalidOffer: 'Invalid connection code',
+        webrtcDataSent: 'Game data sent',
+        webrtcSendFailed: 'Send failed',
+        webrtcConfirmApply: 'Received game data from the other device. Apply it?',
+        webrtcPasteAnswer: 'Paste the answer code',
         ready: 'Ready',
         connected: 'Connected',
         receiving: 'Receiving',
@@ -535,10 +602,29 @@ const translations = {
         aiAiAnalysis: 'AI Analysis',
         aiSuggestionLabel: 'AI Suggestion',
         regenerate: 'Regenerate',
-        regenerating: 'Regenerating...'
+        regenerating: 'Regenerating...',
+        operations: 'Controls',
+        keybindingsSettings: 'Keyboard Shortcuts',
+        keybindingsTip: 'Arrow keys and Esc always work; click a key button then press a new key to rebind, Esc to cancel.',
+        resetToDefault: 'Reset Defaults',
+        done: 'Done',
+        pressKey: 'Press a key...',
+        notSet: 'Not set',
+        kbUp: 'Move Up',
+        kbDown: 'Move Down',
+        kbLeft: 'Move Left',
+        kbRight: 'Move Right',
+        kbPause: 'Pause/Resume',
+        kbUndo: 'Undo',
+        kbNewGame: 'New Game',
+        kbGrid: 'Cycle Grid Size',
+        exportAsLink: 'Export as Link',
+        copyLink: 'Copy Link',
+        linkCopied: 'Link copied to clipboard',
+        linkExportSuccess: 'Link generated'
     }
 };
-let currentLanguage = localStorage.getItem('2048-language') || 'auto';
+let currentLanguage = localStorage.getItem('2048-setting-language') || 'auto';
 function getLang() {
     if (currentLanguage === 'auto') {
         const browserLang = navigator.language || navigator.userLanguage;
@@ -550,7 +636,7 @@ function getLang() {
 function setLang(lang) {
     if (lang === 'auto' || translations[lang]) {
         currentLanguage = lang;
-        localStorage.setItem('2048-language', lang);
+        localStorage.setItem('2048-setting-language', lang);
         updateAllTranslations();
         if (typeof window.updateDocumentTitle === 'function') {
             window.updateDocumentTitle();
@@ -675,6 +761,17 @@ function updateDynamicContent() {
         if (elements.dataTextarea) {
             elements.dataTextarea.placeholder = t('dataTextareaPlaceholder');
         }
+        const webrtcAnswerInput = document.getElementById('webrtc-answer-input');
+        if (webrtcAnswerInput) {
+            webrtcAnswerInput.placeholder = t('webrtcPasteAnswer');
+        }
+        const webrtcOfferInput = document.getElementById('webrtc-offer-input');
+        if (webrtcOfferInput) {
+            webrtcOfferInput.placeholder = t('webrtcJoinPasteOffer');
+        }
+        if (window.renderKeybindingsList && document.getElementById('keybindings-list')) {
+            window.renderKeybindingsList();
+        }
     }
     updateLanguageSelector();
     updateThemeSelector();
@@ -721,7 +818,7 @@ function updateThemeSelector() {
     const selectSelectedDiv = themeSelect.querySelector('.select-selected');
     const selectItems = themeSelect.querySelectorAll('.select-item');
     const themeToggle = document.querySelector('#theme-toggle');
-    let currentTheme = themeToggle?.value || localStorage.getItem('2048-theme');
+    let currentTheme = themeToggle?.value || localStorage.getItem('2048-setting-theme');
     if (selectSelectedDiv) {
         let themeText = '';
         let icon = '';
@@ -973,6 +1070,7 @@ const i18nConfig = {
         ['reset-settings-button', 'resetSettings'],
         ['export-data-button', 'exportData'],
         ['import-data-button', 'importData'],
+        ['export-link-button', 'exportAsLink'],
         ['save-custom-theme', 'save'],
         ['reset-custom-theme', 'reset'],
         ['export-custom-theme', 'exportTheme'],

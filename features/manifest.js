@@ -7,6 +7,7 @@ window.__modulesManifest = {
         'data-transfer.js',
         'custom-select.js',
         'bluetooth-sync.js',
+        'webrtc-sync.js',
         'fullscreen-mode.js'
     ]
 };
