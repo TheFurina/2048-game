@@ -137,7 +137,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
     <script src="./features/module-loader.js"></script>
     <script>
-        const gameVersion = '2.8.0';
+        const gameVersion = '2.8.1';
         window.gameVersion = gameVersion;
         function loadCssVersion() {
             try {
@@ -2987,38 +2987,83 @@
             setupThemeListeners();
             setupOtherListeners();
         }
+        let activeKeyCaptureHandler = null;
+        let keyCaptureAction = null;
+        function cancelActiveKeyCapture() {
+            if (activeKeyCaptureHandler) {
+                document.removeEventListener('keydown', activeKeyCaptureHandler, true);
+                activeKeyCaptureHandler = null;
+            }
+            keyCaptureAction = null;
+        }
+        function findKeyConflicts() {
+            const byKey = {};
+            Object.keys(keyBindings).forEach(a => {
+                const k = keyBindings[a];
+                if (k) {
+                    if (!byKey[k]) byKey[k] = [];
+                    byKey[k].push(a);
+                }
+            });
+            const conflicts = new Set();
+            Object.values(byKey).forEach(actions => {
+                if (actions.length > 1) {
+                    actions.forEach(a => conflicts.add(a));
+                }
+            });
+            return conflicts;
+        }
         function renderKeybindingsList() {
             const list = document.getElementById('keybindings-list');
             if (!list) return;
             list.innerHTML = '';
+            const conflicts = findKeyConflicts();
+            if (keyCaptureAction && conflicts.has(keyCaptureAction)) {
+                const captureKey = keyBindings[keyCaptureAction];
+                Object.keys(keyBindings).forEach(a => {
+                    if (a !== keyCaptureAction && keyBindings[a] === captureKey) {
+                        conflicts.delete(a);
+                    }
+                });
+            }
             keyBindingActions.forEach(({ action, key }) => {
                 const row = document.createElement('div');
                 row.className = 'flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors';
                 const labelSpan = document.createElement('span');
                 labelSpan.className = 'text-sm text-gray-700 dark:text-dark-text';
                 labelSpan.textContent = window.i18n ? i18n.t(key) : key;
+                const isConflict = conflicts.has(action) && action !== keyCaptureAction;
                 const btn = document.createElement('button');
-                btn.className = 'px-3 py-1 min-w-[64px] bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white rounded-md text-sm font-mono transition-colors hover:bg-gray-300 dark:hover:bg-gray-500';
+                btn.className = isConflict
+                    ? 'px-3 py-1 min-w-[64px] bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300 border border-red-500 rounded-md text-sm font-mono transition-colors'
+                    : 'px-3 py-1 min-w-[64px] bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white rounded-md text-sm font-mono transition-colors hover:bg-gray-300 dark:hover:bg-gray-500';
                 btn.textContent = formatKeyName(keyBindings[action]);
                 btn.dataset.action = action;
                 btn.addEventListener('click', () => startKeyCapture(action));
                 row.appendChild(labelSpan);
+                const wrap = document.createElement('span');
+                wrap.className = 'flex items-center gap-1';
+                if (isConflict) {
+                    const icon = document.createElement('i');
+                    icon.className = 'fa-solid fa-circle-exclamation text-red-500';
+                    icon.title = window.i18n ? i18n.t('keybindingConflict') : '快捷键冲突';
+                    wrap.appendChild(icon);
+                }
                 if (action === 'undo') {
-                    const wrap = document.createElement('span');
-                    wrap.className = 'flex items-center gap-1';
                     const prefix = document.createElement('span');
                     prefix.className = 'text-sm text-gray-500 dark:text-dark-muted font-mono';
                     prefix.textContent = 'Ctrl/⌘ +';
                     wrap.appendChild(prefix);
-                    wrap.appendChild(btn);
-                    row.appendChild(wrap);
-                } else {
-                    row.appendChild(btn);
                 }
+                wrap.appendChild(btn);
+                row.appendChild(wrap);
                 list.appendChild(row);
             });
         }
         function startKeyCapture(action) {
+            cancelActiveKeyCapture();
+            keyCaptureAction = action;
+            renderKeybindingsList();
             const list = document.getElementById('keybindings-list');
             if (!list) return;
             const btn = list.querySelector(`button[data-action="${action}"]`);
@@ -3030,18 +3075,17 @@
                 e.stopPropagation();
                 if (['shift', 'control', 'alt', 'meta'].includes(e.key.toLowerCase())) return;
                 document.removeEventListener('keydown', handler, true);
+                if (activeKeyCaptureHandler === handler) activeKeyCaptureHandler = null;
+                keyCaptureAction = null;
                 if (e.key !== 'Escape') {
-                    const newKey = e.key.toLowerCase();
-                    Object.keys(keyBindings).forEach(a => {
-                        if (a !== action && keyBindings[a] === newKey) {
-                            keyBindings[a] = '';
-                        }
-                    });
-                    keyBindings[action] = newKey;
-                    saveKeyBindings();
+                    keyBindings[action] = e.key.toLowerCase();
+                    if (findKeyConflicts().size === 0) {
+                        saveKeyBindings();
+                    }
                 }
                 renderKeybindingsList();
             };
+            activeKeyCaptureHandler = handler;
             document.addEventListener('keydown', handler, true);
         }
         function setupKeyboardListeners() {
@@ -3387,11 +3431,21 @@
             }
             const closeKeybindingsButton = document.getElementById('close-keybindings-button');
             if (closeKeybindingsButton) {
-                closeKeybindingsButton.addEventListener('click', () => hideModal('keybindings-modal'));
+                closeKeybindingsButton.addEventListener('click', () => {
+                    cancelActiveKeyCapture();
+                    if (findKeyConflicts().size > 0) {
+                        alert(window.i18n ? i18n.t('keybindingConflict') : '快捷键冲突，请修改为其他按键');
+                        return;
+                    }
+                    hideModal('keybindings-modal');
+                });
             }
             const closeKeybindingsX = document.getElementById('close-keybindings-x');
             if (closeKeybindingsX) {
-                closeKeybindingsX.addEventListener('click', () => hideModal('keybindings-modal'));
+                closeKeybindingsX.addEventListener('click', () => {
+                    cancelActiveKeyCapture();
+                    hideModal('keybindings-modal');
+                });
             }
             const resetKeybindingsButton = document.getElementById('reset-keybindings-button');
             if (resetKeybindingsButton) {

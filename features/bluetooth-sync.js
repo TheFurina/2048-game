@@ -1,4 +1,4 @@
-const bluetoothSyncVersion = '0.4';
+const bluetoothSyncVersion = '0.5';
 window.bluetoothSyncVersion = bluetoothSyncVersion;
 class BluetoothSync {
     constructor() {
@@ -673,7 +673,7 @@ window.SyncIndicator = window.SyncIndicator || {
     current: null,
     meta: {
         bluetooth: { labelKey: 'bluetoothConnectedBadge', icon: 'fa-brands fa-bluetooth-b' },
-        webrtc: { labelKey: 'webrtcConnectedBadge', icon: 'fa-solid fa-tower-broadcast' }
+        webrtc: { labelKey: 'webrtcConnectedBadge', icon: 'fa-solid fa-wifi' }
     },
     set(name) {
         this.current = name;
