@@ -1,4 +1,4 @@
-const i18nVersion = '1.7';
+const i18nVersion = '1.8';
 window.i18nVersion = i18nVersion;
 const translations = {
     zh: {
@@ -307,6 +307,7 @@ const translations = {
         done: '完成',
         pressKey: '按下按键...',
         notSet: '未设置',
+        keybindingConflict: '快捷键冲突，请修改为其他按键',
         kbUp: '向上移动',
         kbDown: '向下移动',
         kbLeft: '向左移动',
@@ -626,6 +627,7 @@ const translations = {
         done: 'Done',
         pressKey: 'Press a key...',
         notSet: 'Not set',
+        keybindingConflict: 'Shortcut conflict, please choose another key',
         kbUp: 'Move Up',
         kbDown: 'Move Down',
         kbLeft: 'Move Left',
