@@ -1,4 +1,4 @@
-const dataTransferVersion = '1.2';
+const dataTransferVersion = '1.3';
 window.dataTransferVersion = dataTransferVersion;
 const Base91 = {
     chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~"',
@@ -224,7 +224,9 @@ function normalizeBase64Url(dataStr) {
     }
     return str;
 }
+let initialHashImportHandled = false;
 function autoImportFromUrl() {
+    initialHashImportHandled = true;
     try {
         const hash = window.location.hash;
         if (hash && hash.startsWith('#data=')) {
@@ -239,6 +241,12 @@ function autoImportFromUrl() {
     } catch (e) {
         console.error('Auto import from URL failed:', e);
     }
+}
+function handleHashChangeForAutoImport() {
+    if (!initialHashImportHandled) {
+        return;
+    }
+    autoImportFromUrl();
 }
 function copyDataToClipboard() {
     try {
@@ -270,17 +278,26 @@ function importGameData(dataStr) {
         let decodedData;
         let data;
         const trimmedStr = dataStr.trim();
-        if (trimmedStr.startsWith('~G')) {
+        let payloadStr = trimmedStr;
+        const dataFieldMatch = trimmedStr.match(/[#?&]data=([^#&\s]+)/) || trimmedStr.match(/^\s*data=([^#&\s]+)/);
+        if (dataFieldMatch) {
             try {
-                decodedData = Base91.decode(trimmedStr);
+                payloadStr = decodeURIComponent(dataFieldMatch[1]);
+            } catch (e) {
+                payloadStr = dataFieldMatch[1];
+            }
+        }
+        if (payloadStr.startsWith('~G')) {
+            try {
+                decodedData = Base91.decode(payloadStr);
                 data = JSON.parse(decodedData);
             } catch (e) {
                 console.error(window.i18n ? window.i18n.t('consoleBase91Failed') : 'Base91 decode failed', e);
                 throw new Error((window.i18n ? window.i18n.t('importFailed') : 'Import failed') + ' ' + (window.i18n ? window.i18n.t('importFailedDecode') : 'Decode failed'));
             }
-        } else if (trimmedStr.startsWith('ey')) {
+        } else if (payloadStr.startsWith('ey')) {
             try {
-                decodedData = atob(trimmedStr);
+                decodedData = atob(normalizeBase64Url(payloadStr));
                 data = JSON.parse(decodedData);
             } catch (e) {
                 console.error(window.i18n ? window.i18n.t('consoleBase64Failed') : 'Base64 decode failed', e);
@@ -392,6 +409,7 @@ function importGameData(dataStr) {
 (function() {
     try {
         window.dataTransferModuleLoaded = true;
+        window.addEventListener('hashchange', handleHashChangeForAutoImport);
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initDataTransfer);
         } else {

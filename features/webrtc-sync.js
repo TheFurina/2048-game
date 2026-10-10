@@ -1,4 +1,4 @@
-const webRTCSyncVersion = '0.2';
+const webRTCSyncVersion = '0.3';
 window.webRTCSyncVersion = webRTCSyncVersion;
 class WebRTCSync {
     constructor() {
@@ -109,12 +109,17 @@ class WebRTCSync {
     }
     close() {
         if (this.channel) {
+            this.channel.onopen = null;
+            this.channel.onmessage = null;
+            this.channel.onclose = null;
             try {
                 this.channel.close();
             } catch (e) {}
             this.channel = null;
         }
         if (this.pc) {
+            this.pc.onconnectionstatechange = null;
+            this.pc.ondatachannel = null;
             try {
                 this.pc.close();
             } catch (e) {}
