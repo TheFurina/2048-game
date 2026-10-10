@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="./icon.png">
     <title>2048 Game</title>
+    <style>
+        html.loading-active,
+        html.loading-active body {
+            overflow: hidden !important;
+            overscroll-behavior: none;
+        }
+    </style>
     <script>
         document.documentElement.classList.add('loading-active');
         window.SETTING_PREFIX = '2048-setting-';
@@ -112,6 +119,48 @@
                 }
             } catch (e) {}
         })();
+        window.__detectLoadingLang = function () {
+            var lang = 'auto';
+            try {
+                lang = localStorage.getItem(window.SETTING_PREFIX + 'language') || 'auto';
+            } catch (e) {}
+            if (lang === 'auto') {
+                var browserLang = (navigator.language || navigator.userLanguage || '').split('-')[0];
+                lang = browserLang === 'en' ? 'en' : 'zh';
+            }
+            return lang;
+        };
+        window.__loadingErrorTexts = {
+            zh: {
+                title: '资源加载失败',
+                detail: '请检查网络连接后刷新页面',
+                loaderDetail: '模块加载器加载失败，请检查网络连接后刷新页面',
+                reload: '重新加载'
+            },
+            en: {
+                title: 'Failed to load resources',
+                detail: 'Check your network connection and refresh the page',
+                loaderDetail: 'The module loader failed to load. Check your network and refresh the page',
+                reload: 'Reload'
+            }
+        };
+        window.__getLoadingErrorTexts = function () {
+            var lang = window.__detectLoadingLang();
+            var fallback = window.__loadingErrorTexts[lang] || window.__loadingErrorTexts.zh;
+            if (window.i18n && typeof window.i18n.t === 'function') {
+                var pick = function (key, value) {
+                    var translated = window.i18n.t(key);
+                    return translated && translated !== key ? translated : value;
+                };
+                return {
+                    title: pick('loadingFailed', fallback.title),
+                    detail: pick('loadingFailedDetail', fallback.detail),
+                    loaderDetail: pick('moduleLoaderFailedDetail', fallback.loaderDetail),
+                    reload: pick('reloadPage', fallback.reload)
+                };
+            }
+            return fallback;
+        };
         (function() {
             try {
                 var savedLang = localStorage.getItem('2048-setting-language') || 'auto';
@@ -137,7 +186,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
     <script src="./features/module-loader.js"></script>
     <script>
-        const gameVersion = '2.8.1';
+        const gameVersion = '2.9.0';
         window.gameVersion = gameVersion;
         function loadCssVersion() {
             try {
@@ -177,6 +226,7 @@
                     { key: 'tile-appear-animation', default: true },
                     { key: 'tile-move-animation', default: true },
                     { key: 'tile-merge-animation', default: true },
+                    { key: 'score-pop-animation', default: true },
                     { key: 'vibration', default: true },
                     { key: 'vibration-merge', default: true },
                     { key: 'vibration-win', default: true },
@@ -279,42 +329,68 @@
         }
     </script>
     <script>
-        window.modulesReadyPromise = ModuleLoader.loadAll().catch(function(error) {
-            console.error('Module loading failed:', error);
-            var show = function() {
-                var loadingScreen = document.getElementById('loading-screen');
-                if (!loadingScreen) return;
-                var spinnerWrap = loadingScreen.querySelector('.loading-spinner-container');
-                if (spinnerWrap) spinnerWrap.style.display = 'none';
-                var errBox = document.getElementById('loading-error');
-                if (errBox) errBox.style.display = 'flex';
-                var savedLang = 'auto';
-                try { savedLang = localStorage.getItem('2048-setting-language') || 'auto'; } catch (e) {}
-                var lang = savedLang;
-                if (lang === 'auto') {
-                    var browserLang = (navigator.language || navigator.userLanguage || '').split('-')[0];
-                    lang = browserLang === 'en' ? 'en' : 'zh';
+        (function () {
+            if (typeof ModuleLoader === 'undefined' || !window.moduleLoaderModuleLoaded) {
+                var fatal = new Error('Module loader failed to load');
+                var showFatal = function () {
+                    var loadingScreen = document.getElementById('loading-screen');
+                    if (!loadingScreen) return;
+                    var spinnerWrap = loadingScreen.querySelector('.loading-spinner-container');
+                    if (spinnerWrap) spinnerWrap.style.display = 'none';
+                    var errBox = document.getElementById('loading-error');
+                    if (errBox) errBox.style.display = 'flex';
+                    var titleEl = document.getElementById('loading-error-text');
+                    var detailEl = document.getElementById('loading-error-detail');
+                    var btn = document.getElementById('loading-reload-btn');
+                    var text = window.__getLoadingErrorTexts();
+                    if (titleEl) titleEl.textContent = text.title;
+                    if (detailEl) detailEl.textContent = text.loaderDetail + ' (module-loader.js)';
+                    if (btn) {
+                        btn.textContent = text.reload;
+                        btn.onclick = function () { location.reload(); };
+                    }
+                };
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', showFatal);
+                } else {
+                    showFatal();
                 }
-                var text = lang === 'en'
-                    ? { title: 'Failed to load resources', detail: 'Check your network connection and refresh the page', reload: 'Reload' }
-                    : { title: '资源加载失败', detail: '请检查网络连接后刷新页面', reload: '重新加载' };
-                var titleEl = document.getElementById('loading-error-text');
-                if (titleEl) titleEl.textContent = text.title;
-                var detailEl = document.getElementById('loading-error-detail');
-                if (detailEl) detailEl.textContent = text.detail + (error && error.message ? ' (' + error.message + ')' : '');
-                var btn = document.getElementById('loading-reload-btn');
-                if (btn) {
-                    btn.textContent = text.reload;
-                    btn.onclick = function() { location.reload(); };
-                }
-            };
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', show);
-            } else {
-                show();
+                window.modulesReadyPromise = Promise.reject(fatal);
+                return;
             }
-            throw error;
-        }).then(() => {
+            window.modulesReadyPromise = ModuleLoader.loadAll().catch(function (error) {
+                console.error('Module loading failed:', error);
+                var requiredFailures = (error && error.failures) || (ModuleLoader && ModuleLoader.getRequiredFailures ? ModuleLoader.getRequiredFailures() : []);
+                var detailMsg = requiredFailures && requiredFailures.length
+                    ? requiredFailures.map(function (f) { return f.name + ': ' + (f.error || f.reason); }).join('; ')
+                    : (error && error.message ? error.message : '');
+                var show = function () {
+                    var loadingScreen = document.getElementById('loading-screen');
+                    if (!loadingScreen) return;
+                    var spinnerWrap = loadingScreen.querySelector('.loading-spinner-container');
+                    if (spinnerWrap) spinnerWrap.style.display = 'none';
+                    var errBox = document.getElementById('loading-error');
+                    if (errBox) errBox.style.display = 'flex';
+                    var text = window.__getLoadingErrorTexts();
+                    var titleEl = document.getElementById('loading-error-text');
+                    if (titleEl) titleEl.textContent = text.title;
+                    var detailEl = document.getElementById('loading-error-detail');
+                    if (detailEl) detailEl.textContent = text.detail + (detailMsg ? ' (' + detailMsg + ')' : '');
+                    var btn = document.getElementById('loading-reload-btn');
+                    if (btn) {
+                        btn.textContent = text.reload;
+                        btn.onclick = function () { location.reload(); };
+                    }
+                };
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', show);
+                } else {
+                    show();
+                }
+                throw error;
+            });
+        })();
+        window.modulesReadyPromise = window.modulesReadyPromise.then(() => {
             (function() {
                 ModuleLoader.load('dataTransferFallback', null, {
                     exportGameData: function() { alert(window.i18n && window.i18n.t ? i18n.t('dataTransferModuleMissing') : '数据传输模块未找到，请确保 features/data-transfer.js 文件存在。'); },
@@ -447,7 +523,7 @@
                     window.webrtcSync.init();
                 }
             }
-        }).catch(err => console.error('[ModuleLoader] manifest load failed:', err));
+        }).catch(err => { console.error('[ModuleLoader] manifest load failed:', err); throw err; });
     </script>
     <script>
         tailwind.config = {
@@ -587,14 +663,7 @@
                 <i class="fa-solid fa-chevron-up mr-2" id="toggle-icon"></i>
                 <span id="toggle-text">收起控制</span>
             </button>
-            <div id="sync-indicator" class="hidden items-center gap-1 pr-1 text-sm">
-                <button type="button" id="sync-indicator-open" class="flex items-center text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold transition-colors focus:outline-none">
-                    <i class="fa-solid fa-circle-check mr-1"></i><i id="sync-indicator-icon" class="fa-brands fa-bluetooth-b mr-1"></i><span id="sync-indicator-text"></span>
-                </button>
-                <button type="button" id="sync-indicator-disconnect" class="text-secondary/40 hover:text-red-500 dark:text-dark-muted/60 dark:hover:text-red-400 transition-colors focus:outline-none" title="">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
+            <div id="sync-indicator" class="hidden items-center gap-3 pr-1 text-sm"></div>
         </div>
         <div id="controls-container" class="transition-all duration-300 ease-in-out">
             <div id="game-buttons" class="flex flex-wrap gap-2 mb-4">
@@ -640,7 +709,7 @@
             </div>
         </div>
         <div class="stats-container flex justify-between mb-4">
-            <div class="bg-grid dark:bg-dark-grid text-center rounded-md p-3 flex-1 mr-2">
+            <div id="score-box" class="bg-grid dark:bg-dark-grid text-center rounded-md p-3 flex-1 mr-2">
                 <div class="text-xs uppercase text-white/70 dark:text-dark-muted" data-i18n="score">分数</div>
                 <div id="score" class="text-xl font-bold text-white dark:text-dark-text">0</div>
             </div>
@@ -782,6 +851,14 @@
                                         <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
                                     </label>
                                 </div>
+                            </div>
+                            <div class="border-b border-gray-200 dark:border-gray-700 my-3 mx-2"></div>
+                            <div class="flex items-center justify-between px-2">
+                                <span class="text-gray-700 dark:text-dark-muted" data-i18n="scorePopAnimation">分数跳字动画</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="score-pop-animation" class="sr-only peer" checked title="分数跳字动画">
+                                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -1605,6 +1682,7 @@
             tileAppearAnimationEnabled: true,
             tileMoveAnimationEnabled: true,
             tileMergeAnimationEnabled: true,
+            scorePopAnimationEnabled: true,
             vibrationEnabled: true,
             vibrationMergeEnabled: true,
             vibrationWinEnabled: true,
@@ -1905,6 +1983,28 @@
                 }, 300);
             }
         }
+        (function setupModalScrollLock() {
+            const lockClass = 'modal-scroll-lock';
+            const aiModalId = 'ai-analysis-modal';
+            function update() {
+                const anyOpen = Array.from(document.querySelectorAll('[role="dialog"]')).some(modal =>
+                    modal.id !== aiModalId && !modal.classList.contains('hidden')
+                );
+                document.body.classList.toggle(lockClass, anyOpen);
+            }
+            function bind() {
+                const observer = new MutationObserver(update);
+                document.querySelectorAll('[role="dialog"]').forEach(modal => {
+                    observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
+                });
+                update();
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', bind);
+            } else {
+                bind();
+            }
+        })();
         function importGameData(dataStr) {
             try {
                 if (!dataStr) {
@@ -2046,6 +2146,10 @@
                     if (mergeAnimationCheckbox) {
                         mergeAnimationCheckbox.checked = window.settingsManager.load('tile-merge-animation');
                     }
+                    const scorePopAnimationCheckbox = document.getElementById('score-pop-animation');
+                    if (scorePopAnimationCheckbox) {
+                        scorePopAnimationCheckbox.checked = window.settingsManager.load('score-pop-animation');
+                    }
                     const vibrationToggle = document.getElementById('vibration-toggle');
                     const vibrationMergeToggle = document.getElementById('vibration-merge');
                     const vibrationWinToggle = document.getElementById('vibration-win');
@@ -2145,6 +2249,7 @@
             tileAppearAnimation: document.getElementById('tile-appear-animation'),
             tileMoveAnimation: document.getElementById('tile-move-animation'),
             tileMergeAnimation: document.getElementById('tile-merge-animation'),
+            scorePopAnimation: document.getElementById('score-pop-animation'),
             toggleControlsButton: document.getElementById('toggle-controls'),
             controlsContainer: document.getElementById('controls-container'),
             toggleIcon: document.getElementById('toggle-icon'),
@@ -2561,6 +2666,42 @@
                 navigator.vibrate(pattern);
             }
         }
+        let scoreAdditionBuffer = 0;
+        let scoreAdditionFrame = null;
+        function scheduleScoreAddition(amount) {
+            if (!gameState.scorePopAnimationEnabled || !amount || amount <= 0) {
+                return;
+            }
+            scoreAdditionBuffer += amount;
+            if (scoreAdditionFrame === null) {
+                scoreAdditionFrame = requestAnimationFrame(() => {
+                    scoreAdditionFrame = null;
+                    const total = scoreAdditionBuffer;
+                    scoreAdditionBuffer = 0;
+                    playScoreAddition(total);
+                });
+            }
+        }
+        function playScoreAddition(total) {
+            const scoreDisplay = elements.scoreDisplay;
+            if (!scoreDisplay) {
+                return;
+            }
+            scoreDisplay.classList.remove('score-pop');
+            void scoreDisplay.offsetWidth;
+            scoreDisplay.classList.add('score-pop');
+            const existing = scoreDisplay.querySelector('.score-addition');
+            if (existing) {
+                existing.remove();
+            }
+            const addition = document.createElement('div');
+            addition.className = 'score-addition';
+            addition.textContent = '+' + total;
+            scoreDisplay.appendChild(addition);
+            const cleanup = () => addition.remove();
+            addition.addEventListener('animationend', cleanup, { once: true });
+            setTimeout(cleanup, 800);
+        }
         function handleTileMerge(targetY, targetX, sourceY, sourceX) {
             const sourceTile = gameState.grid[sourceY][sourceX];
             const targetTile = gameState.grid[targetY][targetX];
@@ -2573,6 +2714,7 @@
                         elements.bestScoreDisplay.textContent = gameState.bestScore;
                     }
                     elements.scoreDisplay.textContent = gameState.score;
+                    scheduleScoreAddition(addedScore);
                     updateDocumentTitle();
                 },
                 onMergeComplete: () => {
@@ -2886,6 +3028,7 @@
                 gameState.tileAppearAnimationEnabled = true;
                 gameState.tileMoveAnimationEnabled = true;
                 gameState.tileMergeAnimationEnabled = true;
+                gameState.scorePopAnimationEnabled = true;
                 gameState.vibrationEnabled = true;
                 gameState.vibrationMergeEnabled = true;
                 gameState.vibrationWinEnabled = true;
@@ -2921,6 +3064,9 @@
                 elements.tileAppearAnimation.checked = true;
                 elements.tileMoveAnimation.checked = true;
                 elements.tileMergeAnimation.checked = true;
+                if (elements.scorePopAnimation) {
+                    elements.scorePopAnimation.checked = true;
+                }
                 const vibrationToggle = document.getElementById('vibration-toggle');
                 const vibrationMergeToggle = document.getElementById('vibration-merge');
                 const vibrationWinToggle = document.getElementById('vibration-win');
@@ -3496,6 +3642,13 @@
                 gameState.tileMergeAnimationEnabled = e.target.checked;
                 window.settingsManager.save('tile-merge-animation', gameState.tileMergeAnimationEnabled);
             });
+            if (elements.scorePopAnimation) {
+                elements.scorePopAnimation.checked = gameState.scorePopAnimationEnabled;
+                elements.scorePopAnimation.addEventListener('change', (e) => {
+                    gameState.scorePopAnimationEnabled = e.target.checked;
+                    window.settingsManager.save('score-pop-animation', gameState.scorePopAnimationEnabled);
+                });
+            }
             const vibrationToggle = document.getElementById('vibration-toggle');
             const vibrationMergeToggle = document.getElementById('vibration-merge');
             const vibrationWinToggle = document.getElementById('vibration-win');
@@ -3775,24 +3928,7 @@
                 if (spinnerWrap) spinnerWrap.style.display = 'none';
                 var errBox = document.getElementById('loading-error');
                 if (errBox) errBox.style.display = 'flex';
-                var savedLang = 'auto';
-                try { savedLang = localStorage.getItem('2048-setting-language') || 'auto'; } catch (e) {}
-                var lang = savedLang;
-                if (lang === 'auto') {
-                    var browserLang = (navigator.language || navigator.userLanguage || '').split('-')[0];
-                    lang = browserLang === 'en' ? 'en' : 'zh';
-                }
-                var fallback = lang === 'en'
-                    ? { title: 'Failed to load resources', detail: 'Check your network connection and refresh the page', reload: 'Reload' }
-                    : { title: '资源加载失败', detail: '请检查网络连接后刷新页面', reload: '重新加载' };
-                var text = {
-                    title: window.i18n && window.i18n.t ? window.i18n.t('loadingFailed') : fallback.title,
-                    detail: window.i18n && window.i18n.t ? window.i18n.t('loadingFailedDetail') : fallback.detail,
-                    reload: window.i18n && window.i18n.t ? window.i18n.t('reloadPage') : fallback.reload
-                };
-                if (text.title === 'loadingFailed') text.title = fallback.title;
-                if (text.detail === 'loadingFailedDetail') text.detail = fallback.detail;
-                if (text.reload === 'reloadPage') text.reload = fallback.reload;
+                var text = window.__getLoadingErrorTexts();
                 var titleEl = document.getElementById('loading-error-text');
                 if (titleEl) titleEl.textContent = text.title;
                 var detailEl = document.getElementById('loading-error-detail');
