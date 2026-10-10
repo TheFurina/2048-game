@@ -1,4 +1,7 @@
-:root { --css-version: 1.1; }
+:root { --css-version: 1.2; }
+body.modal-scroll-lock {
+    overflow: hidden;
+}
 .hidden {
     opacity: 0;
     visibility: hidden;
@@ -1083,10 +1086,6 @@
     opacity: 1;
     margin-top: 0.25rem;
 }
-html.loading-active,
-html.loading-active body {
-    overflow: hidden;
-}
 #loading-screen {
     transition: opacity 500ms ease-out, transform 500ms ease-out, visibility 500ms ease-out;
 }
@@ -1364,5 +1363,55 @@ html.loading-active body {
 }
 .dark .option-label {
     color: #9e9e9e;
+}
+#score.score-pop {
+    animation: score-pop 0.3s ease-out;
+    transform-origin: center center;
+}
+#score {
+    position: relative;
+    display: inline-block;
+}
+@keyframes score-pop {
+    0% {
+        transform: scale(1);
+    }
+    40% {
+        transform: scale(1.3);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+.score-addition {
+    position: absolute;
+    left: calc(100% + 6px);
+    top: 1px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+    z-index: 5;
+    animation: score-addition-rise 0.7s ease-out forwards;
+}
+html.dark .score-addition {
+    color: rgba(236, 232, 226, 0.95);
+}
+@keyframes score-addition-rise {
+    0% {
+        opacity: 0;
+        transform: translateY(8px) scale(0.8);
+    }
+    25% {
+        opacity: 1;
+        transform: translateY(-2px) scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-32px) scale(1);
+    }
 }
     
