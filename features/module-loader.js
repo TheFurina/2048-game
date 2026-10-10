@@ -1,4 +1,4 @@
-const moduleLoaderVersion = '3.0';
+const moduleLoaderVersion = '3.1';
 window.moduleLoaderVersion = moduleLoaderVersion;
 (function () {
     'use strict';
@@ -114,7 +114,7 @@ window.moduleLoaderVersion = moduleLoaderVersion;
         return new Promise(function (resolve, reject) {
             const script = document.createElement('script');
             const isRemote = /^https?:\/\//i.test(src);
-            script.src = isRemote ? src : (src + (src.indexOf('?') === -1 ? '?v=' + moduleLoaderVersion : '&v=' + moduleLoaderVersion));
+            script.src = src;
             script.async = false;
             script.onload = function () { resolve(src); };
             script.onerror = function () { reject(new Error('[ModuleLoader] Failed to load script: ' + src)); };
