@@ -1,4 +1,4 @@
-const fullscreenModeVersion = '0.4';
+const fullscreenModeVersion = '0.5';
 window.fullscreenModeVersion = fullscreenModeVersion;
 let isFullscreenMode = false;
 const FULLSCREEN_HIDDEN_ELEMENTS = [
@@ -107,9 +107,14 @@ function handleFullscreenButtonGroup(show) {
     }
 }
 function updateFullscreenButtonIcon() {
+    const iconHtml = '<i class="fa-solid ' + (isFullscreenMode ? 'fa-compress' : 'fa-expand') + ' dark:text-[#282828]"></i>';
     const fullscreenButton = document.getElementById('fullscreen-button');
     if (fullscreenButton) {
-        fullscreenButton.innerHTML = '<i class="fa-solid fa-expand dark:text-[#282828]"></i>';
+        fullscreenButton.innerHTML = iconHtml;
+    }
+    const fullscreenClone = document.getElementById('fullscreen-toggle-button');
+    if (fullscreenClone) {
+        fullscreenClone.innerHTML = iconHtml;
     }
 }
 function handleFullscreenChange() {

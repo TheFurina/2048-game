@@ -1,4 +1,4 @@
-const i18nVersion = '1.8';
+const i18nVersion = '1.9';
 window.i18nVersion = i18nVersion;
 const translations = {
     zh: {
@@ -36,6 +36,7 @@ const translations = {
         gpuAcceleration: 'GPU加速',
         vibration: '振动反馈',
         tileAnimation: '滑块动画',
+        scorePopAnimation: '分数跳字动画',
         appearance: '外观',
         theme: '主题',
         dataManagement: '数据',
@@ -148,6 +149,7 @@ const translations = {
         loading: '加载中...',
         loadingFailed: '资源加载失败',
         loadingFailedDetail: '请检查网络连接后刷新页面',
+        moduleLoaderFailedDetail: '模块加载器加载失败，请检查网络连接后刷新页面',
         reloadPage: '重新加载',
         error: '错误',
         success: '成功',
@@ -267,6 +269,7 @@ const translations = {
         receivingBytesTotal: '接收中: {bytes} / {total} 字节',
         includeSettings: '包含设置数据',
         disconnectConnection: '断开连接',
+        disconnect: '断开',
         bluetoothConnectedBadge: '蓝牙已连接',
         webrtcConnectedBadge: '局域网已连接',
         syncLiveHint: '连接保持中，游戏状态与设置更改将自动同步',
@@ -356,6 +359,7 @@ const translations = {
         gpuAcceleration: 'GPU Acceleration',
         vibration: 'Vibration Feedback',
         tileAnimation: 'Tile Animation',
+        scorePopAnimation: 'Score Pop Animation',
         appearance: 'Appearance',
         theme: 'Theme',
         dataManagement: 'Data',
@@ -468,6 +472,7 @@ const translations = {
         loading: 'Loading...',
         loadingFailed: 'Failed to load resources',
         loadingFailedDetail: 'Check your network connection and refresh the page',
+        moduleLoaderFailedDetail: 'The module loader failed to load. Check your network and refresh the page',
         reloadPage: 'Reload',
         error: 'Error',
         success: 'Success',
@@ -587,6 +592,7 @@ const translations = {
         receivingBytesTotal: 'Receiving: {bytes} / {total} bytes',
         includeSettings: 'Include settings data',
         disconnectConnection: 'Disconnect',
+        disconnect: 'Disconnect',
         bluetoothConnectedBadge: 'Bluetooth connected',
         webrtcConnectedBadge: 'LAN connected',
         syncLiveHint: 'Connection active. Game and setting changes sync automatically.',

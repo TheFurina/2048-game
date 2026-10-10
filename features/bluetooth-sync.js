@@ -1,4 +1,4 @@
-const bluetoothSyncVersion = '0.5';
+const bluetoothSyncVersion = '0.6';
 window.bluetoothSyncVersion = bluetoothSyncVersion;
 class BluetoothSync {
     constructor() {
@@ -18,7 +18,11 @@ class BluetoothSync {
         this.dismissed = false;
         this.onConnected = null;
         this.onDisconnected = null;
-        this._txChain = Promise.resolve();
+        this._txChain = null;
+        this._pendingLiveMessage = null;
+        this._mtu = 23;
+        this._chunkSize = 17;
+        this._writeWithoutResponse = false;
         this._gattDisconnectHandler = null;
         this.checkBluetoothSupport();
     }
@@ -107,6 +111,23 @@ class BluetoothSync {
                     'Connection timeout'
                 );
                 this.device = device;
+                this._mtu = 23;
+                this._chunkSize = 17;
+                this._writeWithoutResponse = false;
+                if (typeof this.server.requestMtu === 'function') {
+                    try {
+                        const negotiatedMtu = await this.withTimeout(
+                            this.server.requestMtu(247),
+                            this.timeoutDuration,
+                            'MTU request timeout'
+                        );
+                        if (typeof negotiatedMtu === 'number' && negotiatedMtu >= 23) {
+                            this._mtu = negotiatedMtu;
+                        }
+                    } catch (mtuError) {
+                        console.warn('MTU negotiation failed, using default:', mtuError);
+                    }
+                }
                 if (!this._gattDisconnectHandler) {
                     this._gattDisconnectHandler = () => {
                         if (this.liveMode) {
@@ -125,6 +146,10 @@ class BluetoothSync {
                     this.timeoutDuration,
                     'Characteristic discovery timeout'
                 );
+                const characteristicProps = this.characteristic.properties || {};
+                this._writeWithoutResponse = !!characteristicProps.writeWithoutResponse &&
+                    typeof this.characteristic.writeValueWithoutResponse === 'function';
+                this._chunkSize = Math.max(17, this._mtu - 6);
                 return true;
             } catch (error) {
                 retries++;
@@ -136,6 +161,12 @@ class BluetoothSync {
                 await this.delay(1000);
             }
         }
+    }
+    _writeCharacteristic(buffer) {
+        if (this._writeWithoutResponse) {
+            return this.characteristic.writeValueWithoutResponse(buffer);
+        }
+        return this.characteristic.writeValue(buffer);
     }
     async sendData(data, onProgress) {
         try {
@@ -150,12 +181,11 @@ class BluetoothSync {
             const payloadBytes = encoder.encode(JSON.stringify(payload));
             const totalSize = payloadBytes.length;
             await this.withTimeout(
-                this.characteristic.writeValue(encoder.encode('SIZE:' + totalSize + '\n')),
+                this._writeCharacteristic(encoder.encode('SIZE:' + totalSize + '\n')),
                 this.timeoutDuration,
                 'Size send timeout'
             );
-            await this.delay(30);
-            const chunks = this.chunkDataBytes(payloadBytes, 17);
+            const chunks = this.chunkDataBytes(payloadBytes, this._chunkSize);
             for (let i = 0; i < chunks.length; i++) {
                 const frame = new Uint8Array(chunks[i].length + 3);
                 frame[0] = 0x44;
@@ -163,18 +193,17 @@ class BluetoothSync {
                 frame.set(chunks[i], 2);
                 frame[frame.length - 1] = 0x0A;
                 await this.withTimeout(
-                    this.characteristic.writeValue(frame),
+                    this._writeCharacteristic(frame),
                     this.timeoutDuration,
                     'Data send timeout'
                 );
-                await this.delay(30);
                 if (onProgress) {
                     const progress = Math.round(((i + 1) / chunks.length) * 100);
                     onProgress(progress);
                 }
             }
             await this.withTimeout(
-                this.characteristic.writeValue(encoder.encode('END\n')),
+                this._writeCharacteristic(encoder.encode('END\n')),
                 this.timeoutDuration,
                 'End marker send timeout'
             );
@@ -325,7 +354,7 @@ class BluetoothSync {
     async notifyReady() {
         const encoder = new TextEncoder();
         await this.withTimeout(
-            this.characteristic.writeValue(encoder.encode('READY\n')),
+            this._writeCharacteristic(encoder.encode('READY\n')),
             this.timeoutDuration,
             'Ready signal send timeout'
         );
@@ -484,9 +513,23 @@ class BluetoothSync {
         }
     }
     enqueueSend(message) {
-        const run = this._txChain.then(() => this.sendData(message));
-        this._txChain = run.catch(() => {});
-        return run;
+        this._pendingLiveMessage = message;
+        if (!this._txChain) {
+            this._txChain = this._drainTxQueue()
+                .finally(() => { this._txChain = null; });
+            this._txChain.catch(() => {});
+        }
+        return this._txChain;
+    }
+    async _drainTxQueue() {
+        while (this.liveMode) {
+            const message = this._pendingLiveMessage;
+            this._pendingLiveMessage = null;
+            if (!message) {
+                break;
+            }
+            await this.sendData(message);
+        }
     }
     handleLinkFailure() {
         if (this.liveMode) {
@@ -513,7 +556,8 @@ class BluetoothSync {
         this._readyPending = false;
         this._rxQueue = [];
         this._rxWaiters = [];
-        this._txChain = Promise.resolve();
+        this._txChain = null;
+        this._pendingLiveMessage = null;
         if (callback) {
             callback();
         }
@@ -543,7 +587,8 @@ class BluetoothSync {
         this._readyPending = false;
         this._rxQueue = [];
         this._rxWaiters = [];
-        this._txChain = Promise.resolve();
+        this._txChain = null;
+        this._pendingLiveMessage = null;
         if (wasLive && this.onDisconnected) {
             this.onDisconnected();
         }
@@ -570,10 +615,10 @@ window.SyncLive = window.SyncLive || {
         }
     },
     notifyStateChanged() {
-        this._schedule(500);
+        this._schedule(120);
     },
     notifySettingsChanged() {
-        this._schedule(250);
+        this._schedule(200);
     },
     flushTransport(name) {
         const transport = this._transports[name];
@@ -670,20 +715,21 @@ window.SyncLive = window.SyncLive || {
     }
 };
 window.SyncIndicator = window.SyncIndicator || {
-    current: null,
+    connections: {},
     meta: {
         bluetooth: { labelKey: 'bluetoothConnectedBadge', icon: 'fa-brands fa-bluetooth-b' },
         webrtc: { labelKey: 'webrtcConnectedBadge', icon: 'fa-solid fa-wifi' }
     },
     set(name) {
-        this.current = name;
+        this.connections[name] = true;
         this.render();
     },
     clear(name) {
-        if (name && this.current !== name) {
-            return;
+        if (name) {
+            delete this.connections[name];
+        } else {
+            this.connections = {};
         }
-        this.current = null;
         this.render();
     },
     refresh() {
@@ -694,26 +740,39 @@ window.SyncIndicator = window.SyncIndicator || {
         if (!indicator) {
             return;
         }
-        const meta = this.current ? this.meta[this.current] : null;
-        if (!meta) {
+        const active = Object.keys(this.meta).filter(name => this.connections[name]);
+        if (!active.length) {
             indicator.classList.add('hidden');
             indicator.classList.remove('flex');
+            indicator.innerHTML = '';
             return;
         }
         indicator.classList.remove('hidden');
         indicator.classList.add('flex');
-        const icon = document.getElementById('sync-indicator-icon');
-        const text = document.getElementById('sync-indicator-text');
-        if (icon) {
-            icon.className = meta.icon + ' mr-1';
-        }
-        if (text) {
-            text.textContent = window.i18n ? window.i18n.t(meta.labelKey) : meta.labelKey;
-        }
-        const disconnectBtn = document.getElementById('sync-indicator-disconnect');
-        if (disconnectBtn) {
-            disconnectBtn.title = window.i18n ? window.i18n.t('disconnectConnection') : '';
-        }
+        indicator.innerHTML = '';
+        const t = key => window.i18n ? window.i18n.t(key) : key;
+        active.forEach(name => {
+            const meta = this.meta[name];
+            const group = document.createElement('span');
+            group.className = 'flex items-center gap-1';
+            const openBtn = document.createElement('button');
+            openBtn.type = 'button';
+            openBtn.className = 'sync-open flex items-center text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold transition-colors focus:outline-none';
+            openBtn.dataset.transport = name;
+            openBtn.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i><i class="' + meta.icon + ' mr-1"></i>';
+            const label = document.createElement('span');
+            label.textContent = t(meta.labelKey);
+            openBtn.appendChild(label);
+            const disconnectBtn = document.createElement('button');
+            disconnectBtn.type = 'button';
+            disconnectBtn.className = 'sync-disconnect text-secondary/40 hover:text-red-500 dark:text-dark-muted/60 dark:hover:text-red-400 transition-colors focus:outline-none';
+            disconnectBtn.dataset.transport = name;
+            disconnectBtn.title = t('disconnectConnection');
+            disconnectBtn.textContent = t('disconnect');
+            group.appendChild(openBtn);
+            group.appendChild(disconnectBtn);
+            indicator.appendChild(group);
+        });
     }
 };
 let bluetoothSyncInstance = null;
@@ -746,26 +805,26 @@ function initBluetoothSync() {
     });
 }
 function setupSyncIndicator() {
-    const openBtn = document.getElementById('sync-indicator-open');
-    if (openBtn && !openBtn._syncBound) {
-        openBtn._syncBound = true;
-        openBtn.addEventListener('click', () => {
-            const current = window.SyncIndicator.current;
-            if (current === 'bluetooth') {
-                showBluetoothModal('select');
-            } else if (current === 'webrtc') {
-                showWebRTCModal('connected');
+    const indicator = document.getElementById('sync-indicator');
+    if (indicator && !indicator._syncBound) {
+        indicator._syncBound = true;
+        indicator.addEventListener('click', event => {
+            const openBtn = event.target.closest('.sync-open');
+            if (openBtn) {
+                const name = openBtn.dataset.transport;
+                if (name === 'bluetooth') {
+                    showBluetoothModal('select');
+                } else if (name === 'webrtc') {
+                    showWebRTCModal('connected');
+                }
+                return;
             }
-        });
-    }
-    const disconnectBtn = document.getElementById('sync-indicator-disconnect');
-    if (disconnectBtn && !disconnectBtn._syncBound) {
-        disconnectBtn._syncBound = true;
-        disconnectBtn.addEventListener('click', () => {
-            const current = window.SyncIndicator.current;
-            const transport = window.SyncLive._transports[current];
-            if (transport && transport.disconnect) {
-                transport.disconnect();
+            const disconnectBtn = event.target.closest('.sync-disconnect');
+            if (disconnectBtn) {
+                const transport = window.SyncLive._transports[disconnectBtn.dataset.transport];
+                if (transport && transport.disconnect) {
+                    transport.disconnect();
+                }
             }
         });
     }
