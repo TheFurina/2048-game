@@ -1,4 +1,4 @@
-const fullscreenModeVersion = '0.5';
+const fullscreenModeVersion = '0.6';
 window.fullscreenModeVersion = fullscreenModeVersion;
 let isFullscreenMode = false;
 const FULLSCREEN_HIDDEN_ELEMENTS = [
@@ -14,8 +14,55 @@ const FULLSCREEN_HIDDEN_ELEMENTS = [
     { selector: '#game-header p' },
     { selector: '#mode-description', query: 'parentElement' }
 ];
+function getFullscreenElement() {
+    return document.fullscreenElement
+        || document.webkitFullscreenElement
+        || document.mozFullScreenElement
+        || document.msFullscreenElement
+        || null;
+}
+let orientationLockRetryTimer = null;
+let orientationLockSucceeded = false;
+const ORIENTATION_LOCK_MAX_RETRIES = 15;
+const ORIENTATION_LOCK_RETRY_INTERVAL = 200;
+function stopOrientationLockRetries() {
+    if (orientationLockRetryTimer) {
+        clearTimeout(orientationLockRetryTimer);
+        orientationLockRetryTimer = null;
+    }
+}
+function tryLockPortraitOrientation(retries) {
+    if (!getFullscreenElement()) return;
+    if (!(screen.orientation && typeof screen.orientation.lock === 'function')) {
+        updateRotateHint();
+        return;
+    }
+    screen.orientation.lock('portrait').then(() => {
+        orientationLockSucceeded = true;
+        stopOrientationLockRetries();
+        updateRotateHint();
+    }).catch(() => {
+        if (retries > 0 && getFullscreenElement()) {
+            stopOrientationLockRetries();
+            orientationLockRetryTimer = setTimeout(() => tryLockPortraitOrientation(retries - 1), ORIENTATION_LOCK_RETRY_INTERVAL);
+        } else {
+            updateRotateHint();
+        }
+    });
+}
+function unlockOrientation() {
+    stopOrientationLockRetries();
+    orientationLockSucceeded = false;
+    removeRotateHint();
+    try {
+        if (screen.orientation && typeof screen.orientation.unlock === 'function') {
+            screen.orientation.unlock();
+        }
+    } catch (e) {
+    }
+}
 function toggleFullscreenMode() {
-    if (!document.fullscreenElement) {
+    if (!getFullscreenElement()) {
         enterFullscreenMode();
     } else {
         exitFullscreenMode();
@@ -23,29 +70,74 @@ function toggleFullscreenMode() {
 }
 function enterFullscreenMode() {
     const elem = document.documentElement;
+    let request = null;
     if (elem.requestFullscreen) {
-        elem.requestFullscreen();
+        request = elem.requestFullscreen();
     } else if (elem.webkitRequestFullscreen) {
-        elem.webkitRequestFullscreen();
+        request = elem.webkitRequestFullscreen();
     } else if (elem.msRequestFullscreen) {
-        elem.msRequestFullscreen();
+        request = elem.msRequestFullscreen();
     }
-    if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('portrait').catch(() => {
-        });
+    if (request && typeof request.catch === 'function') {
+        request.catch(() => {});
     }
+    tryLockPortraitOrientation(ORIENTATION_LOCK_MAX_RETRIES);
 }
 function exitFullscreenMode() {
+    unlockOrientation();
+    let request = null;
     if (document.exitFullscreen) {
-        document.exitFullscreen();
+        request = document.exitFullscreen();
     } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
+        request = document.webkitExitFullscreen();
     } else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
+        request = document.msExitFullscreen();
     }
-    if (screen.orientation && screen.orientation.unlock) {
-        screen.orientation.unlock();
+    if (request && typeof request.catch === 'function') {
+        request.catch(() => {});
     }
+}
+function showRotateHint() {
+    if (document.getElementById('rotate-hint-overlay')) return;
+    const overlay = document.createElement('div');
+    overlay.id = 'rotate-hint-overlay';
+    overlay.innerHTML = [
+        '<div class="rotate-hint-content">',
+        '    <i class="fa-solid fa-mobile-screen-button rotate-hint-icon"></i>',
+        '    <p class="rotate-hint-text">请旋转至竖屏以获得最佳体验</p>',
+        '    <p class="rotate-hint-text-en">Please rotate to portrait for the best experience</p>',
+        '</div>'
+    ].join('');
+    document.body.appendChild(overlay);
+}
+function removeRotateHint() {
+    const overlay = document.getElementById('rotate-hint-overlay');
+    if (overlay && overlay.parentNode) {
+        overlay.parentNode.removeChild(overlay);
+    }
+}
+function isTouchPrimaryDevice() {
+    if (window.matchMedia && typeof window.matchMedia === 'function') {
+        const coarseQuery = window.matchMedia('(hover: none) and (pointer: coarse)');
+        if (coarseQuery && typeof coarseQuery.matches === 'boolean') {
+            return coarseQuery.matches;
+        }
+    }
+    return 'ontouchstart' in window || (navigator.maxTouchPoints || 0) > 0;
+}
+function updateRotateHint() {
+    if (!isFullscreenMode || orientationLockSucceeded || !isTouchPrimaryDevice()) {
+        removeRotateHint();
+        return;
+    }
+    if (window.innerWidth > window.innerHeight) {
+        showRotateHint();
+    } else {
+        removeRotateHint();
+    }
+}
+function handleViewportOrientationChange() {
+    updateRotateHint();
 }
 function getElement(config) {
     if (config.query === 'parentElement') {
@@ -118,19 +210,37 @@ function updateFullscreenButtonIcon() {
     }
 }
 function handleFullscreenChange() {
-    isFullscreenMode = !!document.fullscreenElement;
+    isFullscreenMode = !!getFullscreenElement();
     updateFullscreenButtonIcon();
     handleFullscreenButtonGroup(isFullscreenMode);
     toggleElementsVisibility(isFullscreenMode);
+    if (isFullscreenMode) {
+        if (!orientationLockSucceeded) {
+            tryLockPortraitOrientation(ORIENTATION_LOCK_MAX_RETRIES);
+        }
+        updateRotateHint();
+    } else {
+        unlockOrientation();
+    }
 }
 function setupFullscreenMode() {
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
     document.addEventListener('msfullscreenchange', handleFullscreenChange);
+    if (window.matchMedia) {
+        const portraitQuery = window.matchMedia('(orientation: portrait)');
+        if (portraitQuery.addEventListener) {
+            portraitQuery.addEventListener('change', handleViewportOrientationChange);
+        } else if (portraitQuery.addListener) {
+            portraitQuery.addListener(handleViewportOrientationChange);
+        }
+    }
+    window.addEventListener('orientationchange', handleViewportOrientationChange);
+    window.addEventListener('resize', handleViewportOrientationChange);
     document.addEventListener('keydown', function(e) {
         if (e.key === 'F11') {
             e.preventDefault();
-            if (!document.fullscreenElement) {
+            if (!getFullscreenElement()) {
                 enterFullscreenMode();
             } else {
                 exitFullscreenMode();
@@ -211,12 +321,49 @@ function addFullscreenStyles() {
                 z-index: 1000;
             }
         }
+        #rotate-hint-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10000;
+            background: rgba(0, 0, 0, 0.78);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #rotate-hint-overlay .rotate-hint-content {
+            text-align: center;
+            color: #ffffff;
+            padding: 2rem;
+        }
+        #rotate-hint-overlay .rotate-hint-icon {
+            font-size: 3.5rem;
+            color: #faa31b;
+            display: inline-block;
+            animation: rotate-hint-swing 1.8s ease-in-out infinite;
+        }
+        #rotate-hint-overlay .rotate-hint-text {
+            margin-top: 1.25rem;
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+        #rotate-hint-overlay .rotate-hint-text-en {
+            margin-top: 0.35rem;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        @keyframes rotate-hint-swing {
+            0%, 100% { transform: rotate(-90deg); }
+            50% { transform: rotate(0deg); }
+        }
     `;
     document.head.appendChild(styleElement);
 }
 window.setupFullscreenMode = setupFullscreenMode;
 window.toggleFullscreenMode = toggleFullscreenMode;
-window.isFullscreenMode = function() { return !!document.fullscreenElement; };
+window.isFullscreenMode = function() { return !!getFullscreenElement(); };
 function initFullscreenMode() {
     try {
         setupFullscreenMode();

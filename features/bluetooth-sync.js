@@ -1,4 +1,4 @@
-const bluetoothSyncVersion = '0.6';
+const bluetoothSyncVersion = '0.7';
 window.bluetoothSyncVersion = bluetoothSyncVersion;
 class BluetoothSync {
     constructor() {
@@ -917,6 +917,7 @@ function updateBluetoothSelectPanel() {
 function getGameDataForExport(includeSettings) {
     const gameState = window.gameState;
     const gameData = {
+        version: 1,
         gameState: {
             grid: gameState.grid,
             gridSize: gameState.gridSize,
