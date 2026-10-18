@@ -1,4 +1,4 @@
-const dataTransferVersion = '1.3';
+const dataTransferVersion = '1.4';
 window.dataTransferVersion = dataTransferVersion;
 const Base91 = {
     chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~"',
@@ -145,6 +145,7 @@ function exportGameData() {
         const includeSettings = document.getElementById('export-settings-checkbox')?.checked || false;
         const encoding = document.getElementById('encoding-select')?.value || 'base64';
         const data = {
+            version: 1,
             grid: window.gameState.grid,
             score: window.gameState.score,
             bestScore: window.gameState.bestScore,
@@ -174,10 +175,11 @@ function exportGameData() {
         return null;
     }
 }
-function exportGameDataAsLink() {
+async function exportGameDataAsLink() {
     try {
         const includeSettings = document.getElementById('export-settings-checkbox')?.checked || false;
         const data = {
+            version: 1,
             grid: window.gameState.grid,
             score: window.gameState.score,
             bestScore: window.gameState.bestScore,
@@ -187,13 +189,24 @@ function exportGameDataAsLink() {
             difficulty: window.gameState.difficulty,
             isEndlessMode: window.gameState.isEndlessMode,
             timestamp: Date.now(),
-            encoding: 'base64url'
+            encoding: 'gzip-base64url'
         };
         if (includeSettings) {
             data.settings = window.SettingStore.getAll();
         }
         const jsonStr = JSON.stringify(data);
-        const dataStr = btoa(jsonStr).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        let dataStr;
+        if (typeof CompressionStream !== 'undefined') {
+            try {
+                const compressedBytes = await gzipBytes(utf8Encoder.encode(jsonStr));
+                dataStr = COMPRESSED_LINK_PREFIX + bytesToBase64Url(compressedBytes);
+            } catch (compressError) {
+                console.warn('Gzip compress failed, fallback to legacy base64url:', compressError);
+                dataStr = encodeLegacyLinkData(jsonStr);
+            }
+        } else {
+            dataStr = encodeLegacyLinkData(jsonStr);
+        }
         const baseUrl = window.location.href.split('#')[0].split('?')[0];
         const link = baseUrl + '#data=' + encodeURIComponent(dataStr);
         const textarea = document.getElementById('data-textarea');
@@ -224,6 +237,37 @@ function normalizeBase64Url(dataStr) {
     }
     return str;
 }
+const COMPRESSED_LINK_PREFIX = 'z';
+const utf8Encoder = new TextEncoder();
+const utf8Decoder = new TextDecoder();
+function bytesToBase64Url(bytes) {
+    let binary = '';
+    const chunkSize = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + chunkSize, bytes.length)));
+    }
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function base64UrlToBytes(dataStr) {
+    const binary = atob(normalizeBase64Url(dataStr));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+}
+function streamToBytes(stream) {
+    return new Response(stream).arrayBuffer().then(buffer => new Uint8Array(buffer));
+}
+function gzipBytes(bytes) {
+    return streamToBytes(new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip')));
+}
+function gunzipBytes(bytes) {
+    return streamToBytes(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip')));
+}
+function encodeLegacyLinkData(jsonStr) {
+    return btoa(jsonStr).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
 let initialHashImportHandled = false;
 function autoImportFromUrl() {
     initialHashImportHandled = true;
@@ -233,7 +277,7 @@ function autoImportFromUrl() {
             const dataStr = decodeURIComponent(hash.substring(6));
             if (dataStr) {
                 if (confirm(window.i18n ? window.i18n.t('confirmImport') : '确定要导入数据吗？这将覆盖当前游戏状态。')) {
-                    importGameData(normalizeBase64Url(dataStr));
+                    importGameData(dataStr);
                 }
                 history.replaceState(null, '', window.location.href.split('#')[0]);
             }
@@ -269,7 +313,7 @@ function copyDataToClipboard() {
         alert((window.i18n ? window.i18n.t('error') : 'Error') + ' ' + error.message);
     }
 }
-function importGameData(dataStr) {
+async function importGameData(dataStr) {
     try {
         if (!dataStr) {
             console.error(window.i18n ? window.i18n.t('consoleDataEmpty') : 'Data is empty');
@@ -287,7 +331,19 @@ function importGameData(dataStr) {
                 payloadStr = dataFieldMatch[1];
             }
         }
-        if (payloadStr.startsWith('~G')) {
+        if (payloadStr.charAt(0) === COMPRESSED_LINK_PREFIX) {
+            if (typeof DecompressionStream === 'undefined') {
+                throw new Error((window.i18n ? window.i18n.t('importFailed') : 'Import failed') + (window.i18n ? '：当前浏览器不支持解析压缩链接，请更换或升级浏览器后重试。' : ' Current browser cannot decompress this link, please use an up-to-date browser.'));
+            }
+            try {
+                const jsonBytes = await gunzipBytes(base64UrlToBytes(payloadStr.substring(1)));
+                decodedData = utf8Decoder.decode(jsonBytes);
+                data = JSON.parse(decodedData);
+            } catch (e) {
+                console.error(window.i18n ? window.i18n.t('consoleBase64Failed') : 'Gzip decode failed', e);
+                throw new Error((window.i18n ? window.i18n.t('importFailed') : 'Import failed') + ' ' + (window.i18n ? window.i18n.t('importFailedDecode') : 'Decode failed'));
+            }
+        } else if (payloadStr.startsWith('~G')) {
             try {
                 decodedData = Base91.decode(payloadStr);
                 data = JSON.parse(decodedData);

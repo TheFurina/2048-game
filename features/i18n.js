@@ -1,4 +1,4 @@
-const i18nVersion = '1.9';
+const i18nVersion = '1.10';
 window.i18nVersion = i18nVersion;
 const translations = {
     zh: {
@@ -234,7 +234,7 @@ const translations = {
         bluetoothExportSuccess: '蓝牙导出成功！',
         bluetoothImportSuccess: '蓝牙导入成功！',
         webrtcModalTitle: '局域网同步',
-        webrtcSelectDesc: '与同一 Wi-Fi/热点下的另一台设备直连同步，无需服务器。双方互换连接码即可配对。',
+        webrtcSelectDesc: '通过 6 位连接码与另一台设备快速配对同步（信令经公共服务器，游戏数据仍为设备间点对点直连）。也可展开手动模式互换连接码。',
         webrtcCreateConnection: '创建连接',
         webrtcJoinConnection: '加入连接',
         webrtcHostStep1: '第 1 步：将此连接码发给对方',
@@ -262,6 +262,36 @@ const translations = {
         webrtcSendFailed: '发送失败',
         webrtcConfirmApply: '收到对方发来的游戏数据，是否应用？',
         webrtcPasteAnswer: '粘贴对方的应答码',
+        webrtcQuickHostTitle: '将此 6 位连接码告诉对方',
+        webrtcQuickJoinTitle: '输入对方的 6 位连接码',
+        webrtcCopyRoomCode: '复制连接码',
+        webrtcRoomRegenerate: '重新生成',
+        webrtcConnectRoom: '连接',
+        webrtcCopied: '已复制',
+        webrtcCreatingRoom: '正在获取连接码...',
+        webrtcWaitingForPeer: '等待对方加入...',
+        webrtcRoomFailed: '获取连接码失败，请检查网络后重试',
+        webrtcCodeInvalid: '请输入 6 位数字连接码',
+        webrtcJoiningRoom: '正在连接...',
+        webrtcJoinRoomFailed: '连接失败',
+        webrtcPeerUnavailable: '未找到该连接码对应的设备，请确认对方已创建连接且连接码正确',
+        webrtcServerUnreachable: '无法连接公共信令服务器，请检查网络或展开下方手动模式',
+        webrtcBrowserIncompatible: '当前浏览器不支持 WebRTC，请更换浏览器或使用手动模式',
+        webrtcManualMode: '手动模式（备用）：互换长连接码',
+        autoPlayTitle: 'AI自动操作',
+        autoPlayStart: '自动操作',
+        autoPlayPause: '暂停',
+        autoPlayResume: '继续',
+        autoPlayStop: '停止',
+        autoPlayStatusIdle: '未启动',
+        autoPlayBadgeRunning: 'AI自动操作中 · 已执行 {steps} 步',
+        autoPlayBadgePaused: '自动操作已暂停 · {steps} 步',
+        autoPlayRunning: '自动操作中 · 已执行 {steps} 步',
+        autoPlayPausedStatus: '已暂停 · 已执行 {steps} 步',
+        autoPlayGameEnded: '游戏已结束，自动操作已停止',
+        autoPlayMoveBlocked: '无法移动，自动操作已停止',
+        autoPlayAiUnavailable: 'AI请求模块不可用，自动操作已停止',
+        autoPlayAiFailed: 'AI请求失败，自动操作已停止',
         ready: '准备就绪',
         connected: '已连接',
         receiving: '接收中',
@@ -557,7 +587,7 @@ const translations = {
         bluetoothExportSuccess: 'Bluetooth export successful!',
         bluetoothImportSuccess: 'Bluetooth import successful!',
         webrtcModalTitle: 'LAN Sync',
-        webrtcSelectDesc: 'Sync directly with another device on the same Wi-Fi/hotspot. No server needed. Exchange connection codes to pair.',
+        webrtcSelectDesc: 'Pair with another device via a 6-digit code (signaling goes through a public server, game data is still peer-to-peer). Or expand manual mode to exchange codes.',
         webrtcCreateConnection: 'Create Connection',
         webrtcJoinConnection: 'Join Connection',
         webrtcHostStep1: 'Step 1: Send this code to the other device',
@@ -585,6 +615,36 @@ const translations = {
         webrtcSendFailed: 'Send failed',
         webrtcConfirmApply: 'Received game data from the other device. Apply it?',
         webrtcPasteAnswer: 'Paste the answer code',
+        webrtcQuickHostTitle: 'Share this 6-digit code with the other device',
+        webrtcQuickJoinTitle: 'Enter the 6-digit code',
+        webrtcCopyRoomCode: 'Copy Code',
+        webrtcRoomRegenerate: 'Regenerate',
+        webrtcConnectRoom: 'Connect',
+        webrtcCopied: 'Copied',
+        webrtcCreatingRoom: 'Getting connection code...',
+        webrtcWaitingForPeer: 'Waiting for the other device...',
+        webrtcRoomFailed: 'Failed to get connection code. Check your network and retry',
+        webrtcCodeInvalid: 'Please enter a 6-digit code',
+        webrtcJoiningRoom: 'Connecting...',
+        webrtcJoinRoomFailed: 'Connection failed',
+        webrtcPeerUnavailable: 'No device found for this code. Make sure the other device has created a connection and the code is correct',
+        webrtcServerUnreachable: 'Cannot reach the public signaling server. Check your network or expand manual mode below',
+        webrtcBrowserIncompatible: 'This browser does not support WebRTC. Try another browser or use manual mode',
+        webrtcManualMode: 'Manual mode (fallback): exchange long codes',
+        autoPlayTitle: 'AI Auto Play',
+        autoPlayStart: 'Auto Play',
+        autoPlayPause: 'Pause',
+        autoPlayResume: 'Resume',
+        autoPlayStop: 'Stop',
+        autoPlayStatusIdle: 'Not started',
+        autoPlayBadgeRunning: 'AI auto play · {steps} moves',
+        autoPlayBadgePaused: 'Auto play paused · {steps} moves',
+        autoPlayRunning: 'Running · {steps} moves',
+        autoPlayPausedStatus: 'Paused · {steps} moves',
+        autoPlayGameEnded: 'Game over, auto play stopped',
+        autoPlayMoveBlocked: 'Cannot move, auto play stopped',
+        autoPlayAiUnavailable: 'AI request module unavailable, auto play stopped',
+        autoPlayAiFailed: 'AI request failed, auto play stopped',
         ready: 'Ready',
         connected: 'Connected',
         receiving: 'Receiving',
@@ -658,25 +718,120 @@ function getLang() {
     return currentLanguage;
 }
 function setLang(lang) {
-    if (lang === 'auto' || translations[lang]) {
-        currentLanguage = lang;
-        localStorage.setItem('2048-setting-language', lang);
-        updateAllTranslations();
-        if (typeof window.updateDocumentTitle === 'function') {
-            window.updateDocumentTitle();
-        }
+    if (lang !== 'auto' && !translations[lang]) {
+        return false;
+    }
+    if (lang === currentLanguage) {
         return true;
     }
-    return false;
+    currentLanguage = lang;
+    localStorage.setItem('2048-setting-language', lang);
+    clearTranslationCache();
+    updateAllTranslations();
+    if (typeof window.updateDocumentTitle === 'function') {
+        window.updateDocumentTitle();
+    }
+    return true;
+}
+const translationCache = new Map();
+function clearTranslationCache() {
+    translationCache.clear();
+}
+function resolveTranslation(key, lang) {
+    return key in translations[lang] ? translations[lang][key] : (key in translations['zh'] ? translations['zh'][key] : key);
 }
 function t(key, params = {}) {
-    const lang = getLang();
-    let text = key in translations[lang] ? translations[lang][key] : (key in translations['zh'] ? translations['zh'][key] : key);
-    for (const [param, value] of Object.entries(params)) {
-        text = text.replace(`{${param}}`, value);
+    const hasParams = !!params && typeof params === 'object' && Object.keys(params).length > 0;
+    if (hasParams) {
+        let text = resolveTranslation(key, getLang());
+        for (const [param, value] of Object.entries(params)) {
+            text = text.replace(`{${param}}`, value);
+        }
+        return text;
     }
-    
-    return text;
+    const lang = getLang();
+    const cacheKey = lang + ' ' + key;
+    if (translationCache.has(cacheKey)) {
+        return translationCache.get(cacheKey);
+    }
+    const resolved = resolveTranslation(key, lang);
+    translationCache.set(cacheKey, resolved);
+    return resolved;
+}
+function updateIconTextElement(element, key) {
+    const text = t(key);
+    const icon = element.querySelector('i');
+    if (!icon) {
+        element.textContent = text;
+        return;
+    }
+    let updated = false;
+    Array.from(element.childNodes).forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) {
+            if (!updated) {
+                node.nodeValue = ' ' + text;
+                updated = true;
+            } else {
+                node.nodeValue = '';
+            }
+        }
+    });
+    if (!updated) {
+        element.appendChild(document.createTextNode(' ' + text));
+    }
+}
+function updateDecoratedText(container, emoji, iconClass, text) {
+    if (!container) return;
+    let deco = container.firstElementChild;
+    const decoIsEmoji = !!deco && deco.classList && deco.classList.contains('emoji-icon');
+    const decoIsIcon = !!deco && deco.tagName === 'I';
+    if (emoji) {
+        if (decoIsEmoji) {
+            deco.textContent = emoji;
+        } else {
+            if (deco && decoIsIcon) {
+                deco.remove();
+            }
+            deco = document.createElement('span');
+            deco.className = 'emoji-icon';
+            if (iconClass && iconClass.indexOf('mr-1') !== -1) {
+                deco.classList.add('mr-1');
+            }
+            deco.textContent = emoji;
+            container.insertBefore(deco, container.firstChild);
+        }
+    } else if (iconClass) {
+        if (decoIsIcon) {
+            deco.className = iconClass;
+        } else {
+            if (deco && decoIsEmoji) {
+                deco.remove();
+            }
+            deco = document.createElement('i');
+            deco.className = iconClass;
+            container.insertBefore(deco, container.firstChild);
+        }
+    } else if (deco && (decoIsIcon || decoIsEmoji)) {
+        deco.remove();
+        deco = null;
+    }
+    const textValue = deco ? ' ' + text : text;
+    let textNode = null;
+    Array.from(container.childNodes).forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) {
+            if (!textNode) {
+                textNode = node;
+            } else {
+                node.remove();
+            }
+        }
+    });
+    if (!textNode) {
+        textNode = document.createTextNode(textValue);
+        container.appendChild(textNode);
+    } else {
+        textNode.nodeValue = textValue;
+    }
 }
 function updateAllTranslations() {
     document.querySelectorAll('[data-i18n]').forEach(element => {
@@ -684,12 +839,7 @@ function updateAllTranslations() {
         if (!key) return;
         const mode = element.getAttribute('data-i18n-mode');
         if (mode === 'icon+text') {
-            const icon = element.querySelector('i');
-            if (icon) {
-                element.innerHTML = `<i class="${icon.className}"></i> ${t(key)}`;
-            } else {
-                element.textContent = t(key);
-            }
+            updateIconTextElement(element, key);
         } else if (mode === 'span-text') {
             const span = element.querySelector('span[data-i18n]') || element.querySelector('span');
             if (span) {
@@ -701,12 +851,7 @@ function updateAllTranslations() {
             element.textContent = t(key);
         } else {
             if (key === 'footer') {
-                const icon = element.querySelector('i');
-                if (icon) {
-                    element.innerHTML = `<i class="${icon.className}"></i> ${t(key)}`;
-                } else {
-                    element.textContent = t(key);
-                }
+                updateIconTextElement(element, key);
             } else if (element.classList.contains('category-title')) {
                 const span = element.querySelector('span[data-i18n]');
                 if (span) {
@@ -808,6 +953,9 @@ function updateLanguageSelector() {
     languageLabels.forEach(label => {
         label.textContent = t('language');
     });
+    const currentLangText = currentLanguage === 'auto' ? t('auto') : t(currentLanguage === 'zh' ? 'chinese' : 'english');
+    const selectedEmoji = currentLanguage === 'zh' ? '🇨🇳' : (currentLanguage === 'en' ? '🇺🇸' : '');
+    const selectedIcon = currentLanguage === 'auto' ? 'fa-solid fa-globe' : '';
     const languageSelects = document.querySelectorAll('[data-i18n-select="true"]');
     languageSelects.forEach(select => {
         const selectSelectedDiv = select.querySelector('.select-selected');
@@ -815,26 +963,17 @@ function updateLanguageSelector() {
         if (selectSelectedDiv) {
             const textSpan = selectSelectedDiv.querySelector('span');
             if (textSpan) {
-                const currentLangText = currentLanguage === 'auto' ? t('auto') : t(currentLanguage === 'zh' ? 'chinese' : 'english');
-                const icon = currentLanguage === 'auto' ? 'fa-solid fa-globe' : '';
-                const emoji = currentLanguage === 'zh' ? '🇨🇳' : (currentLanguage === 'en' ? '🇺🇸' : '');
-                if (emoji) {
-                    textSpan.innerHTML = `<span class="emoji-icon">${emoji}</span> ${currentLangText}`;
-                } else if (icon) {
-                    textSpan.innerHTML = `<i class="${icon}"></i> ${currentLangText}`;
-                } else {
-                    textSpan.textContent = currentLangText;
-                }
+                updateDecoratedText(textSpan, selectedEmoji, selectedIcon, currentLangText);
             }
         }
         selectItems.forEach(item => {
             const value = item.dataset.value;
             if (value === 'auto') {
-                item.innerHTML = `<i class="fa-solid fa-globe mr-1"></i> ${t('auto')}`;
+                updateDecoratedText(item, '', 'fa-solid fa-globe mr-1', t('auto'));
             } else if (value === 'zh') {
-                item.innerHTML = `<span class="emoji-icon mr-1">🇨🇳</span> ${t('chinese')}`;
+                updateDecoratedText(item, '🇨🇳', 'fa-solid fa-globe mr-1', t('chinese'));
             } else if (value === 'en') {
-                item.innerHTML = `<span class="emoji-icon mr-1">🇺🇸</span> ${t('english')}`;
+                updateDecoratedText(item, '🇺🇸', 'fa-solid fa-globe mr-1', t('english'));
             }
         });
     });
@@ -846,45 +985,78 @@ function updateThemeSelector() {
     const selectItems = themeSelect.querySelectorAll('.select-item');
     const themeToggle = document.querySelector('#theme-toggle');
     let currentTheme = themeToggle?.value || localStorage.getItem('2048-setting-theme');
-    if (selectSelectedDiv) {
-        let themeText = '';
-        let icon = '';
-        let i18nKey = 'followBrowser';
-        switch (currentTheme) {
-            case 'auto':
-                themeText = t('followBrowser');
-                icon = 'fa-solid fa-desktop';
-                i18nKey = 'followBrowser';
-                break;
-            case 'light':
-                themeText = t('lightTheme');
-                icon = 'fa-solid fa-sun';
-                i18nKey = 'lightTheme';
-                break;
-            case 'dark':
-                themeText = t('darkTheme');
-                icon = 'fa-solid fa-moon';
-                i18nKey = 'darkTheme';
-                break;
-            case 'custom':
-                themeText = t('custom');
-                icon = 'fa-solid fa-palette';
-                i18nKey = 'custom';
-                break;
-        }
-        selectSelectedDiv.innerHTML = `<span><i class="${icon} mr-1"></i><span data-i18n="${i18nKey}">${themeText}</span></span><i class="fa fa-chevron-down text-xs ml-2 text-gray-500 dark:text-gray-400"></i>`;
+    let themeText = '';
+    let icon = '';
+    let i18nKey = 'followBrowser';
+    switch (currentTheme) {
+        case 'auto':
+            themeText = t('followBrowser');
+            icon = 'fa-solid fa-desktop';
+            i18nKey = 'followBrowser';
+            break;
+        case 'light':
+            themeText = t('lightTheme');
+            icon = 'fa-solid fa-sun';
+            i18nKey = 'lightTheme';
+            break;
+        case 'dark':
+            themeText = t('darkTheme');
+            icon = 'fa-solid fa-moon';
+            i18nKey = 'darkTheme';
+            break;
+        case 'custom':
+            themeText = t('custom');
+            icon = 'fa-solid fa-palette';
+            i18nKey = 'custom';
+            break;
     }
-    selectItems.forEach(item => {
-        const value = item.dataset.value;
-        if (value === 'auto') {
-            item.innerHTML = `<i class="fa-solid fa-desktop mr-1"></i><span data-i18n="followBrowser">${t('followBrowser')}</span>`;
-        } else if (value === 'light') {
-            item.innerHTML = `<i class="fa-solid fa-sun mr-1"></i><span data-i18n="lightTheme">${t('lightTheme')}</span>`;
-        } else if (value === 'dark') {
-            item.innerHTML = `<i class="fa-solid fa-moon mr-1"></i><span data-i18n="darkTheme">${t('darkTheme')}</span>`;
-        } else if (value === 'custom') {
-            item.innerHTML = `<i class="fa-solid fa-palette mr-1"></i><span data-i18n="custom">${t('custom')}</span>`;
+    if (selectSelectedDiv) {
+        let wrapper = selectSelectedDiv.querySelector('span');
+        if (!wrapper) {
+            wrapper = document.createElement('span');
+            selectSelectedDiv.insertBefore(wrapper, selectSelectedDiv.firstChild);
         }
+        let iconEl = wrapper.querySelector('i');
+        if (!iconEl) {
+            iconEl = document.createElement('i');
+            wrapper.insertBefore(iconEl, wrapper.firstChild);
+        }
+        iconEl.className = icon + ' mr-1';
+        let textSpan = wrapper.querySelector('span[data-i18n]');
+        if (!textSpan) {
+            textSpan = document.createElement('span');
+            wrapper.appendChild(textSpan);
+        }
+        textSpan.setAttribute('data-i18n', i18nKey);
+        textSpan.textContent = themeText;
+        if (!selectSelectedDiv.querySelector('i.fa-chevron-down')) {
+            const chevron = document.createElement('i');
+            chevron.className = 'fa fa-chevron-down text-xs ml-2 text-gray-500 dark:text-gray-400';
+            selectSelectedDiv.appendChild(chevron);
+        }
+    }
+    const themeItemConfig = {
+        auto: { icon: 'fa-solid fa-desktop mr-1', key: 'followBrowser' },
+        light: { icon: 'fa-solid fa-sun mr-1', key: 'lightTheme' },
+        dark: { icon: 'fa-solid fa-moon mr-1', key: 'darkTheme' },
+        custom: { icon: 'fa-solid fa-palette mr-1', key: 'custom' }
+    };
+    selectItems.forEach(item => {
+        const config = themeItemConfig[item.dataset.value];
+        if (!config) return;
+        let iconEl = item.querySelector('i');
+        if (!iconEl) {
+            iconEl = document.createElement('i');
+            item.insertBefore(iconEl, item.firstChild);
+        }
+        iconEl.className = config.icon;
+        let textSpan = item.querySelector('span[data-i18n]');
+        if (!textSpan) {
+            textSpan = document.createElement('span');
+            item.appendChild(textSpan);
+        }
+        textSpan.setAttribute('data-i18n', config.key);
+        textSpan.textContent = t(config.key);
     });
 }
 function setupLanguageSelector() {
@@ -940,21 +1112,13 @@ function setupLanguageSelector() {
             e.stopPropagation();
             setLang(lang.value);
             const newLangText = lang.value === 'auto' ? t('auto') : t(lang.value === 'zh' ? 'chinese' : 'english');
-            if (lang.emoji) {
-                selectedText.innerHTML = `<span class="emoji-icon">${lang.emoji}</span> ${newLangText}`;
-            } else {
-                selectedText.innerHTML = `<i class="${lang.icon}"></i> ${newLangText}`;
-            }
+            updateDecoratedText(selectedText, lang.emoji || '', lang.icon || '', newLangText);
             languages.forEach(l => {
                 const langItem = selectItems.querySelector(`[data-value="${l.value}"]`);
                 if (langItem) {
                     langItem.classList.toggle('selected', l.value === currentLanguage);
                     const updatedText = l.value === 'auto' ? t('auto') : t(l.value === 'zh' ? 'chinese' : 'english');
-                    if (l.emoji) {
-                        langItem.innerHTML = `<span class="emoji-icon mr-1">${l.emoji}</span> ${updatedText}`;
-                    } else {
-                        langItem.innerHTML = `<i class="${l.icon} mr-1"></i> ${updatedText}`;
-                    }
+                    updateDecoratedText(langItem, l.emoji || '', l.icon ? l.icon + ' mr-1' : '', updatedText);
                 }
             });
             label.textContent = t('language');
@@ -1165,6 +1329,8 @@ window.i18n = {
     setLang: setLang,
     t: t,
     updateAllTranslations: updateAllTranslations,
+    updateDynamicContent: updateDynamicContent,
+    clearTranslationCache: clearTranslationCache,
     init: initI18n
 };
 window.i18nModuleLoaded = true;

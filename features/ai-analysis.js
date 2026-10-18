@@ -1,4 +1,4 @@
-const aiAnalysisVersion = '2.4';
+const aiAnalysisVersion = '2.5';
 window.aiAnalysisVersion = aiAnalysisVersion;
 let cachedAlgorithmResults = null;
 let cachedAiResults = null;
@@ -309,13 +309,6 @@ function setupAiAnalysis() {
     const closeAiModalButton = document.getElementById('close-ai-modal');
     if (closeAiModalButton) {
         closeAiModalButton.addEventListener('click', function() {
-            const content = document.querySelector('.ai-analysis-content');
-            if (content) {
-                content.style.left = '';
-                content.style.top = '';
-                content.style.transform = '';
-                content.style.transition = '';
-            }
             document.getElementById('ai-analysis-modal').classList.add('ai-modal-closed');
         });
     }
@@ -323,19 +316,33 @@ function setupAiAnalysis() {
     if (aiAnalysisModal) {
         aiAnalysisModal.addEventListener('click', function(e) {
             if (e.target === aiAnalysisModal) {
-                const content = document.querySelector('.ai-analysis-content');
-                if (content) {
-                    content.style.left = '';
-                    content.style.top = '';
-                    content.style.transform = '';
-                    content.style.transition = '';
-                }
                 aiAnalysisModal.classList.add('ai-modal-closed');
             }
         });
     }
     const aiAnalysisContent = document.querySelector('.ai-analysis-content');
     const aiAnalysisTitle = document.getElementById('ai-analysis-modal-title');
+    let aiResizeHandle = null;
+    function positionAiResizeHandle() {
+        if (!aiResizeHandle || !aiAnalysisContent || !aiAnalysisModal) return;
+        const overlayWidth = aiAnalysisModal.clientWidth;
+        const overlayHeight = aiAnalysisModal.clientHeight;
+        const contentWidth = aiAnalysisContent.offsetWidth;
+        const contentHeight = aiAnalysisContent.offsetHeight;
+        let left;
+        let top;
+        const inlineLeft = parseFloat(aiAnalysisContent.style.left);
+        const inlineTop = parseFloat(aiAnalysisContent.style.top);
+        if (!isNaN(inlineLeft) && !isNaN(inlineTop)) {
+            left = inlineLeft;
+            top = inlineTop;
+        } else {
+            left = (overlayWidth - contentWidth) / 2;
+            top = (overlayHeight - contentHeight) / 2;
+        }
+        aiResizeHandle.style.right = Math.max(0, overlayWidth - (left + contentWidth)) + 'px';
+        aiResizeHandle.style.bottom = Math.max(0, overlayHeight - (top + contentHeight)) + 'px';
+    }
     if (aiAnalysisTitle && aiAnalysisContent) {
         aiAnalysisTitle.style.cursor = 'move';
         let isDragging = false;
@@ -364,11 +371,73 @@ function setupAiAnalysis() {
             aiAnalysisContent.style.left = newLeft + 'px';
             aiAnalysisContent.style.top = newTop + 'px';
             aiAnalysisContent.style.transform = 'none';
+            positionAiResizeHandle();
         });
         document.addEventListener('mouseup', function() {
             if (isDragging) {
                 isDragging = false;
                 aiAnalysisContent.style.transition = 'none';
+            }
+        });
+    }
+    if (aiAnalysisContent && aiAnalysisModal) {
+        aiResizeHandle = document.createElement('div');
+        aiResizeHandle.id = 'ai-analysis-resize-handle';
+        aiResizeHandle.className = 'ai-analysis-resize-handle';
+        aiAnalysisModal.appendChild(aiResizeHandle);
+        positionAiResizeHandle();
+        if (typeof ResizeObserver === 'function') {
+            new ResizeObserver(positionAiResizeHandle).observe(aiAnalysisContent);
+        }
+        if (typeof MutationObserver === 'function') {
+            new MutationObserver(positionAiResizeHandle).observe(aiAnalysisModal, { attributes: true, attributeFilter: ['class'] });
+        }
+        window.addEventListener('resize', positionAiResizeHandle);
+        let isResizing = false;
+        let resizeStartX = 0;
+        let resizeStartY = 0;
+        let resizeStartWidth = 0;
+        let resizeStartHeight = 0;
+        const AI_MODAL_MIN_WIDTH = 320;
+        const AI_MODAL_MIN_HEIGHT = 280;
+        const AI_MODAL_MAX_WIDTH = 760;
+        aiResizeHandle.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            isResizing = true;
+            resizeStartX = e.clientX;
+            resizeStartY = e.clientY;
+            resizeStartWidth = aiAnalysisContent.offsetWidth;
+            resizeStartHeight = aiAnalysisContent.offsetHeight;
+            if (isNaN(parseFloat(aiAnalysisContent.style.left)) || isNaN(parseFloat(aiAnalysisContent.style.top))) {
+                aiAnalysisContent.style.left = ((aiAnalysisModal.clientWidth - resizeStartWidth) / 2) + 'px';
+                aiAnalysisContent.style.top = ((aiAnalysisModal.clientHeight - resizeStartHeight) / 2) + 'px';
+                aiAnalysisContent.style.transform = 'none';
+            }
+            aiAnalysisContent.style.transition = 'none';
+            document.body.style.userSelect = 'none';
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (!isResizing) return;
+            const containerRect = aiAnalysisModal.getBoundingClientRect();
+            const contentRect = aiAnalysisContent.getBoundingClientRect();
+            const maxAvailableWidth = containerRect.right - contentRect.left;
+            const maxAvailableHeight = containerRect.bottom - contentRect.top;
+            let newWidth = resizeStartWidth + (e.clientX - resizeStartX);
+            let newHeight = resizeStartHeight + (e.clientY - resizeStartY);
+            newWidth = Math.max(AI_MODAL_MIN_WIDTH, Math.min(newWidth, AI_MODAL_MAX_WIDTH, maxAvailableWidth));
+            newHeight = Math.max(AI_MODAL_MIN_HEIGHT, Math.min(newHeight, containerRect.height * 0.92, maxAvailableHeight));
+            aiAnalysisContent.style.width = newWidth + 'px';
+            aiAnalysisContent.style.height = newHeight + 'px';
+            aiAnalysisContent.style.maxWidth = 'none';
+            aiAnalysisContent.style.maxHeight = 'none';
+            positionAiResizeHandle();
+        });
+        document.addEventListener('mouseup', function() {
+            if (isResizing) {
+                isResizing = false;
+                aiAnalysisContent.style.transition = 'none';
+                document.body.style.userSelect = '';
             }
         });
     }
@@ -516,12 +585,18 @@ function updateAnalysisResults(results) {
         aiSuggestionElement.textContent = results.aiSuggestion || i18n.t('notAvailable');
     }
 }
+function normalizeGridToNumbers(grid) {
+    return grid.map(row => row.map(cell => {
+        if (cell && typeof cell === 'object') return cell.value || 0;
+        return cell || 0;
+    }));
+}
 function analyzeGameStateWithAlgorithm() {
     const directions = ['up', 'down', 'left', 'right'];
     let bestScore = -1;
     let bestDirection = 'up';
     let mergeOpportunities = 0;
-    const gridCopy = JSON.parse(JSON.stringify(gameState.grid));
+    const gridCopy = normalizeGridToNumbers(gameState.grid);
     const originalScore = gameState.score;
     const gridRows = gameState.gridRows;
     const gridCols = gameState.gridCols;

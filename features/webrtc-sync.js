@@ -1,14 +1,177 @@
-const webRTCSyncVersion = '0.3';
+const webRTCSyncVersion = '0.4';
 window.webRTCSyncVersion = webRTCSyncVersion;
+const WEBRTC_ROOM_ID_PREFIX = '2048sync-';
 class WebRTCSync {
     constructor() {
         this.pc = null;
         this.channel = null;
+        this.peer = null;
         this.role = null;
+        this.roomCode = null;
         this.connected = false;
+        this._pendingJoin = null;
         this.onConnected = null;
         this.onMessage = null;
         this.onDisconnected = null;
+        this.onSignalingError = null;
+    }
+    generateRoomCode() {
+        let code = '';
+        for (let i = 0; i < 6; i++) {
+            code += Math.floor(Math.random() * 10).toString();
+        }
+        return code;
+    }
+    async createRoom() {
+        if (typeof Peer === 'undefined') {
+            const err = new Error('PeerJS library not loaded');
+            err.type = 'peer-lib-missing';
+            throw err;
+        }
+        this.close();
+        this.role = 'room-host';
+        for (let attempt = 0; attempt < 3; attempt++) {
+            const code = this.generateRoomCode();
+            try {
+                await this._openRoomPeer(code);
+                this.roomCode = code;
+                return code;
+            } catch (err) {
+                if (err && err.type === 'unavailable-id' && attempt < 2) {
+                    continue;
+                }
+                throw err;
+            }
+        }
+    }
+    _openRoomPeer(code) {
+        return new Promise((resolve, reject) => {
+            let settled = false;
+            let timer = null;
+            let peer = null;
+            const cleanup = () => {
+                if (timer) {
+                    clearTimeout(timer);
+                    timer = null;
+                }
+            };
+            const fail = (err) => {
+                if (settled) {
+                    if (this.onSignalingError && this.onSignalingError !== reject) {
+                        try { this.onSignalingError(err); } catch (e) {}
+                    }
+                    return;
+                }
+                settled = true;
+                cleanup();
+                try { peer.destroy(); } catch (e) {}
+                if (this.peer === peer) {
+                    this.peer = null;
+                }
+                reject(err);
+            };
+            peer = new Peer(WEBRTC_ROOM_ID_PREFIX + code, { debug: 0 });
+            this.peer = peer;
+            timer = setTimeout(() => {
+                const err = new Error('Signaling server timeout');
+                err.type = 'server-error';
+                fail(err);
+            }, 15000);
+            peer.on('open', () => {
+                if (settled) return;
+                settled = true;
+                cleanup();
+                peer.on('connection', (conn) => {
+                    if (this.channel && this.channel.open) {
+                        try { conn.close(); } catch (e) {}
+                        return;
+                    }
+                    this.channel = conn;
+                    this.bindPeerChannel(conn);
+                });
+                resolve();
+            });
+            peer.on('error', (err) => {
+                fail(err || new Error('Peer error'));
+            });
+        });
+    }
+    async joinRoom(code) {
+        if (typeof Peer === 'undefined') {
+            const err = new Error('PeerJS library not loaded');
+            err.type = 'peer-lib-missing';
+            throw err;
+        }
+        const cleaned = String(code == null ? '' : code).replace(/\D/g, '');
+        if (cleaned.length !== 6) {
+            const err = new Error('Invalid room code');
+            err.type = 'invalid-code';
+            throw err;
+        }
+        this.close();
+        this.role = 'room-joiner';
+        return new Promise((resolve, reject) => {
+            let settled = false;
+            let timer = null;
+            let peer = null;
+            const fail = (err) => {
+                if (settled) return;
+                settled = true;
+                if (timer) clearTimeout(timer);
+                try { peer.destroy(); } catch (e) {}
+                if (this.peer === peer) {
+                    this.peer = null;
+                }
+                reject(err);
+            };
+            peer = new Peer({ debug: 0 });
+            this.peer = peer;
+            timer = setTimeout(() => {
+                const err = new Error('Connection timeout');
+                err.type = 'peer-unavailable';
+                fail(err);
+            }, 20000);
+            peer.on('open', () => {
+                if (settled) return;
+                const conn = peer.connect(WEBRTC_ROOM_ID_PREFIX + cleaned, { reliable: true });
+                this.channel = conn;
+                this.bindPeerChannel(conn);
+                this._pendingJoin = () => {
+                    if (settled) return;
+                    settled = true;
+                    if (timer) clearTimeout(timer);
+                    resolve();
+                };
+            });
+            peer.on('error', (err) => {
+                fail(err || new Error('Peer error'));
+            });
+        });
+    }
+    bindPeerChannel(conn) {
+        conn.on('open', () => {
+            this.connected = true;
+            if (this._pendingJoin) {
+                const resolve = this._pendingJoin;
+                this._pendingJoin = null;
+                resolve();
+            }
+            if (this.onConnected) {
+                this.onConnected();
+            }
+        });
+        conn.on('data', (data) => {
+            if (this.onMessage) {
+                this.onMessage(typeof data === 'string' ? data : JSON.stringify(data));
+            }
+        });
+        conn.on('close', () => {
+            this.connected = false;
+            if (this.onDisconnected) {
+                this.onDisconnected();
+            }
+        });
+        conn.on('error', () => {});
     }
     createPeer() {
         this.close();
@@ -125,8 +288,16 @@ class WebRTCSync {
             } catch (e) {}
             this.pc = null;
         }
+        if (this.peer) {
+            try {
+                this.peer.destroy();
+            } catch (e) {}
+            this.peer = null;
+        }
         this.connected = false;
         this.role = null;
+        this.roomCode = null;
+        this._pendingJoin = null;
     }
     async encodeCode(desc) {
         const text = JSON.stringify(desc);
@@ -168,6 +339,15 @@ function initWebRTCSync() {
     webRTCSyncInstance.onConnected = handleWebRTCConnected;
     webRTCSyncInstance.onMessage = handleWebRTCMessage;
     webRTCSyncInstance.onDisconnected = handleWebRTCDisconnected;
+    webRTCSyncInstance.onSignalingError = (err) => {
+        const modal = document.getElementById('webrtc-modal');
+        if (!modal || modal.classList.contains('hidden') || (webRTCSyncInstance && webRTCSyncInstance.connected)) {
+            return;
+        }
+        if (modal._webrtcMode === 'host') {
+            setWebrtcStatus('webrtc-room-status', describeWebrtcRoomError(err, webrtcT('webrtcRoomFailed', '获取连接码失败，请检查网络后重试')));
+        }
+    };
     setupWebRTCUI();
     window.SyncLive.register('webrtc', {
         includeSettings: true,
@@ -235,6 +415,11 @@ function setupWebRTCUI() {
     const webrtcHostBack = document.getElementById('webrtc-host-back');
     const webrtcJoinBack = document.getElementById('webrtc-join-back');
     const webrtcConnectedBack = document.getElementById('webrtc-connected-back');
+    const webrtcCopyRoomCodeBtn = document.getElementById('webrtc-copy-room-code');
+    const webrtcRoomRegenerateBtn = document.getElementById('webrtc-room-regenerate');
+    const webrtcJoinRoomBtn = document.getElementById('webrtc-join-room-button');
+    const webrtcRoomCodeInput = document.getElementById('webrtc-room-code-input');
+    const webrtcHostManual = document.getElementById('webrtc-host-manual');
     if (webrtcSyncBtn) {
         webrtcSyncBtn.addEventListener('click', () => {
             showWebRTCModal(webRTCSyncInstance && webRTCSyncInstance.connected ? 'connected' : 'select');
@@ -245,6 +430,7 @@ function setupWebRTCUI() {
     }
     if (webrtcJoinBtn) {
         webrtcJoinBtn.addEventListener('click', () => {
+            resetWebrtcJoinUI();
             showWebRTCModal('join');
         });
     }
@@ -265,6 +451,37 @@ function setupWebRTCUI() {
     if (webrtcCopyAnswerBtn) {
         webrtcCopyAnswerBtn.addEventListener('click', () => {
             copyWebrtcText('webrtc-answer-code');
+        });
+    }
+    if (webrtcCopyRoomCodeBtn) {
+        webrtcCopyRoomCodeBtn.addEventListener('click', copyWebrtcRoomCode);
+    }
+    if (webrtcRoomRegenerateBtn) {
+        webrtcRoomRegenerateBtn.addEventListener('click', handleWebRTCHost);
+    }
+    if (webrtcJoinRoomBtn) {
+        webrtcJoinRoomBtn.addEventListener('click', handleWebRTCJoinRoom);
+    }
+    if (webrtcRoomCodeInput) {
+        webrtcRoomCodeInput.addEventListener('input', () => {
+            const cleaned = webrtcRoomCodeInput.value.replace(/\D/g, '').slice(0, 6);
+            if (cleaned !== webrtcRoomCodeInput.value) {
+                webrtcRoomCodeInput.value = cleaned;
+            }
+        });
+        webrtcRoomCodeInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                handleWebRTCJoinRoom();
+            }
+        });
+    }
+    if (webrtcHostManual) {
+        webrtcHostManual.addEventListener('toggle', () => {
+            if (!webrtcHostManual.open) {
+                return;
+            }
+            handleWebRTCHostManualOpen();
         });
     }
     if (closeWebrtcModal) {
@@ -316,15 +533,119 @@ function setupWebRTCUI() {
     }
 }
 async function handleWebRTCHost() {
+    const modal = document.getElementById('webrtc-modal');
     try {
         showWebRTCModal('host');
+        resetWebrtcHostUI();
+        setWebrtcStatus('webrtc-room-status', webrtcT('webrtcCreatingRoom', '正在获取连接码...'));
+        const code = await webRTCSyncInstance.createRoom();
+        const display = document.getElementById('webrtc-room-code');
+        if (display) {
+            display.textContent = code;
+        }
+        if (!modal || modal._webrtcMode === 'host') {
+            setWebrtcStatus('webrtc-room-status', webrtcT('webrtcWaitingForPeer', '等待对方加入...'));
+        }
+    } catch (error) {
+        console.error('WebRTC room host error:', error);
+        setWebrtcStatus('webrtc-room-status', describeWebrtcRoomError(error, webrtcT('webrtcRoomFailed', '获取连接码失败，请检查网络后重试')));
+    }
+}
+function resetWebrtcHostUI() {
+    const modal = document.getElementById('webrtc-modal');
+    if (modal) {
+        modal._manualHostReady = false;
+    }
+    const display = document.getElementById('webrtc-room-code');
+    if (display) {
+        display.textContent = '------';
+    }
+    setWebrtcStatus('webrtc-room-status', '');
+    const offerCode = document.getElementById('webrtc-offer-code');
+    if (offerCode) {
+        offerCode.value = '';
+    }
+    const answerInput = document.getElementById('webrtc-answer-input');
+    if (answerInput) {
+        answerInput.value = '';
+    }
+    setWebrtcStatus('webrtc-host-status', '');
+}
+function resetWebrtcJoinUI() {
+    const input = document.getElementById('webrtc-room-code-input');
+    if (input) {
+        input.value = '';
+    }
+    setWebrtcStatus('webrtc-join-room-status', '');
+}
+function describeWebrtcRoomError(error, fallback) {
+    const type = error && error.type;
+    if (type === 'invalid-code') {
+        return webrtcT('webrtcCodeInvalid', '请输入 6 位数字连接码');
+    }
+    if (type === 'peer-unavailable') {
+        return webrtcT('webrtcPeerUnavailable', '未找到该连接码对应的设备，请确认对方已创建连接且连接码正确');
+    }
+    if (type === 'network' || type === 'server-error' || type === 'socket-error' || type === 'peer-lib-missing') {
+        return webrtcT('webrtcServerUnreachable', '无法连接公共信令服务器，请检查网络或展开下方手动模式');
+    }
+    if (type === 'browser-incompatible') {
+        return webrtcT('webrtcBrowserIncompatible', '当前浏览器不支持 WebRTC，请更换浏览器或使用手动模式');
+    }
+    return fallback + (error && error.message ? ': ' + error.message : '');
+}
+async function handleWebRTCJoinRoom() {
+    const input = document.getElementById('webrtc-room-code-input');
+    const code = input ? input.value : '';
+    if (code.replace(/\D/g, '').length !== 6) {
+        setWebrtcStatus('webrtc-join-room-status', webrtcT('webrtcCodeInvalid', '请输入 6 位数字连接码'));
+        return;
+    }
+    try {
+        setWebrtcStatus('webrtc-join-room-status', webrtcT('webrtcJoiningRoom', '正在连接...'));
+        await webRTCSyncInstance.joinRoom(code);
+    } catch (error) {
+        console.error('WebRTC room join error:', error);
+        setWebrtcStatus('webrtc-join-room-status', describeWebrtcRoomError(error, webrtcT('webrtcJoinRoomFailed', '连接失败')));
+    }
+}
+function copyWebrtcRoomCode() {
+    const display = document.getElementById('webrtc-room-code');
+    const code = display ? display.textContent.trim() : '';
+    if (!code || code === '------') {
+        return;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).catch(() => document.execCommand('copy'));
+    } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = code;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+    }
+    setWebrtcStatus('webrtc-room-status', webrtcT('webrtcCopied', '已复制') + ' · ' + webrtcT('webrtcWaitingForPeer', '等待对方加入...'));
+}
+async function handleWebRTCHostManualOpen() {
+    const modal = document.getElementById('webrtc-modal');
+    if (modal && modal._manualHostReady) {
+        return;
+    }
+    if (modal) {
+        modal._manualHostReady = true;
+    }
+    try {
         setWebrtcStatus('webrtc-host-status', webrtcT('webrtcGeneratingCode', '正在生成连接码...'));
         const code = await webRTCSyncInstance.createOffer();
         document.getElementById('webrtc-offer-code').value = code;
         setWebrtcStatus('webrtc-host-status', webrtcT('webrtcHostInstructions', '1. 将连接码发送给对方\n2. 把对方回传的应答码粘贴到下方并点击"完成连接"'));
     } catch (error) {
-        console.error('WebRTC host error:', error);
+        console.error('WebRTC manual host error:', error);
         setWebrtcStatus('webrtc-host-status', webrtcT('webrtcGenerateFailed', '生成连接码失败') + ': ' + error.message);
+        if (modal) {
+            modal._manualHostReady = false;
+        }
     }
 }
 async function handleWebRTCAcceptAnswer() {

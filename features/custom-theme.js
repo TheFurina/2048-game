@@ -1,4 +1,4 @@
-const customThemeVersion = '1.3';
+const customThemeVersion = '1.4';
 window.customThemeVersion = customThemeVersion;
 window.customThemeLoaded = true;
 const tileValues = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768];
@@ -77,6 +77,7 @@ function writeThemeValues(values) {
             if (opacityValueElement) opacityValueElement.textContent = values[`${field.id}Opacity`] + '%';
         }
     });
+    refreshAllFieldPreviews();
 }
 function getDefaultThemeValues() {
     const defaults = {};
@@ -143,9 +144,257 @@ function opacityToHex(opacity) {
     const value = parseInt(opacity, 10);
     return Math.floor((value / 100) * 255).toString(16).padStart(2, '0');
 }
+function normalizeHexColor(color) {
+    let hex = String(color == null ? '' : color).trim();
+    if (hex.charAt(0) !== '#') {
+        hex = '#' + hex;
+    }
+    if (/^#[0-9A-Fa-f]{3}$/.test(hex)) {
+        return { rgb: '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3], alpha: 1 };
+    }
+    if (/^#[0-9A-Fa-f]{8}$/.test(hex)) {
+        return { rgb: hex.slice(0, 7), alpha: parseInt(hex.slice(7, 9), 16) / 255 };
+    }
+    if (/^#[0-9A-Fa-f]{6}$/.test(hex)) {
+        return { rgb: hex, alpha: 1 };
+    }
+    return { rgb: '#000000', alpha: 1 };
+}
+function composeRgba(hexColor, opacityPercent) {
+    const normalized = normalizeHexColor(hexColor);
+    let sliderAlpha = 1;
+    if (opacityPercent !== undefined && opacityPercent !== null && opacityPercent !== '') {
+        const parsed = Number(opacityPercent);
+        if (!isNaN(parsed)) {
+            sliderAlpha = Math.max(0, Math.min(100, parsed)) / 100;
+        }
+    }
+    const finalAlpha = Math.max(0, Math.min(1, normalized.alpha * sliderAlpha));
+    const r = parseInt(normalized.rgb.slice(1, 3), 16);
+    const g = parseInt(normalized.rgb.slice(3, 5), 16);
+    const b = parseInt(normalized.rgb.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${Math.round(finalAlpha * 1000) / 1000})`;
+}
+const CTP_PREVIEW_LABEL_STYLE = 'font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;flex:0 0 auto;';
+const CTP_PREVIEW_CONTENT_STYLE = 'flex:1 1 auto;display:flex;align-items:center;justify-content:center;min-height:64px;';
+function getGridBoardTemplate() {
+    let cells = '';
+    for (let i = 0; i < 16; i++) {
+        cells += i === 0
+            ? '<div style="height:20px;border-radius:3px;background:#eee4da;color:#776e65;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:11px;">2</div>'
+            : '<div style="height:20px;border-radius:3px;background:#cdc1b4;"></div>';
+    }
+    return '<div class="ctp-board" style="background:#bbada0;border-radius:6px;padding:5px;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;width:124px;">' + cells + '</div>';
+}
+function getTilePreviewTemplate(valueKey) {
+    const key = valueKey === 'Super' ? 'super' : Number(valueKey);
+    const defaults = tileDefaultColors[key] || { bg: '#311b92', text: '#ffffff' };
+    const label = valueKey === 'Super' ? '∞' : String(valueKey);
+    const len = label.length;
+    const fontSize = valueKey === 'Super' ? '20px' : (len <= 2 ? '18px' : (len === 3 ? '15px' : (len === 4 ? '12px' : '10px')));
+    return '<div class="ctp-tile" style="width:52px;height:52px;border-radius:4px;background:' + defaults.bg + ';color:' + defaults.text + ';display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:' + fontSize + ';">' + label + '</div>';
+}
+function getPreviewTemplateForField(fieldId) {
+    const id = String(fieldId || '');
+    const tileMatch = id.match(/^tile(\d+|Super)(Bg|Text)$/);
+    if (tileMatch) {
+        return getTilePreviewTemplate(tileMatch[1]);
+    }
+    switch (id) {
+        case 'bgColor':
+            return '<div class="ctp-panel" style="width:100%;max-width:230px;background:#faf8ef;border-radius:6px;padding:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;">'
+                + '<div style="font-weight:bold;font-size:20px;color:#8f7a66;">2048</div>'
+                + '<div style="display:flex;gap:5px;">'
+                + '<div style="background:#bbada0;color:#ffffff;border-radius:4px;padding:3px 9px;font-size:9px;text-align:center;line-height:1.4;">分数<br><b>0</b></div>'
+                + '<div style="background:#bbada0;color:#ffffff;border-radius:4px;padding:3px 9px;font-size:9px;text-align:center;line-height:1.4;">最佳<br><b>0</b></div>'
+                + '</div></div>';
+        case 'primaryColor':
+            return '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">'
+                + '<button type="button" class="ctp-btn" style="border:none;background:#faa31b;color:#ffffff;font-weight:bold;font-size:12px;padding:8px 14px;border-radius:4px;cursor:default;">新游戏</button>'
+                + '<button type="button" class="ctp-btn" style="border:none;background:#faa31b;color:#ffffff;font-weight:bold;font-size:12px;padding:8px 14px;border-radius:4px;cursor:default;">无尽模式</button>'
+                + '</div>';
+        case 'secondaryColor':
+            return '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;">'
+                + '<button type="button" class="ctp-btn" style="border:none;background:#8f7a66;color:#ffffff;font-weight:bold;font-size:12px;padding:8px 14px;border-radius:4px;cursor:default;">暂停</button>'
+                + '<span class="ctp-text" style="font-size:12px;font-weight:bold;color:#8f7a66;">滑动合并方块</span>'
+                + '</div>';
+        case 'gridColor':
+            return getGridBoardTemplate();
+        case 'cellEmptyColor':
+            return '<div style="display:flex;gap:6px;align-items:center;">'
+                + '<div class="ctp-cell-empty" style="width:44px;height:44px;border-radius:4px;background:#cdc1b4;"></div>'
+                + '<div style="width:44px;height:44px;border-radius:4px;background:#eee4da;color:#776e65;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:17px;">2</div>'
+                + '</div>';
+        case 'scrollbarColor':
+            return '<div style="width:100%;max-width:210px;">'
+                + '<div style="height:14px;background:#e6e6e6;border-radius:7px;padding:3px;">'
+                + '<div class="ctp-thumb" style="height:8px;width:62%;border-radius:4px;background:#bbbbbb;"></div>'
+                + '</div></div>';
+        case 'modalBgColor':
+            return '<div class="ctp-modal" style="background:#ffffff;border-radius:8px;padding:12px 16px;min-width:190px;text-align:center;color:#333333;">'
+                + '<div style="font-weight:bold;font-size:13px;margin-bottom:4px;">恭喜你获胜！</div>'
+                + '<div style="font-size:10px;margin-bottom:8px;opacity:0.75;">你达到了 2048 分，可以继续挑战更高分数。</div>'
+                + '<button type="button" style="border:none;background:#faa31b;color:#ffffff;font-weight:bold;font-size:11px;padding:5px 12px;border-radius:4px;cursor:default;">继续游戏</button>'
+                + '</div>';
+        case 'modalTextColor':
+            return '<div class="ctp-modal" style="background:#ffffff;border:1px solid #e0e0e0;border-radius:8px;padding:12px 16px;min-width:190px;text-align:center;color:#000000;">'
+                + '<div style="font-weight:bold;font-size:13px;margin-bottom:4px;">游戏暂停</div>'
+                + '<div style="font-size:10px;opacity:0.75;">游戏已暂停，点击「继续」按钮恢复。</div>'
+                + '</div>';
+        default:
+            return '';
+    }
+}
+function getPreviewWrapperHTML(field) {
+    return '<div class="ctp-preview" id="preview-' + field.elementId + '" style="background:#f5f5f5;border:1px solid #e5e5e5;border-radius:8px;padding:8px;margin-bottom:8px;display:flex;flex-direction:column;flex:1 1 auto;">'
+        + '<div style="' + CTP_PREVIEW_LABEL_STYLE + '">预览 Preview</div>'
+        + '<div style="' + CTP_PREVIEW_CONTENT_STYLE + '">' + getPreviewTemplateForField(field.id) + '</div>'
+        + '</div>';
+}
+function getFieldById(fieldId) {
+    return getThemeFieldConfig().find(field => field.id === fieldId) || null;
+}
+function getFieldByElementId(elementId) {
+    return getThemeFieldConfig().find(field => field.elementId === elementId) || null;
+}
+function readFieldValue(fieldId, fallback) {
+    const field = getFieldById(fieldId);
+    if (!field) return fallback;
+    const input = document.getElementById(field.elementId);
+    return input && input.value ? input.value : fallback;
+}
+function readFieldOpacity(fieldId) {
+    const field = getFieldById(fieldId);
+    if (!field || !field.opacityId) return undefined;
+    const opacityInput = document.getElementById(field.opacityId);
+    return opacityInput ? opacityInput.value : undefined;
+}
+function injectFieldPreviews() {
+    const config = getThemeFieldConfig();
+    config.forEach(field => {
+        if (!getPreviewTemplateForField(field.id)) return;
+        const input = document.getElementById(field.elementId);
+        if (!input) return;
+        if (document.getElementById('preview-' + field.elementId)) return;
+        const parent = input.closest('.flex.flex-col');
+        if (!parent) return;
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = getPreviewWrapperHTML(field);
+        const previewElement = wrapper.firstElementChild;
+        if (!previewElement) return;
+        parent.insertBefore(previewElement, parent.firstChild);
+        updateFieldPreview(field.elementId);
+    });
+}
+function applyRenderPreview(field, color, opacity) {
+    const preview = document.getElementById('preview-' + field.elementId);
+    if (!preview) return;
+    const id = field.id;
+    let tileMatch;
+    if (id === 'bgColor') {
+        const panel = preview.querySelector('.ctp-panel');
+        if (panel) panel.style.backgroundColor = composeRgba(color, opacity);
+    } else if (id === 'primaryColor') {
+        preview.querySelectorAll('.ctp-btn').forEach(btn => {
+            btn.style.backgroundColor = composeRgba(color, opacity);
+        });
+    } else if (id === 'secondaryColor') {
+        preview.querySelectorAll('.ctp-btn').forEach(btn => {
+            btn.style.backgroundColor = composeRgba(color, opacity);
+        });
+        const text = preview.querySelector('.ctp-text');
+        if (text) text.style.color = composeRgba(color, opacity);
+    } else if (id === 'gridColor') {
+        const board = preview.querySelector('.ctp-board');
+        if (board) board.style.backgroundColor = composeRgba(color, opacity);
+    } else if (id === 'cellEmptyColor') {
+        const cell = preview.querySelector('.ctp-cell-empty');
+        if (cell) cell.style.backgroundColor = composeRgba(color, opacity);
+    } else if (id === 'scrollbarColor') {
+        const thumb = preview.querySelector('.ctp-thumb');
+        if (thumb) thumb.style.backgroundColor = composeRgba(color, opacity);
+    } else if (id === 'modalBgColor') {
+        const modal = preview.querySelector('.ctp-modal');
+        if (modal) {
+            modal.style.backgroundColor = composeRgba(color, opacity);
+            modal.style.color = composeRgba(readFieldValue('modalTextColor', '#333333'), readFieldOpacity('modalTextColor'));
+        }
+    } else if (id === 'modalTextColor') {
+        const modal = preview.querySelector('.ctp-modal');
+        if (modal) {
+            modal.style.backgroundColor = composeRgba(readFieldValue('modalBgColor', '#ffffff'), readFieldOpacity('modalBgColor'));
+            modal.style.color = composeRgba(color, opacity);
+        }
+    } else if ((tileMatch = id.match(/^tile(\d+|Super)(Bg|Text)$/))) {
+        const tile = preview.querySelector('.ctp-tile');
+        if (tile) {
+            const defaultsKey = tileMatch[1] === 'Super' ? 'super' : Number(tileMatch[1]);
+            const defaults = tileDefaultColors[defaultsKey] || { bg: '#311b92', text: '#ffffff' };
+            const bg = tileMatch[2] === 'Bg' ? color : readFieldValue('tile' + tileMatch[1] + 'Bg', defaults.bg);
+            const text = tileMatch[2] === 'Text' ? color : readFieldValue('tile' + tileMatch[1] + 'Text', defaults.text);
+            tile.style.backgroundColor = composeRgba(bg, tileMatch[2] === 'Bg' ? opacity : undefined);
+            tile.style.color = composeRgba(text, tileMatch[2] === 'Text' ? opacity : undefined);
+        }
+    }
+}
+function updateFieldPreview(elementId, color, opacity) {
+    const field = getFieldByElementId(elementId);
+    if (!field) return;
+    const input = document.getElementById(field.elementId);
+    const finalColor = color !== undefined ? color : (input ? input.value : field.default);
+    const finalOpacity = opacity !== undefined ? opacity : readFieldOpacity(field.id);
+    applyRenderPreview(field, finalColor, finalOpacity);
+    const tileMatch = field.id.match(/^tile(\d+|Super)(Bg|Text)$/);
+    if (tileMatch) {
+        const pairId = 'tile' + tileMatch[1] + (tileMatch[2] === 'Bg' ? 'Text' : 'Bg');
+        const pairField = getFieldById(pairId);
+        const pairInput = pairField ? document.getElementById(pairField.elementId) : null;
+        if (pairField && pairInput) {
+            applyRenderPreview(pairField, pairInput.value, undefined);
+        }
+    }
+}
+function bindFieldPreviewUpdates() {
+    const config = getThemeFieldConfig();
+    const isValidHex = value => /^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/.test(String(value || '').trim());
+    config.forEach(field => {
+        const colorInput = document.getElementById(field.elementId);
+        const textInput = document.getElementById(field.elementId + '-text');
+        if (colorInput) {
+            colorInput.addEventListener('input', function() {
+                updateFieldPreview(field.elementId, this.value);
+            });
+        }
+        if (textInput) {
+            textInput.addEventListener('input', function() {
+                if (isValidHex(this.value)) {
+                    updateFieldPreview(field.elementId, this.value.trim());
+                }
+            });
+        }
+        if (field.opacityId) {
+            const opacityInput = document.getElementById(field.opacityId);
+            if (opacityInput) {
+                opacityInput.addEventListener('input', function() {
+                    updateFieldPreview(field.elementId, undefined, this.value);
+                });
+            }
+        }
+    });
+}
+function refreshAllFieldPreviews() {
+    getThemeFieldConfig().forEach(field => {
+        const input = document.getElementById(field.elementId);
+        if (input) {
+            updateFieldPreview(field.elementId, input.value);
+        }
+    });
+}
 function setupThemeCustomizer() {
     const customThemeModal = document.getElementById('custom-theme-modal');
     if (!customThemeModal) return;
+    injectFieldPreviews();
+    bindFieldPreviewUpdates();
     const closeButton = document.getElementById('close-custom-theme-modal');
     if (closeButton) {
         closeButton.addEventListener('click', function() {
@@ -253,6 +502,7 @@ function removePreviewStyles() {
     }
 }
 function parseOpacityFromColor(color, opacityInputId) {
+    let result;
     if (color.length === 9) {
         const alphaHex = color.slice(7, 9);
         const alphaValue = parseInt(alphaHex, 16);
@@ -263,11 +513,16 @@ function parseOpacityFromColor(color, opacityInputId) {
             opacityInput.value = opacityPercent;
             opacityValueDisplay.textContent = opacityPercent + '%';
         }
-        return opacityPercent;
+        result = opacityPercent;
     } else {
         const opacityInput = document.getElementById(opacityInputId);
-        return opacityInput ? opacityInput.value : 100;
+        result = opacityInput ? opacityInput.value : 100;
     }
+    const relatedField = getThemeFieldConfig().find(field => field.opacityId === opacityInputId);
+    if (relatedField) {
+        updateFieldPreview(relatedField.elementId);
+    }
+    return result;
 }
 function resetCustomTheme() {
     const defaults = getDefaultThemeValues();
@@ -321,7 +576,7 @@ function exportCustomTheme() {
     document.getElementById('close-export-theme-modal').addEventListener('click', saveAndClose);
     document.getElementById('confirm-export-theme').addEventListener('click', function() {
         try {
-            const themeData = { timestamp: new Date().getTime() };
+            const themeData = { version: 1, timestamp: new Date().getTime() };
             const currentValues = readThemeValues();
             themeItems.forEach(item => {
                 const checkbox = document.getElementById(`export-${item.id}`);
@@ -392,6 +647,7 @@ function loadCustomTheme() {
         }
         styleElement.textContent = generateThemeCSS(themeData);
         document.body.setAttribute('data-theme', 'custom');
+        writeThemeValues(themeData);
         const earlyStyle = document.getElementById('early-custom-theme');
         if (earlyStyle) {
             earlyStyle.remove();
