@@ -184,9 +184,10 @@
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js" crossorigin="anonymous"></script>
     <script src="./features/module-loader.js"></script>
     <script>
-        const gameVersion = '2.9.0';
+        const gameVersion = '2.10.0';
         window.gameVersion = gameVersion;
         function loadCssVersion() {
             try {
@@ -1596,29 +1597,58 @@
                     </div>
                 </div>
                 <div id="webrtc-host-section" style="display: none;">
-                    <p class="text-gray-600 dark:text-dark-muted text-sm mb-2" data-i18n="webrtcHostStep1">第 1 步：将此连接码发给对方</p>
-                    <textarea id="webrtc-offer-code" readonly class="w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2"></textarea>
-                    <button id="webrtc-copy-offer" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 text-sm font-bold py-2 px-4 rounded-md mb-4">
-                        <i class="fa-solid fa-copy mr-1"></i><span data-i18n="webrtcCopyOffer">复制连接码</span>
-                    </button>
-                    <p class="text-gray-600 dark:text-dark-muted text-sm mb-2" data-i18n="webrtcHostStep2">第 2 步：粘贴对方的应答码</p>
-                    <textarea id="webrtc-answer-input" class="w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2" placeholder="粘贴对方的应答码"></textarea>
-                    <button id="webrtc-accept-answer-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-md mb-4"><span data-i18n="webrtcFinishConnection">完成连接</span></button>
-                    <p id="webrtc-host-status" class="text-sm text-gray-500 dark:text-dark-muted whitespace-pre-line mb-4"></p>
+                    <p class="text-gray-600 dark:text-dark-muted text-sm mb-2" data-i18n="webrtcQuickHostTitle">将此 6 位连接码告诉对方</p>
+                    <div class="flex justify-center mb-3">
+                        <div id="webrtc-room-code" class="text-4xl font-bold tracking-[0.35em] text-primary dark:text-dark-primary bg-gray-100 dark:bg-gray-800 rounded-lg px-6 py-3 select-all">------</div>
+                    </div>
+                    <div class="flex flex-wrap gap-2 justify-center mb-2">
+                        <button id="webrtc-copy-room-code" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 text-sm font-bold py-2 px-4 rounded-md">
+                            <i class="fa-solid fa-copy mr-1"></i><span data-i18n="webrtcCopyRoomCode">复制连接码</span>
+                        </button>
+                        <button id="webrtc-room-regenerate" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 text-sm font-bold py-2 px-4 rounded-md">
+                            <i class="fa-solid fa-rotate-right mr-1"></i><span data-i18n="webrtcRoomRegenerate">重新生成</span>
+                        </button>
+                    </div>
+                    <p id="webrtc-room-status" class="text-sm text-gray-500 dark:text-dark-muted whitespace-pre-line mb-4"></p>
+                    <details id="webrtc-host-manual" class="mb-4 text-left">
+                        <summary class="cursor-pointer text-sm text-gray-500 dark:text-dark-muted select-none" data-i18n="webrtcManualMode">手动模式（备用）：互换长连接码</summary>
+                        <div class="mt-3">
+                            <p class="text-gray-600 dark:text-dark-muted text-sm mb-2" data-i18n="webrtcHostStep1">第 1 步：将此连接码发给对方</p>
+                            <textarea id="webrtc-offer-code" readonly class="w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2"></textarea>
+                            <button id="webrtc-copy-offer" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 text-sm font-bold py-2 px-4 rounded-md mb-4">
+                                <i class="fa-solid fa-copy mr-1"></i><span data-i18n="webrtcCopyOffer">复制连接码</span>
+                            </button>
+                            <p class="text-gray-600 dark:text-dark-muted text-sm mb-2" data-i18n="webrtcHostStep2">第 2 步：粘贴对方的应答码</p>
+                            <textarea id="webrtc-answer-input" class="w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2" placeholder="粘贴对方的应答码"></textarea>
+                            <button id="webrtc-accept-answer-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-md mb-4"><span data-i18n="webrtcFinishConnection">完成连接</span></button>
+                            <p id="webrtc-host-status" class="text-sm text-gray-500 dark:text-dark-muted whitespace-pre-line"></p>
+                        </div>
+                    </details>
                     <button id="webrtc-host-back" class="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 font-bold py-3 px-6 rounded-md"><i class="fa-solid fa-arrow-left mr-2"></i><span data-i18n="cancel">返回</span></button>
                 </div>
                 <div id="webrtc-join-section" style="display: none;">
-                    <p class="text-gray-600 dark:text-dark-muted text-sm mb-2" data-i18n="webrtcJoinPasteOffer">粘贴对方的连接码</p>
-                    <textarea id="webrtc-offer-input" class="w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2" placeholder="粘贴对方的连接码"></textarea>
-                    <button id="webrtc-generate-answer-button" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-6 rounded-md mb-4"><span data-i18n="webrtcGenerateAnswer">生成应答码</span></button>
-                    <div id="webrtc-answer-box" style="display: none;">
-                        <p class="text-gray-600 dark:text-dark-muted text-sm mb-2" data-i18n="webrtcJoinStep2">将此应答码发回给对方</p>
-                        <textarea id="webrtc-answer-code" readonly class="w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2"></textarea>
-                        <button id="webrtc-copy-answer" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 text-sm font-bold py-2 px-4 rounded-md mb-4">
-                            <i class="fa-solid fa-copy mr-1"></i><span data-i18n="webrtcCopyAnswer">复制应答码</span>
-                        </button>
+                    <p class="text-gray-600 dark:text-dark-muted text-sm mb-2" data-i18n="webrtcQuickJoinTitle">输入对方的 6 位连接码</p>
+                    <div class="flex justify-center mb-3">
+                        <input id="webrtc-room-code-input" maxlength="6" inputmode="numeric" autocomplete="off" class="w-44 text-center text-3xl font-bold tracking-[0.3em] text-secondary dark:text-dark-text bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="000000">
                     </div>
-                    <p id="webrtc-join-status" class="text-sm text-gray-500 dark:text-dark-muted whitespace-pre-line mb-4"></p>
+                    <button id="webrtc-join-room-button" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-md mb-2"><span data-i18n="webrtcConnectRoom">连接</span></button>
+                    <p id="webrtc-join-room-status" class="text-sm text-gray-500 dark:text-dark-muted whitespace-pre-line mb-4"></p>
+                    <details id="webrtc-join-manual" class="mb-4 text-left">
+                        <summary class="cursor-pointer text-sm text-gray-500 dark:text-dark-muted select-none" data-i18n="webrtcManualMode">手动模式（备用）：互换长连接码</summary>
+                        <div class="mt-3">
+                            <p class="text-gray-600 dark:text-dark-muted text-sm mb-2" data-i18n="webrtcJoinPasteOffer">粘贴对方的连接码</p>
+                            <textarea id="webrtc-offer-input" class="w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2" placeholder="粘贴对方的连接码"></textarea>
+                            <button id="webrtc-generate-answer-button" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-6 rounded-md mb-4"><span data-i18n="webrtcGenerateAnswer">生成应答码</span></button>
+                            <div id="webrtc-answer-box" style="display: none;">
+                                <p class="text-gray-600 dark:text-dark-muted text-sm mb-2" data-i18n="webrtcJoinStep2">将此应答码发回给对方</p>
+                                <textarea id="webrtc-answer-code" readonly class="w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2"></textarea>
+                                <button id="webrtc-copy-answer" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 text-sm font-bold py-2 px-4 rounded-md mb-4">
+                                    <i class="fa-solid fa-copy mr-1"></i><span data-i18n="webrtcCopyAnswer">复制应答码</span>
+                                </button>
+                            </div>
+                            <p id="webrtc-join-status" class="text-sm text-gray-500 dark:text-dark-muted whitespace-pre-line"></p>
+                        </div>
+                    </details>
                     <button id="webrtc-join-back" class="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 font-bold py-3 px-6 rounded-md"><i class="fa-solid fa-arrow-left mr-2"></i><span data-i18n="cancel">返回</span></button>
                 </div>
                 <div id="webrtc-connected-section" style="display: none;">
@@ -2495,7 +2525,7 @@
         let removeTileTimers = {};
         function move(direction) {
             const modal = document.getElementById('ai-analysis-modal');
-            if (gameState.isPaused || gameState.gameOver || !elements.gameMessage.classList.contains('hidden') || !modal.classList.contains('ai-modal-closed')) return false;
+            if (gameState.isPaused || gameState.gameOver || !elements.gameMessage.classList.contains('hidden') || (!modal.classList.contains('ai-modal-closed') && !window.autoPlayActive)) return false;
             if (moveInProgress) return false;
             moveInProgress = true;
             let moved = false;
@@ -3022,6 +3052,12 @@
         function resetAllSettings() {
             if (confirm(i18n.t('confirmReset'))) {
                 window.SettingStore.removeAll();
+                cancelActiveKeyCapture();
+                keyBindings = { ...defaultKeyBindings };
+                const keybindingsModal = document.getElementById('keybindings-modal');
+                if (keybindingsModal && !keybindingsModal.classList.contains('hidden')) {
+                    renderKeybindingsList();
+                }
                 document.getElementById('custom-theme-button-container').classList.remove('visible');
                 gameState.gpuAccelerationEnabled = true;
                 gameState.tileAnimationEnabled = true;
@@ -4014,6 +4050,21 @@
                     <div id="best-move-direction" class="analysis-value best-move w-full">
                         <span class="best-move-text">--</span>
                     </div>
+                </div>
+                <div class="analysis-item">
+                    <div class="flex items-center justify-between">
+                        <div class="analysis-label" data-i18n="autoPlayTitle">AI自动操作</div>
+                        <div class="flex items-center gap-2">
+                            <button id="auto-play-stop-button" class="hidden bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 text-xs font-medium px-2.5 py-1 rounded-md shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50" title="停止自动操作">
+                                <i class="fa-solid fa-stop"></i>
+                            </button>
+                            <button id="auto-play-toggle-button" class="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-white px-2.5 py-1 rounded-md shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center gap-1 text-xs font-medium">
+                                <i class="fa-solid fa-play"></i>
+                                <span data-i18n="autoPlayStart">自动操作</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="auto-play-status" class="analysis-value">--</div>
                 </div>
                 <div class="analysis-item">
                     <div class="analysis-label" data-i18n="mergeOpportunitiesLabel">潜在合并机会</div>
