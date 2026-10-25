@@ -1,4 +1,4 @@
-const aiAnalysisVersion = '2.5';
+const aiAnalysisVersion = '2.6';
 window.aiAnalysisVersion = aiAnalysisVersion;
 let cachedAlgorithmResults = null;
 let cachedAiResults = null;
@@ -37,6 +37,25 @@ function saveAnalysisMode(mode) {
     }
 }
 let currentAnalysisMode = loadAnalysisMode();
+function getAiConfigErrors() {
+    if (!window.aiRequest || typeof window.aiRequest.validateConfig !== 'function' || typeof window.aiRequest.getConfig !== 'function') {
+        return [];
+    }
+    try {
+        const errors = window.aiRequest.validateConfig(window.aiRequest.getConfig());
+        return Array.isArray(errors) ? errors : [];
+    } catch (e) {
+        return [];
+    }
+}
+function hasIncompleteAiConfig() {
+    return getAiConfigErrors().length > 0;
+}
+function buildAiConfigPromptMessage() {
+    const errors = getAiConfigErrors().map(key => i18n.t(key)).join('；');
+    const prompt = i18n.t('aiApiConfigIncomplete');
+    return errors ? prompt + '：' + errors : prompt;
+}
 function setupAiAnalysis() {
     const aiAnalysisButton = document.getElementById('ai-analysis-button');
     if (!aiAnalysisButton) return;
@@ -73,9 +92,31 @@ function setupAiAnalysis() {
                 regenerateBtn.classList.add('hidden');
             }
         };
+        const apiSettingsEntry = document.getElementById('ai-analysis-api-settings-entry');
+        const toggleApiSettingsEntry = (show) => {
+            if (!apiSettingsEntry) return;
+            if (show) {
+                apiSettingsEntry.classList.remove('hidden');
+            } else {
+                apiSettingsEntry.classList.add('hidden');
+            }
+        };
+        const apiSettingsButton = document.getElementById('ai-analysis-api-settings-button');
+        if (apiSettingsButton) {
+            apiSettingsButton.addEventListener('click', () => {
+                if (typeof showModal === 'function') {
+                    showModal('ai-settings-modal');
+                }
+            });
+        }
         if (regenerateBtn) {
             regenerateBtn.addEventListener('click', async () => {
                 if (currentAnalysisMode !== 'ai') return;
+                if (hasIncompleteAiConfig()) {
+                    const suggestionEl = document.getElementById('ai-suggestion');
+                    if (suggestionEl) suggestionEl.textContent = buildAiConfigPromptMessage();
+                    return;
+                }
                 showAnalysisLoading();
                 setRegenerateButtonLoading(true);
                 cachedAiResults = null;
@@ -113,11 +154,13 @@ function setupAiAnalysis() {
             algorithmBtn.className = 'px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded transition-colors relative z-10 bg-transparent';
             analysisSlider.style.left = 'calc(50% - 1px)';
             toggleRegenerateButton(true);
+            toggleApiSettingsEntry(true);
         } else {
             algorithmBtn.className = 'px-3 py-1 text-xs font-medium text-gray-800 dark:text-gray-200 rounded transition-colors relative z-10 bg-transparent';
             aiBtn.className = 'px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded transition-colors relative z-10 bg-transparent';
             analysisSlider.style.left = '2px';
             toggleRegenerateButton(false);
+            toggleApiSettingsEntry(false);
         }
         toggleAiSuggestionVisibility(currentAnalysisMode === 'ai', true);
         analysisSlider.offsetHeight;
@@ -129,10 +172,12 @@ function setupAiAnalysis() {
                 algorithmBtn.className = 'px-3 py-1 text-xs font-medium text-gray-800 dark:text-gray-200 rounded transition-colors relative z-10 bg-transparent';
                 aiBtn.className = 'px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded transition-colors relative z-10 bg-transparent';
                 toggleRegenerateButton(false);
+                toggleApiSettingsEntry(false);
             } else {
                 aiBtn.className = 'px-3 py-1 text-xs font-medium text-gray-800 dark:text-gray-200 rounded transition-colors relative z-10 bg-transparent';
                 algorithmBtn.className = 'px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded transition-colors relative z-10 bg-transparent';
                 toggleRegenerateButton(true);
+                toggleApiSettingsEntry(true);
             }
             toggleAiSuggestionVisibility(mode === 'ai', isInitializing);
             if (!isInitializing) {
@@ -154,6 +199,19 @@ function setupAiAnalysis() {
                             updateAnalysisResults(results);
                         }
                     } else {
+                        if (hasIncompleteAiConfig()) {
+                            const configErrorMsg = buildAiConfigPromptMessage();
+                            cachedAiResults = {
+                                bestMove: '--',
+                                mergeOpportunities: 0,
+                                gameStateAssessment: 'safe',
+                                scorePotential: 'medium',
+                                aiSuggestion: configErrorMsg
+                            };
+                            updateGameStateCache(gameState, undefined, cachedAiResults);
+                            updateAnalysisResults(cachedAiResults);
+                            return;
+                        }
                         if (cachedAiResults && !gameChanged) {
                             updateAnalysisResults(cachedAiResults);
                         } else {
@@ -313,9 +371,18 @@ function setupAiAnalysis() {
         });
     }
     const aiAnalysisModal = document.getElementById('ai-analysis-modal');
+    let backdropPressed = false;
     if (aiAnalysisModal) {
+        aiAnalysisModal.addEventListener('mousedown', function(e) {
+            backdropPressed = e.target === aiAnalysisModal;
+        });
+        aiAnalysisModal.addEventListener('touchstart', function(e) {
+            backdropPressed = e.target === aiAnalysisModal;
+        }, { passive: true });
         aiAnalysisModal.addEventListener('click', function(e) {
-            if (e.target === aiAnalysisModal) {
+            const fromBackdrop = e.target === aiAnalysisModal && backdropPressed;
+            backdropPressed = false;
+            if (fromBackdrop) {
                 aiAnalysisModal.classList.add('ai-modal-closed');
             }
         });
@@ -350,6 +417,7 @@ function setupAiAnalysis() {
         aiAnalysisTitle.addEventListener('mousedown', function(e) {
             if (e.target.closest('button') || e.target.closest('#analysis-switch-container') || window.isSliderDragging) return;
             isDragging = true;
+            backdropPressed = false;
             const rect = aiAnalysisContent.getBoundingClientRect();
             startX = e.clientX;
             startY = e.clientY;
@@ -405,6 +473,7 @@ function setupAiAnalysis() {
             e.preventDefault();
             e.stopPropagation();
             isResizing = true;
+            backdropPressed = false;
             resizeStartX = e.clientX;
             resizeStartY = e.clientY;
             resizeStartWidth = aiAnalysisContent.offsetWidth;
@@ -478,7 +547,8 @@ function setupAiAnalysis() {
 }
 let aiSuggestionHideTimer = null;
 function toggleAiSuggestionVisibility(show, isInitializing = false) {
-    const aiSuggestionItem = document.querySelector('.analysis-item:last-child');
+    const aiSuggestionValue = document.getElementById('ai-suggestion');
+    const aiSuggestionItem = aiSuggestionValue ? aiSuggestionValue.closest('.analysis-item') : null;
     if (!aiSuggestionItem) return;
     if (aiSuggestionHideTimer) {
         clearTimeout(aiSuggestionHideTimer);
@@ -591,81 +661,224 @@ function normalizeGridToNumbers(grid) {
         return cell || 0;
     }));
 }
-function analyzeGameStateWithAlgorithm() {
-    const directions = ['up', 'down', 'left', 'right'];
-    let bestScore = -1;
-    let bestDirection = 'up';
-    let mergeOpportunities = 0;
-    const gridCopy = normalizeGridToNumbers(gameState.grid);
-    const originalScore = gameState.score;
-    const gridRows = gameState.gridRows;
-    const gridCols = gameState.gridCols;
-    const gridSize = Math.max(gridRows, gridCols);
-    let scoreDiffWeight, emptyCellsWeight, mergesWeight, positionWeight, maxValueWeight, continuityWeight, uniformityWeight, blockWeight, multiStepWeight, monotonicityWeight;
-    let dangerThreshold, warningThreshold;
-    let highPotentialThreshold, mediumPotentialThreshold;
-    let directionPriority = {up: 1, down: 1, left: 1, right: 1};
-    scoreDiffWeight = Math.min(0.3, 0.2 + (gridSize - 3) * 0.05);
-    emptyCellsWeight = Math.max(0.1, 0.18 - (gridSize - 3) * 0.03);
-    mergesWeight = Math.max(0.1, 0.15 - (gridSize - 3) * 0.015);
-    positionWeight = 0.1;
-    maxValueWeight = 0.1;
-    continuityWeight = 0.05;
-    uniformityWeight = 0.05;
-    blockWeight = 0.05;
-    multiStepWeight = 0.1;
-    monotonicityWeight = Math.max(0, 0.02 - (gridSize - 3) * 0.005);
-    directionPriority = {up: 1.1, down: 0.9, left: 1, right: 1};
-    dangerThreshold = Math.max(1, Math.floor(gridSize * 0.67));
-    warningThreshold = Math.max(2, Math.floor(gridSize * 1.33));
-    highPotentialThreshold = Math.max(2, Math.floor(gridSize * 0.67));
-    mediumPotentialThreshold = Math.max(1, Math.floor(gridSize * 0.33));
-    directions.forEach(direction => {
-        const tempGameState = {
-            grid: JSON.parse(JSON.stringify(gridCopy)),
-            score: originalScore,
-            gridSize: gridSize,
-            gridRows: gridRows,
-            gridCols: gridCols
+const AI_DIRECTIONS = ['up', 'down', 'left', 'right'];
+const AI_SPAWN_FOUR_PROBABILITY = 0.1;
+const AI_SEARCH_TIME_BUDGET = 90;
+function aiNow() {
+    return typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now();
+}
+function aiLegalMoves(grid) {
+    const rows = grid.length;
+    const cols = grid[0].length;
+    const moves = [];
+    for (let i = 0; i < AI_DIRECTIONS.length; i++) {
+        const direction = AI_DIRECTIONS[i];
+        const state = {
+            grid: grid.map(row => row.slice()),
+            score: 0,
+            gridSize: Math.max(rows, cols),
+            gridRows: rows,
+            gridCols: cols
         };
-        const moveResult = simulateMove(tempGameState, direction);
-        if (moveResult.moved) {
-            const scoreDiff = moveResult.score - originalScore;
-            const emptyCells = countEmptyCells(tempGameState.grid);
-            const merges = moveResult.merges;
-            const positionScore = calculatePositionScore(tempGameState.grid);
-            const maxValueScore = calculateMaxValueScore(tempGameState.grid);
-            const continuityScore = calculateContinuityScore(tempGameState.grid);
-            const uniformityScore = calculateUniformityScore(tempGameState.grid);
-            const blockScore = calculateBlockScore(tempGameState.grid);
-            const multiStepScore = calculateMultiStepScore(tempGameState.grid, direction);
-            const monotonicityScore = calculateMonotonicityScore(tempGameState.grid);
-            let totalScore = (
-                scoreDiff * scoreDiffWeight +
-                emptyCells * emptyCellsWeight +
-                merges * mergesWeight +
-                positionScore * positionWeight +
-                maxValueScore * maxValueWeight +
-                continuityScore * continuityWeight +
-                uniformityScore * uniformityWeight +
-                blockScore * blockWeight +
-                multiStepScore * multiStepWeight +
-                monotonicityScore * monotonicityWeight
-            ) * directionPriority[direction];
-            if (totalScore > bestScore) {
-                bestScore = totalScore;
-                bestDirection = direction;
-            }
-            mergeOpportunities += merges;
+        const result = simulateMove(state, direction);
+        if (result.moved) {
+            moves.push({ direction: direction, grid: state.grid, gained: result.score, merges: result.merges });
         }
-    });
-    const assessment = evaluateGameState(gameState, dangerThreshold, warningThreshold);
-    const potential = assessScorePotential(gameState, highPotentialThreshold, mediumPotentialThreshold);
+    }
+    return moves;
+}
+function aiCountMergePairs(grid) {
+    const rows = grid.length;
+    const cols = grid[0].length;
+    let count = 0;
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            const value = grid[r][c];
+            if (!value) continue;
+            if (c + 1 < cols && grid[r][c + 1] === value) count++;
+            if (r + 1 < rows && grid[r + 1][c] === value) count++;
+        }
+    }
+    return count;
+}
+function aiSnakeScore(grid) {
+    const rows = grid.length;
+    const cols = grid[0].length;
+    const total = rows * cols;
+    const corners = [[0, 0], [0, cols - 1], [rows - 1, 0], [rows - 1, cols - 1]];
+    let best = -Infinity;
+    for (let k = 0; k < corners.length; k++) {
+        const startRow = corners[k][0];
+        const startCol = corners[k][1];
+        const rowStep = startRow === 0 ? 1 : -1;
+        let score = 0;
+        let index = 0;
+        for (let i = 0; i < rows; i++) {
+            const r = startRow + rowStep * i;
+            const leftToRight = i % 2 === 0;
+            for (let j = 0; j < cols; j++) {
+                const c = leftToRight ? j : cols - 1 - j;
+                const value = grid[r][c];
+                if (value) score += Math.log2(value) * (1 - index / total);
+                index++;
+            }
+        }
+        if (score > best) best = score;
+    }
+    return best;
+}
+function aiMonotonicityScore(grid) {
+    const rows = grid.length;
+    const cols = grid[0].length;
+    let score = 0;
+    const lineScore = (values) => {
+        let rising = 0;
+        let falling = 0;
+        for (let i = 0; i < values.length - 1; i++) {
+            if (!values[i] || !values[i + 1]) continue;
+            const left = Math.log2(values[i]);
+            const right = Math.log2(values[i + 1]);
+            if (left > right) falling += right - left;
+            else rising += left - right;
+        }
+        return Math.max(rising, falling);
+    };
+    for (let r = 0; r < rows; r++) score += lineScore(grid[r]);
+    for (let c = 0; c < cols; c++) {
+        const column = [];
+        for (let r = 0; r < rows; r++) column.push(grid[r][c]);
+        score += lineScore(column);
+    }
+    return score;
+}
+function aiEvaluateGrid(grid) {
+    const rows = grid.length;
+    const cols = grid[0].length;
+    let empty = 0;
+    let mergePairs = 0;
+    let smoothness = 0;
+    let maxValue = 0;
+    let maxRow = 0;
+    let maxCol = 0;
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            const value = grid[r][c];
+            if (!value) {
+                empty++;
+                continue;
+            }
+            const logValue = Math.log2(value);
+            if (value > maxValue) {
+                maxValue = value;
+                maxRow = r;
+                maxCol = c;
+            }
+            if (c + 1 < cols && grid[r][c + 1]) {
+                const right = grid[r][c + 1];
+                smoothness -= Math.abs(logValue - Math.log2(right));
+                if (right === value) mergePairs++;
+            }
+            if (r + 1 < rows && grid[r + 1][c]) {
+                const down = grid[r + 1][c];
+                smoothness -= Math.abs(logValue - Math.log2(down));
+                if (down === value) mergePairs++;
+            }
+        }
+    }
+    let cornerBonus = 0;
+    if (maxValue) {
+        const maxLog = Math.log2(maxValue);
+        const cornerDistance = Math.min(
+            maxRow + maxCol,
+            maxRow + (cols - 1 - maxCol),
+            (rows - 1 - maxRow) + maxCol,
+            (rows - 1 - maxRow) + (cols - 1 - maxCol)
+        );
+        cornerBonus = cornerDistance === 0 ? maxLog * 1.5 : -maxLog * Math.min(cornerDistance, 4) * 0.25;
+    }
+    const monotonicity = aiMonotonicityScore(grid);
+    const snake = aiSnakeScore(grid);
+    return empty * 3.2 + mergePairs * 1.2 + smoothness * 0.12 + monotonicity * 0.9 + snake * 0.35 + cornerBonus;
+}
+function aiChanceValue(grid, depth, deadline) {
+    if (depth <= 0 || aiNow() > deadline) return aiEvaluateGrid(grid);
+    const empties = [];
+    for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (!grid[r][c]) empties.push([r, c]);
+        }
+    }
+    if (!empties.length) return aiSearchValue(grid, depth, deadline);
+    let total = 0;
+    for (let i = 0; i < empties.length; i++) {
+        const row = empties[i][0];
+        const col = empties[i][1];
+        const withTwo = grid.map(line => line.slice());
+        withTwo[row][col] = 2;
+        total += (1 - AI_SPAWN_FOUR_PROBABILITY) * aiSearchValue(withTwo, depth, deadline);
+        const withFour = grid.map(line => line.slice());
+        withFour[row][col] = 4;
+        total += AI_SPAWN_FOUR_PROBABILITY * aiSearchValue(withFour, depth, deadline);
+    }
+    return total / empties.length;
+}
+function aiSearchValue(grid, depth, deadline) {
+    if (depth <= 0 || aiNow() > deadline) return aiEvaluateGrid(grid);
+    const moves = aiLegalMoves(grid);
+    if (!moves.length) return aiEvaluateGrid(grid) - 500;
+    let best = -Infinity;
+    for (let i = 0; i < moves.length; i++) {
+        const value = aiChanceValue(moves[i].grid, depth - 1, deadline) + Math.log2(moves[i].gained + 1) * 0.6;
+        if (value > best) best = value;
+    }
+    return best;
+}
+function analyzeGameStateWithAlgorithm() {
+    if (!gameState || !gameState.grid || !gameState.grid.length) {
+        return {
+            bestMove: 'up',
+            mergeOpportunities: 0,
+            gameStateAssessment: 'safe',
+            scorePotential: 'low',
+            aiSuggestion: ''
+        };
+    }
+    const grid = normalizeGridToNumbers(gameState.grid);
+    const rows = grid.length;
+    const cols = grid[0].length;
+    const cells = rows * cols;
+    const deadline = aiNow() + AI_SEARCH_TIME_BUDGET;
+    const emptyCells = countEmptyCells(grid);
+    const depth = emptyCells <= 2 ? 3 : 2;
+    const moves = aiLegalMoves(grid);
+    let bestDirection = 'up';
+    let bestValue = -Infinity;
+    for (let i = 0; i < moves.length; i++) {
+        const value = aiChanceValue(moves[i].grid, depth - 1, deadline) + Math.log2(moves[i].gained + 1) * 0.6;
+        if (value > bestValue) {
+            bestValue = value;
+            bestDirection = moves[i].direction;
+        }
+    }
+    const mergeOpportunities = aiCountMergePairs(grid);
+    const mobility = moves.length;
+    const dangerEmpty = Math.max(1, Math.round(cells * 0.12));
+    const warningEmpty = Math.max(2, Math.round(cells * 0.35));
+    let gameStateAssessment = 'safe';
+    if (emptyCells <= dangerEmpty || mobility <= 1) {
+        gameStateAssessment = 'danger';
+    } else if ((emptyCells <= warningEmpty && mergeOpportunities === 0) || mobility === 2) {
+        gameStateAssessment = 'warning';
+    }
+    const highPotentialThreshold = Math.max(2, Math.round(cells * 0.15));
+    let scorePotential = 'low';
+    if (mergeOpportunities >= highPotentialThreshold) scorePotential = 'high';
+    else if (mergeOpportunities >= 1) scorePotential = 'medium';
     return {
         bestMove: bestDirection,
         mergeOpportunities: mergeOpportunities,
-        gameStateAssessment: assessment === i18n.t('danger') ? 'danger' : (assessment === i18n.t('warning') ? 'warning' : 'safe'),
-        scorePotential: potential === i18n.t('high') ? 'high' : (potential === i18n.t('mediumScore') ? 'medium' : 'low'),
+        gameStateAssessment: gameStateAssessment,
+        scorePotential: scorePotential,
         aiSuggestion: ''
     };
 }
@@ -849,132 +1062,6 @@ function countEmptyCells(grid) {
         if (utils.isEmpty(row, col)) count++;
     });
     return count;
-}
-function calculatePositionScore(grid) {
-    const utils = createGridUtils(grid);
-    let score = 0;
-    const weights = [];
-    for (let i = 0; i < utils.gridRows; i++) {
-        weights[i] = [];
-        for (let j = 0; j < utils.gridCols; j++) {
-            weights[i][j] = Math.pow(2, (utils.gridRows - i - 1) + (utils.gridCols - j - 1));
-        }
-    }
-    utils.forEachNonEmptyCell((cell, row, col) => {
-        score += cell * weights[row][col];
-    });
-    return score;
-}
-function calculateMaxValueScore(grid) {
-    const utils = createGridUtils(grid);
-    let maxValue = 0;
-    utils.forEachNonEmptyCell((cell) => {
-        if (cell > maxValue) maxValue = cell;
-    });
-    return maxValue;
-}
-function calculateContinuityScore(grid) {
-    const utils = createGridUtils(grid);
-    let score = 0;
-    utils.forEachNonEmptyCell((cell, row, col) => {
-        if (utils.isValidCell(row, col + 1) && !utils.isEmpty(row, col + 1)) {
-            const rightCell = grid[row][col + 1];
-            const ratio = Math.min(cell, rightCell) / Math.max(cell, rightCell);
-            score += ratio;
-        }
-        if (utils.isValidCell(row + 1, col) && !utils.isEmpty(row + 1, col)) {
-            const downCell = grid[row + 1][col];
-            const ratio = Math.min(cell, downCell) / Math.max(cell, downCell);
-            score += ratio;
-        }
-    });
-    return score;
-}
-function calculateUniformityScore(grid) {
-    const utils = createGridUtils(grid);
-    const values = [];
-    utils.forEachNonEmptyCell((cell) => {
-        values.push(cell);
-    });
-    if (values.length === 0) return 0;
-    const avg = values.reduce((a, b) => a + b, 0) / values.length;
-    const variance = values.reduce((sum, val) => sum + Math.pow(val - avg, 2), 0) / values.length;
-    const uniformity = 1 / (1 + Math.sqrt(variance));
-    return uniformity;
-}
-function calculateBlockScore(grid) {
-    const utils = createGridUtils(grid);
-    let blockScore = 0;
-    utils.forEachNonEmptyCell((cell, row, col) => {
-        if (!utils.hasEmptyNeighbor(row, col)) {
-            const canMergeVertically = row > 0 && row < utils.gridRows - 1 && 
-                grid[row - 1][col] === grid[row + 1][col] && !utils.isEmpty(row - 1, col);
-            const canMergeHorizontally = col > 0 && col < utils.gridCols - 1 && 
-                grid[row][col - 1] === grid[row][col + 1] && !utils.isEmpty(row, col - 1);
-            if (!canMergeVertically && !canMergeHorizontally) {
-                blockScore++;
-            }
-        }
-    });
-    return -blockScore;
-}
-function calculateMultiStepScore(grid, direction) {
-    const utils = createGridUtils(grid);
-    const tempGameState = {
-        grid: JSON.parse(JSON.stringify(grid)),
-        score: 0,
-        gridSize: Math.max(utils.gridRows, utils.gridCols),
-        gridRows: utils.gridRows,
-        gridCols: utils.gridCols
-    };
-    let multiStepScore = 0;
-    let steps = 0;
-    while (steps < 2) {
-        const result = simulateMove(tempGameState, direction);
-        if (!result.moved) break;
-        multiStepScore += result.score;
-        steps++;
-    }
-    return multiStepScore;
-}
-function calculateMonotonicityScore(grid) {
-    const utils = createGridUtils(grid);
-    let monotonicity = 0;
-    for (let i = 0; i < utils.gridRows; i++) {
-        for (let j = 0; j < utils.gridCols - 1; j++) {
-            if (!utils.isEmpty(i, j) && !utils.isEmpty(i, j + 1) && grid[i][j] <= grid[i][j + 1]) {
-                monotonicity++;
-            }
-        }
-    }
-    for (let j = 0; j < utils.gridCols; j++) {
-        for (let i = 0; i < utils.gridRows - 1; i++) {
-            if (!utils.isEmpty(i, j) && !utils.isEmpty(i + 1, j) && grid[i][j] <= grid[i + 1][j]) {
-                monotonicity++;
-            }
-        }
-    }
-    return monotonicity;
-}
-function evaluateGameState(gameState, dangerThreshold, warningThreshold) {
-    const emptyCells = countEmptyCells(gameState.grid);
-    if (emptyCells <= dangerThreshold) {
-        return i18n.t('danger');
-    } else if (emptyCells <= warningThreshold) {
-        return i18n.t('warning');
-    } else {
-        return i18n.t('safe');
-    }
-}
-function assessScorePotential(gameState, highPotentialThreshold, mediumPotentialThreshold) {
-    const emptyCells = countEmptyCells(gameState.grid);
-    if (emptyCells >= highPotentialThreshold) {
-        return i18n.t('high');
-    } else if (emptyCells >= mediumPotentialThreshold) {
-        return i18n.t('mediumScore');
-    } else {
-        return i18n.t('low');
-    }
 }
 if (typeof window !== 'undefined') {
     window.setupAiAnalysis = setupAiAnalysis;

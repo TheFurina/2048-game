@@ -1,4 +1,4 @@
-const dataTransferVersion = '1.4';
+const dataTransferVersion = '1.5';
 window.dataTransferVersion = dataTransferVersion;
 const Base91 = {
     chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~"',
@@ -168,6 +168,29 @@ function exportGameData() {
             dataStr = btoa(jsonStr);
         }
         document.getElementById('data-textarea').value = dataStr;
+        return dataStr;
+    } catch (error) {
+        console.error(window.i18n ? window.i18n.t('exportFailed') : 'Export failed', error);
+        alert((window.i18n ? window.i18n.t('exportFailed') : 'Export failed') + error.message);
+        return null;
+    }
+}
+function exportGameDataAsFile() {
+    const dataStr = exportGameData();
+    if (!dataStr) return null;
+    try {
+        const now = new Date();
+        const pad = (value) => String(value).padStart(2, '0');
+        const stamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+        const blob = new Blob([dataStr], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `2048-data-${stamp}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
         return dataStr;
     } catch (error) {
         console.error(window.i18n ? window.i18n.t('exportFailed') : 'Export failed', error);

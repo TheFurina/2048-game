@@ -1,4 +1,4 @@
-const fullscreenModeVersion = '0.6';
+const fullscreenModeVersion = '0.7';
 window.fullscreenModeVersion = fullscreenModeVersion;
 let isFullscreenMode = false;
 const FULLSCREEN_HIDDEN_ELEMENTS = [
@@ -99,16 +99,21 @@ function exitFullscreenMode() {
 }
 function showRotateHint() {
     if (document.getElementById('rotate-hint-overlay')) return;
+    const tr = (key, fallback) => (window.i18n && typeof window.i18n.t === 'function' ? window.i18n.t(key) : fallback);
     const overlay = document.createElement('div');
     overlay.id = 'rotate-hint-overlay';
     overlay.innerHTML = [
         '<div class="rotate-hint-content">',
         '    <i class="fa-solid fa-mobile-screen-button rotate-hint-icon"></i>',
-        '    <p class="rotate-hint-text">请旋转至竖屏以获得最佳体验</p>',
-        '    <p class="rotate-hint-text-en">Please rotate to portrait for the best experience</p>',
+        `    <p class="rotate-hint-text" data-i18n="rotateHintTitle">${tr('rotateHintTitle', '请旋转至竖屏以获得最佳体验')}</p>`,
+        '    <button type="button" id="rotate-hint-exit-button" class="rotate-hint-exit">',
+        '        <i class="fa-solid fa-compress"></i>',
+        `        <span data-i18n="exitFullscreen">${tr('exitFullscreen', '退出全屏')}</span>`,
+        '    </button>',
         '</div>'
     ].join('');
     document.body.appendChild(overlay);
+    overlay.querySelector('#rotate-hint-exit-button').addEventListener('click', exitFullscreenMode);
 }
 function removeRotateHint() {
     const overlay = document.getElementById('rotate-hint-overlay');
@@ -349,10 +354,28 @@ function addFullscreenStyles() {
             font-size: 1.05rem;
             font-weight: 600;
         }
-        #rotate-hint-overlay .rotate-hint-text-en {
-            margin-top: 0.35rem;
-            font-size: 0.8rem;
-            opacity: 0.7;
+        #rotate-hint-overlay .rotate-hint-exit {
+            margin-top: 1.5rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 9999px;
+            background: #faa31b;
+            color: #ffffff;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        #rotate-hint-overlay .rotate-hint-exit:hover {
+            background: #e59517;
+        }
+        #rotate-hint-overlay .rotate-hint-exit:active {
+            transform: scale(0.97);
         }
         @keyframes rotate-hint-swing {
             0%, 100% { transform: rotate(-90deg); }
@@ -363,6 +386,7 @@ function addFullscreenStyles() {
 }
 window.setupFullscreenMode = setupFullscreenMode;
 window.toggleFullscreenMode = toggleFullscreenMode;
+window.showRotateHint = showRotateHint;
 window.isFullscreenMode = function() { return !!getFullscreenElement(); };
 function initFullscreenMode() {
     try {

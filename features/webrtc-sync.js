@@ -1,4 +1,4 @@
-const webRTCSyncVersion = '0.4';
+const webRTCSyncVersion = '0.5';
 window.webRTCSyncVersion = webRTCSyncVersion;
 const WEBRTC_ROOM_ID_PREFIX = '2048sync-';
 class WebRTCSync {
@@ -366,11 +366,6 @@ function handleWebRTCConnected() {
     window.SyncLive.setEnabled('webrtc', liveSyncCheckbox ? liveSyncCheckbox.checked : true);
     showWebRTCModal('connected');
     setWebrtcStatus('webrtc-connected-status', webrtcT('webrtcConnectedReady', '已连接，可以发送游戏数据'));
-    setTimeout(() => {
-        if (webRTCSyncInstance && webRTCSyncInstance.connected) {
-            window.SyncLive.flushTransport('webrtc');
-        }
-    }, 400);
 }
 function handleWebRTCDisconnected() {
     window.SyncIndicator.clear('webrtc');
@@ -502,18 +497,12 @@ function setupWebRTCUI() {
     if (webrtcSettingsCheckbox) {
         webrtcSettingsCheckbox.addEventListener('change', () => {
             window.SyncLive.setIncludeSettings('webrtc', webrtcSettingsCheckbox.checked);
-            if (webRTCSyncInstance && webRTCSyncInstance.connected) {
-                window.SyncLive.flushTransport('webrtc');
-            }
         });
     }
     const webrtcLiveSyncCheckbox = document.getElementById('webrtc-live-sync-checkbox');
     if (webrtcLiveSyncCheckbox) {
         webrtcLiveSyncCheckbox.addEventListener('change', () => {
             window.SyncLive.setEnabled('webrtc', webrtcLiveSyncCheckbox.checked);
-            if (webrtcLiveSyncCheckbox.checked && webRTCSyncInstance && webRTCSyncInstance.connected) {
-                window.SyncLive.flushTransport('webrtc');
-            }
         });
     }
     if (webrtcHostBack) {
