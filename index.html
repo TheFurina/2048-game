@@ -187,7 +187,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js" crossorigin="anonymous"></script>
     <script src="./features/module-loader.js"></script>
     <script>
-        const gameVersion = '2.10.0';
+        const gameVersion = '2.11.0';
         window.gameVersion = gameVersion;
         function loadCssVersion() {
             try {
@@ -231,11 +231,13 @@
                     { key: 'vibration', default: true },
                     { key: 'vibration-merge', default: true },
                     { key: 'vibration-win', default: true },
-                    { key: 'vibration-loss', default: true }
+                    { key: 'vibration-loss', default: true },
+                    { key: 'ai-best-move-only', default: true },
+                    { key: 'auto-play-keep-screen-awake', default: false }
                 ];
             }
             getStorageKey(key) {
-                return `2048-${key}`;
+                return `${window.SETTING_PREFIX}${key}`;
             }
             load(key) {
                 const storageKey = this.getStorageKey(key);
@@ -269,6 +271,25 @@
             }
         }
         window.settingsManager = new SettingsManager();
+        function syncAiBestMoveOnlyToggle() {
+            const aiBestMoveOnlyToggle = document.getElementById('ai-best-move-only');
+            if (aiBestMoveOnlyToggle) {
+                aiBestMoveOnlyToggle.checked = window.settingsManager.load('ai-best-move-only');
+            }
+        }
+        function syncAutoPlayKeepAwakeToggle() {
+            const keepAwakeToggle = document.getElementById('auto-play-keep-screen-awake');
+            if (keepAwakeToggle) {
+                keepAwakeToggle.checked = window.settingsManager.load('auto-play-keep-screen-awake');
+            }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', syncAiBestMoveOnlyToggle);
+            document.addEventListener('DOMContentLoaded', syncAutoPlayKeepAwakeToggle);
+        } else {
+            syncAiBestMoveOnlyToggle();
+            syncAutoPlayKeepAwakeToggle();
+        }
         const defaultKeyBindings = {
             up: 'w',
             down: 's',
@@ -896,6 +917,28 @@
                                 </span>
                                 <i class="fa-solid fa-chevron-right text-xs"></i>
                             </button>
+                            <div class="border-b border-gray-200 dark:border-gray-700 my-1 mx-2"></div>
+                            <div class="flex items-center justify-between px-4 py-3 gap-3">
+                                <div class="flex flex-col text-left">
+                                    <span class="text-gray-700 dark:text-dark-muted" data-i18n="aiBestMoveOnly">仅请求最佳移动方向</span>
+                                    <span class="text-xs text-gray-500 dark:text-dark-muted mt-0.5" data-i18n="aiBestMoveOnlyHint">自动操作时跳过详细分析，响应更快</span>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                                    <input type="checkbox" id="ai-best-move-only" class="sr-only peer" checked onchange="window.settingsManager.save('ai-best-move-only', this.checked)">
+                                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
+                                </label>
+                            </div>
+                            <div class="border-b border-gray-200 dark:border-gray-700 my-1 mx-2"></div>
+                            <div class="flex items-center justify-between px-4 py-3 gap-3">
+                                <div class="flex flex-col text-left">
+                                    <span class="text-gray-700 dark:text-dark-muted" data-i18n="autoPlayKeepAwake">自动操作时保持屏幕常亮</span>
+                                    <span class="text-xs text-gray-500 dark:text-dark-muted mt-0.5" data-i18n="autoPlayKeepAwakeHint">自动操作运行期间防止屏幕休眠</span>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                                    <input type="checkbox" id="auto-play-keep-screen-awake" class="sr-only peer" onchange="window.settingsManager.save('auto-play-keep-screen-awake', this.checked); if (window.aiAutoPlay) window.aiAutoPlay.setKeepScreenAwake(this.checked)">
+                                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
+                                </label>
+                            </div>
                         </div>
                     </div>
                     <div class="setting-category">
@@ -925,7 +968,7 @@
                 </div>
             </div>
         </div>
-        <div id="ai-settings-modal" data-no-autofocus="true" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="ai-settings-modal-title" aria-modal="true">
+        <div id="ai-settings-modal" data-no-autofocus="true" class="fixed inset-0 flex items-center justify-center bg-black/50 z-[1100] hidden" role="dialog" aria-labelledby="ai-settings-modal-title" aria-modal="true">
             <div class="bg-gray-50 dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-visible text-center shadow-xl transform transition-all duration-300 scale-95 opacity-0">
                 <h2 id="ai-settings-modal-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4" data-i18n="aiApiSettingsItem">API设置</h2>
                 <div class="flex flex-col gap-4">
@@ -940,7 +983,7 @@
                     <div class="text-left">
                         <label for="ai-api-model" class="block text-sm font-medium text-gray-700 dark:text-dark-muted mb-1" data-i18n="aiApiModel">模型</label>
                         <div class="relative">
-                            <input type="text" id="ai-api-model" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-l-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm pr-10" placeholder="gpt-4o-mini">
+                            <input type="text" id="ai-api-model" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm pr-10" placeholder="gpt-4o-mini">
                             <button id="ai-model-dropdown-btn" class="absolute right-0 top-0 h-full px-3 py-2 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r-md bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors">
                                 <i class="fa-solid fa-chevron-down transition-transform duration-300"></i>
                             </button>
@@ -1407,6 +1450,7 @@
                     <button id="import-data-button" class="bg-secondary hover:bg-secondary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary/50">
                         <i class="fa-solid fa-download mr-2"></i><span>导入数据</span>
                     </button>
+                    <input type="file" id="import-file-input" accept=".txt,text/plain,application/json" class="hidden">
                 </div>
                 <div class="relative w-full mb-0.5">
                     <textarea id="data-textarea" class="w-full p-3 border border-gray-300 rounded-md h-32 text-sm dark:bg-dark-surface dark:border-dark-muted dark:text-dark-text" style="word-break: break-all;" placeholder="在此复制导出的数据或输入要导入的数据..."></textarea>
@@ -1427,9 +1471,15 @@
                         </select>
                     </div>
                 </div>
-                <div class="flex justify-start">
+                <div class="flex flex-wrap justify-start gap-x-4 gap-y-2">
                     <button id="export-link-button" class="text-primary hover:text-primary/80 text-sm flex items-center gap-1 transition-colors duration-200 focus:outline-none">
                         <i class="fa-solid fa-link"></i><span data-i18n="exportAsLink">导出为链接</span>
+                    </button>
+                    <button id="export-file-button" class="text-primary hover:text-primary/80 text-sm flex items-center gap-1 transition-colors duration-200 focus:outline-none">
+                        <i class="fa-solid fa-file-arrow-up"></i><span data-i18n="exportAsFile">导出为文件</span>
+                    </button>
+                    <button id="import-file-button" class="text-primary hover:text-primary/80 text-sm flex items-center gap-1 transition-colors duration-200 focus:outline-none">
+                        <i class="fa-solid fa-file-arrow-down"></i><span data-i18n="importFromFile">从文件导入</span>
                     </button>
                 </div>
             </div>
@@ -1576,7 +1626,7 @@
                 <div id="webrtc-join-section" style="display: none;">
                     <p class="text-gray-600 dark:text-dark-muted text-sm mb-2" data-i18n="webrtcQuickJoinTitle">输入对方的 6 位连接码</p>
                     <div class="flex justify-center mb-3">
-                        <input id="webrtc-room-code-input" maxlength="6" inputmode="numeric" autocomplete="off" class="w-44 text-center text-3xl font-bold tracking-[0.3em] text-secondary dark:text-dark-text bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="000000">
+                        <input id="webrtc-room-code-input" maxlength="6" inputmode="numeric" autocomplete="off" class="w-full max-w-xs text-center text-3xl font-bold tracking-[0.3em] text-secondary dark:text-dark-text bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="000000">
                     </div>
                     <button id="webrtc-join-room-button" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-md mb-2"><span data-i18n="webrtcConnectRoom">连接</span></button>
                     <p id="webrtc-join-room-status" class="text-sm text-gray-500 dark:text-dark-muted whitespace-pre-line mb-4"></p>
@@ -1711,7 +1761,7 @@
                 isDebugMode = !isDebugMode;
                 console.log(`Debug mode ${isDebugMode ? 'enabled' : 'disabled'}`);
                 if (isDebugMode) {
-                    console.log('Debug commands:\n- "novib" - Simulate no vibration support\n- "vib" - Restore vibration support\n- "nobluetooth" - Simulate no Bluetooth support\n- "bluetooth" - Restore Bluetooth support\n- "alldeviceson" - Enable discover all Bluetooth devices\n- "alldevicesoff" - Disable discover all Bluetooth devices\n- "win" - Trigger game win\n- "loss" - Trigger game over\n- "exitDebug" - Exit debug mode');
+                    console.log('Debug commands:\n- "novib" - Simulate no vibration support\n- "vib" - Restore vibration support\n- "nobluetooth" - Simulate no Bluetooth support\n- "bluetooth" - Restore Bluetooth support\n- "alldeviceson" - Enable discover all Bluetooth devices\n- "alldevicesoff" - Disable discover all Bluetooth devices\n- "rotatehint" - Show the rotate-to-portrait hint\n- "win" - Trigger game win\n- "loss" - Trigger game over\n- "exitDebug" - Exit debug mode');
                 }
                 return 'Debug mode command executed';
             }
@@ -1845,6 +1895,23 @@
                     } else {
                         console.log('Bluetooth sync module not initialized');
                         return 'Bluetooth sync module not initialized';
+                    }
+                } else {
+                    console.log('Please enable debug mode first with gameDebug');
+                    return 'Debug mode not enabled';
+                }
+            }
+        });
+        Object.defineProperty(window, 'rotatehint', {
+            get: function() {
+                if (isDebugMode) {
+                    if (typeof window.showRotateHint === 'function') {
+                        window.showRotateHint();
+                        console.log('Rotate hint shown');
+                        return 'Rotate hint shown';
+                    } else {
+                        console.log('Fullscreen mode module not initialized');
+                        return 'Fullscreen mode module not initialized';
                     }
                 } else {
                     console.log('Please enable debug mode first with gameDebug');
@@ -2126,6 +2193,14 @@
                     const scorePopAnimationCheckbox = document.getElementById('score-pop-animation');
                     if (scorePopAnimationCheckbox) {
                         scorePopAnimationCheckbox.checked = window.settingsManager.load('score-pop-animation');
+                    }
+                    const aiBestMoveOnlyCheckbox = document.getElementById('ai-best-move-only');
+                    if (aiBestMoveOnlyCheckbox) {
+                        aiBestMoveOnlyCheckbox.checked = window.settingsManager.load('ai-best-move-only');
+                    }
+                    const keepAwakeCheckbox = document.getElementById('auto-play-keep-screen-awake');
+                    if (keepAwakeCheckbox) {
+                        keepAwakeCheckbox.checked = window.settingsManager.load('auto-play-keep-screen-awake');
                     }
                     const vibrationToggle = document.getElementById('vibration-toggle');
                     const vibrationMergeToggle = document.getElementById('vibration-merge');
@@ -2878,6 +2953,9 @@
         elements.exportDataButton = document.getElementById('export-data-button');
         elements.importDataButton = document.getElementById('import-data-button');
         elements.exportLinkButton = document.getElementById('export-link-button');
+        elements.exportFileButton = document.getElementById('export-file-button');
+        elements.importFileButton = document.getElementById('import-file-button');
+        elements.importFileInput = document.getElementById('import-file-input');
         elements.dataTextarea = document.getElementById('data-textarea');
         elements.closeDataModal = document.getElementById('close-data-modal');
         function setupDataTransfer() {
@@ -2902,6 +2980,28 @@
             elements.importDataButton.addEventListener('click', handleImportClick);
             elements.exportLinkButton.addEventListener('click', () => {
                 exportGameDataAsLink();
+            });
+            elements.exportFileButton.addEventListener('click', () => {
+                exportGameDataAsFile();
+            });
+            elements.importFileButton.addEventListener('click', () => {
+                elements.importFileInput.value = '';
+                elements.importFileInput.click();
+            });
+            elements.importFileInput.addEventListener('change', async () => {
+                const file = elements.importFileInput.files && elements.importFileInput.files[0];
+                if (!file) return;
+                try {
+                    const text = await file.text();
+                    const data = text.trim();
+                    if (!data) return;
+                    elements.dataTextarea.value = data;
+                    if (confirm(i18n.t('confirmImport'))) {
+                        importGameData(data);
+                    }
+                } catch (error) {
+                    alert(i18n.t('importFailed') + ' ' + error.message);
+                }
             });
             elements.closeDataModal.addEventListener('click', () => {
                 const modal = document.getElementById('data-transfer-modal');
@@ -3049,6 +3149,17 @@
                 elements.tileMergeAnimation.checked = true;
                 if (elements.scorePopAnimation) {
                     elements.scorePopAnimation.checked = true;
+                }
+                const aiBestMoveOnlyCheckbox = document.getElementById('ai-best-move-only');
+                if (aiBestMoveOnlyCheckbox) {
+                    aiBestMoveOnlyCheckbox.checked = true;
+                }
+                const keepAwakeCheckbox = document.getElementById('auto-play-keep-screen-awake');
+                if (keepAwakeCheckbox) {
+                    keepAwakeCheckbox.checked = false;
+                    if (window.aiAutoPlay) {
+                        window.aiAutoPlay.setKeepScreenAwake(false);
+                    }
                 }
                 const vibrationToggle = document.getElementById('vibration-toggle');
                 const vibrationMergeToggle = document.getElementById('vibration-merge');
@@ -4028,6 +4139,11 @@
                 <div class="analysis-item">
                     <div class="analysis-label" data-i18n="aiSuggestionLabel">AI建议</div>
                     <div id="ai-suggestion" class="analysis-value min-h-[60px]">--</div>
+                </div>
+                <div id="ai-analysis-api-settings-entry" class="hidden mt-2 text-right">
+                    <button id="ai-analysis-api-settings-button" class="inline-flex items-center gap-1 text-primary hover:text-primary/80 text-sm transition-colors duration-200 focus:outline-none">
+                        <i class="fa-solid fa-gear"></i><span data-i18n="aiApiSettingsItem">API设置</span>
+                    </button>
                 </div>
             </div>
         </main>
