@@ -1,4 +1,4 @@
-const bluetoothSyncVersion = '0.7';
+const bluetoothSyncVersion = '0.8';
 window.bluetoothSyncVersion = bluetoothSyncVersion;
 class BluetoothSync {
     constructor() {
@@ -620,12 +620,6 @@ window.SyncLive = window.SyncLive || {
     notifySettingsChanged() {
         this._schedule(200);
     },
-    flushTransport(name) {
-        const transport = this._transports[name];
-        if (transport && transport.isConnected() && transport.enabled !== false) {
-            this._sendTo(transport);
-        }
-    },
     _schedule(delay) {
         if (!this._hasConnectedTransport()) {
             return;
@@ -881,9 +875,6 @@ function setupBluetoothUI() {
         if (checkbox) {
             checkbox.addEventListener('change', () => {
                 window.SyncLive.setIncludeSettings('bluetooth', checkbox.checked);
-                if (bluetoothSyncInstance && bluetoothSyncInstance.liveMode) {
-                    window.SyncLive.flushTransport('bluetooth');
-                }
             });
         }
     };
@@ -893,9 +884,6 @@ function setupBluetoothUI() {
     if (liveSyncCheckbox) {
         liveSyncCheckbox.addEventListener('change', () => {
             window.SyncLive.setEnabled('bluetooth', liveSyncCheckbox.checked);
-            if (liveSyncCheckbox.checked && bluetoothSyncInstance && bluetoothSyncInstance.liveMode) {
-                window.SyncLive.flushTransport('bluetooth');
-            }
         });
     }
 }

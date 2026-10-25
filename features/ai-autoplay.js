@@ -1,4 +1,4 @@
-const aiAutoPlayVersion = '1.0';
+const aiAutoPlayVersion = '1.1';
 window.aiAutoPlayVersion = aiAutoPlayVersion;
 window.aiAutoPlayLoaded = true;
 const AUTO_PLAY_DIRECTIONS = ['up', 'down', 'left', 'right'];
@@ -30,6 +30,51 @@ function getAutoPlayAnalysisMode() {
     } catch (e) {}
     return 'algorithm';
 }
+function isAutoPlayKeepAwakeEnabled() {
+    if (window.settingsManager && typeof window.settingsManager.load === 'function') {
+        return window.settingsManager.load('auto-play-keep-screen-awake');
+    }
+    return false;
+}
+let autoPlayWakeLock = null;
+async function requestAutoPlayWakeLock() {
+    if (!isAutoPlayKeepAwakeEnabled()) return;
+    if (!navigator.wakeLock || typeof navigator.wakeLock.request !== 'function') return;
+    if (autoPlayWakeLock) return;
+    try {
+        autoPlayWakeLock = await navigator.wakeLock.request('screen');
+        autoPlayWakeLock.addEventListener('release', function() {
+            autoPlayWakeLock = null;
+        });
+    } catch (e) {
+        autoPlayWakeLock = null;
+    }
+}
+function releaseAutoPlayWakeLock() {
+    const lock = autoPlayWakeLock;
+    autoPlayWakeLock = null;
+    if (!lock) return;
+    try {
+        lock.release();
+    } catch (e) {}
+}
+function isAutoPlayAiConfigComplete() {
+    if (!window.aiRequest || typeof window.aiRequest.validateConfig !== 'function' || typeof window.aiRequest.getConfig !== 'function') {
+        return true;
+    }
+    try {
+        const errors = window.aiRequest.validateConfig(window.aiRequest.getConfig());
+        return !(Array.isArray(errors) && errors.length > 0);
+    } catch (e) {
+        return true;
+    }
+}
+function isAutoPlayBestMoveOnlyEnabled() {
+    if (window.settingsManager && typeof window.settingsManager.load === 'function') {
+        return window.settingsManager.load('ai-best-move-only');
+    }
+    return true;
+}
 async function getAutoPlayBestMove(mode) {
     if (mode === 'ai') {
         if (!window.aiRequest || typeof window.aiRequest.sendGameAnalysis !== 'function') {
@@ -37,9 +82,10 @@ async function getAutoPlayBestMove(mode) {
         }
         try {
             const language = window.i18n && window.i18n.getLang ? window.i18n.getLang() : 'zh';
-            const result = await window.aiRequest.sendGameAnalysis(window.gameState, language);
+            const bestMoveOnly = isAutoPlayBestMoveOnlyEnabled();
+            const result = await window.aiRequest.sendGameAnalysis(window.gameState, language, { bestMoveOnly: bestMoveOnly });
             if (result && result.success && result.data && AUTO_PLAY_DIRECTIONS.indexOf(result.data.bestMove) !== -1) {
-                return { move: result.data.bestMove, results: result.data };
+                return { move: result.data.bestMove, results: bestMoveOnly ? null : result.data };
             }
             return { error: 'ai-failed' };
         } catch (e) {
@@ -274,6 +320,10 @@ async function performAutoPlayStep() {
 }
 function startAutoPlay() {
     if (autoPlayStatus.running && !autoPlayStatus.paused) return;
+    if (getAutoPlayAnalysisMode() === 'ai' && !isAutoPlayAiConfigComplete()) {
+        updateAutoPlayStatusText(autoPlayT('autoPlayAiSettingsRequired'));
+        return;
+    }
     if (!autoPlayStatus.running) {
         autoPlayStatus.steps = 0;
         autoPlayStatus.failCount = 0;
@@ -283,12 +333,14 @@ function startAutoPlay() {
     autoPlayStatus.paused = false;
     window.autoPlayActive = true;
     updateAutoPlayUI();
+    requestAutoPlayWakeLock();
     scheduleAutoPlayStep(150);
 }
 function pauseAutoPlay() {
     if (!autoPlayStatus.running || autoPlayStatus.paused) return;
     autoPlayStatus.paused = true;
     clearAutoPlayTimer();
+    releaseAutoPlayWakeLock();
     window.autoPlayActive = false;
     updateAutoPlayUI();
 }
@@ -297,12 +349,14 @@ function resumeAutoPlay() {
     autoPlayStatus.paused = false;
     window.autoPlayActive = true;
     updateAutoPlayUI();
+    requestAutoPlayWakeLock();
     scheduleAutoPlayStep(200);
 }
 function stopAutoPlay(stopReason) {
     autoPlayStatus.running = false;
     autoPlayStatus.paused = false;
     clearAutoPlayTimer();
+    releaseAutoPlayWakeLock();
     window.autoPlayActive = false;
     autoPlayStatus.failCount = 0;
     autoPlayStatus.stopReason = stopReason || null;
@@ -323,6 +377,11 @@ function setupAiAutoPlay() {
     if (stopButton) {
         stopButton.addEventListener('click', stopAutoPlay);
     }
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible' && autoPlayStatus.running && !autoPlayStatus.paused) {
+            requestAutoPlayWakeLock();
+        }
+    });
     updateAutoPlayUI();
 }
 if (typeof window !== 'undefined') {
@@ -332,6 +391,13 @@ if (typeof window !== 'undefined') {
         pause: pauseAutoPlay,
         resume: resumeAutoPlay,
         stop: stopAutoPlay,
+        setKeepScreenAwake: function(enabled) {
+            if (enabled && autoPlayStatus.running && !autoPlayStatus.paused) {
+                requestAutoPlayWakeLock();
+            } else {
+                releaseAutoPlayWakeLock();
+            }
+        },
         isActive: function() { return autoPlayStatus.running; }
     };
 }

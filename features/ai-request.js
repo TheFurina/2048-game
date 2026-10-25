@@ -1,4 +1,4 @@
-const aiRequestVersion = '1.2';
+const aiRequestVersion = '1.3';
 window.aiRequestVersion = aiRequestVersion;
 const DEFAULT_CONFIG = {
     baseUrl: 'https://api.openai.com/v1',
@@ -396,7 +396,7 @@ async function checkAiApiAvailability(config) {
         };
     }
 }
-async function sendGameAnalysisRequest(gameState, language) {
+async function sendGameAnalysisRequest(gameState, language, options = {}) {
     const aiConfig = getAiConfig();
     const errors = validateAiConfig(aiConfig);
     if (errors.length > 0) {
@@ -419,7 +419,17 @@ async function sendGameAnalysisRequest(gameState, language) {
             isEndlessMode: gameState.isEndlessMode,
             difficulty: gameState.difficulty
         };
-        const messages = [
+        const bestMoveOnly = !!(options && options.bestMoveOnly);
+        const messages = bestMoveOnly ? [
+            {
+                role: 'system',
+                content: 'You are an expert 2048 game player. Choose the single best move for the given grid and return ONLY a valid JSON object.\n\nSTRICT OUTPUT FORMAT REQUIREMENTS:\n- Your entire response must be a single JSON object. No extra text, no explanations, no markdown code blocks, no ```json``` wrappers.\n- The JSON object MUST contain exactly one key: "bestMove" (string), which MUST be exactly ONE of these 4 exact lowercase values: "up" | "down" | "left" | "right". No other values are allowed. If you are uncertain, still choose the single most likely direction among the four.\n'
+            },
+            {
+                role: 'user',
+                content: 'Choose the best move for this 2048 grid and return ONLY the JSON object.\nGrid: ' + JSON.stringify(gridData)
+            }
+        ] : [
             {
                 role: 'system',
                 content: 'You are an expert 2048 game analyst. Analyze the game state and return ONLY a valid JSON object as output.\n\nSTRICT OUTPUT FORMAT REQUIREMENTS:\n- Your entire response must be a single JSON object. No extra text, no explanations, no markdown code blocks, no ```json``` wrappers.\n- The JSON object MUST contain exactly these 6 keys with the following constraints:\n\n1. "bestMove" (string, REQUIRED): MUST be exactly ONE of these 4 exact lowercase values: "up" | "down" | "left" | "right". ABSOLUTELY NO other values allowed. Do NOT return arrays, multiple directions separated by commas or slashes, "none", "any", "unknown", "N/A", empty string, or any value outside the four listed above. If you are uncertain, still choose the single most likely direction among the four.\n\n2. "mergeOpportunities" (integer, REQUIRED): A non-negative integer (0, 1, 2, ...) counting the possible tile merges on the current grid.\n\n3. "gameStateAssessment" (string, REQUIRED): MUST be exactly ONE of: "safe" | "warning" | "danger". No other values.\n\n4. "scorePotential" (string, REQUIRED): MUST be exactly ONE of: "high" | "medium" | "low". No other values.\n\n5. "aiSuggestion" (string, REQUIRED): A detailed strategic recommendation written in the user\'s language. Explain why the chosen bestMove is optimal.\n\n6. "confidence" (number, REQUIRED): A float between 0.0 and 1.0 inclusive representing your confidence in the bestMove recommendation.\n\nUSER LANGUAGE REQUIREMENT: The user\'s language is: ' + language + '. The entire "aiSuggestion" string MUST be written in this language. Do NOT mix languages.\n\nFINAL REMINDER: Return ONLY the raw JSON object. Do not wrap it in any other formatting.\n'

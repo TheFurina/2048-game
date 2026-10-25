@@ -1,4 +1,4 @@
-const i18nVersion = '1.10';
+const i18nVersion = '1.11';
 window.i18nVersion = i18nVersion;
 const translations = {
     zh: {
@@ -32,6 +32,8 @@ const translations = {
         tryAgain: '再玩一次',
         toggleControls: '收起控制',
         expandControls: '展开控制',
+        rotateHintTitle: '请旋转至竖屏以获得最佳体验',
+        exitFullscreen: '退出全屏',
         gamePerformance: '性能',
         gpuAcceleration: 'GPU加速',
         vibration: '振动反馈',
@@ -306,6 +308,12 @@ const translations = {
         liveSyncData: '实时同步数据',
         aiApiSettings: 'AI',
         aiApiSettingsItem: 'API设置',
+        aiBestMoveOnly: '仅请求最佳移动方向',
+        aiBestMoveOnlyHint: '自动操作时跳过详细分析，响应更快',
+        autoPlayKeepAwake: '自动操作时保持屏幕常亮',
+        autoPlayKeepAwakeHint: '自动操作运行期间防止屏幕休眠',
+        autoPlayAiSettingsRequired: '请先完成 API 设置',
+        aiApiConfigIncomplete: 'API 设置未完成，请点击下方“API设置”进入配置',
         aiApiBaseUrl: 'API Base URL',
         aiApiKey: 'API Key',
         aiApiModel: '模型',
@@ -350,6 +358,8 @@ const translations = {
         kbNewGame: '新游戏',
         kbGrid: '切换网格大小',
         exportAsLink: '导出为链接',
+        exportAsFile: '导出为文件',
+        importFromFile: '从文件导入',
         copyLink: '复制链接',
         linkCopied: '链接已复制到剪贴板',
         linkExportSuccess: '链接已生成'
@@ -385,6 +395,8 @@ const translations = {
         tryAgain: 'Play Again',
         toggleControls: 'Hide Controls',
         expandControls: 'Show Controls',
+        rotateHintTitle: 'Please rotate to portrait for the best experience',
+        exitFullscreen: 'Exit Fullscreen',
         gamePerformance: 'Performance',
         gpuAcceleration: 'GPU Acceleration',
         vibration: 'Vibration Feedback',
@@ -659,6 +671,12 @@ const translations = {
         liveSyncData: 'Live sync data',
         aiApiSettings: 'AI',
         aiApiSettingsItem: 'API Settings',
+        aiBestMoveOnly: 'Request best move only',
+        aiBestMoveOnlyHint: 'Skip detailed analysis during auto play for faster responses',
+        autoPlayKeepAwake: 'Keep screen awake during auto play',
+        autoPlayKeepAwakeHint: 'Prevent the screen from sleeping while auto play is running',
+        autoPlayAiSettingsRequired: 'Please complete the API settings first',
+        aiApiConfigIncomplete: 'API settings are incomplete. Tap "API Settings" below to configure',
         aiApiBaseUrl: 'API Base URL',
         aiApiKey: 'API Key',
         aiApiModel: 'Model',
@@ -703,6 +721,8 @@ const translations = {
         kbNewGame: 'New Game',
         kbGrid: 'Cycle Grid Size',
         exportAsLink: 'Export as Link',
+        exportAsFile: 'Export as File',
+        importFromFile: 'Import from File',
         copyLink: 'Copy Link',
         linkCopied: 'Link copied to clipboard',
         linkExportSuccess: 'Link generated'
@@ -1262,6 +1282,8 @@ const i18nConfig = {
         ['export-data-button', 'exportData'],
         ['import-data-button', 'importData'],
         ['export-link-button', 'exportAsLink'],
+        ['export-file-button', 'exportAsFile'],
+        ['import-file-button', 'importFromFile'],
         ['save-custom-theme', 'save'],
         ['reset-custom-theme', 'reset'],
         ['export-custom-theme', 'exportTheme'],
