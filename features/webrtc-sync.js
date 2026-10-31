@@ -1,4 +1,4 @@
-const webRTCSyncVersion = '0.5';
+const webRTCSyncVersion = '0.6';
 window.webRTCSyncVersion = webRTCSyncVersion;
 const WEBRTC_ROOM_ID_PREFIX = '2048sync-';
 class WebRTCSync {
@@ -330,6 +330,202 @@ class WebRTCSync {
         }
     }
 }
+window.SyncLive = window.SyncLive || {
+    _transports: {},
+    _timer: null,
+    _saveHookInstalled: false,
+    _storageHookInstalled: false,
+    register(name, transport) {
+        this._transports[name] = transport;
+    },
+    setIncludeSettings(name, value) {
+        const transport = this._transports[name];
+        if (transport) {
+            transport.includeSettings = !!value;
+        }
+    },
+    setEnabled(name, value) {
+        const transport = this._transports[name];
+        if (transport) {
+            transport.enabled = !!value;
+        }
+    },
+    notifyStateChanged() {
+        this._schedule(120);
+    },
+    notifySettingsChanged() {
+        this._schedule(200);
+    },
+    _schedule(delay) {
+        if (!this._hasConnectedTransport()) {
+            return;
+        }
+        clearTimeout(this._timer);
+        this._timer = setTimeout(() => this._flush(), delay);
+    },
+    _hasConnectedTransport() {
+        return Object.keys(this._transports).some(name => {
+            const transport = this._transports[name];
+            return !!(transport && transport.isConnected() && transport.enabled !== false);
+        });
+    },
+    _flush() {
+        Object.keys(this._transports).forEach(name => {
+            const transport = this._transports[name];
+            if (transport && transport.isConnected() && transport.enabled !== false) {
+                this._sendTo(transport);
+            }
+        });
+    },
+    _sendTo(transport) {
+        try {
+            const snapshot = getGameDataForExport(transport.includeSettings !== false);
+            Promise.resolve(transport.send({ type: 'stateUpdate', data: snapshot })).catch(error => {
+                console.warn('Live sync send failed:', error);
+                if (transport.onSendError) {
+                    transport.onSendError(error);
+                }
+            });
+        } catch (error) {
+            console.warn('Live sync snapshot failed:', error);
+        }
+    },
+    handleRemoteMessage(name, message) {
+        const transport = this._transports[name];
+        if (!message || !message.data || (transport && transport.enabled === false)) {
+            return;
+        }
+        this._applyRemote(message.data);
+    },
+    _applyRemote(data) {
+        window.__remoteSyncApply = true;
+        try {
+            applyImportedData(data);
+        } catch (error) {
+            console.warn('Apply remote sync data failed:', error);
+        } finally {
+            window.__remoteSyncApply = false;
+        }
+        try {
+            if (typeof loadGameState === 'function') {
+                loadGameState();
+            }
+        } catch (error) {
+            console.warn('Reload game state after sync failed:', error);
+        }
+    },
+    installHooks() {
+        if (!this._saveHookInstalled && typeof window.saveGameState === 'function') {
+            this._saveHookInstalled = true;
+            const originalSave = window.saveGameState;
+            window.saveGameState = function() {
+                const result = originalSave.apply(this, arguments);
+                if (!window.__remoteSyncApply) {
+                    window.SyncLive.notifyStateChanged();
+                }
+                return result;
+            };
+        }
+        if (!this._storageHookInstalled) {
+            try {
+                const prefix = window.SETTING_PREFIX || '2048-setting-';
+                const originalSetItem = localStorage.setItem.bind(localStorage);
+                localStorage.setItem = function(key, value) {
+                    const result = originalSetItem(key, value);
+                    if (!window.__remoteSyncApply && typeof key === 'string' && key.indexOf(prefix) === 0) {
+                        window.SyncLive.notifySettingsChanged();
+                    }
+                    return result;
+                };
+                this._storageHookInstalled = true;
+            } catch (error) {
+                console.warn('Install settings sync hook failed:', error);
+            }
+        }
+    }
+};
+window.SyncIndicator = window.SyncIndicator || {
+    connections: {},
+    meta: {
+        webrtc: { labelKey: 'webrtcConnectedBadge', icon: 'fa-solid fa-wifi' }
+    },
+    set(name) {
+        this.connections[name] = true;
+        this.render();
+    },
+    clear(name) {
+        if (name) {
+            delete this.connections[name];
+        } else {
+            this.connections = {};
+        }
+        this.render();
+    },
+    refresh() {
+        this.render();
+    },
+    render() {
+        const indicator = document.getElementById('sync-indicator');
+        if (!indicator) {
+            return;
+        }
+        const active = Object.keys(this.meta).filter(name => this.connections[name]);
+        if (!active.length) {
+            indicator.classList.add('hidden');
+            indicator.classList.remove('flex');
+            indicator.innerHTML = '';
+            return;
+        }
+        indicator.classList.remove('hidden');
+        indicator.classList.add('flex');
+        indicator.innerHTML = '';
+        const t = key => window.i18n ? window.i18n.t(key) : key;
+        active.forEach(name => {
+            const meta = this.meta[name];
+            const group = document.createElement('span');
+            group.className = 'flex items-center gap-1';
+            const openBtn = document.createElement('button');
+            openBtn.type = 'button';
+            openBtn.className = 'sync-open flex items-center text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold transition-colors focus:outline-none';
+            openBtn.dataset.transport = name;
+            openBtn.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i><i class="' + meta.icon + ' mr-1"></i>';
+            const label = document.createElement('span');
+            label.textContent = t(meta.labelKey);
+            openBtn.appendChild(label);
+            const disconnectBtn = document.createElement('button');
+            disconnectBtn.type = 'button';
+            disconnectBtn.className = 'sync-disconnect text-secondary/40 hover:text-red-500 dark:text-dark-muted/60 dark:hover:text-red-400 transition-colors focus:outline-none';
+            disconnectBtn.dataset.transport = name;
+            disconnectBtn.title = t('disconnectConnection');
+            disconnectBtn.textContent = t('disconnect');
+            group.appendChild(openBtn);
+            group.appendChild(disconnectBtn);
+            indicator.appendChild(group);
+        });
+    }
+};
+function setupSyncIndicator() {
+    const indicator = document.getElementById('sync-indicator');
+    if (indicator && !indicator._syncBound) {
+        indicator._syncBound = true;
+        indicator.addEventListener('click', event => {
+            const openBtn = event.target.closest('.sync-open');
+            if (openBtn) {
+                if (openBtn.dataset.transport === 'webrtc') {
+                    showWebRTCModal('connected');
+                }
+                return;
+            }
+            const disconnectBtn = event.target.closest('.sync-disconnect');
+            if (disconnectBtn) {
+                const transport = window.SyncLive._transports[disconnectBtn.dataset.transport];
+                if (transport && transport.disconnect) {
+                    transport.disconnect();
+                }
+            }
+        });
+    }
+}
 let webRTCSyncInstance = null;
 function webrtcT(key, fallback) {
     return window.i18n && window.i18n.t ? window.i18n.t(key) : fallback;
@@ -349,6 +545,15 @@ function initWebRTCSync() {
         }
     };
     setupWebRTCUI();
+    setupSyncIndicator();
+    window.SyncLive.installHooks();
+    if (typeof window.saveGameState !== 'function') {
+        const retryInstall = () => window.SyncLive.installHooks();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', retryInstall, { once: true });
+        }
+        setTimeout(retryInstall, 1000);
+    }
     window.SyncLive.register('webrtc', {
         includeSettings: true,
         enabled: true,

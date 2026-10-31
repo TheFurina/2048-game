@@ -1,4 +1,4 @@
-const customSelectVersion = '1.2';
+const customSelectVersion = '1.3';
 window.customSelectVersion = customSelectVersion;
 (function() {
     try {
@@ -27,6 +27,11 @@ function initCustomSelects() {
             nativeSelect.value = savedTheme;
         } else if (customSelect.parentElement.querySelector('#language-select')) {
             nativeSelect = customSelect.parentElement.querySelector('#language-select');
+        } else {
+            nativeSelect = customSelect.querySelector('select') || customSelect.parentElement.querySelector('select');
+            if (nativeSelect && nativeSelect.id === 'custom-theme-palette-select') {
+                nativeSelect.value = localStorage.getItem('2048-setting-custom-theme-palette') || 'auto';
+            }
         }
         if (selectedValue && nativeSelect) {
             const currentValue = nativeSelect.value;

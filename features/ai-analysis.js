@@ -1,4 +1,4 @@
-const aiAnalysisVersion = '2.6';
+const aiAnalysisVersion = '2.7';
 window.aiAnalysisVersion = aiAnalysisVersion;
 let cachedAlgorithmResults = null;
 let cachedAiResults = null;
@@ -122,7 +122,7 @@ function setupAiAnalysis() {
                 cachedAiResults = null;
                 try {
                     const language = i18n.getLang();
-                    const result = await window.aiRequest?.sendGameAnalysis(gameState, language);
+                    const result = await requestGameAnalysis(gameState, language);
                     if (result && result.success) {
                         cachedAiResults = result.data;
                         updateGameStateCache(gameState, undefined, result.data);
@@ -218,7 +218,7 @@ function setupAiAnalysis() {
                             showAnalysisLoading();
                             toggleAiSuggestionVisibility(true, true);
                             const language = i18n.getLang();
-                            const result = await window.aiRequest?.sendGameAnalysis(gameState, language);
+                            const result = await requestGameAnalysis(gameState, language);
                             if (result && result.success) {
                                 cachedAiResults = result.data;
                                 updateGameStateCache(gameState, undefined, result.data);
@@ -623,6 +623,7 @@ function updateAnalysisResults(results) {
         left: i18n.t('left'), 
         right: i18n.t('right')
     };
+    directionNames.undo = i18n.t('undo');
     document.getElementById('best-move-direction').innerHTML = `<span class="best-move-text">${directionNames[results.bestMove] || results.bestMove}</span>`;
     const mergeOpportunitiesElement = document.getElementById('merge-opportunities');
     mergeOpportunitiesElement.className = 'analysis-value';
@@ -664,6 +665,7 @@ function normalizeGridToNumbers(grid) {
 const AI_DIRECTIONS = ['up', 'down', 'left', 'right'];
 const AI_SPAWN_FOUR_PROBABILITY = 0.1;
 const AI_SEARCH_TIME_BUDGET = 90;
+const AI_UNDO_ADVANTAGE_MARGIN = 1.5;
 function aiNow() {
     return typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now();
 }
@@ -860,6 +862,22 @@ function analyzeGameStateWithAlgorithm() {
             bestDirection = moves[i].direction;
         }
     }
+    const allowUndo = !window.settingsManager || typeof window.settingsManager.load !== 'function' || window.settingsManager.load('ai-allow-undo');
+    if (allowUndo && gameState.history && gameState.history.length > 0) {
+        const prevGrid = normalizeGridToNumbers(gameState.history[gameState.history.length - 1].grid);
+        const prevMoves = aiLegalMoves(prevGrid);
+        if (prevMoves.length > 0) {
+            const undoDeadline = aiNow() + AI_SEARCH_TIME_BUDGET;
+            let undoValue = -Infinity;
+            for (let i = 0; i < prevMoves.length; i++) {
+                const value = aiChanceValue(prevMoves[i].grid, depth - 1, undoDeadline) + Math.log2(prevMoves[i].gained + 1) * 0.6;
+                if (value > undoValue) undoValue = value;
+            }
+            if (undoValue > bestValue + AI_UNDO_ADVANTAGE_MARGIN) {
+                bestDirection = 'undo';
+            }
+        }
+    }
     const mergeOpportunities = aiCountMergePairs(grid);
     const mobility = moves.length;
     const dangerEmpty = Math.max(1, Math.round(cells * 0.12));
@@ -880,6 +898,82 @@ function analyzeGameStateWithAlgorithm() {
         gameStateAssessment: gameStateAssessment,
         scorePotential: scorePotential,
         aiSuggestion: ''
+    };
+}
+function buildGameAnalysisMessages(gameState, language, options = {}) {
+    const gridData = gameState.grid.map(row =>
+        row.map(cell => cell ? cell.value : 0)
+    );
+    const gameData = {
+        grid: gridData,
+        score: gameState.score,
+        bestScore: gameState.bestScore,
+        gridRows: gameState.gridRows,
+        gridCols: gameState.gridCols,
+        isEndlessMode: gameState.isEndlessMode,
+        difficulty: gameState.difficulty
+    };
+    const bestMoveOnly = !!(options && options.bestMoveOnly);
+    const allowUndoSetting = !window.settingsManager || typeof window.settingsManager.load !== 'function' || window.settingsManager.load('ai-allow-undo');
+    const canUndo = allowUndoSetting && gameState && Array.isArray(gameState.history) && gameState.history.length > 0;
+    const bestMoveRule = canUndo
+        ? 'MUST be exactly ONE of these 5 exact lowercase values: "up" | "down" | "left" | "right" | "undo". "undo" reverts the last move and restores the previous board state; recommend it ONLY when the previous position was clearly better and every direct move would likely make things worse.'
+        : 'MUST be exactly ONE of these 4 exact lowercase values: "up" | "down" | "left" | "right".';
+    return bestMoveOnly ? [
+        {
+            role: 'system',
+            content: 'You are an expert 2048 game player. Choose the single best move for the given grid and return ONLY a valid JSON object.\n\nSTRICT OUTPUT FORMAT REQUIREMENTS:\n- Your entire response must be a single JSON object. No extra text, no explanations, no markdown code blocks, no ```json``` wrappers.\n- The JSON object MUST contain exactly one key: "bestMove" (string), which ' + bestMoveRule + ' No other values are allowed. If you are uncertain, still choose the single most likely direction among the four.\n'
+        },
+        {
+            role: 'user',
+            content: 'Choose the best move for this 2048 grid and return ONLY the JSON object.\nGrid: ' + JSON.stringify(gridData)
+        }
+    ] : [
+        {
+            role: 'system',
+            content: 'You are an expert 2048 game analyst. Analyze the game state and return ONLY a valid JSON object as output.\n\nSTRICT OUTPUT FORMAT REQUIREMENTS:\n- Your entire response must be a single JSON object. No extra text, no explanations, no markdown code blocks, no ```json``` wrappers.\n- The JSON object MUST contain exactly these 6 keys with the following constraints:\n\n1. "bestMove" (string, REQUIRED): ' + bestMoveRule + ' ABSOLUTELY NO other values allowed. Do NOT return arrays, multiple directions separated by commas or slashes, "none", "any", "unknown", "N/A", empty string, or any value outside the four listed above. If you are uncertain, still choose the single most likely direction among the four.\n\n2. "mergeOpportunities" (integer, REQUIRED): A non-negative integer (0, 1, 2, ...) counting the possible tile merges on the current grid.\n\n3. "gameStateAssessment" (string, REQUIRED): MUST be exactly ONE of: "safe" | "warning" | "danger". No other values.\n\n4. "scorePotential" (string, REQUIRED): MUST be exactly ONE of: "high" | "medium" | "low". No other values.\n\n5. "aiSuggestion" (string, REQUIRED): A detailed strategic recommendation written in the user\'s language. Explain why the chosen bestMove is optimal.\n\n6. "confidence" (number, REQUIRED): A float between 0.0 and 1.0 inclusive representing your confidence in the bestMove recommendation.\n\nUSER LANGUAGE REQUIREMENT: The user\'s language is: ' + language + '. The entire "aiSuggestion" string MUST be written in this language. Do NOT mix languages.\n\nFINAL REMINDER: Return ONLY the raw JSON object. Do not wrap it in any other formatting.\n'
+        },
+        {
+            role: 'user',
+            content: 'Analyze this 2048 game state and return ONLY a JSON object.\nGame data: ' + JSON.stringify(gameData)
+        }
+    ];
+}
+function parseGameAnalysisMessage(messageContent) {
+    try {
+        let jsonStr = messageContent.trim();
+        if (jsonStr.startsWith('```')) {
+            jsonStr = jsonStr.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+        }
+        return { success: true, data: JSON.parse(jsonStr) };
+    } catch (e) {
+        return {
+            success: false,
+            error: 'aiApiParseError',
+            message: messageContent.substring(0, 200)
+        };
+    }
+}
+async function requestGameAnalysis(gameState, language, options = {}) {
+    if (!window.aiRequest || typeof window.aiRequest.sendRequest !== 'function') {
+        return {
+            success: false,
+            error: 'aiApiRequestFailed'
+        };
+    }
+    const messages = buildGameAnalysisMessages(gameState, language, options);
+    const result = await window.aiRequest.sendRequest(messages);
+    if (!result || !result.success) {
+        return result || { success: false, error: 'aiApiRequestFailed' };
+    }
+    const messageContent = result.message || '';
+    console.log('[AI Raw Response]', messageContent);
+    const parsed = parseGameAnalysisMessage(messageContent);
+    if (!parsed.success) return parsed;
+    return {
+        success: true,
+        data: parsed.data,
+        rawMessage: messageContent
     };
 }
 async function analyzeGameState() {
@@ -913,7 +1007,7 @@ async function analyzeGameState() {
     }
     if (currentAnalysisMode === 'ai') {
         const language = i18n.getLang();
-        const result = await window.aiRequest?.sendGameAnalysis(gameState, language);
+        const result = await requestGameAnalysis(gameState, language);
         if (result && result.success) {
             cachedAiResults = result.data;
             updateGameStateCache(gameState, undefined, result.data);
@@ -1066,4 +1160,5 @@ function countEmptyCells(grid) {
 if (typeof window !== 'undefined') {
     window.setupAiAnalysis = setupAiAnalysis;
     window.analyzeGameState = analyzeGameState;
+    window.requestGameAnalysis = requestGameAnalysis;
 }

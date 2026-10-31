@@ -1,4 +1,4 @@
-const aiAutoPlayVersion = '1.1';
+const aiAutoPlayVersion = '1.2';
 window.aiAutoPlayVersion = aiAutoPlayVersion;
 window.aiAutoPlayLoaded = true;
 const AUTO_PLAY_DIRECTIONS = ['up', 'down', 'left', 'right'];
@@ -75,16 +75,26 @@ function isAutoPlayBestMoveOnlyEnabled() {
     }
     return true;
 }
+function isAutoPlayAllowUndoEnabled() {
+    if (window.settingsManager && typeof window.settingsManager.load === 'function') {
+        return window.settingsManager.load('ai-allow-undo');
+    }
+    return true;
+}
+function getAutoPlayValidMoves() {
+    const hasHistory = window.gameState && Array.isArray(window.gameState.history) && window.gameState.history.length > 0;
+    return isAutoPlayAllowUndoEnabled() && hasHistory ? AUTO_PLAY_DIRECTIONS.concat('undo') : AUTO_PLAY_DIRECTIONS;
+}
 async function getAutoPlayBestMove(mode) {
     if (mode === 'ai') {
-        if (!window.aiRequest || typeof window.aiRequest.sendGameAnalysis !== 'function') {
+        if (typeof requestGameAnalysis !== 'function') {
             return { error: 'ai-unavailable' };
         }
         try {
             const language = window.i18n && window.i18n.getLang ? window.i18n.getLang() : 'zh';
             const bestMoveOnly = isAutoPlayBestMoveOnlyEnabled();
-            const result = await window.aiRequest.sendGameAnalysis(window.gameState, language, { bestMoveOnly: bestMoveOnly });
-            if (result && result.success && result.data && AUTO_PLAY_DIRECTIONS.indexOf(result.data.bestMove) !== -1) {
+            const result = await requestGameAnalysis(window.gameState, language, { bestMoveOnly: bestMoveOnly });
+            if (result && result.success && result.data && getAutoPlayValidMoves().indexOf(result.data.bestMove) !== -1) {
                 return { move: result.data.bestMove, results: bestMoveOnly ? null : result.data };
             }
             return { error: 'ai-failed' };
@@ -97,7 +107,7 @@ async function getAutoPlayBestMove(mode) {
     }
     try {
         const results = analyzeGameStateWithAlgorithm();
-        if (results && AUTO_PLAY_DIRECTIONS.indexOf(results.bestMove) !== -1) {
+        if (results && getAutoPlayValidMoves().indexOf(results.bestMove) !== -1) {
             return { move: results.bestMove, results: results };
         }
         return { error: 'ai-failed' };
@@ -291,7 +301,16 @@ async function performAutoPlayStep() {
         } catch (e) {}
     }
     let moved = false;
-    if (typeof move === 'function') {
+    if (outcome.move === 'undo') {
+        if (typeof undoMove === 'function' && window.gameState && Array.isArray(window.gameState.history) && window.gameState.history.length > 0) {
+            try {
+                undoMove();
+                moved = true;
+            } catch (e) {
+                moved = false;
+            }
+        }
+    } else if (typeof move === 'function') {
         try {
             const result = move(outcome.move);
             moved = result !== false;
@@ -391,6 +410,7 @@ if (typeof window !== 'undefined') {
         pause: pauseAutoPlay,
         resume: resumeAutoPlay,
         stop: stopAutoPlay,
+        toggle: toggleAutoPlay,
         setKeepScreenAwake: function(enabled) {
             if (enabled && autoPlayStatus.running && !autoPlayStatus.paused) {
                 requestAutoPlayWakeLock();
