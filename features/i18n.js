@@ -1,4 +1,4 @@
-const i18nVersion = '1.11';
+const i18nVersion = '1.12';
 window.i18nVersion = i18nVersion;
 const translations = {
     zh: {
@@ -210,31 +210,6 @@ const translations = {
         customThemeModuleFailed: '自定义主题模块加载失败:',
         aiAnalysisModuleFailed: 'AI分析模块加载失败:',
         i18nModuleFailed: 'i18n模块加载失败:',
-        bluetoothSync: '蓝牙同步',
-        exportViaBluetooth: '蓝牙导出',
-        importViaBluetooth: '蓝牙导入',
-        bluetoothNotSupported: '当前浏览器不支持蓝牙功能',
-        bluetoothModuleError: '蓝牙模块未加载失败',
-        bluetoothExportFailed: '蓝牙导出失败',
-        bluetoothImportFailed: '蓝牙导入失败',
-        pinCode: 'PIN码',
-        pinVerified: 'PIN码验证成功！',
-        pinInvalid: 'PIN码错误，请重试',
-        enterPin: '请输入PIN码',
-        bluetoothModalTitle: '蓝牙同步',
-        bluetoothExportPin: '请在接收设备上输入此PIN码',
-        bluetoothImportPin: '请输入发送设备显示的PIN码',
-        enterPinToVerify: '请输入上述PIN码进行验证',
-        searchingAndVerifying: '正在搜索设备并验证...请稍候',
-        bluetoothDevice: '设备',
-        verifying: '验证中...',
-        verify: '验证',
-        bluetoothSyncModuleMissing: '蓝牙同步模块未找到，请确保 features/bluetooth-sync.js 文件存在。',
-        bluetoothSyncModuleFailed: '蓝牙同步模块加载失败:',
-        exportProgress: '导出进度',
-        importProgress: '导入进度',
-        bluetoothExportSuccess: '蓝牙导出成功！',
-        bluetoothImportSuccess: '蓝牙导入成功！',
         webrtcModalTitle: '局域网同步',
         webrtcSelectDesc: '通过 6 位连接码与另一台设备快速配对同步（信令经公共服务器，游戏数据仍为设备间点对点直连）。也可展开手动模式互换连接码。',
         webrtcCreateConnection: '创建连接',
@@ -302,7 +277,6 @@ const translations = {
         includeSettings: '包含设置数据',
         disconnectConnection: '断开连接',
         disconnect: '断开',
-        bluetoothConnectedBadge: '蓝牙已连接',
         webrtcConnectedBadge: '局域网已连接',
         syncLiveHint: '连接保持中，游戏状态与设置更改将自动同步',
         liveSyncData: '实时同步数据',
@@ -310,6 +284,8 @@ const translations = {
         aiApiSettingsItem: 'API设置',
         aiBestMoveOnly: '仅请求最佳移动方向',
         aiBestMoveOnlyHint: '自动操作时跳过详细分析，响应更快',
+        aiAllowUndo: '允许推荐撤销',
+        aiAllowUndoHint: 'AI 可以推荐撤销上一步来挽回失误',
         autoPlayKeepAwake: '自动操作时保持屏幕常亮',
         autoPlayKeepAwakeHint: '自动操作运行期间防止屏幕休眠',
         autoPlayAiSettingsRequired: '请先完成 API 设置',
@@ -357,6 +333,7 @@ const translations = {
         kbUndo: '撤销',
         kbNewGame: '新游戏',
         kbGrid: '切换网格大小',
+        kbAiAutoPlay: 'AI自动操作',
         exportAsLink: '导出为链接',
         exportAsFile: '导出为文件',
         importFromFile: '从文件导入',
@@ -573,31 +550,6 @@ const translations = {
         customThemeModuleFailed: 'Custom theme module loading failed:',
         aiAnalysisModuleFailed: 'AI analysis module loading failed:',
         i18nModuleFailed: 'i18n module loading failed:',
-        bluetoothSync: 'Bluetooth Sync',
-        exportViaBluetooth: 'Export via Bluetooth',
-        importViaBluetooth: 'Import via Bluetooth',
-        bluetoothNotSupported: 'Bluetooth is not supported in this browser',
-        bluetoothModuleError: 'Bluetooth module loading failed',
-        bluetoothExportFailed: 'Bluetooth export failed',
-        bluetoothImportFailed: 'Bluetooth import failed',
-        pinCode: 'PIN Code',
-        pinVerified: 'PIN verified successfully!',
-        pinInvalid: 'Invalid PIN, please try again',
-        enterPin: 'Please enter PIN',
-        bluetoothModalTitle: 'Bluetooth Sync',
-        bluetoothExportPin: 'Please enter this PIN on the receiving device',
-        bluetoothImportPin: 'Please enter the PIN shown on the sending device',
-        enterPinToVerify: 'Please enter the above PIN to verify',
-        searchingAndVerifying: 'Searching for device and verifying... Please wait',
-        bluetoothDevice: 'Device',
-        verifying: 'Verifying...',
-        verify: 'Verify',
-        bluetoothSyncModuleMissing: 'Bluetooth sync module not found. Please ensure features/bluetooth-sync.js file exists.',
-        bluetoothSyncModuleFailed: 'Bluetooth sync module loading failed:',
-        exportProgress: 'Export Progress',
-        importProgress: 'Import Progress',
-        bluetoothExportSuccess: 'Bluetooth export successful!',
-        bluetoothImportSuccess: 'Bluetooth import successful!',
         webrtcModalTitle: 'LAN Sync',
         webrtcSelectDesc: 'Pair with another device via a 6-digit code (signaling goes through a public server, game data is still peer-to-peer). Or expand manual mode to exchange codes.',
         webrtcCreateConnection: 'Create Connection',
@@ -665,7 +617,6 @@ const translations = {
         includeSettings: 'Include settings data',
         disconnectConnection: 'Disconnect',
         disconnect: 'Disconnect',
-        bluetoothConnectedBadge: 'Bluetooth connected',
         webrtcConnectedBadge: 'LAN connected',
         syncLiveHint: 'Connection active. Game and setting changes sync automatically.',
         liveSyncData: 'Live sync data',
@@ -673,6 +624,8 @@ const translations = {
         aiApiSettingsItem: 'API Settings',
         aiBestMoveOnly: 'Request best move only',
         aiBestMoveOnlyHint: 'Skip detailed analysis during auto play for faster responses',
+        aiAllowUndo: 'Allow undo recommendation',
+        aiAllowUndoHint: 'AI may recommend undoing the last move to recover from a mistake',
         autoPlayKeepAwake: 'Keep screen awake during auto play',
         autoPlayKeepAwakeHint: 'Prevent the screen from sleeping while auto play is running',
         autoPlayAiSettingsRequired: 'Please complete the API settings first',
@@ -720,6 +673,7 @@ const translations = {
         kbUndo: 'Undo',
         kbNewGame: 'New Game',
         kbGrid: 'Cycle Grid Size',
+        kbAiAutoPlay: 'AI Auto Play',
         exportAsLink: 'Export as Link',
         exportAsFile: 'Export as File',
         importFromFile: 'Import from File',
@@ -1253,7 +1207,6 @@ const i18nConfig = {
         ['custom-grid-modal-title', 'customGrid'],
         ['custom-theme-modal-title', 'customTheme'],
         ['export-theme-modal-title', 'exportThemeModal'],
-        ['bluetooth-modal-title', 'bluetoothModalTitle'],
         ['ai-settings-modal-title', 'aiApiSettingsItem'],
         ['easy-mode', 'easy'],
         ['medium-mode', 'medium'],
@@ -1264,11 +1217,7 @@ const i18nConfig = {
         ['game-message-title', 'gameWon'],
         ['game-message-text', 'gameWonText'],
         ['game-message-button', 'tryAgain'],
-        ['custom-theme-button', 'customThemeButton'],
-        ['bluetooth-export-pin-text', 'bluetoothExportPin'],
-        ['bluetooth-import-pin-text', 'bluetoothImportPin'],
-        ['bluetooth-device-label', 'bluetoothDevice'],
-        ['bluetooth-pin-label', 'pinCode']
+        ['custom-theme-button', 'customThemeButton']
     ],
     buttonIds: [
         ['new-game', 'newGame'],
@@ -1290,10 +1239,6 @@ const i18nConfig = {
         ['import-custom-theme', 'importTheme'],
         ['confirm-export-theme', 'export'],
         ['cancel-export-theme', 'cancel'],
-        ['verify-pin-button', 'verify'],
-        ['cancel-bluetooth-button', 'cancel'],
-        ['export-bluetooth-button', 'exportViaBluetooth'],
-        ['import-bluetooth-button', 'importViaBluetooth'],
         ['save-ai-settings', 'save'],
         ['reset-ai-settings', 'reset']
     ],
@@ -1326,18 +1271,6 @@ function processSpecialCases() {
     if (h3Element && h3Element.tagName === 'H3' && h3Element.textContent.trim() === '选择要导出的主题项') {
         h3Element.setAttribute('data-i18n', 'selectThemeItems');
     }
-    const bluetoothSyncBtn = document.getElementById('bluetooth-sync-button');
-    if (bluetoothSyncBtn) {
-        const span = bluetoothSyncBtn.querySelector('span[data-i18n]');
-        if (span) {
-            span.setAttribute('data-i18n', 'bluetoothSync');
-        }
-    }
-    setById('bluetooth-export-select', 'exportViaBluetooth', true);
-    setById('bluetooth-import-select', 'importViaBluetooth', true);
-    setById('cancel-bluetooth-select', 'cancel', true);
-    setById('back-to-select-from-export', 'cancel', true);
-    setById('back-to-select-from-import', 'cancel', true);
 }
 function addI18nAttributes() {
     processBatch(i18nConfig.simpleIds, (id, key) => setById(id, key));

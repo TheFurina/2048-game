@@ -11,7 +11,6 @@ window.__modulesManifest = {
         { name: 'aiRequest', src: 'ai-request.js', required: false, check: 'aiRequest' },
         { name: 'aiAutoPlay', src: 'ai-autoplay.js', required: false, check: 'aiAutoPlay' },
         { name: 'dataTransfer', src: 'data-transfer.js', required: false, check: function () { return typeof exportGameData === 'function'; } },
-        { name: 'bluetoothSync', src: 'bluetooth-sync.js', required: false, check: 'bluetoothSync' },
         { name: 'webrtcSync', src: 'webrtc-sync.js', required: false, check: 'webrtcSync' },
         { name: 'fullscreenMode', src: 'fullscreen-mode.js', required: false, check: function () { return typeof setupFullscreenMode === 'function'; } }
     ]
