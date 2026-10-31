@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="icon" href="./icon.png">
+    <link rel="icon" href="./favicon.ico" sizes="16x16 24x24 32x32 48x48 64x64 128x128 256x256">
     <title>2048 Game</title>
     <style>
         html.loading-active,
@@ -86,11 +86,17 @@
         (function() {
             try {
                 var savedTheme = localStorage.getItem('2048-setting-theme') || 'auto';
+                var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                 var isDark = false;
                 if (savedTheme === 'dark') isDark = true;
                 else if (savedTheme === 'light') isDark = false;
-                else if (savedTheme === 'custom') isDark = false;
-                else isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                else if (savedTheme === 'custom') {
+                    var palettePref = localStorage.getItem('2048-setting-custom-theme-palette') || 'auto';
+                    if (palettePref === 'dark') isDark = true;
+                    else if (palettePref === 'light') isDark = false;
+                    else isDark = prefersDark;
+                }
+                else isDark = prefersDark;
                 if (isDark) document.documentElement.classList.add('dark');
                 if (savedTheme === 'custom') {
                     var raw = localStorage.getItem('2048-setting-custom-theme');
@@ -101,14 +107,22 @@
                             if (isNaN(v)) return 'ff';
                             return Math.floor((v / 100) * 255).toString(16).padStart(2, '0');
                         }
-                        var css = '';
-                        if (data.bgColor) css += 'body.bg-bg{background-color:' + data.bgColor + op2hex(data.bgOpacity) + ' !important;}';
-                        if (data.primaryColor) css += '.bg-primary{background-color:' + data.primaryColor + op2hex(data.primaryOpacity) + ' !important;}';
-                        if (data.secondaryColor) {
-                            css += '.text-secondary{color:' + data.secondaryColor + op2hex(data.secondaryOpacity) + ' !important;}';
-                            css += '.text-secondary\\/80{color:' + data.secondaryColor + op2hex(Math.round(parseInt(data.secondaryOpacity) * 0.8)) + ' !important;}';
+                        function buildThemeBlock(selector, values) {
+                            var block = '';
+                            if (!values) return block;
+                            if (values.bgColor) block += selector + '{background-color:' + values.bgColor + op2hex(values.bgOpacity) + ' !important;}';
+                            if (values.primaryColor) block += selector + ' .bg-primary{background-color:' + values.primaryColor + op2hex(values.primaryOpacity) + ' !important;}';
+                            if (values.secondaryColor) {
+                                block += selector + ' .text-secondary{color:' + values.secondaryColor + op2hex(values.secondaryOpacity) + ' !important;}';
+                                block += selector + ' .text-secondary\\/80{color:' + values.secondaryColor + op2hex(Math.round(parseInt(values.secondaryOpacity) * 0.8)) + ' !important;}';
+                            }
+                            if (values.gridColor) block += selector + ' .bg-grid{background-color:' + values.gridColor + op2hex(values.gridOpacity) + ' !important;}';
+                            return block;
                         }
-                        if (data.gridColor) css += '.bg-grid{background-color:' + data.gridColor + op2hex(data.gridOpacity) + ' !important;}';
+                        var lightValues = data.light || data;
+                        var darkValues = data.dark || null;
+                        var css = buildThemeBlock('body.bg-bg', lightValues);
+                        css += buildThemeBlock('html.dark body.bg-bg', darkValues);
                         if (css) {
                             var s = document.createElement('style');
                             s.id = 'early-custom-theme';
@@ -182,12 +196,45 @@
             } catch (e) {}
         })();
     </script>
+    <script>
+        (function () {
+            var missing = [];
+            function supportsSyntax(code) {
+                try {
+                    new Function(code);
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            }
+            if (typeof Promise !== 'function') missing.push('Promise');
+            if (typeof fetch !== 'function') missing.push('Fetch API');
+            if (typeof Symbol !== 'function') missing.push('Symbol');
+            if (typeof Map !== 'function' || typeof Set !== 'function') missing.push('Map/Set');
+            if (!Object.assign) missing.push('Object.assign');
+            if (!Object.entries) missing.push('Object.entries');
+            if (!Array.prototype.includes) missing.push('Array.prototype.includes');
+            if (!String.prototype.includes) missing.push('String.prototype.includes');
+            if (typeof Number.isFinite !== 'function') missing.push('Number.isFinite');
+            if (!('classList' in document.documentElement)) missing.push('classList');
+            if (typeof window.matchMedia !== 'function') missing.push('matchMedia');
+            if (typeof window.requestAnimationFrame !== 'function') missing.push('requestAnimationFrame');
+            if (!window.CSS || typeof window.CSS.supports !== 'function' || !window.CSS.supports('color', 'var(--x)')) missing.push('CSS variables');
+            if (!supportsSyntax('var o = {}; return o?.a;')) missing.push('optional chaining');
+            if (!supportsSyntax('var a = null; return a ?? 1;')) missing.push('nullish coalescing');
+            if (!supportsSyntax('return (async function () {})();')) missing.push('async/await');
+            if (!supportsSyntax('var f = function (...a) { return a.length; }; return f(1);')) missing.push('rest parameters');
+            if (!supportsSyntax('var o = { a: 1 }; var b = { ...o }; return b.a;')) missing.push('object spread');
+            window.__browserCompatibilityIssues = missing;
+            window.__browserUnsupported = missing.length > 0;
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js" crossorigin="anonymous"></script>
     <script src="./features/module-loader.js"></script>
     <script>
-        const gameVersion = '2.11.0';
+        const gameVersion = '2.12.0';
         window.gameVersion = gameVersion;
         function loadCssVersion() {
             try {
@@ -233,6 +280,7 @@
                     { key: 'vibration-win', default: true },
                     { key: 'vibration-loss', default: true },
                     { key: 'ai-best-move-only', default: true },
+                    { key: 'ai-allow-undo', default: true },
                     { key: 'auto-play-keep-screen-awake', default: false }
                 ];
             }
@@ -277,6 +325,12 @@
                 aiBestMoveOnlyToggle.checked = window.settingsManager.load('ai-best-move-only');
             }
         }
+        function syncAiAllowUndoToggle() {
+            const aiAllowUndoToggle = document.getElementById('ai-allow-undo');
+            if (aiAllowUndoToggle) {
+                aiAllowUndoToggle.checked = window.settingsManager.load('ai-allow-undo');
+            }
+        }
         function syncAutoPlayKeepAwakeToggle() {
             const keepAwakeToggle = document.getElementById('auto-play-keep-screen-awake');
             if (keepAwakeToggle) {
@@ -285,9 +339,11 @@
         }
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', syncAiBestMoveOnlyToggle);
+            document.addEventListener('DOMContentLoaded', syncAiAllowUndoToggle);
             document.addEventListener('DOMContentLoaded', syncAutoPlayKeepAwakeToggle);
         } else {
             syncAiBestMoveOnlyToggle();
+            syncAiAllowUndoToggle();
             syncAutoPlayKeepAwakeToggle();
         }
         const defaultKeyBindings = {
@@ -301,7 +357,8 @@
             newGame: 'n',
             endless: 'e',
             grid: 'g',
-            aiAnalyze: 'l'
+            aiAnalyze: 'l',
+            aiAutoPlay: 't'
         };
         const keyBindingActions = [
             { action: 'up', key: 'kbUp' },
@@ -314,7 +371,8 @@
             { action: 'newGame', key: 'kbNewGame' },
             { action: 'endless', key: 'endlessMode' },
             { action: 'grid', key: 'kbGrid' },
-            { action: 'aiAnalyze', key: 'aiAiAnalysis' }
+            { action: 'aiAnalyze', key: 'aiAiAnalysis' },
+            { action: 'aiAutoPlay', key: 'kbAiAutoPlay' }
         ];
         let keyBindings = { ...defaultKeyBindings };
         function loadKeyBindings() {
@@ -413,6 +471,25 @@
             });
         })();
         window.modulesReadyPromise = window.modulesReadyPromise.then(() => {
+            function safeInitOptionalModule(name, initFn) {
+                if (typeof initFn !== 'function') {
+                    console.warn('[ModuleLoader] Optional module "' + name + '" init skipped: init function unavailable');
+                    return;
+                }
+                try {
+                    initFn();
+                } catch (e) {
+                    console.warn('[ModuleLoader] Optional module "' + name + '" init failed:', e);
+                }
+            }
+            function scheduleOptionalInit(name, initFn) {
+                var runner = function() { safeInitOptionalModule(name, initFn); };
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', runner);
+                } else {
+                    runner();
+                }
+            }
             (function() {
                 ModuleLoader.load('dataTransferFallback', null, {
                     exportGameData: function() { alert(window.i18n && window.i18n.t ? i18n.t('dataTransferModuleMissing') : '数据传输模块未找到，请确保 features/data-transfer.js 文件存在。'); },
@@ -432,11 +509,11 @@
             ModuleLoader.load('customSelect', null, {
                 moduleLoaded: false
             });
-            ModuleLoader.load('2048-setting-custom-theme', {
-                setupThemeCustomizer: typeof setupThemeCustomizer === 'function' ? setupThemeCustomizer : null,
+            ModuleLoader.load('customTheme', typeof setupThemeCustomizer === 'function' ? {
+                setupThemeCustomizer: setupThemeCustomizer,
                 loadCustomTheme: typeof loadCustomTheme === 'function' ? loadCustomTheme : null,
                 resetCustomTheme: typeof resetCustomTheme === 'function' ? resetCustomTheme : null
-            }, {
+            } : null, {
                 setupThemeCustomizer: function() { alert(window.i18n && window.i18n.t ? i18n.t('customThemeModuleMissing') : '自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); },
                 loadCustomTheme: function() { alert(window.i18n && window.i18n.t ? i18n.t('customThemeModuleMissing') : '自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); },
                 resetCustomTheme: function() { alert(window.i18n && window.i18n.t ? i18n.t('customThemeModuleMissing') : '自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); }
@@ -444,17 +521,13 @@
             window.setupThemeCustomizer = window.customTheme?.setupThemeCustomizer || window.setupThemeCustomizer;
             window.loadCustomTheme = window.customTheme?.loadCustomTheme || window.loadCustomTheme;
             window.resetCustomTheme = window.customTheme?.resetCustomTheme || window.resetCustomTheme;
-            if (window.customThemeLoaded !== false && typeof setupThemeCustomizer === 'function') {
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', setupThemeCustomizer);
-                } else {
-                    setupThemeCustomizer();
-                }
+            if (typeof setupThemeCustomizer === 'function') {
+                scheduleOptionalInit('customTheme', function() { setupThemeCustomizer(); });
             }
-            ModuleLoader.load('aiAnalysis', {
-                setupAiAnalysis: typeof setupAiAnalysis === 'function' ? setupAiAnalysis : null,
+            ModuleLoader.load('aiAnalysis', typeof setupAiAnalysis === 'function' ? {
+                setupAiAnalysis: setupAiAnalysis,
                 analyzeGameState: typeof analyzeGameState === 'function' ? analyzeGameState : null
-            }, {
+            } : null, {
                 setupAiAnalysis: function() {
                     const aiAnalysisButton = document.getElementById('ai-analysis-button');
                     if (aiAnalysisButton) {
@@ -467,12 +540,8 @@
             });
             window.setupAiAnalysis = window.aiAnalysis?.setupAiAnalysis || window.setupAiAnalysis;
             window.analyzeGameState = window.aiAnalysis?.analyzeGameState || window.analyzeGameState;
-            if (window.aiAnalysisModuleLoaded !== false) {
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', window.setupAiAnalysis);
-                } else {
-                    window.setupAiAnalysis();
-                }
+            if (typeof window.setupAiAnalysis === 'function') {
+                scheduleOptionalInit('aiAnalysis', function() { window.setupAiAnalysis(); });
             }
             ModuleLoader.load('aiRequest', typeof aiRequest === 'object' ? aiRequest : null, {
                 getConfig: function() { return { baseUrl: 'https://api.openai.com/v1', apiKey: '', model: 'gpt-4o-mini', temperature: 0.7, maxTokens: 500 }; },
@@ -488,43 +557,16 @@
                 sendRequest: function() { return { success: false, error: 'aiApiModuleMissing' }; },
                 setupSettings: function() {}
             };
-            if (window.aiRequestModuleLoaded !== false) {
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', function() { window.aiRequest.setupSettings(); });
-                } else {
-                    window.aiRequest.setupSettings();
-                }
+            if (window.aiRequest && typeof window.aiRequest.setupSettings === 'function') {
+                scheduleOptionalInit('aiRequest', function() { window.aiRequest.setupSettings(); });
             }
             ModuleLoader.load('i18n', typeof i18n === 'object' ? i18n : null, {
                 t: function(key) { return key; },
                 init: function() { console.warn('i18n module not found. Please ensure features/i18n.js file exists.'); }
             });
             window.i18n = window.i18n || { t: function(key) { return key; }, init: function() {} };
-            if (window.i18nModuleLoaded !== false) {
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', function() { window.i18n.init(); });
-                } else {
-                    window.i18n.init();
-                }
-            }
-            ModuleLoader.load('bluetoothSync', typeof bluetoothSync === 'object' ? bluetoothSync : null, {
-                init: function() {
-                    console.warn('Bluetooth sync module not found. Please ensure features/bluetooth-sync.js file exists.');
-                    const bluetoothSyncBtn = document.getElementById('bluetooth-sync-button');
-                    if (bluetoothSyncBtn) {
-                        bluetoothSyncBtn.addEventListener('click', function() {
-                            alert(window.i18n && window.i18n.t ? i18n.t('bluetoothSyncModuleMissing') : '蓝牙同步模块未找到，请确保 features/bluetooth-sync.js 文件存在。');
-                        });
-                    }
-                }
-            });
-            window.bluetoothSync = window.bluetoothSync || { init: function() {} };
-            if (window.bluetoothSyncModuleLoaded !== false) {
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', function() { window.bluetoothSync.init(); });
-                } else {
-                    window.bluetoothSync.init();
-                }
+            if (window.i18n && typeof window.i18n.init === 'function') {
+                scheduleOptionalInit('i18n', function() { window.i18n.init(); });
             }
             ModuleLoader.load('webrtcSync', typeof webrtcSync === 'object' ? webrtcSync : null, {
                 init: function() {
@@ -538,14 +580,17 @@
                 }
             });
             window.webrtcSync = window.webrtcSync || { init: function() {} };
-            if (window.webrtcSyncModuleLoaded !== false) {
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', function() { window.webrtcSync.init(); });
-                } else {
-                    window.webrtcSync.init();
-                }
+            if (window.webrtcSync && typeof window.webrtcSync.init === 'function') {
+                scheduleOptionalInit('webrtcSync', function() { window.webrtcSync.init(); });
             }
-        }).catch(err => { console.error('[ModuleLoader] manifest load failed:', err); throw err; });
+        }).catch(err => {
+            var requiredFailures = (typeof ModuleLoader !== 'undefined' && typeof ModuleLoader.getRequiredFailures === 'function') ? ModuleLoader.getRequiredFailures() : [];
+            if (requiredFailures.length > 0) {
+                console.error('[ModuleLoader] manifest load failed:', err);
+                throw err;
+            }
+            console.warn('[ModuleLoader] optional module initialization warning (ignored):', err);
+        });
     </script>
     <script>
         tailwind.config = {
@@ -857,6 +902,25 @@
                                     <option value="custom">&#xf53f; 自定义</option>
                                 </select>
                             </div>
+                            <div id="custom-theme-palette-row" class="flex items-center justify-between mt-2 mb-2 px-2 hidden">
+                                <label for="custom-theme-palette-select" class="text-gray-700 dark:text-dark-muted" data-i18n="customTheme">自定义主题</label>
+                                <div class="custom-select relative w-full max-w-[180px]">
+                                    <div class="select-selected flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md border border-gray-300 dark:border-gray-600 cursor-pointer transition-all duration-200 hover:border-primary/50">
+                                        <span><i class="fa-solid fa-desktop mr-1"></i><span data-i18n="followBrowser">跟随浏览器</span></span>
+                                        <i class="fa fa-chevron-down text-xs ml-2 text-gray-500 dark:text-gray-400"></i>
+                                    </div>
+                                    <div class="select-items absolute mt-1 w-full bg-gray-100 dark:bg-gray-800 rounded-md shadow-lg border border-gray-300 dark:border-gray-600 z-20 max-h-0 opacity-0 overflow-y-auto transition-all duration-300 ease-in-out">
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="auto"><i class="fa-solid fa-desktop mr-1"></i><span data-i18n="followBrowser">跟随浏览器</span></div>
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="light"><i class="fa-solid fa-sun mr-1"></i><span data-i18n="lightTheme">浅色</span></div>
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="dark"><i class="fa-solid fa-moon mr-1"></i><span data-i18n="darkTheme">深色</span></div>
+                                    </div>
+                                    <select id="custom-theme-palette-select" style="display: none;">
+                                        <option value="auto">跟随浏览器</option>
+                                        <option value="light">浅色</option>
+                                        <option value="dark">深色</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div id="custom-theme-button-container" class="flex justify-end px-2">
                                 <button id="custom-theme-button" class="px-3 py-1 bg-primary hover:bg-primary/90 text-white rounded-md text-sm transition-all duration-200">
                                     <i class="fa-solid fa-palette mr-1"></i><span data-i18n="customThemeButton">自定义主题设置</span>
@@ -873,24 +937,6 @@
                                 <span class="flex items-center">
                                     <i class="fa-solid fa-database w-5 mr-2"></i>
                                     <span data-i18n="dataTransfer">数据管理</span>
-                                </span>
-                                <i class="fa-solid fa-chevron-right text-xs"></i>
-                            </button>
-                            <div class="border-b border-gray-200 dark:border-gray-700 my-2 mx-2"></div>
-                            <button id="bluetooth-sync-button" class="flex items-center justify-between w-full px-4 py-3 text-gray-700 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-all duration-200 rounded-lg">
-                                <span class="flex items-center">
-                                    <i class="fa-brands fa-bluetooth-b w-5 mr-2"></i>
-                                    <span data-i18n="bluetoothSync">蓝牙同步</span>
-                                    <span class="ml-2 px-2 py-0.5 text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full font-semibold shadow-sm dark:from-blue-400 dark:to-purple-400 dark:text-gray-900">Beta</span>
-                                    <div id="bluetooth-warning-container" class="relative ml-2 flex items-center group hidden">
-                                        <span id="bluetooth-warning-icon" class="text-yellow-500 transition-opacity duration-300 cursor-help">
-                                            <i class="fa-solid fa-circle-exclamation"></i>
-                                        </span>
-                                        <span id="bluetooth-warning-text" class="text-yellow-500 text-xs ml-1 transition-opacity duration-300" data-i18n="notAvailable">不可用</span>
-                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs p-2 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-                                            <span data-i18n="bluetoothNotSupported">当前浏览器不支持蓝牙功能</span>
-                                        </div>
-                                    </div>
                                 </span>
                                 <i class="fa-solid fa-chevron-right text-xs"></i>
                             </button>
@@ -925,6 +971,17 @@
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
                                     <input type="checkbox" id="ai-best-move-only" class="sr-only peer" checked onchange="window.settingsManager.save('ai-best-move-only', this.checked)">
+                                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
+                                </label>
+                            </div>
+                            <div class="border-b border-gray-200 dark:border-gray-700 my-1 mx-2"></div>
+                            <div class="flex items-center justify-between px-4 py-3 gap-3">
+                                <div class="flex flex-col text-left">
+                                    <span class="text-gray-700 dark:text-dark-muted" data-i18n="aiAllowUndo">允许推荐撤销</span>
+                                    <span class="text-xs text-gray-500 dark:text-dark-muted mt-0.5" data-i18n="aiAllowUndoHint">AI 可以推荐撤销上一步来挽回失误</span>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                                    <input type="checkbox" id="ai-allow-undo" class="sr-only peer" checked onchange="window.settingsManager.save('ai-allow-undo', this.checked)">
                                     <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
                                 </label>
                             </div>
@@ -1037,6 +1094,10 @@
                 </div>
             <div class="flex-1 p-6 overflow-y-auto">
                 <div class="flex flex-col gap-4">
+                <div class="theme-palette-tabs" role="tablist">
+                    <button type="button" id="theme-palette-light" role="tab" class="theme-palette-tab" data-i18n="lightTheme">浅色</button>
+                    <button type="button" id="theme-palette-dark" role="tab" class="theme-palette-tab" data-i18n="darkTheme">深色</button>
+                </div>
                 <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
                     <h3 class="text-lg font-semibold text-gray-700 dark:text-dark-text mb-3" data-i18n="baseColors">基础颜色</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1484,91 +1545,6 @@
                 </div>
             </div>
         </div>
-        <div id="bluetooth-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="bluetooth-modal-title" aria-modal="true">
-            <div class="bluetooth-content bg-white dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl relative">
-                <h2 id="bluetooth-modal-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4" data-i18n="bluetoothModalTitle">蓝牙同步</h2>
-                <button id="close-bluetooth-modal" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl dark:text-dark-muted dark:hover:text-white" title="关闭">
-                    <i class="fa-solid fa-times"></i>
-                </button>
-                <div id="bluetooth-select-section">
-                    <div id="bluetooth-select-actions" class="flex flex-col gap-4 mb-6">
-                        <button id="bluetooth-export-select" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300">
-                            <i class="fa-brands fa-bluetooth-b mr-2"></i><span data-i18n="exportViaBluetooth">蓝牙导出</span>
-                        </button>
-                        <button id="bluetooth-import-select" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                            <i class="fa-brands fa-bluetooth mr-2"></i><span data-i18n="importViaBluetooth">蓝牙导入</span>
-                        </button>
-                    </div>
-                    <div id="bluetooth-connected-panel" style="display: none;" class="mb-6">
-                        <p class="text-green-600 dark:text-green-400 font-bold mb-2"><i class="fa-solid fa-circle-check mr-1"></i><span data-i18n="connected">已连接</span></p>
-                        <p class="text-gray-600 dark:text-dark-muted text-sm mb-1"><span data-i18n="bluetoothDevice">设备</span>: <span id="bluetooth-live-device-name" class="font-semibold">-</span></p>
-                        <p class="text-gray-500 dark:text-dark-muted text-xs mb-3" data-i18n="syncLiveHint">连接保持中，游戏状态与设置更改将自动同步</p>
-                        <div class="flex items-center justify-center gap-2 mb-4">
-                            <input type="checkbox" id="bluetooth-live-sync-checkbox" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:bg-dark-surface dark:border-dark-muted" checked>
-                            <label for="bluetooth-live-sync-checkbox" class="text-sm text-gray-700 dark:text-dark-text" data-i18n="liveSyncData">实时同步数据</label>
-                        </div>
-                        <button id="bluetooth-disconnect-button" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-300">
-                            <i class="fa-solid fa-link-slash mr-2"></i><span data-i18n="disconnectConnection">断开连接</span>
-                        </button>
-                    </div>
-                </div>
-                <div id="bluetooth-export-section" style="display: none;">
-                    <div class="mb-4">
-                        <p id="bluetooth-export-pin-text" class="text-gray-700 dark:text-dark-muted mb-4" data-i18n="bluetoothExportPin">请在接收设备上输入此PIN码</p>
-                        <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-4">
-                            <span id="bluetooth-pin-display" class="text-4xl font-mono font-bold text-primary dark:text-dark-primary">000000</span>
-                        </div>
-                        <div class="flex items-center justify-between gap-4 mb-4 px-4">
-                            <div class="flex items-center gap-2">
-                                <span id="bluetooth-device-label" class="text-gray-600 dark:text-dark-muted" data-i18n="bluetoothDevice">设备:</span>
-                                <span id="bluetooth-device-name" class="text-gray-800 dark:text-dark-text font-semibold">-</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <input type="checkbox" id="bluetooth-export-settings-checkbox" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:bg-dark-surface dark:border-dark-muted" checked>
-                                <label for="bluetooth-export-settings-checkbox" class="text-sm text-gray-700 dark:text-dark-text" data-i18n="includeSettings">包含设置数据</label>
-                            </div>
-                        </div>
-                        <div class="mb-4" style="display: none;" id="bluetooth-export-progress">
-                            <div class="flex items-center justify-between mb-2">
-                                <p class="text-gray-600 dark:text-dark-muted" data-i18n="exportProgress">导出进度:</p>
-                                <p class="text-sm text-gray-500 dark:text-dark-muted" id="bluetooth-export-progress-text">0%</p>
-                            </div>
-                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex justify-center">
-                        <button id="back-to-select-from-export" class="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text dark:focus:ring-gray-600 text-gray-800 font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
-                            <i class="fa-solid fa-arrow-left mr-2"></i><span data-i18n="cancel">返回</span>
-                        </button>
-                    </div>
-                </div>
-                <div id="bluetooth-import-section" style="display: none;">
-                    <div class="mb-4">
-                        <p class="text-gray-700 dark:text-dark-muted mb-4" data-i18n="searchingAndVerifying">正在搜索设备并验证...请稍候</p>
-                        <div class="flex items-center justify-center gap-2 mb-4">
-                            <input type="checkbox" id="bluetooth-import-settings-checkbox" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:bg-dark-surface dark:border-dark-muted" checked>
-                            <label for="bluetooth-import-settings-checkbox" class="text-sm text-gray-700 dark:text-dark-text" data-i18n="includeSettings">包含设置数据</label>
-                        </div>
-                        <div class="mb-4" style="display: none;" id="bluetooth-import-progress">
-                            <div class="flex items-center justify-between mb-2">
-                                <p class="text-gray-600 dark:text-dark-muted" data-i18n="importProgress">导入进度:</p>
-                                <p class="text-sm text-gray-500 dark:text-dark-muted" id="bluetooth-import-progress-text">接收中...</p>
-                            </div>
-                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                                <div class="bg-green-600 h-2.5 rounded-full" style="width: 0%"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex justify-center">
-                        <button id="back-to-select-from-import" class="bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text dark:focus:ring-gray-600 text-gray-800 font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
-                            <i class="fa-solid fa-arrow-left mr-2"></i><span data-i18n="cancel">返回</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
         <div id="webrtc-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="webrtc-modal-title" aria-modal="true">
             <div class="bg-white dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl relative transform transition-all duration-300 scale-95 opacity-0">
                 <h2 id="webrtc-modal-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4" data-i18n="webrtcModalTitle">局域网同步</h2>
@@ -1736,7 +1712,6 @@
         const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
         let isDebugMode = false;
         let simulateNoVibration = false;
-        let simulateNoBluetooth = false;
         Object.defineProperty(window, 'gameVersions', {
             get: function() {
                 let output = '';
@@ -1761,7 +1736,7 @@
                 isDebugMode = !isDebugMode;
                 console.log(`Debug mode ${isDebugMode ? 'enabled' : 'disabled'}`);
                 if (isDebugMode) {
-                    console.log('Debug commands:\n- "novib" - Simulate no vibration support\n- "vib" - Restore vibration support\n- "nobluetooth" - Simulate no Bluetooth support\n- "bluetooth" - Restore Bluetooth support\n- "alldeviceson" - Enable discover all Bluetooth devices\n- "alldevicesoff" - Disable discover all Bluetooth devices\n- "rotatehint" - Show the rotate-to-portrait hint\n- "win" - Trigger game win\n- "loss" - Trigger game over\n- "exitDebug" - Exit debug mode');
+                    console.log('Debug commands:\n- "novib" - Simulate no vibration support\n- "vib" - Restore vibration support\n- "rotatehint" - Show the rotate-to-portrait hint\n- "win" - Trigger game win\n- "loss" - Trigger game over\n- "exitDebug" - Exit debug mode');
                 }
                 return 'Debug mode command executed';
             }
@@ -1820,82 +1795,6 @@
                         }
                     }
                     return 'Vibration support restored';
-                } else {
-                    console.log('Please enable debug mode first with gameDebug');
-                    return 'Debug mode not enabled';
-                }
-            }
-        });
-        Object.defineProperty(window, 'nobluetooth', {
-            get: function() {
-                if (isDebugMode) {
-                    simulateNoBluetooth = true;
-                    console.log('Simulating no Bluetooth support');
-                    const bluetoothSyncButton = document.getElementById('bluetooth-sync-button');
-                    const bluetoothWarningContainer = document.getElementById('bluetooth-warning-container');
-                    if (bluetoothSyncButton) {
-                        bluetoothSyncButton.disabled = true;
-                        bluetoothSyncButton.classList.add('opacity-50', 'cursor-not-allowed');
-                        if (bluetoothWarningContainer) {
-                            bluetoothWarningContainer.classList.remove('hidden');
-                        }
-                    }
-                    return 'No Bluetooth simulation enabled';
-                } else {
-                    console.log('Please enable debug mode first with gameDebug');
-                    return 'Debug mode not enabled';
-                }
-            }
-        });
-        Object.defineProperty(window, 'bluetooth', {
-            get: function() {
-                if (isDebugMode) {
-                    simulateNoBluetooth = false;
-                    console.log('Restoring Bluetooth support');
-                    const bluetoothSyncButton = document.getElementById('bluetooth-sync-button');
-                    const bluetoothWarningContainer = document.getElementById('bluetooth-warning-container');
-                    if (bluetoothSyncButton) {
-                        bluetoothSyncButton.disabled = false;
-                        bluetoothSyncButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                        if (bluetoothWarningContainer) {
-                            bluetoothWarningContainer.classList.add('hidden');
-                        }
-                    }
-                    return 'Bluetooth support restored';
-                } else {
-                    console.log('Please enable debug mode first with gameDebug');
-                    return 'Debug mode not enabled';
-                }
-            }
-        });
-        Object.defineProperty(window, 'alldeviceson', {
-            get: function() {
-                if (isDebugMode) {
-                    if (window.bluetoothSync && window.bluetoothSync.instance) {
-                        window.bluetoothSync.instance.discoverAllDevices = true;
-                        console.log('Discover all devices mode enabled');
-                        return 'Discover all devices mode enabled';
-                    } else {
-                        console.log('Bluetooth sync module not initialized');
-                        return 'Bluetooth sync module not initialized';
-                    }
-                } else {
-                    console.log('Please enable debug mode first with gameDebug');
-                    return 'Debug mode not enabled';
-                }
-            }
-        });
-        Object.defineProperty(window, 'alldevicesoff', {
-            get: function() {
-                if (isDebugMode) {
-                    if (window.bluetoothSync && window.bluetoothSync.instance) {
-                        window.bluetoothSync.instance.discoverAllDevices = false;
-                        console.log('Discover all devices mode disabled');
-                        return 'Discover all devices mode disabled';
-                    } else {
-                        console.log('Bluetooth sync module not initialized');
-                        return 'Bluetooth sync module not initialized';
-                    }
                 } else {
                     console.log('Please enable debug mode first with gameDebug');
                     return 'Debug mode not enabled';
@@ -2138,6 +2037,8 @@
                             document.documentElement.classList.toggle('dark', prefersDark);
                         } else if (importedTheme === 'dark') {
                             document.documentElement.classList.add('dark');
+                        } else if (importedTheme === 'custom') {
+                            document.documentElement.classList.toggle('dark', window.matchMedia('(prefers-color-scheme: dark)').matches);
                         } else {
                             document.documentElement.classList.remove('dark');
                         }
@@ -2155,7 +2056,15 @@
                             });
                         }
                         if (importedTheme === 'custom') {
-                            loadCustomTheme();
+                            if (typeof applyCustomThemePalettePreference === 'function') {
+                                applyCustomThemePalettePreference();
+                            }
+                            if (typeof loadCustomTheme === 'function') {
+                                loadCustomTheme();
+                            }
+                        }
+                        if (typeof updateCustomThemePaletteRow === 'function') {
+                            updateCustomThemePaletteRow();
                         }
                     }
                     const importedLanguage = data.settings['2048-setting-language'];
@@ -2197,6 +2106,10 @@
                     const aiBestMoveOnlyCheckbox = document.getElementById('ai-best-move-only');
                     if (aiBestMoveOnlyCheckbox) {
                         aiBestMoveOnlyCheckbox.checked = window.settingsManager.load('ai-best-move-only');
+                    }
+                    const aiAllowUndoCheckbox = document.getElementById('ai-allow-undo');
+                    if (aiAllowUndoCheckbox) {
+                        aiAllowUndoCheckbox.checked = window.settingsManager.load('ai-allow-undo');
                     }
                     const keepAwakeCheckbox = document.getElementById('auto-play-keep-screen-awake');
                     if (keepAwakeCheckbox) {
@@ -2251,6 +2164,7 @@
         let isSmallScreen = window.matchMedia('(max-width: 400px) and (max-height: 400px)').matches;
         window.matchMedia('(max-width: 400px) and (max-height: 400px)').addEventListener('change', (e) => {
             isSmallScreen = e.matches;
+            applyGridGapVariable(gameState.gridRows, gameState.gridCols);
         });
         window.elements = {
             gridContainer: document.getElementById('grid-container'),
@@ -2322,8 +2236,47 @@
             }
             return grid;
         }
+        function computeGridGapPx(gridRows, gridCols) {
+            const container = elements.gameContainer || document.querySelector('.game-container');
+            const boardSize = container ? Math.min(container.clientWidth, container.clientHeight) : 0;
+            const base = boardSize > 0 ? boardSize : 500;
+            const maxSide = Math.max(gridRows || 4, gridCols || 4);
+            const ratioBase = isSmallScreen ? 6.4 : 12.8;
+            const minPx = isSmallScreen ? 1 : 2;
+            const maxPx = isSmallScreen ? 6 : 24;
+            const raw = base * ratioBase / maxSide / 100;
+            const clamped = Math.min(maxPx, Math.max(minPx, raw));
+            return Math.round(clamped * 2) / 2;
+        }
+        function computeTileFontPx(gridRows, gridCols) {
+            const rows = gridRows || 4;
+            const cols = gridCols || 4;
+            const gap = computeGridGapPx(rows, cols);
+            const gc = elements.gridContainer;
+            const board = elements.gameContainer || document.querySelector('.game-container');
+            const boardSize = board ? Math.min(board.clientWidth, board.clientHeight) - 32 : 468;
+            const innerW = gc && gc.clientWidth > 0 ? gc.clientWidth : (boardSize > 0 ? boardSize : 468);
+            const innerH = gc && gc.clientHeight > 0 ? gc.clientHeight : innerW;
+            const tileW = (innerW - (cols - 1) * gap) / cols;
+            const tileH = (innerH - (rows - 1) * gap) / rows;
+            const tile = Math.min(tileW, tileH);
+            const size = tile > 0 ? tile * 0.4 : 40;
+            return Math.max(7, Math.min(40, Math.round(size * 2) / 2));
+        }
+        function computeBoardPaddingPx(gridRows, gridCols) {
+            const raw = computeGridGapPx(gridRows, gridCols) * 1.1;
+            return Math.round(Math.min(14, Math.max(6, raw)) * 2) / 2;
+        }
+        function applyGridGapVariable(gridRows, gridCols) {
+            const container = elements.gameContainer || document.querySelector('.game-container');
+            if (!container) return;
+            container.style.setProperty('--grid-gap', computeGridGapPx(gridRows, gridCols) + 'px');
+            container.style.setProperty('--board-padding', computeBoardPaddingPx(gridRows, gridCols) + 'px');
+            container.style.setProperty('--tile-font', computeTileFontPx(gridRows, gridCols) + 'px');
+        }
         function generateGridStyles(gridSize, gridRows, gridCols) {
             document.querySelectorAll('style[id^="grid-"]').forEach(style => style.remove());
+            applyGridGapVariable(gridRows, gridCols);
             if (gridRows === gridCols && (gridRows === 3 || gridRows === 4 || gridRows === 5)) {
                 return;
             }
@@ -2334,7 +2287,7 @@
             }
             const style = document.createElement('style');
             style.id = styleId;
-            const gapSize = isSmallScreen ? 'clamp(2px, 1.5vw, 4px)' : 'clamp(8px, 3vw, 16px)';
+            const gapSize = 'var(--grid-gap)';
             const totalHorizontalGap = `(${gridCols} - 1) * ${gapSize}`;
             const totalVerticalGap = `(${gridRows} - 1) * ${gapSize}`;
             style.textContent = `
@@ -2355,15 +2308,15 @@
                 .grid-${gridRows}x${gridCols} .tile {
                     width: calc((100% - ${totalHorizontalGap}) / ${gridCols});
                     height: calc((100% - ${totalVerticalGap}) / ${gridRows});
-                    font-size: ${Math.max(0.6, 2.5 - Math.max(gridRows, gridCols) * 0.2)}rem;
+                    font-size: var(--tile-font, 1rem);
                 }
-                ${generateTilePositions(gridRows, gridCols, isSmallScreen)}
+                ${generateTilePositions(gridRows, gridCols)}
             `;
             document.head.appendChild(style);
         }
-        function generateTilePositions(gridRows, gridCols, isSmallScreen = false) {
+        function generateTilePositions(gridRows, gridCols) {
             let styles = '';
-            const gapSize = isSmallScreen ? 'clamp(2px, 1.5vw, 4px)' : 'clamp(8px, 3vw, 16px)';
+            const gapSize = 'var(--grid-gap)';
             const totalHorizontalGap = `(${gridCols} - 1) * ${gapSize}`;
             const totalVerticalGap = `(${gridRows} - 1) * ${gapSize}`;
             const tileSize = `calc((100% - ${totalHorizontalGap}) / ${gridCols})`;
@@ -2378,6 +2331,7 @@
             return styles;
         }
         function initGridContainer() {
+            applyGridGapVariable(gameState.gridRows, gameState.gridCols);
             elements.gridContainer.innerHTML = '';
             for (let y = 0; y < gameState.gridRows; y++) {
                 const gridRow = document.createElement('div');
@@ -2430,7 +2384,7 @@
             return false;
         }
         function getTilePosition(x, y) {
-            const gapSize = isSmallScreen ? 'clamp(2px, 1.5vw, 4px)' : 'clamp(8px, 3vw, 16px)';
+            const gapSize = 'var(--grid-gap)';
             const totalHorizontalGap = `(${gameState.gridCols} - 1) * ${gapSize}`;
             const totalVerticalGap = `(${gameState.gridRows} - 1) * ${gapSize}`;
             const tileSize = `calc((100% - ${totalHorizontalGap}) / ${gameState.gridCols})`;
@@ -3080,7 +3034,7 @@
                 elements.themeToggle.querySelector('i').className = 'fa-solid fa-sun';
             } else if (currentTheme === 'dark' || currentTheme === 'auto') {
                 const hasCustomTheme = localStorage.getItem('2048-setting-custom-theme') !== null;
-                if (hasCustomTheme) {
+                if (hasCustomTheme && typeof loadCustomTheme === 'function') {
                     loadCustomTheme();
                     newTheme = 'custom';
                     elements.themeToggle.querySelector('i').className = 'fa-solid fa-palette';
@@ -3106,6 +3060,10 @@
                     renderKeybindingsList();
                 }
                 document.getElementById('custom-theme-button-container').classList.remove('visible');
+                const customThemePaletteRow = document.getElementById('custom-theme-palette-row');
+                if (customThemePaletteRow) {
+                    customThemePaletteRow.classList.add('hidden');
+                }
                 gameState.gpuAccelerationEnabled = true;
                 gameState.tileAnimationEnabled = true;
                 gameState.tileAppearAnimationEnabled = true;
@@ -3123,7 +3081,9 @@
                     styleElement.remove();
                 }
                 document.body.removeAttribute('data-theme');
-                resetCustomTheme();
+                if (typeof resetCustomTheme === 'function') {
+                    resetCustomTheme();
+                }
                 if (window.themeMediaQueryListener) {
                     window.themeMediaQueryListener.mediaQuery.removeEventListener('change', window.themeMediaQueryListener.handler);
                     window.themeMediaQueryListener = null;
@@ -3153,6 +3113,10 @@
                 const aiBestMoveOnlyCheckbox = document.getElementById('ai-best-move-only');
                 if (aiBestMoveOnlyCheckbox) {
                     aiBestMoveOnlyCheckbox.checked = true;
+                }
+                const aiAllowUndoCheckbox = document.getElementById('ai-allow-undo');
+                if (aiAllowUndoCheckbox) {
+                    aiAllowUndoCheckbox.checked = true;
                 }
                 const keepAwakeCheckbox = document.getElementById('auto-play-keep-screen-awake');
                 if (keepAwakeCheckbox) {
@@ -3416,8 +3380,13 @@
                         }
                         break;
                     case 'aiAnalyze':
-                        if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+                        if (!e.ctrlKey && !e.metaKey && !e.altKey && typeof analyzeGameState === 'function') {
                             analyzeGameState();
+                        }
+                        break;
+                    case 'aiAutoPlay':
+                        if (!e.ctrlKey && !e.metaKey && !e.altKey && window.aiAutoPlay) {
+                            window.aiAutoPlay.toggle();
                         }
                         break;
                 }
@@ -3491,7 +3460,7 @@
                         } else {
                             element.innerHTML = i18n.t('confirm');
                         }
-                        element.classList.add('bg-red-500', 'hover:bg-red-600');
+                        element.classList.add('confirm-pending');
                     } else {
                         onConfirm();
                     }
@@ -3527,6 +3496,8 @@
         }
         function setupGridButtons() {
             const buttons = [];
+            let squareGridLockedPreference = null;
+            localStorage.removeItem('2048-square-grid-locked');
             function createGridButton(buttonId, element, gridSize) {
                 buttons.push(createConfirmButton({
                     buttonId,
@@ -3573,9 +3544,8 @@
             elements.customGridButton.addEventListener('click', () => {
                 elements.gridSizeInput.value = gameState.gridRows;
                 elements.gridSizeInput2.value = gameState.gridCols;
-                const savedSquareGridState = localStorage.getItem('2048-square-grid-locked');
-                const isSquareGrid = savedSquareGridState !== null 
-                    ? savedSquareGridState === 'true' 
+                const isSquareGrid = squareGridLockedPreference !== null
+                    ? squareGridLockedPreference
                     : gameState.gridRows === gameState.gridCols;
                 elements.squareGridCheckbox.checked = isSquareGrid;
                 elements.gridSizeInput2.disabled = isSquareGrid;
@@ -3583,7 +3553,7 @@
                 showModal('custom-grid-modal');
             });
             elements.squareGridCheckbox.addEventListener('change', () => {
-                localStorage.setItem('2048-square-grid-locked', elements.squareGridCheckbox.checked);
+                squareGridLockedPreference = elements.squareGridCheckbox.checked;
                 elements.gridSizeInput2.disabled = elements.squareGridCheckbox.checked;
                 if (elements.squareGridCheckbox.checked) {
                     elements.gridSizeInput2.value = elements.gridSizeInput.value;
@@ -3819,21 +3789,6 @@
                     vibrationLossToggle.disabled = true;
                 }
             }
-            const bluetoothSyncButton = document.getElementById('bluetooth-sync-button');
-            if (bluetoothSyncButton) {
-                if (!navigator.bluetooth || simulateNoBluetooth) {
-                    bluetoothSyncButton.disabled = true;
-                    bluetoothSyncButton.classList.add('opacity-50', 'cursor-not-allowed');
-                    const bluetoothWarningContainer = document.getElementById('bluetooth-warning-container');
-                    if (bluetoothWarningContainer) {
-                        bluetoothWarningContainer.classList.remove('hidden');
-                    }
-                    bluetoothSyncButton.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        alert(i18n.t('bluetoothNotSupported'));
-                    });
-                }
-            }
             elements.resetSettingsButton.addEventListener('click', resetAllSettings);
         }
         function setupThemeListeners() {
@@ -3870,8 +3825,12 @@
                     }
                     localStorage.setItem('2048-setting-theme', 'custom');
                     document.getElementById('custom-theme-button-container').classList.add('visible');
-                    document.documentElement.classList.remove('dark');
-                    loadCustomTheme();
+                    if (typeof applyCustomThemePalettePreference === 'function') {
+                        applyCustomThemePalettePreference();
+                    }
+                    if (typeof loadCustomTheme === 'function') {
+                        loadCustomTheme();
+                    }
                     document.body.setAttribute('data-theme', 'custom');
                 } else {
                     document.getElementById('custom-theme-button-container').classList.remove('visible');
@@ -3882,7 +3841,19 @@
                 if (typeof updateThemeSelector === 'function') {
                     updateThemeSelector();
                 }
+                if (typeof updateCustomThemePaletteRow === 'function') {
+                    updateCustomThemePaletteRow();
+                }
             });
+            const customThemePaletteSelect = document.getElementById('custom-theme-palette-select');
+            if (customThemePaletteSelect) {
+                customThemePaletteSelect.addEventListener('change', function() {
+                    localStorage.setItem('2048-setting-custom-theme-palette', this.value);
+                    if (localStorage.getItem('2048-setting-theme') === 'custom' && typeof applyCustomThemePalettePreference === 'function') {
+                        applyCustomThemePalettePreference();
+                    }
+                });
+            }
             const customThemeButton = document.getElementById('custom-theme-button');
             if (customThemeButton) {
                 customThemeButton.addEventListener('click', function() {
@@ -3906,6 +3877,9 @@
                 }
                 if (window.resetModeButtonStates) {
                     window.resetModeButtonStates();
+                }
+                if (window.aiAutoPlay && typeof window.aiAutoPlay.stop === 'function') {
+                    window.aiAutoPlay.stop();
                 }
                 return originalInitGame.apply(this, args);
             };
@@ -3952,7 +3926,9 @@
                 } else {
                     elements.themeToggle.value = 'custom';
                     document.getElementById('custom-theme-button-container').classList.add('visible');
-                    document.documentElement.classList.remove('dark');
+                    if (typeof applyCustomThemePalettePreference === 'function') {
+                        applyCustomThemePalettePreference();
+                    }
                     if (typeof loadCustomTheme === 'function') loadCustomTheme();
                 }
             } else if (savedTheme === 'dark') {
@@ -3972,6 +3948,9 @@
                     handler: updateTheme
                 };
                 elements.themeToggle.value = savedTheme || 'auto';
+            }
+            if (typeof updateCustomThemePaletteRow === 'function') {
+                updateCustomThemePaletteRow();
             }
             if (savedState) {
                 try {
@@ -4649,6 +4628,56 @@
             }
             return score;
         }
+    </script>
+    <script>
+        (function () {
+            if (!window.__browserUnsupported) return;
+            var issues = window.__browserCompatibilityIssues || [];
+            var lang = 'zh';
+            try {
+                if (typeof window.__detectLoadingLang === 'function') lang = window.__detectLoadingLang();
+            } catch (e) {}
+            var isEn = lang === 'en';
+            var texts = isEn ? {
+                title: 'Browser version not supported',
+                detail: 'Your browser is too old to run this game. Please upgrade to the latest version of Chrome, Edge, Firefox or Safari, then reopen this page.',
+                issues: 'Unsupported features: '
+            } : {
+                title: '浏览器版本过低',
+                detail: '当前浏览器版本过低，无法运行本游戏。请升级到最新版的 Chrome、Edge、Firefox 或 Safari 后重新打开本页面。',
+                issues: '缺少特性：'
+            };
+            var loading = document.getElementById('loading-screen');
+            if (loading) loading.style.display = 'none';
+            if (document.getElementById('browser-unsupported-screen')) return;
+            var overlay = document.createElement('div');
+            overlay.id = 'browser-unsupported-screen';
+            overlay.setAttribute('role', 'alert');
+            overlay.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:24px;background:#faf8ef;color:#776e65;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;text-align:center;';
+            var box = document.createElement('div');
+            box.style.cssText = 'max-width:520px;width:100%;background:#ffffff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.12);padding:32px 24px;box-sizing:border-box;';
+            var icon = document.createElement('div');
+            icon.textContent = '!';
+            icon.style.cssText = 'width:44px;height:44px;line-height:44px;margin:0 auto 16px;border-radius:50%;background:#fdf0e3;color:#e67e22;font-size:26px;font-weight:700;';
+            var title = document.createElement('h1');
+            title.textContent = texts.title;
+            title.style.cssText = 'font-size:22px;font-weight:700;margin:0 0 12px;';
+            var detail = document.createElement('p');
+            detail.textContent = texts.detail;
+            detail.style.cssText = 'font-size:14px;line-height:1.7;margin:0 0 16px;color:#8f7a66;';
+            box.appendChild(icon);
+            box.appendChild(title);
+            box.appendChild(detail);
+            if (issues.length > 0) {
+                var issueEl = document.createElement('p');
+                issueEl.textContent = texts.issues + issues.join(', ');
+                issueEl.style.cssText = 'font-size:12px;line-height:1.6;margin:0;color:#b0a49a;word-break:break-word;';
+                box.appendChild(issueEl);
+            }
+            overlay.appendChild(box);
+            document.body.appendChild(overlay);
+            document.title = texts.title;
+        })();
     </script>
 </body>
 </html>
