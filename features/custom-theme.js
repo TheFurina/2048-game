@@ -1,27 +1,40 @@
-const customThemeVersion = '1.5';
+const customThemeVersion = '1.5-fix.1';
 window.customThemeVersion = customThemeVersion;
 window.customThemeLoaded = true;
 const tileValues = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768];
 const DARK_THEME_DEFAULTS = {
     bgColor: '#121212',
-    bgOpacity: '100',
     primaryColor: '#ffb74d',
-    primaryOpacity: '100',
     secondaryColor: '#a1887f',
-    secondaryOpacity: '100',
     gridColor: '#37474f',
-    gridOpacity: '100',
     cellEmptyColor: '#546e7a',
-    cellEmptyOpacity: '100',
     scrollbarColor: '#4a4a4a',
-    scrollbarOpacity: '100',
     modalBgColor: '#1e1e1e',
-    modalBgOpacity: '100',
-    modalTextColor: '#e0e0e0',
-    modalTextOpacity: '100'
+    modalTextColor: '#e0e0e0'
 };
 let themeDraft = null;
 let themePalette = 'light';
+const LEGACY_OPACITY_KEYS = {
+    bgOpacity: 'bgColorOpacity',
+    primaryOpacity: 'primaryColorOpacity',
+    secondaryOpacity: 'secondaryColorOpacity',
+    gridOpacity: 'gridColorOpacity',
+    cellEmptyOpacity: 'cellEmptyColorOpacity',
+    scrollbarOpacity: 'scrollbarColorOpacity',
+    modalBgOpacity: 'modalBgColorOpacity',
+    modalTextOpacity: 'modalTextColorOpacity'
+};
+function normalizeThemeOpacityKeys(values) {
+    const normalized = Object.assign({}, values);
+    Object.keys(LEGACY_OPACITY_KEYS).forEach(shortKey => {
+        const longKey = LEGACY_OPACITY_KEYS[shortKey];
+        if (normalized[longKey] === undefined && normalized[shortKey] !== undefined) {
+            normalized[longKey] = normalized[shortKey];
+        }
+        delete normalized[shortKey];
+    });
+    return normalized;
+}
 const themeFieldConfig = [
     { id: 'bgColor', elementId: 'custom-bg-color', opacityId: 'custom-bg-opacity', category: 'base', default: '#faf8ef', defaultOpacity: '100' },
     { id: 'primaryColor', elementId: 'custom-primary-color', opacityId: 'custom-primary-opacity', category: 'base', default: '#faa31b', defaultOpacity: '100' },
@@ -134,12 +147,12 @@ function getCustomThemeData() {
     if (!data || typeof data !== 'object') return null;
     if (data.light || data.dark) {
         return {
-            light: Object.assign(getDefaultThemeValues('light'), data.light || {}),
-            dark: Object.assign(getDefaultThemeValues('dark'), data.dark || {})
+            light: Object.assign(getDefaultThemeValues('light'), normalizeThemeOpacityKeys(data.light || {})),
+            dark: Object.assign(getDefaultThemeValues('dark'), normalizeThemeOpacityKeys(data.dark || {}))
         };
     }
     return {
-        light: Object.assign(getDefaultThemeValues('light'), data),
+        light: Object.assign(getDefaultThemeValues('light'), normalizeThemeOpacityKeys(data)),
         dark: Object.assign(getDefaultThemeValues('dark'), {})
     };
 }
@@ -250,13 +263,13 @@ function loadThemePalette(palette) {
 }
 function generateThemeCSS(values, selector = 'body.bg-bg') {
     const config = getThemeFieldConfig();
-    let css = `${selector} { background-color: ${values.bgColor}${opacityToHex(values.bgOpacity)} !important; color: ${values.secondaryColor}${opacityToHex(values.secondaryOpacity)} !important; }\n`;
-    css += `${selector} .bg-bg { background-color: ${values.bgColor}${opacityToHex(values.bgOpacity)} !important; }\n`;
-    css += `${selector} .text-secondary { color: ${values.secondaryColor}${opacityToHex(values.secondaryOpacity)} !important; }\n`;
-    css += `${selector} .text-secondary\\/80 { color: ${values.secondaryColor}${opacityToHex(Math.round(parseInt(values.secondaryOpacity) * 0.8))} !important; }\n`;
-    css += `${selector} .bg-grid { background-color: ${values.gridColor}${opacityToHex(values.gridOpacity)} !important; }\n`;
-    css += `${selector} .bg-primary { background-color: ${values.primaryColor}${opacityToHex(values.primaryOpacity)} !important; }\n`;
-    css += `${selector} .bg-secondary { background-color: ${values.secondaryColor}${opacityToHex(values.secondaryOpacity)} !important; }\n`;
+    let css = `${selector} { background-color: ${values.bgColor}${opacityToHex(values.bgColorOpacity)} !important; color: ${values.secondaryColor}${opacityToHex(values.secondaryColorOpacity)} !important; }\n`;
+    css += `${selector} .bg-bg { background-color: ${values.bgColor}${opacityToHex(values.bgColorOpacity)} !important; }\n`;
+    css += `${selector} .text-secondary { color: ${values.secondaryColor}${opacityToHex(values.secondaryColorOpacity)} !important; }\n`;
+    css += `${selector} .text-secondary\\/80 { color: ${values.secondaryColor}${opacityToHex(Math.round(parseInt(values.secondaryColorOpacity) * 0.8))} !important; }\n`;
+    css += `${selector} .bg-grid { background-color: ${values.gridColor}${opacityToHex(values.gridColorOpacity)} !important; }\n`;
+    css += `${selector} .bg-primary { background-color: ${values.primaryColor}${opacityToHex(values.primaryColorOpacity)} !important; }\n`;
+    css += `${selector} .bg-secondary { background-color: ${values.secondaryColor}${opacityToHex(values.secondaryColorOpacity)} !important; }\n`;
     tileValues.forEach(value => {
         const bgKey = `tile${value}Bg`;
         const textKey = `tile${value}Text`;
@@ -267,8 +280,8 @@ function generateThemeCSS(values, selector = 'body.bg-bg') {
     if (values.tileSuperBg && values.tileSuperText) {
         css += `${selector} .tile-super { background-color: ${values.tileSuperBg} !important; color: ${values.tileSuperText} !important; }\n`;
     }
-    css += `${selector} ::-webkit-scrollbar-track { background: ${values.bgColor}${opacityToHex(values.bgOpacity)} !important; }\n`;
-    css += `${selector} ::-webkit-scrollbar-thumb { background: ${values.scrollbarColor}${opacityToHex(values.scrollbarOpacity)} !important; }\n`;
+    css += `${selector} ::-webkit-scrollbar-track { background: ${values.bgColor}${opacityToHex(values.bgColorOpacity)} !important; }\n`;
+    css += `${selector} ::-webkit-scrollbar-thumb { background: ${values.scrollbarColor}${opacityToHex(values.scrollbarColorOpacity)} !important; }\n`;
     return css;
 }
 function opacityToHex(opacity) {
@@ -791,12 +804,12 @@ function importCustomTheme() {
                 }
                 if (themeData.light || themeData.dark) {
                     themeDraft = {
-                        light: Object.assign(getDefaultThemeValues('light'), themeData.light || {}),
-                        dark: Object.assign(getDefaultThemeValues('dark'), themeData.dark || {})
+                        light: Object.assign(getDefaultThemeValues('light'), normalizeThemeOpacityKeys(themeData.light || {})),
+                        dark: Object.assign(getDefaultThemeValues('dark'), normalizeThemeOpacityKeys(themeData.dark || {}))
                     };
                 } else {
                     themeDraft = {
-                        light: Object.assign(getDefaultThemeValues('light'), themeData),
+                        light: Object.assign(getDefaultThemeValues('light'), normalizeThemeOpacityKeys(themeData)),
                         dark: Object.assign(getDefaultThemeValues('dark'), {})
                     };
                 }
