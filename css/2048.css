@@ -1,4 +1,4 @@
-:root { --css-version: 1.4; }
+:root { --css-version: 1.5; }
 body.modal-scroll-lock {
     overflow: hidden;
 }
@@ -7,6 +7,28 @@ body.modal-scroll-lock {
     visibility: hidden;
     transition: all 0.3s ease;
 } 
+@keyframes modal-backdrop-fade-in {
+    from {
+        background-color: rgba(0, 0, 0, 0);
+    }
+    to {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+}
+[role="dialog"][class*="bg-black/50"]:not(.hidden) {
+    animation: modal-backdrop-fade-in 0.3s ease-out;
+}
+@keyframes modal-backdrop-fade-out {
+    from {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    to {
+        background-color: rgba(0, 0, 0, 0);
+    }
+}
+[role="dialog"][class*="bg-black/50"].modal-backdrop-fade-out {
+    animation: modal-backdrop-fade-out 0.3s ease-out forwards;
+}
 .modal-enter { 
     opacity: 0;
     transform: scale(0.95);
@@ -1451,4 +1473,20 @@ html.dark .score-addition {
         transform: translateY(-32px) scale(1);
     }
 }
-    
+.ctp-preview {
+    background-color: #f5f5f5;
+    border: 1px solid #e5e5e5;
+}
+html.dark .ctp-preview {
+    background-color: #2b2b2b;
+    border-color: #3c3c3c;
+}
+html.dark .theme-palette-tab {
+    color: #e5e7eb;
+}
+html.dark .theme-palette-tab:hover {
+    color: #ffb74d;
+}
+html.dark .theme-palette-tabs .theme-palette-tab-active {
+    color: #ffffff;
+}
