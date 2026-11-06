@@ -222,19 +222,78 @@
             if (!Object.assign) missing.push('Object.assign');
             if (!Object.entries) missing.push('Object.entries');
             if (!Array.prototype.includes) missing.push('Array.prototype.includes');
+            if (!Array.prototype.flatMap) missing.push('Array.prototype.flatMap');
+            if (!Array.from) missing.push('Array.from');
             if (!String.prototype.includes) missing.push('String.prototype.includes');
+            if (!String.prototype.padStart) missing.push('String.prototype.padStart');
+            if (!Object.values) missing.push('Object.values');
             if (typeof Number.isFinite !== 'function') missing.push('Number.isFinite');
             if (!('classList' in document.documentElement)) missing.push('classList');
+            if (!('dataset' in document.documentElement)) missing.push('dataset');
+            if (typeof document.documentElement.closest !== 'function') missing.push('Element.closest');
             if (typeof window.matchMedia !== 'function') missing.push('matchMedia');
             if (typeof window.requestAnimationFrame !== 'function') missing.push('requestAnimationFrame');
             if (!window.CSS || typeof window.CSS.supports !== 'function' || !window.CSS.supports('color', 'var(--x)')) missing.push('CSS variables');
+            if (window.CSS && typeof window.CSS.supports === 'function') {
+                if (!window.CSS.supports('width', 'calc(50% - 10px)')) missing.push('CSS calc()');
+                if (!window.CSS.supports('width', 'clamp(10px, 2vw, 20px)')) missing.push('CSS clamp()');
+                if (!window.CSS.supports('display', 'flex')) missing.push('Flexbox');
+                if (!window.CSS.supports('transform', 'translateZ(0)')) missing.push('CSS transforms');
+                if (!window.CSS.supports('transition', 'transform 0.2s ease')) missing.push('CSS transitions');
+                if (!window.CSS.supports('user-select', 'none')) missing.push('user-select');
+            }
+            try {
+                var layoutProbe = document.createElement('div');
+                layoutProbe.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:200px;height:200px;';
+                var tileProbe = document.createElement('div');
+                tileProbe.style.cssText = 'width:calc((100% - 3 * 10px) / 4);height:20px;';
+                layoutProbe.appendChild(tileProbe);
+                document.documentElement.appendChild(layoutProbe);
+                var tileProbeWidth = tileProbe.getBoundingClientRect().width;
+                document.documentElement.removeChild(layoutProbe);
+                if (!(tileProbeWidth > 42 && tileProbeWidth < 43)) missing.push('CSS tile layout');
+            } catch (e) {
+                missing.push('CSS tile layout');
+            }
+            try {
+                var layerStyle = document.createElement('style');
+                layerStyle.textContent = '@layer compat-probe { .compat-layer-probe { color: rgb(1, 2, 3); } }';
+                document.head.appendChild(layerStyle);
+                var layerProbe = document.createElement('div');
+                layerProbe.className = 'compat-layer-probe';
+                layerProbe.style.cssText = 'position:absolute;left:-9999px;top:-9999px;';
+                document.documentElement.appendChild(layerProbe);
+                var layerColor = window.getComputedStyle(layerProbe).color;
+                document.documentElement.removeChild(layerProbe);
+                document.head.removeChild(layerStyle);
+                if (layerColor.indexOf('1, 2, 3') === -1) missing.push('CSS @layer');
+            } catch (e) {
+                missing.push('CSS @layer');
+            }
+            try {
+                var storageProbe = '__2048_storage_probe__';
+                window.localStorage.setItem(storageProbe, '1');
+                window.localStorage.removeItem(storageProbe);
+            } catch (e) {
+                missing.push('localStorage');
+            }
+            if (!supportsSyntax('const a = 1; let b = 2; return a + b;')) missing.push('let/const');
+            if (!supportsSyntax('var f = (a) => a + 1; return f(1);')) missing.push('arrow functions');
+            if (!supportsSyntax('var a = 1; return `v${a}`;')) missing.push('template literals');
+            if (!supportsSyntax('var a = [1]; var [b] = a; return b;')) missing.push('destructuring');
+            if (!supportsSyntax('var f = function (a = 1) { return a; }; return f();')) missing.push('default parameters');
+            if (!supportsSyntax('for (var x of [1, 2]) { return x; }')) missing.push('for...of');
             if (!supportsSyntax('var o = {}; return o?.a;')) missing.push('optional chaining');
             if (!supportsSyntax('var a = null; return a ?? 1;')) missing.push('nullish coalescing');
             if (!supportsSyntax('return (async function () {})();')) missing.push('async/await');
             if (!supportsSyntax('var f = function (...a) { return a.length; }; return f(1);')) missing.push('rest parameters');
             if (!supportsSyntax('var o = { a: 1 }; var b = { ...o }; return b.a;')) missing.push('object spread');
-            window.__browserCompatibilityIssues = missing;
-            window.__browserUnsupported = missing.length > 0;
+            var uniqueMissing = [];
+            for (var i = 0; i < missing.length; i++) {
+                if (uniqueMissing.indexOf(missing[i]) === -1) uniqueMissing.push(missing[i]);
+            }
+            window.__browserCompatibilityIssues = uniqueMissing;
+            window.__browserUnsupported = uniqueMissing.length > 0;
         })();
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -242,7 +301,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js" crossorigin="anonymous"></script>
     <script src="./features/module-loader.js"></script>
     <script>
-        const gameVersion = '2.12.0-fix.1';
+        const gameVersion = '2.13.0';
         window.gameVersion = gameVersion;
         function loadCssVersion() {
             try {
@@ -1077,7 +1136,7 @@
                     <button id="reset-settings-button" class="text-gray-500 hover:text-gray-700 focus:outline-none text-sm inline-block mx-auto">
                         <i class="fa-solid fa-rotate-right mr-1"></i><span>重置所有设置</span>
                     </button>
-                    <button id="close-settings-button" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl" title="关闭设置">
+                    <button id="close-settings-button" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl dark:text-dark-muted dark:hover:text-white" title="关闭设置">
                         <i class="fa-solid fa-times"></i>
                     </button>
                     <div class="flex justify-end">
@@ -1124,7 +1183,7 @@
                     <button id="reset-ai-settings" class="px-6 py-2 text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-sm transition-colors flex items-center justify-center gap-2 min-w-[80px]"><i class="fa-solid fa-rotate-right"></i><span data-i18n="reset">重置</span></button>
                     <button id="save-ai-settings" class="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-md text-sm transition-colors flex items-center justify-center gap-2 w-[100px]"><i class="fa-solid fa-floppy-disk"></i><span data-i18n="save">保存</span></button>
                 </div>
-                <button id="close-ai-settings-button" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl" title="关闭设置">
+                <button id="close-ai-settings-button" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl dark:text-dark-muted dark:hover:text-white" title="关闭设置">
                     <i class="fa-solid fa-times"></i>
                 </button>
             </div>
@@ -1138,7 +1197,7 @@
                     <button id="reset-keybindings-button" class="px-6 py-2 text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-sm transition-colors flex items-center justify-center gap-2 min-w-[80px]"><i class="fa-solid fa-rotate-right"></i><span data-i18n="resetToDefault">重置默认</span></button>
                     <button id="close-keybindings-button" class="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-md text-sm transition-colors flex items-center justify-center gap-2 w-[100px]"><i class="fa-solid fa-check"></i><span data-i18n="done">完成</span></button>
                 </div>
-                <button id="close-keybindings-x" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl" title="关闭">
+                <button id="close-keybindings-x" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl dark:text-dark-muted dark:hover:text-white" title="关闭">
                     <i class="fa-solid fa-times"></i>
                 </button>
             </div>
@@ -1148,7 +1207,7 @@
                 <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                     <h2 id="custom-theme-modal-title" class="text-xl font-bold text-secondary" data-i18n="customTheme">自定义主题</h2>
                     <div class="mr-[1rem]">
-                        <button id="close-custom-theme-modal" class="text-secondary/60 hover:text-secondary focus:outline-none text-lg" title="关闭">
+                        <button id="close-custom-theme-modal" class="text-secondary/60 hover:text-secondary focus:outline-none text-lg dark:text-dark-muted dark:hover:text-white" title="关闭">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
@@ -1529,13 +1588,26 @@
                 <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                     <h2 id="export-theme-modal-title" class="text-xl font-bold text-secondary" data-i18n="exportThemeModal">导出主题</h2>
                     <div class="mr-[1rem]">
-                        <button id="close-export-theme-modal" class="text-secondary/60 hover:text-secondary focus:outline-none text-lg" title="关闭">
+                        <button id="close-export-theme-modal" class="text-secondary/60 hover:text-secondary focus:outline-none text-lg dark:text-dark-muted dark:hover:text-white" title="关闭">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
                 </div>
                 <div class="flex-1 p-6 overflow-y-auto">
                     <div class="flex flex-col gap-4">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+                            <h3 class="text-lg font-semibold text-gray-700 dark:text-dark-text mb-3" data-i18n="selectThemeMode">选择主题模式</h3>
+                            <div class="flex flex-wrap items-center gap-4">
+                                <div class="flex items-center gap-2">
+                                    <input type="checkbox" id="export-light-theme" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:bg-dark-surface dark:border-dark-muted" checked>
+                                    <label for="export-light-theme" class="text-sm text-gray-700 dark:text-dark-text" data-i18n="lightTheme">浅色</label>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <input type="checkbox" id="export-dark-theme" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:bg-dark-surface dark:border-dark-muted" checked>
+                                    <label for="export-dark-theme" class="text-sm text-gray-700 dark:text-dark-text" data-i18n="darkTheme">深色</label>
+                                </div>
+                            </div>
+                        </div>
                         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
                             <h3 class="text-lg font-semibold text-gray-700 dark:text-dark-text mb-3" data-i18n="selectThemeItems">选择要导出的主题项</h3>
                             <div id="theme-export-options" class="space-y-2">
@@ -1928,7 +2000,12 @@
         function handleModalKeyDown(e) {
             const modalId = e.currentTarget.id;
             if (e.key === 'Escape') {
-                hideModal(modalId);
+                if (modalId === 'pause-menu') {
+                    togglePause();
+                    e.stopPropagation();
+                } else {
+                    hideModal(modalId);
+                }
             } else if (e.key === 'Tab') {
                 const focusable = Array.from(e.currentTarget.querySelectorAll(focusableElements));
                 const currentIndex = focusable.indexOf(document.activeElement);
@@ -1961,6 +2038,7 @@
             const modal = document.getElementById(modalId);
             if (modal) {
                 lastFocusedElement = document.activeElement;
+                modal.classList.remove('modal-backdrop-fade-out');
                 modal.classList.remove('hidden');
                 setTimeout(() => {
                     modal.querySelector('div').classList.remove('scale-95', 'opacity-0');
@@ -1976,10 +2054,12 @@
         function hideModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
+                modal.classList.add('modal-backdrop-fade-out');
                 modal.querySelector('div').classList.remove('scale-100', 'opacity-100');
                 modal.querySelector('div').classList.add('scale-95', 'opacity-0');
                 setTimeout(() => {
                     modal.classList.add('hidden');
+                    modal.classList.remove('modal-backdrop-fade-out');
                     if (lastFocusedElement && document.contains(lastFocusedElement)) {
                         lastFocusedElement.focus();
                     }
@@ -2847,6 +2927,7 @@
         function showGameMessage(title, text) {
             elements.gameMessageTitle.textContent = i18n.t(title);
             elements.gameMessageText.textContent = i18n.t(text);
+            elements.gameMessage.classList.remove('modal-backdrop-fade-out');
             elements.gameMessage.classList.remove('hidden');
             setTimeout(() => {
                 const messageBox = elements.gameMessage.querySelector('.bg-white');
@@ -2858,13 +2939,17 @@
             const messageBox = elements.gameMessage.querySelector('.bg-white');
             messageBox.classList.remove('scale-100');
             messageBox.classList.add('scale-95', 'opacity-0');
+            elements.gameMessage.classList.add('modal-backdrop-fade-out');
             setTimeout(() => {
                 elements.gameMessage.classList.add('hidden');
-            }, 200);
+                elements.gameMessage.classList.remove('modal-backdrop-fade-out');
+            }, 300);
         }
         function togglePause() {
             gameState.isPaused = !gameState.isPaused;
             if (gameState.isPaused) {
+                if (window.aiAutoPlay && window.aiAutoPlay.pauseForGame) window.aiAutoPlay.pauseForGame();
+                elements.pauseMenu.classList.remove('modal-backdrop-fade-out');
                 elements.pauseMenu.classList.remove('hidden');
                 setTimeout(() => {
                     const pauseBox = elements.pauseMenu.querySelector('.bg-white');
@@ -2877,13 +2962,16 @@
                     elements.pauseMenu.addEventListener('keydown', handleModalKeyDown);
                 }, 10);
             } else {
+                if (window.aiAutoPlay && window.aiAutoPlay.resumeForGame) window.aiAutoPlay.resumeForGame();
                 const pauseBox = elements.pauseMenu.querySelector('.bg-white');
                 pauseBox.classList.remove('scale-100');
                 pauseBox.classList.add('scale-95', 'opacity-0');
+                elements.pauseMenu.classList.add('modal-backdrop-fade-out');
                 setTimeout(() => {
                     elements.pauseMenu.classList.add('hidden');
+                    elements.pauseMenu.classList.remove('modal-backdrop-fade-out');
                     elements.pauseMenu.removeEventListener('keydown', handleModalKeyDown);
-                }, 200);
+                }, 300);
             }
         }
         function saveHistory() {
@@ -3659,8 +3747,9 @@
             elements.resumeButton.addEventListener('click', togglePause);
             elements.restartButton.addEventListener('click', () => {
                 gameState.isPaused = false;
-                elements.pauseMenu.classList.add('hidden');
+                hideModal('pause-menu');
                 initGame(gameState.isEndlessMode, gameState.gridRows, gameState.gridCols);
+                if (window.aiAutoPlay && window.aiAutoPlay.resumeForGame) window.aiAutoPlay.resumeForGame();
             });
             elements.undoButton.addEventListener('click', undoMove);
             let isControlsCollapsed = false;
@@ -4691,7 +4780,7 @@
         }
     </script>
     <script>
-        (function () {
+        window.__showBrowserUnsupported = function () {
             if (!window.__browserUnsupported) return;
             var issues = window.__browserCompatibilityIssues || [];
             var lang = 'zh';
@@ -4701,11 +4790,11 @@
             var isEn = lang === 'en';
             var texts = isEn ? {
                 title: 'Browser version not supported',
-                detail: 'Your browser is too old to run this game. Please upgrade to the latest version of Chrome, Edge, Firefox or Safari, then reopen this page.',
+                detail: 'Your browser is missing features required to render this game correctly. Please upgrade to the latest version of Chrome, Edge, Firefox or Safari, then reopen this page.',
                 issues: 'Unsupported features: '
             } : {
                 title: '浏览器版本过低',
-                detail: '当前浏览器版本过低，无法运行本游戏。请升级到最新版的 Chrome、Edge、Firefox 或 Safari 后重新打开本页面。',
+                detail: '当前浏览器缺少渲染本游戏所需的特性，方块和界面可能无法正常显示。请升级到最新版的 Chrome、Edge、Firefox 或 Safari 后重新打开本页面。',
                 issues: '缺少特性：'
             };
             var loading = document.getElementById('loading-screen');
@@ -4714,7 +4803,7 @@
             var overlay = document.createElement('div');
             overlay.id = 'browser-unsupported-screen';
             overlay.setAttribute('role', 'alert');
-            overlay.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:24px;background:#faf8ef;color:#776e65;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;text-align:center;';
+            overlay.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:24px;background:#faf8ef;color:#776e65;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;text-align:center;overflow-y:auto;';
             var box = document.createElement('div');
             box.style.cssText = 'max-width:520px;width:100%;background:#ffffff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.12);padding:32px 24px;box-sizing:border-box;';
             var icon = document.createElement('div');
@@ -4738,6 +4827,39 @@
             overlay.appendChild(box);
             document.body.appendChild(overlay);
             document.title = texts.title;
+        };
+        window.__showBrowserUnsupported();
+        (function () {
+            if (window.__browserUnsupported) return;
+            var attempts = 0;
+            function checkTileRendering() {
+                attempts++;
+                if (document.getElementById('browser-unsupported-screen')) return;
+                var tile = document.querySelector('#tile-container .tile');
+                if (tile) {
+                    var broken = false;
+                    try {
+                        var bg = window.getComputedStyle(tile).backgroundColor;
+                        broken = !(tile.offsetWidth > 0 && tile.offsetHeight > 0) || bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent';
+                    } catch (e) {
+                        broken = true;
+                    }
+                    if (broken) {
+                        window.__browserCompatibilityIssues = (window.__browserCompatibilityIssues || []).concat(['tile rendering']);
+                        window.__browserUnsupported = true;
+                        window.__showBrowserUnsupported();
+                    }
+                    return;
+                }
+                if (attempts < 20) setTimeout(checkTileRendering, 400);
+            }
+            if (document.readyState === 'complete') {
+                setTimeout(checkTileRendering, 400);
+            } else {
+                window.addEventListener('load', function () {
+                    setTimeout(checkTileRendering, 400);
+                });
+            }
         })();
     </script>
 </body>
