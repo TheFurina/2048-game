@@ -1,6 +1,9 @@
-const customThemeVersion = '1.5-fix.1';
+const customThemeVersion = '1.6';
 window.customThemeVersion = customThemeVersion;
 window.customThemeLoaded = true;
+if (window.i18n && typeof window.i18n.registerModule === 'function') {
+    window.i18n.registerModule('theme');
+}
 const tileValues = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768];
 const DARK_THEME_DEFAULTS = {
     bgColor: '#121212',
@@ -251,7 +254,6 @@ function updateThemePaletteTabs() {
         element.setAttribute('aria-selected', active ? 'true' : 'false');
         element.classList.toggle('theme-palette-tab-active', active);
         element.style.backgroundColor = active ? '#faa31b' : '';
-        element.style.color = active ? '#ffffff' : '';
         element.style.boxShadow = active ? '0 1px 3px rgba(0,0,0,0.18)' : '';
     });
 }
@@ -391,7 +393,7 @@ function getPreviewTemplateForField(fieldId) {
     }
 }
 function getPreviewWrapperHTML(field) {
-    return '<div class="ctp-preview" id="preview-' + field.elementId + '" style="background:#f5f5f5;border:1px solid #e5e5e5;border-radius:8px;padding:8px;margin-bottom:8px;display:flex;flex-direction:column;flex:1 1 auto;">'
+    return '<div class="ctp-preview" id="preview-' + field.elementId + '" style="border-radius:8px;padding:8px;margin-bottom:8px;display:flex;flex-direction:column;flex:1 1 auto;">'
         + '<div style="' + CTP_PREVIEW_LABEL_STYLE + '">预览 Preview</div>'
         + '<div style="' + CTP_PREVIEW_CONTENT_STYLE + '">' + getPreviewTemplateForField(field.id) + '</div>'
         + '</div>';
@@ -737,28 +739,42 @@ function exportCustomTheme() {
         selectAllCheckbox.checked = allChecked;
     };
     selectAllCheckbox.checked = true;
-    selectAllCheckbox.addEventListener('change', function() {
+    selectAllCheckbox.onchange = function() {
         const checkboxes = document.querySelectorAll('.theme-export-checkbox');
         checkboxes.forEach(checkbox => {
             checkbox.checked = selectAllCheckbox.checked;
         });
-    });
-    optionsContainer.addEventListener('change', updateSelectAllState);
+    };
+    optionsContainer.onchange = updateSelectAllState;
+    const lightThemeCheckbox = document.getElementById('export-light-theme');
+    const darkThemeCheckbox = document.getElementById('export-dark-theme');
+    if (lightThemeCheckbox) lightThemeCheckbox.checked = true;
+    if (darkThemeCheckbox) darkThemeCheckbox.checked = true;
     const saveAndClose = function() {
         hideModal('export-theme-modal');
     };
     showModal('export-theme-modal');
-    document.getElementById('cancel-export-theme').addEventListener('click', saveAndClose);
-    document.getElementById('close-export-theme-modal').addEventListener('click', saveAndClose);
-    document.getElementById('confirm-export-theme').addEventListener('click', function() {
+    document.getElementById('cancel-export-theme').onclick = saveAndClose;
+    document.getElementById('close-export-theme-modal').onclick = saveAndClose;
+    document.getElementById('confirm-export-theme').onclick = function() {
+        const palettes = [];
+        if (lightThemeCheckbox && lightThemeCheckbox.checked) palettes.push('light');
+        if (darkThemeCheckbox && darkThemeCheckbox.checked) palettes.push('dark');
+        if (palettes.length === 0) {
+            alert(i18n.t('selectAtLeastOneThemeMode'));
+            return;
+        }
         try {
             ensureThemeDraft();
             captureThemePalette();
-            const themeData = { version: 2, timestamp: new Date().getTime(), light: {}, dark: {} };
+            const themeData = { version: 2, timestamp: new Date().getTime() };
+            palettes.forEach(palette => {
+                themeData[palette] = {};
+            });
             themeItems.forEach(item => {
                 const checkbox = document.getElementById(`export-${item.id}`);
                 if (!checkbox.checked) return;
-                ['light', 'dark'].forEach(palette => {
+                palettes.forEach(palette => {
                     const values = themeDraft[palette];
                     if (!values) return;
                     if (values[item.id] !== undefined) {
@@ -786,7 +802,7 @@ function exportCustomTheme() {
             alert(i18n.t('exportFailed') + e.message);
             saveAndClose();
         }
-    });
+    };
 }
 function importCustomTheme() {
     const input = document.createElement('input');
@@ -803,9 +819,10 @@ function importCustomTheme() {
                     throw new Error(i18n.t('invalidThemeFile'));
                 }
                 if (themeData.light || themeData.dark) {
+                    ensureThemeDraft();
                     themeDraft = {
-                        light: Object.assign(getDefaultThemeValues('light'), normalizeThemeOpacityKeys(themeData.light || {})),
-                        dark: Object.assign(getDefaultThemeValues('dark'), normalizeThemeOpacityKeys(themeData.dark || {}))
+                        light: themeData.light ? Object.assign(getDefaultThemeValues('light'), normalizeThemeOpacityKeys(themeData.light)) : Object.assign({}, themeDraft.light || getDefaultThemeValues('light')),
+                        dark: themeData.dark ? Object.assign(getDefaultThemeValues('dark'), normalizeThemeOpacityKeys(themeData.dark)) : Object.assign({}, themeDraft.dark || getDefaultThemeValues('dark'))
                     };
                 } else {
                     themeDraft = {
