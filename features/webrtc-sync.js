@@ -1,5 +1,8 @@
-const webRTCSyncVersion = '0.6';
+const webRTCSyncVersion = '0.6-fix.1';
 window.webRTCSyncVersion = webRTCSyncVersion;
+if (window.i18n && typeof window.i18n.registerModule === 'function') {
+    window.i18n.registerModule('webrtc');
+}
 const WEBRTC_ROOM_ID_PREFIX = '2048sync-';
 class WebRTCSync {
     constructor() {
@@ -957,6 +960,7 @@ function showWebRTCModal(mode) {
         return;
     }
     modal.classList.remove('hidden');
+    modal.classList.remove('modal-backdrop-fade-out');
     const box = modal.querySelector('div');
     clearTimeout(modal._hideTimer);
     box.classList.remove('scale-100', 'opacity-100');
@@ -973,8 +977,10 @@ function hideWebRTCModal() {
         const box = modal.querySelector('div');
         box.classList.remove('scale-100', 'opacity-100');
         box.classList.add('scale-95', 'opacity-0');
+        modal.classList.add('modal-backdrop-fade-out');
         modal._hideTimer = setTimeout(() => {
             modal.classList.add('hidden');
+            modal.classList.remove('modal-backdrop-fade-out');
         }, 300);
     }
 }

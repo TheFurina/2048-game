@@ -1,5 +1,8 @@
-const aiAnalysisVersion = '2.7';
+const aiAnalysisVersion = '2.8';
 window.aiAnalysisVersion = aiAnalysisVersion;
+if (window.i18n && typeof window.i18n.registerModule === 'function') {
+    window.i18n.registerModule('ai');
+}
 let cachedAlgorithmResults = null;
 let cachedAiResults = null;
 let cachedGameStateSignature = null;
@@ -864,16 +867,21 @@ function analyzeGameStateWithAlgorithm() {
     }
     const allowUndo = !window.settingsManager || typeof window.settingsManager.load !== 'function' || window.settingsManager.load('ai-allow-undo');
     if (allowUndo && gameState.history && gameState.history.length > 0) {
-        const prevGrid = normalizeGridToNumbers(gameState.history[gameState.history.length - 1].grid);
+        const prevState = gameState.history[gameState.history.length - 1];
+        const prevGrid = normalizeGridToNumbers(prevState.grid);
         const prevMoves = aiLegalMoves(prevGrid);
         if (prevMoves.length > 0) {
+            const prevEmpty = countEmptyCells(prevGrid);
+            const prevDepth = prevEmpty <= 2 ? 3 : 2;
             const undoDeadline = aiNow() + AI_SEARCH_TIME_BUDGET;
             let undoValue = -Infinity;
             for (let i = 0; i < prevMoves.length; i++) {
-                const value = aiChanceValue(prevMoves[i].grid, depth - 1, undoDeadline) + Math.log2(prevMoves[i].gained + 1) * 0.6;
+                const value = aiChanceValue(prevMoves[i].grid, prevDepth - 1, undoDeadline) + Math.log2(prevMoves[i].gained + 1) * 0.6;
                 if (value > undoValue) undoValue = value;
             }
-            if (undoValue > bestValue + AI_UNDO_ADVANTAGE_MARGIN) {
+            const scoreLoss = Math.max(0, (Number(gameState.score) || 0) - (Number(prevState.score) || 0));
+            const undoPenalty = Math.log2(scoreLoss + 1) * 0.6;
+            if (undoValue > bestValue + AI_UNDO_ADVANTAGE_MARGIN + undoPenalty) {
                 bestDirection = 'undo';
             }
         }
@@ -904,6 +912,13 @@ function buildGameAnalysisMessages(gameState, language, options = {}) {
     const gridData = gameState.grid.map(row =>
         row.map(cell => cell ? cell.value : 0)
     );
+    const bestMoveOnly = !!(options && options.bestMoveOnly);
+    const allowUndoSetting = !window.settingsManager || typeof window.settingsManager.load !== 'function' || window.settingsManager.load('ai-allow-undo');
+    const canUndo = allowUndoSetting && gameState && Array.isArray(gameState.history) && gameState.history.length > 0;
+    const previousState = canUndo ? gameState.history[gameState.history.length - 1] : null;
+    const previousGridData = previousState && Array.isArray(previousState.grid)
+        ? previousState.grid.map(row => row.map(cell => cell ? cell.value : 0))
+        : null;
     const gameData = {
         grid: gridData,
         score: gameState.score,
@@ -913,11 +928,12 @@ function buildGameAnalysisMessages(gameState, language, options = {}) {
         isEndlessMode: gameState.isEndlessMode,
         difficulty: gameState.difficulty
     };
-    const bestMoveOnly = !!(options && options.bestMoveOnly);
-    const allowUndoSetting = !window.settingsManager || typeof window.settingsManager.load !== 'function' || window.settingsManager.load('ai-allow-undo');
-    const canUndo = allowUndoSetting && gameState && Array.isArray(gameState.history) && gameState.history.length > 0;
+    if (previousGridData) {
+        gameData.previousGrid = previousGridData;
+        gameData.previousScore = previousState.score;
+    }
     const bestMoveRule = canUndo
-        ? 'MUST be exactly ONE of these 5 exact lowercase values: "up" | "down" | "left" | "right" | "undo". "undo" reverts the last move and restores the previous board state; recommend it ONLY when the previous position was clearly better and every direct move would likely make things worse.'
+        ? 'MUST be exactly ONE of these 5 exact lowercase values: "up" | "down" | "left" | "right" | "undo". "undo" reverts the last move and restores the previous board state (provided as "previousGrid" with "previousScore"). Compare the current "grid" with "previousGrid" and recommend "undo" ONLY when the previous position was clearly better and every direct move on the current grid would likely make things worse.'
         : 'MUST be exactly ONE of these 4 exact lowercase values: "up" | "down" | "left" | "right".';
     return bestMoveOnly ? [
         {
@@ -926,12 +942,12 @@ function buildGameAnalysisMessages(gameState, language, options = {}) {
         },
         {
             role: 'user',
-            content: 'Choose the best move for this 2048 grid and return ONLY the JSON object.\nGrid: ' + JSON.stringify(gridData)
+            content: 'Choose the best move for this 2048 game state and return ONLY the JSON object.\nGame data: ' + JSON.stringify(gameData)
         }
     ] : [
         {
             role: 'system',
-            content: 'You are an expert 2048 game analyst. Analyze the game state and return ONLY a valid JSON object as output.\n\nSTRICT OUTPUT FORMAT REQUIREMENTS:\n- Your entire response must be a single JSON object. No extra text, no explanations, no markdown code blocks, no ```json``` wrappers.\n- The JSON object MUST contain exactly these 6 keys with the following constraints:\n\n1. "bestMove" (string, REQUIRED): ' + bestMoveRule + ' ABSOLUTELY NO other values allowed. Do NOT return arrays, multiple directions separated by commas or slashes, "none", "any", "unknown", "N/A", empty string, or any value outside the four listed above. If you are uncertain, still choose the single most likely direction among the four.\n\n2. "mergeOpportunities" (integer, REQUIRED): A non-negative integer (0, 1, 2, ...) counting the possible tile merges on the current grid.\n\n3. "gameStateAssessment" (string, REQUIRED): MUST be exactly ONE of: "safe" | "warning" | "danger". No other values.\n\n4. "scorePotential" (string, REQUIRED): MUST be exactly ONE of: "high" | "medium" | "low". No other values.\n\n5. "aiSuggestion" (string, REQUIRED): A detailed strategic recommendation written in the user\'s language. Explain why the chosen bestMove is optimal.\n\n6. "confidence" (number, REQUIRED): A float between 0.0 and 1.0 inclusive representing your confidence in the bestMove recommendation.\n\nUSER LANGUAGE REQUIREMENT: The user\'s language is: ' + language + '. The entire "aiSuggestion" string MUST be written in this language. Do NOT mix languages.\n\nFINAL REMINDER: Return ONLY the raw JSON object. Do not wrap it in any other formatting.\n'
+            content: 'You are an expert 2048 game analyst. Analyze the game state and return ONLY a valid JSON object as output.\n\nSTRICT OUTPUT FORMAT REQUIREMENTS:\n- Your entire response must be a single JSON object. No extra text, no explanations, no markdown code blocks, no ```json``` wrappers.\n- The JSON object MUST contain exactly these 6 keys with the following constraints:\n\n1. "bestMove" (string, REQUIRED): ' + bestMoveRule + ' ABSOLUTELY NO other values allowed. Do NOT return arrays, multiple directions separated by commas or slashes, "none", "any", "unknown", "N/A", empty string, or any value outside the allowed values listed above. If you are uncertain, still choose the single most likely direction among the four.\n\n2. "mergeOpportunities" (integer, REQUIRED): A non-negative integer (0, 1, 2, ...) counting the possible tile merges on the current grid.\n\n3. "gameStateAssessment" (string, REQUIRED): MUST be exactly ONE of: "safe" | "warning" | "danger". No other values.\n\n4. "scorePotential" (string, REQUIRED): MUST be exactly ONE of: "high" | "medium" | "low". No other values.\n\n5. "aiSuggestion" (string, REQUIRED): A detailed strategic recommendation written in the user\'s language. Explain why the chosen bestMove is optimal.\n\n6. "confidence" (number, REQUIRED): A float between 0.0 and 1.0 inclusive representing your confidence in the bestMove recommendation.\n\nUSER LANGUAGE REQUIREMENT: The user\'s language is: ' + language + '. The entire "aiSuggestion" string MUST be written in this language. Do NOT mix languages.\n\nFINAL REMINDER: Return ONLY the raw JSON object. Do not wrap it in any other formatting.\n'
         },
         {
             role: 'user',

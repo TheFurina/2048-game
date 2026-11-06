@@ -1,5 +1,8 @@
-const dataTransferVersion = '1.5';
+const dataTransferVersion = '1.5-fix.1';
 window.dataTransferVersion = dataTransferVersion;
+if (window.i18n && typeof window.i18n.registerModule === 'function') {
+    window.i18n.registerModule('dataTransfer');
+}
 const Base91 = {
     chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~"',
     decodeTable: null,

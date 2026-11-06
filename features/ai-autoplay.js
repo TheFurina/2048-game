@@ -1,6 +1,9 @@
-const aiAutoPlayVersion = '1.2';
+const aiAutoPlayVersion = '1.3';
 window.aiAutoPlayVersion = aiAutoPlayVersion;
 window.aiAutoPlayLoaded = true;
+if (window.i18n && typeof window.i18n.registerModule === 'function') {
+    window.i18n.registerModule('autoPlay');
+}
 const AUTO_PLAY_DIRECTIONS = ['up', 'down', 'left', 'right'];
 const AUTO_PLAY_ALGORITHM_INTERVAL = 350;
 const AUTO_PLAY_AI_INTERVAL = 500;
@@ -8,6 +11,7 @@ const AUTO_PLAY_MAX_CONSECUTIVE_FAILURES = 6;
 const autoPlayStatus = {
     running: false,
     paused: false,
+    pausedByGame: false,
     steps: 0,
     failCount: 0,
     stopReason: null,
@@ -282,6 +286,10 @@ function scheduleAutoPlayStep(delay) {
 }
 async function performAutoPlayStep() {
     if (!autoPlayStatus.running || autoPlayStatus.paused) return;
+    if (window.gameState && window.gameState.isPaused) {
+        scheduleAutoPlayStep(300);
+        return;
+    }
     if (!isAutoPlayGameActive()) {
         stopAutoPlay();
         updateAutoPlayStatusText(autoPlayT('autoPlayGameEnded'));
@@ -350,10 +358,17 @@ function startAutoPlay() {
     }
     autoPlayStatus.running = true;
     autoPlayStatus.paused = false;
+    autoPlayStatus.pausedByGame = false;
     window.autoPlayActive = true;
+    if (window.gameState && window.gameState.isPaused) {
+        autoPlayStatus.paused = true;
+        autoPlayStatus.pausedByGame = true;
+    }
     updateAutoPlayUI();
     requestAutoPlayWakeLock();
-    scheduleAutoPlayStep(150);
+    if (!autoPlayStatus.paused) {
+        scheduleAutoPlayStep(150);
+    }
 }
 function pauseAutoPlay() {
     if (!autoPlayStatus.running || autoPlayStatus.paused) return;
@@ -366,14 +381,25 @@ function pauseAutoPlay() {
 function resumeAutoPlay() {
     if (!autoPlayStatus.running || !autoPlayStatus.paused) return;
     autoPlayStatus.paused = false;
+    autoPlayStatus.pausedByGame = false;
     window.autoPlayActive = true;
     updateAutoPlayUI();
     requestAutoPlayWakeLock();
     scheduleAutoPlayStep(200);
 }
+function pauseAutoPlayForGame() {
+    if (!autoPlayStatus.running || autoPlayStatus.paused) return;
+    autoPlayStatus.pausedByGame = true;
+    pauseAutoPlay();
+}
+function resumeAutoPlayForGame() {
+    if (!autoPlayStatus.running || !autoPlayStatus.paused || !autoPlayStatus.pausedByGame) return;
+    resumeAutoPlay();
+}
 function stopAutoPlay(stopReason) {
     autoPlayStatus.running = false;
     autoPlayStatus.paused = false;
+    autoPlayStatus.pausedByGame = false;
     clearAutoPlayTimer();
     releaseAutoPlayWakeLock();
     window.autoPlayActive = false;
@@ -411,6 +437,8 @@ if (typeof window !== 'undefined') {
         resume: resumeAutoPlay,
         stop: stopAutoPlay,
         toggle: toggleAutoPlay,
+        pauseForGame: pauseAutoPlayForGame,
+        resumeForGame: resumeAutoPlayForGame,
         setKeepScreenAwake: function(enabled) {
             if (enabled && autoPlayStatus.running && !autoPlayStatus.paused) {
                 requestAutoPlayWakeLock();
