@@ -1,5 +1,7 @@
-const dataTransferVersion = '1.5-fix.1';
+const dataTransferVersion = '1.6';
 window.dataTransferVersion = dataTransferVersion;
+const dataTransferDomTemplates = {"#module-dom-root": "        <div id=\"data-transfer-modal\" class=\"fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden\" role=\"dialog\" aria-labelledby=\"data-transfer-modal-title\" aria-modal=\"true\">\n            <div class=\"bg-white dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0 relative\">\n                <h2 id=\"data-transfer-modal-title\" class=\"text-2xl font-bold text-secondary dark:text-dark-text mb-4\" data-i18n=\"dataTransfer\">数据管理</h2>\n                <button id=\"close-data-modal\" class=\"text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl dark:text-dark-muted dark:hover:text-white\" title=\"关闭设置\">\n                    <i class=\"fa-solid fa-times\"></i>\n                </button>\n                <div class=\"flex flex-col gap-3 mb-4\">\n                    <button id=\"export-data-button\" class=\"bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50\">\n                        <i class=\"fa-solid fa-upload mr-2\"></i><span>导出数据</span>\n                    </button>\n                    <button id=\"import-data-button\" class=\"bg-secondary hover:bg-secondary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary/50\">\n                        <i class=\"fa-solid fa-download mr-2\"></i><span>导入数据</span>\n                    </button>\n                    <input type=\"file\" id=\"import-file-input\" accept=\".txt,text/plain,application/json\" class=\"hidden\">\n                </div>\n                <div class=\"relative w-full mb-0.5\">\n                    <textarea id=\"data-textarea\" class=\"w-full p-3 border border-gray-300 rounded-md h-32 text-sm dark:bg-dark-surface dark:border-dark-muted dark:text-dark-text\" style=\"word-break: break-all;\" data-i18n-placeholder=\"dataTextareaPlaceholder\" placeholder=\"在此复制导出的数据或输入要导入的数据...\"></textarea>\n                    <button id=\"copy-data-button\" class=\"absolute top-2 right-2 p-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md opacity-0 invisible transition-all duration-200 focus:outline-none\" title=\"复制数据\">\n                        <i class=\"fa-solid fa-copy text-gray-600 dark:text-gray-300\"></i>\n                    </button>\n                </div>\n                <div class=\"flex items-center justify-between gap-4 mb-4\">\n                    <div class=\"flex items-center gap-2\">\n                        <input type=\"checkbox\" id=\"export-settings-checkbox\" class=\"w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:bg-dark-surface dark:border-dark-muted\">\n                        <label for=\"export-settings-checkbox\" class=\"text-sm text-gray-700 dark:text-dark-text\">包含设置数据</label>\n                    </div>\n                    <div class=\"flex items-center gap-2\">\n                        <label for=\"encoding-select\" class=\"text-sm text-gray-700 dark:text-dark-text\" data-i18n=\"encoding\">编码方式:</label>\n                        <select id=\"encoding-select\" class=\"px-3 py-2 border border-gray-300 dark:border-dark-muted rounded-md bg-white dark:bg-dark-surface text-gray-700 dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary\">\n                            <option value=\"base64\">Base64</option>\n                            <option value=\"base91\">Base91</option>\n                        </select>\n                    </div>\n                </div>\n                <div class=\"flex flex-wrap justify-start gap-x-4 gap-y-2\">\n                    <button id=\"export-link-button\" class=\"text-primary hover:text-primary/80 text-sm flex items-center gap-1 transition-colors duration-200 focus:outline-none\">\n                        <i class=\"fa-solid fa-link\"></i><span data-i18n=\"exportAsLink\">导出为链接</span>\n                    </button>\n                    <button id=\"export-file-button\" class=\"text-primary hover:text-primary/80 text-sm flex items-center gap-1 transition-colors duration-200 focus:outline-none\">\n                        <i class=\"fa-solid fa-file-arrow-up\"></i><span data-i18n=\"exportAsFile\">导出为文件</span>\n                    </button>\n                    <button id=\"import-file-button\" class=\"text-primary hover:text-primary/80 text-sm flex items-center gap-1 transition-colors duration-200 focus:outline-none\">\n                        <i class=\"fa-solid fa-file-arrow-down\"></i><span data-i18n=\"importFromFile\">从文件导入</span>\n                    </button>\n                </div>\n            </div>\n        </div>", "#settings-module-data": "                            <button id=\"data-transfer-button\" class=\"flex items-center justify-between w-full px-4 py-3 text-gray-700 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-all duration-200 rounded-lg\">\n                                <span class=\"flex items-center\">\n                                    <i class=\"fa-solid fa-database w-5 mr-2\"></i>\n                                    <span data-i18n=\"dataTransfer\">数据管理</span>\n                                </span>\n                                <i class=\"fa-solid fa-chevron-right text-xs\"></i>\n                            </button>\n                            <div class=\"border-b border-gray-200 dark:border-gray-700 my-2 mx-2\"></div>"};
+let dataTransferDomBound = false;
 if (window.i18n && typeof window.i18n.registerModule === 'function') {
     window.i18n.registerModule('dataTransfer');
 }
@@ -492,20 +494,83 @@ async function importGameData(dataStr) {
     try {
         window.dataTransferModuleLoaded = true;
         window.addEventListener('hashchange', handleHashChangeForAutoImport);
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initDataTransfer);
-        } else {
-            initDataTransfer();
-        }
     } catch (error) {
         console.warn('Data transfer module loading failed:', error);
         window.dataTransferModuleLoaded = false;
     }
 })();
 function initDataTransfer() {
-    const textarea = document.getElementById('data-textarea');
-    const textareaContainer = textarea ? textarea.closest('.relative') : null;
+    if (dataTransferDomBound) return;
+    const dataTransferButton = document.getElementById('data-transfer-button');
+    const dataTransferModal = document.getElementById('data-transfer-modal');
+    const exportDataButton = document.getElementById('export-data-button');
+    const importDataButton = document.getElementById('import-data-button');
+    const exportLinkButton = document.getElementById('export-link-button');
+    const exportFileButton = document.getElementById('export-file-button');
+    const importFileButton = document.getElementById('import-file-button');
+    const importFileInput = document.getElementById('import-file-input');
+    const dataTextarea = document.getElementById('data-textarea');
+    const closeDataModal = document.getElementById('close-data-modal');
     const copyButton = document.getElementById('copy-data-button');
+    const textareaContainer = dataTextarea ? dataTextarea.closest('.relative') : null;
+    if (!dataTransferButton || !dataTransferModal || !exportDataButton || !importDataButton || !exportLinkButton || !exportFileButton || !importFileButton || !importFileInput || !dataTextarea || !closeDataModal) {
+        return;
+    }
+    function handleImportClick() {
+        const data = dataTextarea.value.trim();
+        if (data && confirm(window.i18n ? window.i18n.t('confirmImport') : '确定要导入数据吗？')) {
+            importGameData(data);
+        }
+    }
+    dataTransferButton.addEventListener('click', () => {
+        if (typeof window.showModal === 'function') {
+            window.showModal('data-transfer-modal');
+            return;
+        }
+        dataTransferModal.classList.remove('hidden');
+        const panel = dataTransferModal.querySelector('div');
+        if (panel) {
+            panel.classList.remove('scale-95', 'opacity-0');
+            panel.classList.add('scale-100', 'opacity-100');
+        }
+    });
+    exportDataButton.addEventListener('click', exportGameData);
+    importDataButton.addEventListener('click', handleImportClick);
+    exportLinkButton.addEventListener('click', exportGameDataAsLink);
+    exportFileButton.addEventListener('click', exportGameDataAsFile);
+    importFileButton.addEventListener('click', () => {
+        importFileInput.value = '';
+        importFileInput.click();
+    });
+    importFileInput.addEventListener('change', async () => {
+        const file = importFileInput.files && importFileInput.files[0];
+        if (!file) return;
+        try {
+            const text = await file.text();
+            const data = text.trim();
+            if (!data) return;
+            dataTextarea.value = data;
+            if (confirm(window.i18n ? window.i18n.t('confirmImport') : '确定要导入数据吗？')) {
+                importGameData(data);
+            }
+        } catch (error) {
+            alert((window.i18n ? window.i18n.t('importFailed') : '导入失败') + ' ' + error.message);
+        }
+    });
+    closeDataModal.addEventListener('click', () => {
+        if (typeof window.hideModal === 'function') {
+            window.hideModal('data-transfer-modal');
+            return;
+        }
+        const panel = dataTransferModal.querySelector('div');
+        if (panel) {
+            panel.classList.remove('scale-100', 'opacity-100');
+            panel.classList.add('scale-95', 'opacity-0');
+        }
+        setTimeout(() => {
+            dataTransferModal.classList.add('hidden');
+        }, 300);
+    });
     if (textareaContainer && copyButton) {
         textareaContainer.addEventListener('mouseenter', () => {
             copyButton.classList.remove('opacity-0', 'invisible');
@@ -517,4 +582,21 @@ function initDataTransfer() {
         });
         copyButton.addEventListener('click', copyDataToClipboard);
     }
+    dataTransferDomBound = true;
+}
+if (typeof window !== 'undefined') {
+    window.dataTransfer = {
+        version: dataTransferVersion,
+        exportGameData: exportGameData,
+        importGameData: importGameData,
+        exportGameDataAsLink: exportGameDataAsLink,
+        exportGameDataAsFile: exportGameDataAsFile,
+        copyDataToClipboard: copyDataToClipboard,
+        autoImportFromUrl: autoImportFromUrl,
+        init: initDataTransfer,
+        domTemplates: dataTransferDomTemplates,
+        isDomReady: function () {
+            return !!document.getElementById('data-transfer-modal') && !!document.getElementById('data-transfer-button');
+        }
+    };
 }

@@ -1,22 +1,11 @@
-const customSelectVersion = '1.3';
+const customSelectVersion = '1.4';
 window.customSelectVersion = customSelectVersion;
-(function() {
-    try {
-        window.customSelectModuleLoaded = true;
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initCustomSelects);
-        } else {
-            initCustomSelects();
-        }
-    } catch (error) {
-        console.warn('Custom select module loading failed:', error);
-        window.customSelectModuleLoaded = false;
-    }
-})();
+window.customSelectModuleLoaded = true;
 function initCustomSelects() {
     const customSelects = document.querySelectorAll('.custom-select');
     customSelects.forEach(customSelect => {
-        if (customSelect.dataset.i18nSelect) return;
+        if (customSelect.dataset.i18nSelect || customSelect.dataset.customSelectBound) return;
+        customSelect.dataset.customSelectBound = 'true';
         const selectedValue = customSelect.querySelector('.select-selected span');
         const selectItems = customSelect.querySelector('.select-items');
         const selectOptions = customSelect.querySelectorAll('.select-item');
@@ -146,3 +135,9 @@ function initCustomSelects() {
         });
     });
 }
+window.customSelect = {
+    version: customSelectVersion,
+    init: initCustomSelects,
+    domMode: 'none',
+    isDomReady: function () { return true; }
+};
