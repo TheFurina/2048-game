@@ -1,4 +1,4 @@
-const i18nVersion = '2.0';
+const i18nVersion = '2.1';
 window.i18nVersion = i18nVersion;
 const TILE_LEVELS = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768];
 function buildTileKeys(lang) {
@@ -100,6 +100,7 @@ const translations = {
         animationDetails: '动画详情',
         vibrationDetails: '振动详情',
         loading: '加载中...',
+        moduleLoading: '正在加载资源...',
         loadingFailed: '资源加载失败',
         loadingFailedDetail: '请检查网络连接后刷新页面',
         moduleLoaderFailedDetail: '模块加载器加载失败，请检查网络连接后刷新页面',
@@ -200,6 +201,7 @@ const translations = {
         animationDetails: 'Animation Details',
         vibrationDetails: 'Vibration Details',
         loading: 'Loading...',
+        moduleLoading: 'Loading resources...',
         loadingFailed: 'Failed to load resources',
         loadingFailedDetail: 'Check your network connection and refresh the page',
         moduleLoaderFailedDetail: 'The module loader failed to load. Check your network and refresh the page',
@@ -860,6 +862,12 @@ function updateAllTranslations() {
             }
         }
     });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+        const key = element.getAttribute('data-i18n-placeholder');
+        if (key) {
+            element.placeholder = t(key);
+        }
+    });
     updateDynamicContent();
     updateButtonWidths();
     updateHtmlLangAttribute();
@@ -935,6 +943,9 @@ function updateDynamicContent() {
     }
     if (window.SyncIndicator) {
         window.SyncIndicator.refresh();
+    }
+    if (window.aiAutoPlay && typeof window.aiAutoPlay.refresh === 'function') {
+        window.aiAutoPlay.refresh();
     }
     updateLanguageSelector();
     updateThemeSelector();
@@ -1162,20 +1173,14 @@ function setupLanguageSelector() {
     languageContainer.appendChild(customSelect);
     const appearanceCategory = document.querySelector('.setting-category:nth-child(2)');
     if (appearanceCategory) {
-        const customThemeButtonContainer = appearanceCategory.querySelector('#custom-theme-button-container');
-        if (customThemeButtonContainer) {
+        const anchor = appearanceCategory.querySelector('#settings-module-appearance') ||
+            appearanceCategory.querySelector('#custom-theme-button-container') ||
+            appearanceCategory.querySelector('.flex.items-center.justify-between');
+        if (anchor) {
             const separator = document.createElement('div');
             separator.className = 'border-b border-gray-200 dark:border-gray-700 my-3 mx-2';
-            customThemeButtonContainer.parentNode.insertBefore(separator, customThemeButtonContainer.nextSibling);
-            customThemeButtonContainer.parentNode.insertBefore(languageContainer, separator.nextSibling);
-        } else {
-            const themeToggleContainer = appearanceCategory.querySelector('.flex.items-center.justify-between');
-            if (themeToggleContainer) {
-                const separator = document.createElement('div');
-                separator.className = 'border-b border-gray-200 dark:border-gray-700 my-3 mx-2';
-                themeToggleContainer.parentNode.insertBefore(separator, themeToggleContainer.nextSibling);
-                themeToggleContainer.parentNode.insertBefore(languageContainer, separator.nextSibling);
-            }
+            anchor.parentNode.insertBefore(separator, anchor.nextSibling);
+            anchor.parentNode.insertBefore(languageContainer, separator.nextSibling);
         }
     }
 }
@@ -1285,9 +1290,12 @@ function processSpecialCases() {
         const key = elements.controlsContainer.classList.contains('collapsed') ? 'expandControls' : 'toggleControls';
         toggleText.setAttribute('data-i18n', key);
     }
-    const h3Element = document.querySelector('#theme-export-options').previousElementSibling;
-    if (h3Element && h3Element.tagName === 'H3' && h3Element.textContent.trim() === '选择要导出的主题项') {
-        h3Element.setAttribute('data-i18n', 'selectThemeItems');
+    const themeExportOptions = document.querySelector('#theme-export-options');
+    if (themeExportOptions) {
+        const h3Element = themeExportOptions.previousElementSibling;
+        if (h3Element && h3Element.tagName === 'H3' && h3Element.textContent.trim() === '选择要导出的主题项') {
+            h3Element.setAttribute('data-i18n', 'selectThemeItems');
+        }
     }
 }
 function addI18nAttributes() {

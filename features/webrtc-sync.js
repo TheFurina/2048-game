@@ -1,9 +1,30 @@
-const webRTCSyncVersion = '0.6-fix.1';
+const webRTCSyncVersion = '0.7';
 window.webRTCSyncVersion = webRTCSyncVersion;
+const webRTCSyncDomTemplates = {"#module-dom-root": "        <div id=\"webrtc-modal\" class=\"fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden\" role=\"dialog\" aria-labelledby=\"webrtc-modal-title\" aria-modal=\"true\">\n            <div class=\"bg-white dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl relative transform transition-all duration-300 scale-95 opacity-0\">\n                <h2 id=\"webrtc-modal-title\" class=\"text-2xl font-bold text-secondary dark:text-dark-text mb-4\" data-i18n=\"webrtcModalTitle\">局域网同步</h2>\n                <button id=\"close-webrtc-modal\" class=\"text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl dark:text-dark-muted dark:hover:text-white\" title=\"关闭\">\n                    <i class=\"fa-solid fa-times\"></i>\n                </button>\n                <div id=\"webrtc-select-section\">\n                    <p class=\"text-gray-700 dark:text-dark-muted mb-4\" data-i18n=\"webrtcSelectDesc\">与同一 Wi-Fi/热点下的另一台设备直连同步，无需服务器。双方互换连接码即可配对。</p>\n                    <div id=\"webrtc-select-actions\" class=\"flex flex-col gap-4 mb-6\">\n                        <button id=\"webrtc-host-button\" class=\"bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-md shadow-md transition-all duration-200\">\n                            <i class=\"fa-solid fa-tower-broadcast mr-2\"></i><span data-i18n=\"webrtcCreateConnection\">创建连接</span>\n                        </button>\n                        <button id=\"webrtc-join-button\" class=\"bg-teal-500 hover:bg-teal-600 text-white font-bold py-4 px-6 rounded-md shadow-md transition-all duration-200\">\n                            <i class=\"fa-solid fa-link mr-2\"></i><span data-i18n=\"webrtcJoinConnection\">加入连接</span>\n                        </button>\n                    </div>\n                    <div id=\"webrtc-connected-panel\" style=\"display: none;\" class=\"mb-6\">\n                        <p class=\"text-green-600 dark:text-green-400 font-bold mb-2\"><i class=\"fa-solid fa-circle-check mr-1\"></i><span data-i18n=\"webrtcConnected\">已建立连接</span></p>\n                        <p class=\"text-gray-500 dark:text-dark-muted text-xs mb-4\" data-i18n=\"syncLiveHint\">连接保持中，游戏状态与设置更改将自动同步</p>\n                        <button id=\"webrtc-select-disconnect-button\" class=\"bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200\">\n                            <i class=\"fa-solid fa-link-slash mr-2\"></i><span data-i18n=\"disconnectConnection\">断开连接</span>\n                        </button>\n                    </div>\n                </div>\n                <div id=\"webrtc-host-section\" style=\"display: none;\">\n                    <p class=\"text-gray-600 dark:text-dark-muted text-sm mb-2\" data-i18n=\"webrtcQuickHostTitle\">将此 6 位连接码告诉对方</p>\n                    <div class=\"flex justify-center mb-3\">\n                        <div id=\"webrtc-room-code\" class=\"text-4xl font-bold tracking-[0.35em] text-primary dark:text-dark-primary bg-gray-100 dark:bg-gray-800 rounded-lg px-6 py-3 select-all\">------</div>\n                    </div>\n                    <div class=\"flex flex-wrap gap-2 justify-center mb-2\">\n                        <button id=\"webrtc-copy-room-code\" class=\"bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 text-sm font-bold py-2 px-4 rounded-md\">\n                            <i class=\"fa-solid fa-copy mr-1\"></i><span data-i18n=\"webrtcCopyRoomCode\">复制连接码</span>\n                        </button>\n                        <button id=\"webrtc-room-regenerate\" class=\"bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 text-sm font-bold py-2 px-4 rounded-md\">\n                            <i class=\"fa-solid fa-rotate-right mr-1\"></i><span data-i18n=\"webrtcRoomRegenerate\">重新生成</span>\n                        </button>\n                    </div>\n                    <p id=\"webrtc-room-status\" class=\"text-sm text-gray-500 dark:text-dark-muted whitespace-pre-line mb-4\"></p>\n                    <details id=\"webrtc-host-manual\" class=\"mb-4 text-left\">\n                        <summary class=\"cursor-pointer text-sm text-gray-500 dark:text-dark-muted select-none\" data-i18n=\"webrtcManualMode\">手动模式（备用）：互换长连接码</summary>\n                        <div class=\"mt-3\">\n                            <p class=\"text-gray-600 dark:text-dark-muted text-sm mb-2\" data-i18n=\"webrtcHostStep1\">第 1 步：将此连接码发给对方</p>\n                            <textarea id=\"webrtc-offer-code\" readonly class=\"w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2\"></textarea>\n                            <button id=\"webrtc-copy-offer\" class=\"bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 text-sm font-bold py-2 px-4 rounded-md mb-4\">\n                                <i class=\"fa-solid fa-copy mr-1\"></i><span data-i18n=\"webrtcCopyOffer\">复制连接码</span>\n                            </button>\n                            <p class=\"text-gray-600 dark:text-dark-muted text-sm mb-2\" data-i18n=\"webrtcHostStep2\">第 2 步：粘贴对方的应答码</p>\n                            <textarea id=\"webrtc-answer-input\" class=\"w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2\" placeholder=\"粘贴对方的应答码\"></textarea>\n                            <button id=\"webrtc-accept-answer-button\" class=\"bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-md mb-4\"><span data-i18n=\"webrtcFinishConnection\">完成连接</span></button>\n                            <p id=\"webrtc-host-status\" class=\"text-sm text-gray-500 dark:text-dark-muted whitespace-pre-line\"></p>\n                        </div>\n                    </details>\n                    <button id=\"webrtc-host-back\" class=\"bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 font-bold py-3 px-6 rounded-md\"><i class=\"fa-solid fa-arrow-left mr-2\"></i><span data-i18n=\"cancel\">返回</span></button>\n                </div>\n                <div id=\"webrtc-join-section\" style=\"display: none;\">\n                    <p class=\"text-gray-600 dark:text-dark-muted text-sm mb-2\" data-i18n=\"webrtcQuickJoinTitle\">输入对方的 6 位连接码</p>\n                    <div class=\"flex justify-center mb-3\">\n                        <input id=\"webrtc-room-code-input\" maxlength=\"6\" inputmode=\"numeric\" autocomplete=\"off\" class=\"w-full max-w-xs text-center text-3xl font-bold tracking-[0.3em] text-secondary dark:text-dark-text bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary\" placeholder=\"000000\">\n                    </div>\n                    <button id=\"webrtc-join-room-button\" class=\"bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-md mb-2\"><span data-i18n=\"webrtcConnectRoom\">连接</span></button>\n                    <p id=\"webrtc-join-room-status\" class=\"text-sm text-gray-500 dark:text-dark-muted whitespace-pre-line mb-4\"></p>\n                    <details id=\"webrtc-join-manual\" class=\"mb-4 text-left\">\n                        <summary class=\"cursor-pointer text-sm text-gray-500 dark:text-dark-muted select-none\" data-i18n=\"webrtcManualMode\">手动模式（备用）：互换长连接码</summary>\n                        <div class=\"mt-3\">\n                            <p class=\"text-gray-600 dark:text-dark-muted text-sm mb-2\" data-i18n=\"webrtcJoinPasteOffer\">粘贴对方的连接码</p>\n                            <textarea id=\"webrtc-offer-input\" class=\"w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2\" placeholder=\"粘贴对方的连接码\"></textarea>\n                            <button id=\"webrtc-generate-answer-button\" class=\"bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-6 rounded-md mb-4\"><span data-i18n=\"webrtcGenerateAnswer\">生成应答码</span></button>\n                            <div id=\"webrtc-answer-box\" style=\"display: none;\">\n                                <p class=\"text-gray-600 dark:text-dark-muted text-sm mb-2\" data-i18n=\"webrtcJoinStep2\">将此应答码发回给对方</p>\n                                <textarea id=\"webrtc-answer-code\" readonly class=\"w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2\"></textarea>\n                                <button id=\"webrtc-copy-answer\" class=\"bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 text-sm font-bold py-2 px-4 rounded-md mb-4\">\n                                    <i class=\"fa-solid fa-copy mr-1\"></i><span data-i18n=\"webrtcCopyAnswer\">复制应答码</span>\n                                </button>\n                            </div>\n                            <p id=\"webrtc-join-status\" class=\"text-sm text-gray-500 dark:text-dark-muted whitespace-pre-line\"></p>\n                        </div>\n                    </details>\n                    <button id=\"webrtc-join-back\" class=\"bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 font-bold py-3 px-6 rounded-md\"><i class=\"fa-solid fa-arrow-left mr-2\"></i><span data-i18n=\"cancel\">返回</span></button>\n                </div>\n                <div id=\"webrtc-connected-section\" style=\"display: none;\">\n                    <p class=\"text-green-600 font-bold mb-4\" data-i18n=\"webrtcConnected\" data-i18n-mode=\"icon+text\"><i class=\"fa-solid fa-circle-check mr-1\"></i>已建立连接</p>\n                    <div class=\"flex items-center justify-center gap-2 mb-2\">\n                        <input type=\"checkbox\" id=\"webrtc-settings-checkbox\" class=\"w-4 h-4 text-primary bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded\" checked>\n                        <label for=\"webrtc-settings-checkbox\" class=\"text-sm text-gray-700 dark:text-dark-text\" data-i18n=\"includeSettings\">包含设置数据</label>\n                    </div>\n                    <div class=\"flex items-center justify-center gap-2 mb-4\">\n                        <input type=\"checkbox\" id=\"webrtc-live-sync-checkbox\" class=\"w-4 h-4 text-primary bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded\" checked>\n                        <label for=\"webrtc-live-sync-checkbox\" class=\"text-sm text-gray-700 dark:text-dark-text\" data-i18n=\"liveSyncData\">实时同步数据</label>\n                    </div>\n                    <button id=\"webrtc-send-button\" class=\"bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-md shadow-md mb-4\">\n                        <i class=\"fa-solid fa-paper-plane mr-2\"></i><span data-i18n=\"webrtcSendData\">发送游戏数据</span>\n                    </button>\n                    <p id=\"webrtc-connected-status\" class=\"text-sm text-gray-500 dark:text-dark-muted mb-4\"></p>\n                    <div class=\"flex flex-wrap gap-3 justify-center\">\n                        <button id=\"webrtc-disconnect-button\" class=\"bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200\">\n                            <i class=\"fa-solid fa-link-slash mr-2\"></i><span data-i18n=\"disconnectConnection\">断开连接</span>\n                        </button>\n                        <button id=\"webrtc-connected-back\" class=\"bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 font-bold py-3 px-6 rounded-md\"><i class=\"fa-solid fa-arrow-left mr-2\"></i><span data-i18n=\"cancel\">返回</span></button>\n                    </div>\n                </div>\n            </div>\n        </div>", "#settings-module-data": "                            <button id=\"webrtc-sync-button\" class=\"flex items-center justify-between w-full px-4 py-3 text-gray-700 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-all duration-200 rounded-lg\">\n                                <span class=\"flex items-center\">\n                                    <i class=\"fa-solid fa-wifi w-5 mr-2\"></i>\n                                    <span data-i18n=\"webrtcModalTitle\">局域网同步</span>\n                                    <span class=\"ml-2 px-2 py-0.5 text-xs bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-full font-semibold shadow-sm dark:from-green-400 dark:to-teal-400 dark:text-gray-900\">Beta</span>\n                                </span>\n                                <i class=\"fa-solid fa-chevron-right text-xs\"></i>\n                            </button>"};
 if (window.i18n && typeof window.i18n.registerModule === 'function') {
     window.i18n.registerModule('webrtc');
 }
 const WEBRTC_ROOM_ID_PREFIX = '2048sync-';
+const PEERJS_SCRIPT_URL = 'https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js';
+let peerLibPromise = null;
+function ensurePeerLib() {
+    if (typeof Peer !== 'undefined') return Promise.resolve();
+    if (peerLibPromise) return peerLibPromise;
+    peerLibPromise = new Promise(function (resolve, reject) {
+        const script = document.createElement('script');
+        script.src = PEERJS_SCRIPT_URL;
+        script.crossOrigin = 'anonymous';
+        script.onload = function () { resolve(); };
+        script.onerror = function () {
+            peerLibPromise = null;
+            const err = new Error('PeerJS library failed to load');
+            err.type = 'peer-lib-missing';
+            reject(err);
+        };
+        document.head.appendChild(script);
+    });
+    return peerLibPromise;
+}
 class WebRTCSync {
     constructor() {
         this.pc = null;
@@ -26,11 +47,7 @@ class WebRTCSync {
         return code;
     }
     async createRoom() {
-        if (typeof Peer === 'undefined') {
-            const err = new Error('PeerJS library not loaded');
-            err.type = 'peer-lib-missing';
-            throw err;
-        }
+        await ensurePeerLib();
         this.close();
         this.role = 'room-host';
         for (let attempt = 0; attempt < 3; attempt++) {
@@ -100,11 +117,7 @@ class WebRTCSync {
         });
     }
     async joinRoom(code) {
-        if (typeof Peer === 'undefined') {
-            const err = new Error('PeerJS library not loaded');
-            err.type = 'peer-lib-missing';
-            throw err;
-        }
+        await ensurePeerLib();
         const cleaned = String(code == null ? '' : code).replace(/\D/g, '');
         if (cleaned.length !== 6) {
             const err = new Error('Invalid room code');
@@ -868,6 +881,72 @@ async function handleWebRTCJoin() {
         setWebrtcStatus('webrtc-join-status', webrtcT('webrtcInvalidOffer', '连接码无效') + ': ' + error.message);
     }
 }
+function getGameDataForExport(includeSettings) {
+    const data = {
+        version: 1,
+        grid: window.gameState.grid,
+        score: window.gameState.score,
+        bestScore: window.gameState.bestScore,
+        gridSize: window.gameState.gridSize,
+        gridRows: window.gameState.gridRows,
+        gridCols: window.gameState.gridCols,
+        difficulty: window.gameState.difficulty,
+        isEndlessMode: window.gameState.isEndlessMode,
+        gameOver: window.gameState.gameOver,
+        gameWon: window.gameState.gameWon,
+        timestamp: new Date().toISOString()
+    };
+    if (includeSettings && window.SettingStore) {
+        data.settings = window.SettingStore.getAll();
+    }
+    return data;
+}
+function applyImportedData(data) {
+    if (!data || typeof data !== 'object' || !Array.isArray(data.grid) || data.grid.length === 0) {
+        throw new Error(webrtcT('importFailedGrid', 'Invalid grid'));
+    }
+    const gridRows = data.gridRows || data.gridSize || data.grid.length;
+    const gridCols = data.gridCols || data.gridSize || data.grid[0].length;
+    if (data.grid.length !== gridRows || data.grid.some(row => row.length !== gridCols)) {
+        throw new Error(webrtcT('importFailedSize', 'Size mismatch'));
+    }
+    window.gameState.grid = data.grid;
+    window.gameState.score = data.score || 0;
+    window.gameState.bestScore = data.bestScore || 0;
+    window.gameState.gridSize = data.gridSize || Math.max(gridRows, gridCols);
+    window.gameState.gridRows = gridRows;
+    window.gameState.gridCols = gridCols;
+    window.gameState.difficulty = data.difficulty || 'medium';
+    window.gameState.isEndlessMode = !!data.isEndlessMode;
+    window.gameState.gameOver = !!data.gameOver;
+    window.gameState.gameWon = !!data.gameWon;
+    window.gameState.history = [];
+    if (typeof saveGameState === 'function') {
+        saveGameState();
+    }
+    if (data.settings && window.SettingStore) {
+        let settingsChanged = false;
+        Object.keys(data.settings).forEach(key => {
+            const value = data.settings[key];
+            if (value !== null && value !== undefined && window.SettingStore.get(key) !== value) {
+                window.SettingStore.set(key, value);
+                settingsChanged = true;
+            }
+        });
+        if (settingsChanged && typeof importSettingsToGameState === 'function' && typeof SETTINGS_CONFIG !== 'undefined') {
+            importSettingsToGameState(SETTINGS_CONFIG);
+            if (typeof updateSettingsUI === 'function') {
+                updateSettingsUI(SETTINGS_CONFIG);
+            }
+            if (typeof handleThemeChange === 'function') {
+                handleThemeChange(localStorage.getItem('2048-setting-theme'));
+            }
+            if (typeof handleLanguageChange === 'function') {
+                handleLanguageChange(localStorage.getItem('2048-setting-language'));
+            }
+        }
+    }
+}
 function handleWebRTCSend() {
     try {
         const includeSettings = document.getElementById('webrtc-settings-checkbox').checked;
@@ -987,6 +1066,11 @@ function hideWebRTCModal() {
 window.webrtcSync = {
     version: webRTCSyncVersion,
     init: initWebRTCSync,
+    domTemplates: webRTCSyncDomTemplates,
+    selfParts: ['syncIndicator'],
+    isDomReady: function () {
+        return !!document.getElementById('webrtc-modal') && !!document.getElementById('webrtc-sync-button');
+    },
     get instance() {
         return webRTCSyncInstance;
     }

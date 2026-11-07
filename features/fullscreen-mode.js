@@ -1,6 +1,7 @@
-const fullscreenModeVersion = '0.7';
+const fullscreenModeVersion = '0.8';
 window.fullscreenModeVersion = fullscreenModeVersion;
 let isFullscreenMode = false;
+let fullscreenDomBound = false;
 const FULLSCREEN_HIDDEN_ELEMENTS = [
     { selector: '#game-header div.flex.gap-2' },
     { selector: '#controls-container' },
@@ -389,16 +390,21 @@ window.toggleFullscreenMode = toggleFullscreenMode;
 window.showRotateHint = showRotateHint;
 window.isFullscreenMode = function() { return !!getFullscreenElement(); };
 function initFullscreenMode() {
+    if (fullscreenDomBound) return;
     try {
         setupFullscreenMode();
         window.fullscreenModeModuleLoaded = true;
+        fullscreenDomBound = true;
     } catch (error) {
         console.warn('Fullscreen mode module loading failed:', error);
         window.fullscreenModeModuleLoaded = false;
     }
 }
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initFullscreenMode);
-} else {
-    initFullscreenMode();
-}
+window.fullscreenMode = {
+    version: fullscreenModeVersion,
+    init: initFullscreenMode,
+    domMode: 'self',
+    isDomReady: function () {
+        return !!document.getElementById('fullscreen-button') || !!document.getElementById('ai-analysis-button');
+    }
+};

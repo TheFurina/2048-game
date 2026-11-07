@@ -1,6 +1,7 @@
-const aiAutoPlayVersion = '1.3';
+const aiAutoPlayVersion = '1.4';
+const aiAutoPlayDomTemplates = {"#settings-module-ai": "                            <div class=\"flex items-center justify-between px-4 py-3 gap-3\">\n                                <div class=\"flex flex-col text-left\">\n                                    <span class=\"text-gray-700 dark:text-dark-muted\" data-i18n=\"aiBestMoveOnly\">仅请求最佳移动方向</span>\n                                    <span class=\"text-xs text-gray-500 dark:text-dark-muted mt-0.5\" data-i18n=\"aiBestMoveOnlyHint\">自动操作时跳过详细分析，响应更快</span>\n                                </div>\n                                <label class=\"relative inline-flex items-center cursor-pointer flex-shrink-0\">\n                                    <input type=\"checkbox\" id=\"ai-best-move-only\" class=\"sr-only peer\" checked onchange=\"window.settingsManager.save('ai-best-move-only', this.checked)\">\n                                    <div class=\"w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg\"></div>\n                                </label>\n                            </div>\n                            <div class=\"border-b border-gray-200 dark:border-gray-700 my-1 mx-2\"></div>\n                            <div class=\"flex items-center justify-between px-4 py-3 gap-3\">\n                                <div class=\"flex flex-col text-left\">\n                                    <span class=\"text-gray-700 dark:text-dark-muted\" data-i18n=\"aiAllowUndo\">允许推荐撤销</span>\n                                    <span class=\"text-xs text-gray-500 dark:text-dark-muted mt-0.5\" data-i18n=\"aiAllowUndoHint\">AI 可以推荐撤销上一步来挽回失误</span>\n                                </div>\n                                <label class=\"relative inline-flex items-center cursor-pointer flex-shrink-0\">\n                                    <input type=\"checkbox\" id=\"ai-allow-undo\" class=\"sr-only peer\" checked onchange=\"window.settingsManager.save('ai-allow-undo', this.checked)\">\n                                    <div class=\"w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg\"></div>\n                                </label>\n                            </div>\n                            <div class=\"border-b border-gray-200 dark:border-gray-700 my-1 mx-2\"></div>\n                            <div class=\"flex items-center justify-between px-4 py-3 gap-3\">\n                                <div class=\"flex flex-col text-left\">\n                                    <span class=\"text-gray-700 dark:text-dark-muted\" data-i18n=\"autoPlayKeepAwake\">自动操作时保持屏幕常亮</span>\n                                    <span class=\"text-xs text-gray-500 dark:text-dark-muted mt-0.5\" data-i18n=\"autoPlayKeepAwakeHint\">自动操作运行期间防止屏幕休眠</span>\n                                </div>\n                                <label class=\"relative inline-flex items-center cursor-pointer flex-shrink-0\">\n                                    <input type=\"checkbox\" id=\"auto-play-keep-screen-awake\" class=\"sr-only peer\" onchange=\"window.settingsManager.save('auto-play-keep-screen-awake', this.checked); if (window.aiAutoPlay) window.aiAutoPlay.setKeepScreenAwake(this.checked)\">\n                                    <div class=\"w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg\"></div>\n                                </label>\n                            </div>"};
 window.aiAutoPlayVersion = aiAutoPlayVersion;
-window.aiAutoPlayLoaded = true;
+let aiAutoPlayDomBound = false;
 if (window.i18n && typeof window.i18n.registerModule === 'function') {
     window.i18n.registerModule('autoPlay');
 }
@@ -256,6 +257,9 @@ function updateAutoPlayUI() {
     const stopButton = document.getElementById('auto-play-stop-button');
     const icon = toggleButton ? toggleButton.querySelector('i') : null;
     const label = toggleButton ? toggleButton.querySelector('span') : null;
+    if (stopButton) {
+        stopButton.title = autoPlayT('autoPlayStop');
+    }
     if (autoPlayStatus.running && !autoPlayStatus.paused) {
         if (icon) icon.className = 'fa-solid fa-pause';
         if (label) label.textContent = autoPlayT('autoPlayPause');
@@ -415,6 +419,7 @@ function toggleAutoPlay() {
     }
 }
 function setupAiAutoPlay() {
+    if (aiAutoPlayDomBound) return;
     const toggleButton = document.getElementById('auto-play-toggle-button');
     const stopButton = document.getElementById('auto-play-stop-button');
     if (!toggleButton) return;
@@ -428,6 +433,7 @@ function setupAiAutoPlay() {
         }
     });
     updateAutoPlayUI();
+    aiAutoPlayDomBound = true;
 }
 if (typeof window !== 'undefined') {
     window.aiAutoPlay = {
@@ -446,11 +452,14 @@ if (typeof window !== 'undefined') {
                 releaseAutoPlayWakeLock();
             }
         },
-        isActive: function() { return autoPlayStatus.running; }
+        isActive: function() { return autoPlayStatus.running; },
+        refresh: updateAutoPlayUI,
+        init: setupAiAutoPlay,
+        domMode: 'self',
+        domTemplates: aiAutoPlayDomTemplates,
+        isDomReady: function () {
+            return !!document.getElementById('game-touch-area') && !!document.getElementById('ai-analysis-modal');
+        }
     };
-}
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupAiAutoPlay);
-} else {
-    setupAiAutoPlay();
+    window.aiAutoPlayLoaded = true;
 }
