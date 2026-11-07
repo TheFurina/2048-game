@@ -1,0 +1,74 @@
+:root { --module-css-custom-select-version: 1.0; }
+.custom-select .select-selected i, .custom-select .select-item i, .custom-select .select-selected .emoji-icon, .custom-select .select-item .emoji-icon {
+    width: 20px;
+    display: inline-block;
+    text-align: center;
+}
+.custom-select .select-selected > span:first-child {
+    flex: 1;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.custom-select .select-item {
+    text-align: left;
+}
+
+.custom-select {
+    position: relative;
+}
+.custom-select .relative:hover .absolute {
+    opacity: 1;
+    visibility: visible;
+}
+.custom-select .relative:hover .absolute::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #1f2937;
+}
+.dark .custom-select .relative:hover .absolute::after {
+    border-top-color: #1f2937;
+}
+.select-selected {
+    user-select: none;
+}
+.select-selected .fa-chevron-down {
+    transition: transform 0.3s ease;
+}
+.select-selected.active .fa-chevron-down {
+    transform: rotate(180deg);
+}
+.select-items {
+    user-select: none;
+    overflow-y: auto;
+}
+.select-selected.active ~ .select-items {
+    max-height: 200px;
+}
+.select-item {
+    display: flex;
+    align-items: center;
+    font-family: 'Font Awesome 6 Free', sans-serif;
+    font-weight: 900;
+}
+.select-item.selected {
+    background-color: transparent;
+}
+.select-selected.active ~ .select-items .select-item.selected {
+    background-color: #d1d5db;
+}
+.dark .select-item.selected {
+    background-color: transparent;
+}
+.dark .select-selected.active ~ .select-items .select-item.selected {
+    background-color: #4b5563;
+}
+.select-selected span {
+    font-family: 'Font Awesome 6 Free', sans-serif;
+    font-weight: 900;
+}
