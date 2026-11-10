@@ -1,4 +1,4 @@
-const i18nVersion = '2.1';
+const i18nVersion = '2.1.1';
 window.i18nVersion = i18nVersion;
 const TILE_LEVELS = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768];
 function buildTileKeys(lang) {
@@ -308,6 +308,7 @@ const MODULE_TRANSLATIONS = {
             importFailedGrid: '网格数据无效',
             importFailedSize: '网格尺寸不匹配',
             importFailedTiles: '网格中包含无效的方块值',
+            importDecompressUnsupported: '当前浏览器不支持解析压缩链接，请更换或升级浏览器后重试。',
             consoleDataEmpty: '数据验证失败: 数据为空',
             consoleBase64Failed: 'Base64解码失败',
             consoleBase91Failed: 'Base91解码失败',
@@ -335,6 +336,7 @@ const MODULE_TRANSLATIONS = {
             importFailedGrid: 'Invalid grid data',
             importFailedSize: 'Grid size mismatch',
             importFailedTiles: 'Grid contains invalid tile values',
+            importDecompressUnsupported: 'Current browser cannot decompress this link, please use an up-to-date browser and retry.',
             consoleDataEmpty: 'Data validation failed: Data is empty',
             consoleBase64Failed: 'Base64 decode failed',
             consoleBase91Failed: 'Base91 decode failed',
@@ -1293,7 +1295,7 @@ function processSpecialCases() {
     const themeExportOptions = document.querySelector('#theme-export-options');
     if (themeExportOptions) {
         const h3Element = themeExportOptions.previousElementSibling;
-        if (h3Element && h3Element.tagName === 'H3' && h3Element.textContent.trim() === '选择要导出的主题项') {
+        if (h3Element && h3Element.tagName === 'H3') {
             h3Element.setAttribute('data-i18n', 'selectThemeItems');
         }
     }

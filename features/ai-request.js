@@ -1,6 +1,6 @@
-const aiRequestVersion = '1.5';
+const aiRequestVersion = '1.5-fix.1';
 window.aiRequestVersion = aiRequestVersion;
-const aiRequestDomTemplates = {"#module-dom-root": "        <div id=\"ai-settings-modal\" data-no-autofocus=\"true\" class=\"fixed inset-0 flex items-center justify-center bg-black/50 z-[1100] hidden\" role=\"dialog\" aria-labelledby=\"ai-settings-modal-title\" aria-modal=\"true\">\n            <div class=\"bg-gray-50 dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-visible text-center shadow-xl transform transition-all duration-300 scale-95 opacity-0\">\n                <h2 id=\"ai-settings-modal-title\" class=\"text-2xl font-bold text-secondary dark:text-dark-text mb-4\" data-i18n=\"aiApiSettingsItem\">API设置</h2>\n                <div class=\"flex flex-col gap-4\">\n                    <div class=\"text-left\">\n                        <label for=\"ai-api-base-url\" class=\"block text-sm font-medium text-gray-700 dark:text-dark-muted mb-1\" data-i18n=\"aiApiBaseUrl\">API Base URL</label>\n                        <input type=\"text\" id=\"ai-api-base-url\" class=\"w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm\" placeholder=\"https://api.openai.com/v1\">\n                    </div>\n                    <div class=\"text-left\">\n                        <label for=\"ai-api-key\" class=\"block text-sm font-medium text-gray-700 dark:text-dark-muted mb-1\" data-i18n=\"aiApiKey\">API Key</label>\n                        <input type=\"password\" id=\"ai-api-key\" class=\"w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm\" placeholder=\"sk-...\">\n                    </div>\n                    <div class=\"text-left\">\n                        <label for=\"ai-api-model\" class=\"block text-sm font-medium text-gray-700 dark:text-dark-muted mb-1\" data-i18n=\"aiApiModel\">模型</label>\n                        <div class=\"relative\">\n                            <input type=\"text\" id=\"ai-api-model\" class=\"w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm pr-10\" placeholder=\"gpt-4o-mini\">\n                            <button id=\"ai-model-dropdown-btn\" class=\"absolute right-0 top-0 h-full px-3 py-2 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r-md bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors\">\n                                <i class=\"fa-solid fa-chevron-down transition-transform duration-300\"></i>\n                            </button>\n                            <div id=\"ai-model-dropdown\" class=\"absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-[60] max-h-[200px] opacity-0 pointer-events-none overflow-hidden transition-all duration-300 ease-in-out\">\n                                <button id=\"ai-model-refresh-btn\" class=\"absolute top-1 right-2.5 p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-md transition-all z-10 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600\" title=\"刷新\">\n                                    <i class=\"fa-solid fa-rotate-right\"></i>\n                                </button>\n                                <div class=\"models-container p-1 overflow-y-auto max-h-48\">\n                                    <div class=\"px-3 py-2 text-sm text-gray-500 dark:text-gray-400 flex items-center justify-start gap-2\">\n                                        <i class=\"fa-solid fa-spinner fa-spin\"></i>\n                                        <span data-i18n=\"aiApiLoading\">加载中...</span>\n                                    </div>\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n                <button id=\"check-ai-api-btn\" class=\"w-full px-4 py-2 text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-sm transition-colors flex items-center justify-center gap-2 mt-4 whitespace-normal break-words\"><i class=\"fa-solid fa-circle-check flex-shrink-0\"></i><span data-i18n=\"aiApiCheck\">检查可用性</span></button>\n                <div class=\"flex justify-center gap-2 mt-6\">\n                    <button id=\"reset-ai-settings\" class=\"px-6 py-2 text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-sm transition-colors flex items-center justify-center gap-2 min-w-[80px]\"><i class=\"fa-solid fa-rotate-right\"></i><span data-i18n=\"reset\">重置</span></button>\n                    <button id=\"save-ai-settings\" class=\"px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-md text-sm transition-colors flex items-center justify-center gap-2 w-[100px]\"><i class=\"fa-solid fa-floppy-disk\"></i><span data-i18n=\"save\">保存</span></button>\n                </div>\n                <button id=\"close-ai-settings-button\" class=\"text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl dark:text-dark-muted dark:hover:text-white\" title=\"关闭设置\">\n                    <i class=\"fa-solid fa-times\"></i>\n                </button>\n            </div>\n        </div>", "#settings-module-ai": "                            <button id=\"ai-settings-button\" class=\"flex items-center justify-between w-full px-4 py-3 text-gray-700 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-all duration-200 rounded-lg\">\n                                <span class=\"flex items-center\">\n                                    <i class=\"fa-solid fa-gear w-5 mr-2\"></i>\n                                    <span data-i18n=\"aiApiSettingsItem\">API设置</span>\n                                </span>\n                                <i class=\"fa-solid fa-chevron-right text-xs\"></i>\n                            </button>\n                            <div class=\"border-b border-gray-200 dark:border-gray-700 my-1 mx-2\"></div>"};
+const aiRequestDomTemplates = {"#module-dom-root": "        <div id=\"ai-settings-modal\" data-no-autofocus=\"true\" class=\"fixed inset-0 flex items-center justify-center bg-black/50 z-[1100] hidden\" role=\"dialog\" aria-labelledby=\"ai-settings-modal-title\" aria-modal=\"true\">\n            <div class=\"bg-gray-50 dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-visible text-center shadow-xl transform transition-all duration-300 scale-95 opacity-0\">\n                <h2 id=\"ai-settings-modal-title\" class=\"text-2xl font-bold text-secondary dark:text-dark-text mb-4\" data-i18n=\"aiApiSettingsItem\"></h2>\n                <div class=\"flex flex-col gap-4\">\n                    <div class=\"text-left\">\n                        <label for=\"ai-api-base-url\" class=\"block text-sm font-medium text-gray-700 dark:text-dark-muted mb-1\" data-i18n=\"aiApiBaseUrl\"></label>\n                        <input type=\"text\" id=\"ai-api-base-url\" class=\"w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm\" placeholder=\"https://api.openai.com/v1\">\n                    </div>\n                    <div class=\"text-left\">\n                        <label for=\"ai-api-key\" class=\"block text-sm font-medium text-gray-700 dark:text-dark-muted mb-1\" data-i18n=\"aiApiKey\"></label>\n                        <input type=\"password\" id=\"ai-api-key\" class=\"w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm\" placeholder=\"sk-...\">\n                    </div>\n                    <div class=\"text-left\">\n                        <label for=\"ai-api-model\" class=\"block text-sm font-medium text-gray-700 dark:text-dark-muted mb-1\" data-i18n=\"aiApiModel\"></label>\n                        <div class=\"relative\">\n                            <input type=\"text\" id=\"ai-api-model\" class=\"w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm pr-10\" placeholder=\"gpt-4o-mini\">\n                            <button id=\"ai-model-dropdown-btn\" class=\"absolute right-0 top-0 h-full px-3 py-2 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r-md bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-500 dark:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors\">\n                                <i class=\"fa-solid fa-chevron-down transition-transform duration-300\"></i>\n                            </button>\n                            <div id=\"ai-model-dropdown\" class=\"absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-[60] max-h-[200px] opacity-0 pointer-events-none overflow-hidden transition-all duration-300 ease-in-out\">\n                                <button id=\"ai-model-refresh-btn\" class=\"absolute top-1 right-2.5 p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-md transition-all z-10 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600\" title=\"刷新\">\n                                    <i class=\"fa-solid fa-rotate-right\"></i>\n                                </button>\n                                <div class=\"models-container p-1 overflow-y-auto max-h-48\">\n                                    <div class=\"px-3 py-2 text-sm text-gray-500 dark:text-gray-400 flex items-center justify-start gap-2\">\n                                        <i class=\"fa-solid fa-spinner fa-spin\"></i>\n                                        <span data-i18n=\"aiApiLoading\"></span>\n                                    </div>\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n                <button id=\"check-ai-api-btn\" class=\"w-full px-4 py-2 text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-sm transition-colors flex items-center justify-center gap-2 mt-4 whitespace-normal break-words\"><i class=\"fa-solid fa-circle-check flex-shrink-0\"></i><span data-i18n=\"aiApiCheck\"></span></button>\n                <div class=\"flex justify-center gap-2 mt-6\">\n                    <button id=\"reset-ai-settings\" class=\"px-6 py-2 text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-sm transition-colors flex items-center justify-center gap-2 min-w-[80px]\"><i class=\"fa-solid fa-rotate-right\"></i><span data-i18n=\"reset\"></span></button>\n                    <button id=\"save-ai-settings\" class=\"px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-md text-sm transition-colors flex items-center justify-center gap-2 w-[100px]\"><i class=\"fa-solid fa-floppy-disk\"></i><span data-i18n=\"save\"></span></button>\n                </div>\n                <button id=\"close-ai-settings-button\" class=\"text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl dark:text-dark-muted dark:hover:text-white\" title=\"关闭设置\">\n                    <i class=\"fa-solid fa-times\"></i>\n                </button>\n            </div>\n        </div>", "#settings-module-ai": "                            <button id=\"ai-settings-button\" class=\"flex items-center justify-between w-full px-4 py-3 text-gray-700 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-all duration-200 rounded-lg\">\n                                <span class=\"flex items-center\">\n                                    <i class=\"fa-solid fa-gear w-5 mr-2\"></i>\n                                    <span data-i18n=\"aiApiSettingsItem\"></span>\n                                </span>\n                                <i class=\"fa-solid fa-chevron-right text-xs\"></i>\n                            </button>\n                            <div class=\"border-b border-gray-200 dark:border-gray-700 my-1 mx-2\"></div>"};
 const DEFAULT_CONFIG = {
     baseUrl: 'https://api.openai.com/v1',
     apiKey: '',
@@ -114,7 +114,6 @@ const ButtonStateManager = {
             className: 'w-full px-4 py-2 text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-sm transition-colors flex items-center justify-center gap-2 mt-4 whitespace-normal break-words',
             icon: 'fa-circle-check',
             textKey: 'aiApiCheck',
-            fallbackText: '检查可用性',
             dataI18n: 'aiApiCheck',
             disabled: false
         },
@@ -122,7 +121,6 @@ const ButtonStateManager = {
             className: 'w-full px-4 py-2 text-gray-600 bg-gray-100 dark:text-gray-300 dark:bg-gray-700 rounded-md text-sm transition-colors flex items-center justify-center gap-2 mt-4 whitespace-normal break-words',
             icon: 'fa-spinner fa-spin',
             textKey: 'aiApiChecking',
-            fallbackText: '检查中...',
             dataI18n: 'aiApiChecking',
             disabled: true
         },
@@ -130,7 +128,6 @@ const ButtonStateManager = {
             className: 'w-full px-4 py-2 text-white bg-green-500 hover:bg-green-600 rounded-md text-sm transition-colors flex items-center justify-center gap-2 mt-4 whitespace-normal break-words',
             icon: 'fa-circle-check',
             textKey: 'aiApiAvailable',
-            fallbackText: 'API可用',
             dataI18n: 'aiApiAvailable',
             disabled: false
         },
@@ -138,7 +135,6 @@ const ButtonStateManager = {
             className: 'w-full px-4 py-2 text-white bg-red-500 hover:bg-red-600 rounded-md text-sm transition-colors flex items-center justify-center gap-2 mt-4 whitespace-normal break-words',
             icon: 'fa-circle-exclamation',
             textKey: 'aiApiUnavailable',
-            fallbackText: 'API不可用',
             dataI18n: 'aiApiUnavailable',
             disabled: false
         }
@@ -151,7 +147,7 @@ const ButtonStateManager = {
         }
         button.className = state.className;
         button.disabled = state.disabled;
-        const text = customText || (i18n && i18n.t ? i18n.t(state.textKey) : state.fallbackText);
+        const text = customText || i18n.t(state.textKey);
         const dataAttr = state.dataI18n ? ` data-i18n="${state.dataI18n}"` : '';
         button.innerHTML = `<i class="fa-solid ${state.icon} flex-shrink-0"></i><span${dataAttr}>${text}</span>`;
     },
@@ -243,7 +239,7 @@ function setupAiRequestSettings() {
                 `<button class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md model-option" data-model="${model}">${model}</button>`
             ).join('');
         } else {
-            modelsContainer.innerHTML = '<div class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 text-left">' + (i18n && i18n.t ? i18n.t('aiApiModelsFailed') : '无法获取模型列表') + '</div>';
+            modelsContainer.innerHTML = '<div class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 text-left">' + (i18n.t('aiApiModelsFailed')) + '</div>';
         }
         if (refreshBtn) {
             refreshBtn.style.display = 'block';
@@ -271,7 +267,7 @@ function setupAiRequestSettings() {
             refreshBtn.addEventListener('click', async (e) => {
                 e.stopPropagation();
                 const modelsContainer = modelDropdown.querySelector('.models-container');
-                modelsContainer.innerHTML = '<div class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 flex items-center justify-start gap-2"><i class="fa-solid fa-spinner fa-spin"></i><span>' + (i18n && i18n.t ? i18n.t('aiApiLoading') : '加载中...') + '</span></div>';
+                modelsContainer.innerHTML = '<div class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 flex items-center justify-start gap-2"><i class="fa-solid fa-spinner fa-spin"></i><span>' + (i18n.t('aiApiLoading')) + '</span></div>';
                 await refreshModelsList();
             });
         }
@@ -301,17 +297,17 @@ function setupAiRequestSettings() {
                 ButtonStateManager.flashState(saveAiSettingsButton, {
                     className: 'px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md text-sm transition-colors flex items-center justify-center gap-2 w-[100px]',
                     icon: 'fa-solid fa-check',
-                    text: i18n && i18n.t ? i18n.t('aiApiSaved') : '已保存',
+                    text: i18n.t('aiApiSaved'),
                     dataI18n: 'aiApiSaved'
                 });
             } else {
-                alert(i18n && i18n.t ? i18n.t('aiApiSettingsSaveFailed') : 'AI设置保存失败！');
+                alert(i18n.t('aiApiSettingsSaveFailed'));
             }
         });
     }
     if (resetAiSettingsButton) {
         resetAiSettingsButton.addEventListener('click', () => {
-            if (confirm(i18n && i18n.t ? i18n.t('aiApiConfirmReset') : '确定要重置AI设置吗？')) {
+            if (confirm(i18n.t('aiApiConfirmReset'))) {
                 saveAiConfig(DEFAULT_CONFIG);
                 baseUrlInput.value = DEFAULT_CONFIG.baseUrl;
                 apiKeyInput.value = DEFAULT_CONFIG.apiKey;
@@ -357,7 +353,7 @@ async function checkAiApiAvailability(config) {
         if (!config.baseUrl || !config.apiKey) {
             return {
                 success: false,
-                message: i18n && i18n.t ? i18n.t('aiApiMissingConfig') : '缺少必要配置'
+                message: i18n.t('aiApiMissingConfig')
             };
         }
         const response = await fetch(`${config.baseUrl}/chat/completions`, {
@@ -376,14 +372,14 @@ async function checkAiApiAvailability(config) {
         if (response.ok) {
             return { success: true };
         } else {
-            let errorMsg = (i18n && i18n.t ? i18n.t('aiApiUnavailable') : 'API不可用');
+            let errorMsg = (i18n.t('aiApiUnavailable'));
             try {
                 const data = await response.json();
                 if (data.error && data.error.message) {
                     errorMsg = data.error.message;
                 }
             } catch (e) {
-                errorMsg = (i18n && i18n.t ? i18n.t('aiApiRequestFailed') : '请求失败');
+                errorMsg = (i18n.t('aiApiRequestFailed'));
             }
             return {
                 success: false,
@@ -393,7 +389,7 @@ async function checkAiApiAvailability(config) {
     } catch (e) {
         return {
             success: false,
-            message: (i18n && i18n.t ? i18n.t('aiApiNetworkError') : '网络错误') + ': ' + e.message
+            message: (i18n.t('aiApiNetworkError')) + ': ' + e.message
         };
     }
 }
