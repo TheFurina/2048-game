@@ -300,7 +300,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
     <script src="./features/module-loader.js"></script>
     <script>
-        const gameVersion = '3.0.0';
+        const gameVersion = '3.0.1';
         window.gameVersion = gameVersion;
         function loadCssVersion() {
             try {
@@ -458,7 +458,7 @@
         }
         loadKeyBindings();
         function formatKeyName(k) {
-            if (!k) return window.i18n ? i18n.t('notSet') : '未设置';
+            if (!k) return i18n.t('notSet');
             const nameMap = {
                 ' ': 'Space',
                 'escape': 'Esc',
@@ -511,17 +511,16 @@
                 else container.classList.remove('visible');
             }
             window.setCustomThemeUiVisible = setCustomThemeUiVisible;
-            function moduleMissingAlert(key, fallbackText) {
-                var text = window.i18n && typeof window.i18n.t === 'function' ? window.i18n.t(key) : fallbackText;
-                alert(text);
+            function moduleMissingAlert(key) {
+                alert(window.i18n && typeof window.i18n.t === 'function' ? window.i18n.t(key) : key);
             }
             function registerModuleFallbacks() {
                 ModuleLoader.registerFallback('dataTransfer', {
-                    exportGameData: function() { moduleMissingAlert('dataTransferModuleMissing', '数据传输模块未找到，请确保 features/data-transfer.js 文件存在。'); },
-                    importGameData: function() { moduleMissingAlert('dataTransferModuleMissing', '数据传输模块未找到，请确保 features/data-transfer.js 文件存在。'); },
-                    exportGameDataAsLink: function() { moduleMissingAlert('dataTransferModuleMissing', '数据传输模块未找到，请确保 features/data-transfer.js 文件存在。'); },
-                    exportGameDataAsFile: function() { moduleMissingAlert('dataTransferModuleMissing', '数据传输模块未找到，请确保 features/data-transfer.js 文件存在。'); },
-                    copyDataToClipboard: function() { moduleMissingAlert('dataTransferModuleMissing', '数据传输模块未找到，请确保 features/data-transfer.js 文件存在。'); },
+                    exportGameData: function() { moduleMissingAlert('dataTransferModuleMissing'); },
+                    importGameData: function() { moduleMissingAlert('dataTransferModuleMissing'); },
+                    exportGameDataAsLink: function() { moduleMissingAlert('dataTransferModuleMissing'); },
+                    exportGameDataAsFile: function() { moduleMissingAlert('dataTransferModuleMissing'); },
+                    copyDataToClipboard: function() { moduleMissingAlert('dataTransferModuleMissing'); },
                     isDomReady: function() { return false; },
                     domTemplates: {}
                 });
@@ -530,9 +529,9 @@
                     isDomReady: function() { return true; }
                 });
                 ModuleLoader.registerFallback('customTheme', {
-                    setupThemeCustomizer: function() { moduleMissingAlert('customThemeModuleMissing', '自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); },
-                    loadCustomTheme: function() { moduleMissingAlert('customThemeModuleMissing', '自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); },
-                    resetCustomTheme: function() { moduleMissingAlert('customThemeModuleMissing', '自定义主题模块未找到，请确保 features/custom-theme.js 文件存在。'); },
+                    setupThemeCustomizer: function() { moduleMissingAlert('customThemeModuleMissing'); },
+                    loadCustomTheme: function() { moduleMissingAlert('customThemeModuleMissing'); },
+                    resetCustomTheme: function() { moduleMissingAlert('customThemeModuleMissing'); },
                     isDomReady: function() { return false; },
                     domTemplates: {}
                 });
@@ -547,7 +546,7 @@
                 });
                 ModuleLoader.registerFallback('aiAnalysis', {
                     setupAiAnalysis: function() {},
-                    analyzeGameState: function() { moduleMissingAlert('aiAnalysisModuleMissing', 'AI分析模块未找到，请确保 features/ai-analysis.js 文件存在。'); },
+                    analyzeGameState: function() { moduleMissingAlert('aiAnalysisModuleMissing'); },
                     requestGameAnalysis: function() {},
                     isDomReady: function() { return false; },
                     domTemplates: {}
@@ -799,7 +798,7 @@
             <h1 class="text-5xl md:text-6xl font-bold text-secondary dark:text-dark-text tracking-tight">2048</h1>
             <div class="loading-spinner-container flex items-center gap-3">
                 <div class="loading-spinner"></div>
-                <span class="text-secondary/80 dark:text-dark-muted text-lg font-medium" data-i18n="loading">加载中...</span>
+                <span class="text-secondary/80 dark:text-dark-muted text-lg font-medium" data-i18n="loading"></span>
             </div>
             <div id="loading-error" class="flex-col items-center gap-3 text-center px-6" style="display: none;">
                 <i class="fa-solid fa-triangle-exclamation text-4xl text-red-500"></i>
@@ -812,43 +811,43 @@
     <div id="module-loading-overlay" class="fixed inset-0 z-[9998] hidden items-center justify-center bg-black/30 dark:bg-black/50" aria-live="polite">
         <div class="flex items-center gap-3 rounded-lg bg-white/95 dark:bg-dark-surface/95 px-5 py-4 shadow-xl">
             <div class="loading-spinner"></div>
-            <span class="text-secondary/80 dark:text-dark-muted text-base font-medium" data-i18n="moduleLoading">正在加载资源...</span>
+            <span class="text-secondary/80 dark:text-dark-muted text-base font-medium" data-i18n="moduleLoading"></span>
         </div>
     </div>
     <main class="max-w-md w-full mx-auto">
         <header id="game-header" class="flex flex-col md:flex-row justify-between items-center mb-6">
             <div>
-                <h1 id="game-title" class="text-[clamp(2.5rem,5vw,3.5rem)] font-bold text-secondary dark:text-dark-text mb-1 tracking-tight">2048</h1>
-                <p class="text-[clamp(1rem,2vw,1.2rem)] text-secondary/80 dark:text-dark-muted">滑动合并方块，创建<span class="font-bold">2048</span>！</p>
+                <h1 id="game-title" class="text-[clamp(2.5rem,5vw,3.5rem)] font-bold text-secondary dark:text-dark-text mb-1 tracking-tight"></h1>
+                <p class="text-[clamp(1rem,2vw,1.2rem)] text-secondary/80 dark:text-dark-muted"></p>
             </div>
             <div class="flex gap-2 mt-4 md:mt-0">
                 <button id="undo-button" class="bg-grid hover:bg-grid/80 text-white p-2 rounded-md shadow-md transition-all duration-200 focus:outline-none dark:bg-dark-grid w-[72px]" title="撤销上一步">
-                    <i class="fa-solid fa-undo mr-1"></i><span>撤销</span>
+                    <i class="fa-solid fa-undo mr-1"></i><span></span>
                 </button>
                 <button id="pause-button" class="bg-grid hover:bg-grid/80 text-white p-2 rounded-md shadow-md transition-all duration-200 focus:outline-none dark:bg-dark-grid w-[72px]" title="暂停游戏">
-                    <i class="fa-solid fa-pause mr-1"></i><span>暂停</span>
+                    <i class="fa-solid fa-pause mr-1"></i><span></span>
                 </button>
             </div>
         </header>
         <div class="flex justify-between items-center mb-4">
             <button id="toggle-controls" class="text-secondary dark:text-dark-muted hover:text-secondary/80 dark:hover:text-dark-muted/80 px-4 rounded transition-all duration-200 focus:outline-none flex items-center text-sm">
                 <i class="fa-solid fa-chevron-up mr-2" id="toggle-icon"></i>
-                <span id="toggle-text">收起控制</span>
+                <span id="toggle-text"></span>
             </button>
             <div id="sync-indicator" class="hidden items-center gap-3 pr-1 text-sm"></div>
         </div>
         <div id="controls-container" class="transition-all duration-300 ease-in-out">
             <div id="game-buttons" class="flex flex-wrap gap-2 mb-4">
                 <button id="new-game" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 flex-1 btn-hover dark:bg-dark-primary">
-                    <i class="fa-solid fa-gamepad mr-2"></i><span>标准模式</span>
+                    <i class="fa-solid fa-gamepad mr-2"></i><span></span>
                 </button>
                 <button id="endless-mode" class="bg-secondary hover:bg-secondary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary/50 flex-1 btn-hover dark:bg-dark-secondary">
-                    <i class="fa-solid fa-infinity mr-2"></i><span>无尽模式</span>
+                    <i class="fa-solid fa-infinity mr-2"></i><span></span>
                 </button>
             </div>
             <div class="options-container mb-4">
                 <div class="options-row">
-                    <span class="option-label">网格大小:</span>
+                    <span class="option-label"></span>
                     <div class="option-buttons">
                         <button id="grid-3x3" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-300 btn-hover w-16">
                             <i class="fa-solid fa-square-three"></i>3×3
@@ -860,21 +859,20 @@
                             <i class="fa-solid fa-square-five"></i>5×5
                         </button>
                         <button id="custom-grid" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-300 btn-hover w-20" title="自定义网格大小">
-                            自定义
                         </button>
                     </div>
                 </div>
                 <div class="options-row">
-                    <span class="option-label" data-i18n="difficulty">难度选择:</span>
+                    <span class="option-label" data-i18n="difficulty"></span>
                     <div class="option-buttons">
                         <button id="easy-mode" class="bg-easy hover:bg-easy/90 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-easy/50 flex-1 btn-hover">
-                            <i class="fa-solid fa-shield-check"></i>简单
+                            <i class="fa-solid fa-shield-check"></i>
                         </button>
                         <button id="medium-mode" class="bg-medium hover:bg-medium/90 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-medium/50 flex-1 btn-hover active">
-                            <i class="fa-solid fa-shield-half"></i>中等
+                            <i class="fa-solid fa-shield-half"></i>
                         </button>
                         <button id="hard-mode" class="bg-hard hover:bg-hard/90 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-hard/50 flex-1 btn-hover">
-                            <i class="fa-solid fa-shield-exclamation"></i>困难
+                            <i class="fa-solid fa-shield-exclamation"></i>
                         </button>
                     </div>
                 </div>
@@ -882,21 +880,19 @@
         </div>
         <div class="stats-container flex justify-between mb-4">
             <div id="score-box" class="bg-grid dark:bg-dark-grid text-center rounded-md p-3 flex-1 mr-2">
-                <div class="text-xs uppercase text-white/70 dark:text-dark-muted" data-i18n="score">分数</div>
+                <div class="text-xs uppercase text-white/70 dark:text-dark-muted" data-i18n="score"></div>
                 <div id="score" class="text-xl font-bold text-white dark:text-dark-text">0</div>
             </div>
             <div class="bg-grid dark:bg-dark-grid text-center rounded-md p-3 flex-1">
-                <div class="text-xs uppercase text-white/70 dark:text-dark-muted" data-i18n="bestScore">最高分</div>
+                <div class="text-xs uppercase text-white/70 dark:text-dark-muted" data-i18n="bestScore"></div>
                 <div id="best-score" class="text-xl font-bold text-white dark:text-dark-text">0</div>
             </div>
         </div>
         <div class="flex justify-between items-center mb-4">
             <div>
                 <div class="text-secondary/80 dark:text-dark-muted mb-2" id="mode-description">
-                    当前模式：标准模式 - 达到2048获胜
                 </div>
                 <div id="difficulty-description" class="text-secondary/80 dark:text-dark-muted">
-                    当前难度：中等 - 4x4网格
                 </div>
             </div>
             <button id="ai-analysis-button" class="bg-primary dark:bg-dark-primary hover:bg-primary/90 text-white w-12 h-12 rounded-full shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center justify-center">
@@ -910,26 +906,26 @@
         <div id="game-touch-area" class="mt-4 h-5 bg-transparent"></div>
         <div id="game-message" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="game-message-title" aria-modal="true">
             <div class="bg-white dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0">
-                <h2 id="game-message-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4" data-i18n="gameWon">恭喜你获胜！</h2>
-                <p id="game-message-text" class="text-secondary/80 mb-6" data-i18n="gameWonText">你达到了2048分，可以继续游戏挑战更高分数，或者重新开始。</p>
+                <h2 id="game-message-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4" data-i18n="gameWon"></h2>
+                <p id="game-message-text" class="text-secondary/80 mb-6" data-i18n="gameWonText"></p>
                 <button id="game-message-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50">
-                    <i class="fa-solid fa-refresh mr-2"></i><span data-i18n="tryAgain">再玩一次</span>
+                    <i class="fa-solid fa-refresh mr-2"></i><span data-i18n="tryAgain"></span>
                 </button>
             </div>
         </div>
         <div id="pause-menu" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="pause-menu-title" aria-modal="true">
             <div class="bg-white dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0">
-                <h2 id="pause-menu-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4" data-i18n="gamePaused">游戏暂停</h2>
+                <h2 id="pause-menu-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4" data-i18n="gamePaused"></h2>
                 <div class="flex flex-col gap-4">
                     <button id="resume-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50">
-                        <i class="fa-solid fa-play mr-2"></i><span>继续游戏</span>
+                        <i class="fa-solid fa-play mr-2"></i><span></span>
                     </button>
                     <button id="restart-button" class="bg-secondary hover:bg-secondary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary/50">
-                        <i class="fa-solid fa-refresh mr-2"></i><span>重新开始</span>
+                        <i class="fa-solid fa-refresh mr-2"></i><span></span>
                     </button>
                     <div class="flex justify-center gap-4 mt-2">
                         <button id="settings-button" class="text-primary hover:text-primary/80 focus:outline-none text-sm">
-                            <i class="fa-solid fa-cog mr-1"></i><span>设置</span>
+                            <i class="fa-solid fa-cog mr-1"></i><span></span>
                         </button>
                      </div>
                 </div>
@@ -937,15 +933,15 @@
         </div>
         <div id="settings-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="settings-modal-title" aria-modal="true">
             <div class="bg-gray-50 dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 scale-95 opacity-0">
-                <h2 id="settings-modal-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4">设置</h2>
+                <h2 id="settings-modal-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4"></h2>
                 <div class="flex flex-col gap-3">
                     <div class="setting-category">
                         <h3 class="text-base font-semibold text-secondary mb-2 text-left category-title flex items-center">
-                            <i class="fa-solid fa-gauge-high mr-2"></i><span data-i18n="gamePerformance">性能</span>
+                            <i class="fa-solid fa-gauge-high mr-2"></i><span data-i18n="gamePerformance"></span>
                         </h3>
                         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 py-3 px-2 shadow-sm">
                             <div class="flex items-center justify-between mb-2 px-2">
-                                <span class="text-gray-700 dark:text-dark-muted" data-i18n="gpuAcceleration">GPU加速</span>
+                                <span class="text-gray-700 dark:text-dark-muted" data-i18n="gpuAcceleration"></span>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" id="gpu-acceleration" class="sr-only peer" checked title="GPU加速">
                                     <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
@@ -954,14 +950,14 @@
                             <div class="border-b border-gray-200 dark:border-gray-700 my-3 mx-2"></div>
                             <div class="vibration-toggle-container flex items-center justify-between mb-2 px-2">
                                 <div class="flex items-center">
-                                    <span class="text-gray-700 dark:text-dark-muted" data-i18n="vibration">振动反馈</span>
+                                    <span class="text-gray-700 dark:text-dark-muted" data-i18n="vibration"></span>
                                     <div id="vibration-warning-container" class="relative ml-2 flex items-center group hidden">
                                         <span id="vibration-warning-icon" class="text-yellow-500 transition-opacity duration-300 cursor-help">
                                             <i class="fa-solid fa-circle-exclamation"></i>
                                         </span>
-                                        <span id="vibration-warning-text" class="text-yellow-500 text-xs ml-1 transition-opacity duration-300" data-i18n="notAvailable">不可用</span>
+                                        <span id="vibration-warning-text" class="text-yellow-500 text-xs ml-1 transition-opacity duration-300" data-i18n="notAvailable"></span>
                                         <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs p-2 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-                                            <span data-i18n="vibrationWarning">当前浏览器不支持振动功能</span>
+                                            <span data-i18n="vibrationWarning"></span>
                                         </div>
                                     </div>
                                 </div>
@@ -972,21 +968,21 @@
                             </div>
                             <div id="vibration-details" class="ml-6 mt-1 space-y-2">
                                 <div class="flex items-center justify-between px-2">
-                                    <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="mergeVibration">合并振动</span>
+                                    <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="mergeVibration"></span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="vibration-merge" class="sr-only peer" checked title="合并振动">
                                         <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
                                     </label>
                                 </div>
                                 <div class="flex items-center justify-between px-2">
-                                    <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="winVibration">获胜振动</span>
+                                    <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="winVibration"></span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="vibration-win" class="sr-only peer" checked title="获胜振动">
                                         <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
                                     </label>
                                 </div>
                                 <div class="flex items-center justify-between px-2">
-                                    <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="lossVibration">失败振动</span>
+                                    <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="lossVibration"></span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="vibration-loss" class="sr-only peer" checked title="失败振动">
                                         <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
@@ -995,7 +991,7 @@
                             </div>
                             <div class="border-b border-gray-200 dark:border-gray-700 my-3 mx-2"></div>
                             <div class="flex items-center justify-between px-2">
-                                <span class="text-gray-700 dark:text-dark-muted" data-i18n="tileAnimation">滑块动画</span>
+                                <span class="text-gray-700 dark:text-dark-muted" data-i18n="tileAnimation"></span>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" id="tile-animation" class="sr-only peer" checked title="滑块动画">
                                     <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
@@ -1003,21 +999,21 @@
                             </div>
                             <div id="animation-details" class="ml-6 mt-1 space-y-2">
                                 <div class="flex items-center justify-between px-2">
-                                    <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="appearAnimation">新滑块出现动画</span>
+                                    <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="appearAnimation"></span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="tile-appear-animation" class="sr-only peer" checked title="新滑块出现动画">
                                         <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
                                     </label>
                                 </div>
                                 <div class="flex items-center justify-between px-2">
-                                    <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="moveAnimation">滑块移动动画</span>
+                                    <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="moveAnimation"></span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="tile-move-animation" class="sr-only peer" checked title="滑块移动动画">
                                         <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
                                     </label>
                                 </div>
                                 <div class="flex items-center justify-between px-2">
-                                    <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="mergeAnimation">滑块合并动画</span>
+                                    <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="mergeAnimation"></span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="tile-merge-animation" class="sr-only peer" checked title="滑块合并动画">
                                         <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
@@ -1026,7 +1022,7 @@
                             </div>
                             <div class="border-b border-gray-200 dark:border-gray-700 my-3 mx-2"></div>
                             <div class="flex items-center justify-between px-2">
-                                <span class="text-gray-700 dark:text-dark-muted" data-i18n="scorePopAnimation">分数跳字动画</span>
+                                <span class="text-gray-700 dark:text-dark-muted" data-i18n="scorePopAnimation"></span>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" id="score-pop-animation" class="sr-only peer" checked title="分数跳字动画">
                                     <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg"></div>
@@ -1036,21 +1032,21 @@
                     </div>
                     <div class="setting-category">
                         <h3 class="text-base font-semibold text-secondary mb-2 text-left category-title flex items-center">
-                            <i class="fa-solid fa-paint-roller mr-2"></i><span data-i18n="appearance">外观</span>
+                            <i class="fa-solid fa-paint-roller mr-2"></i><span data-i18n="appearance"></span>
                         </h3>
                         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-3 shadow-sm">
                             <div class="flex items-center justify-between mt-2 mb-2 px-2">
-                                <label for="theme-toggle" class="text-gray-700 dark:text-dark-muted" data-i18n="theme">主题</label>
+                                <label for="theme-toggle" class="text-gray-700 dark:text-dark-muted" data-i18n="theme"></label>
                                 <div class="custom-select relative w-full max-w-[180px]">
                                     <div class="select-selected flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md border border-gray-300 dark:border-gray-600 cursor-pointer transition-all duration-200 hover:border-primary/50">
-                                        <span><i class="fa-solid fa-desktop mr-1"></i><span data-i18n="followBrowser">跟随浏览器</span></span>
+                                        <span><i class="fa-solid fa-desktop mr-1"></i><span data-i18n="followBrowser"></span></span>
                                         <i class="fa fa-chevron-down text-xs ml-2 text-gray-500 dark:text-gray-400"></i>
                                     </div>
                                     <div class="select-items absolute mt-1 w-full bg-gray-100 dark:bg-gray-800 rounded-md shadow-lg border border-gray-300 dark:border-gray-600 z-20 max-h-0 opacity-0 overflow-y-auto transition-all duration-300 ease-in-out">
-                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="auto"><i class="fa-solid fa-desktop mr-1"></i><span data-i18n="followBrowser">跟随浏览器</span></div>
-                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="light"><i class="fa-solid fa-sun mr-1"></i><span data-i18n="lightTheme">浅色</span></div>
-                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="dark"><i class="fa-solid fa-moon mr-1"></i><span data-i18n="darkTheme">深色</span></div>
-                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="custom"><i class="fa-solid fa-palette mr-1"></i><span data-i18n="custom">自定义</span></div>
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="auto"><i class="fa-solid fa-desktop mr-1"></i><span data-i18n="followBrowser"></span></div>
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="light"><i class="fa-solid fa-sun mr-1"></i><span data-i18n="lightTheme"></span></div>
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="dark"><i class="fa-solid fa-moon mr-1"></i><span data-i18n="darkTheme"></span></div>
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="custom"><i class="fa-solid fa-palette mr-1"></i><span data-i18n="custom"></span></div>
                                     </div>
                                 </div>
                                 <select id="theme-toggle" style="display: none;" class="bg-grid text-gray-800 dark:text-white p-2 rounded-md shadow-md transition-all duration-200 focus:outline-none dark:bg-dark-grid" title="选择主题">
@@ -1065,7 +1061,7 @@
                     </div>
                     <div class="setting-category">
                         <h3 class="text-base font-semibold text-secondary mb-2 text-left category-title flex items-center">
-                            <i class="fa-solid fa-database mr-2"></i><span data-i18n="dataManagement">数据</span>
+                            <i class="fa-solid fa-database mr-2"></i><span data-i18n="dataManagement"></span>
                         </h3>
                         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-2 shadow-sm">
                             <div id="settings-module-data"></div>
@@ -1073,7 +1069,7 @@
                     </div>
                     <div class="setting-category">
                         <h3 class="text-base font-semibold text-secondary mb-2 text-left category-title flex items-center">
-                            <i class="fa-solid fa-brain mr-2"></i><span data-i18n="aiApiSettings">AI</span>
+                            <i class="fa-solid fa-brain mr-2"></i><span data-i18n="aiApiSettings"></span>
                         </h3>
                         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-2 shadow-sm">
                             <div id="settings-module-ai"></div>
@@ -1081,7 +1077,7 @@
                     </div>
                     <div class="setting-category">
                         <h3 class="text-base font-semibold text-secondary mb-2 text-left category-title flex items-center">
-                            <i class="fa-solid fa-keyboard mr-2"></i><span data-i18n="operations">操作</span>
+                            <i class="fa-solid fa-keyboard mr-2"></i><span data-i18n="operations"></span>
                         </h3>
                         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-2 shadow-sm">
                             <div id="settings-module-operations"></div>
@@ -1089,22 +1085,22 @@
                     </div>
                     <div class="text-sm text-secondary/70 mt-4" id="version-info"></div>
                     <button id="reset-settings-button" class="text-gray-500 hover:text-gray-700 focus:outline-none text-sm inline-block mx-auto">
-                        <i class="fa-solid fa-rotate-right mr-1"></i><span>重置所有设置</span>
+                        <i class="fa-solid fa-rotate-right mr-1"></i><span></span>
                     </button>
                     <button id="close-settings-button" class="text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl dark:text-dark-muted dark:hover:text-white" title="关闭设置">
                         <i class="fa-solid fa-times"></i>
                     </button>
                     <div class="flex justify-end">
-                        <a href="https://github.com/TheFurina/2048-game" class="text-primary hover:underline flex items-center gap-1 text-xs" target="_blank"><i class="fa-brands fa-github"></i> <span data-i18n="github">Github</span></a>
+                        <a href="https://github.com/TheFurina/2048-game" class="text-primary hover:underline flex items-center gap-1 text-xs" target="_blank"><i class="fa-brands fa-github"></i> <span data-i18n="github"></span></a>
                     </div>
                 </div>
             </div>
         </div>
         <div id="custom-grid-modal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden" role="dialog" aria-labelledby="custom-grid-modal-title" aria-modal="true">
             <div class="bg-white dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl transform transition-all duration-300 ease-in-out scale-95 opacity-0">
-                <h2 id="custom-grid-modal-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4">自定义网格大小</h2>
+                <h2 id="custom-grid-modal-title" class="text-2xl font-bold text-secondary dark:text-dark-text mb-4"></h2>
                 <div class="mb-4">
-                    <label for="grid-size-input" class="block text-sm font-medium text-gray-700 dark:text-dark-muted mb-2">请输入网格大小 (3-10):</label>
+                    <label for="grid-size-input" class="block text-sm font-medium text-gray-700 dark:text-dark-muted mb-2"></label>
                     <div class="flex items-center justify-center gap-2">
                         <input type="number" id="grid-size-input" min="3" max="10" value="4" class="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-center dark:bg-dark-surface dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         <span class="text-gray-600 dark:text-dark-muted">×</span>
@@ -1113,22 +1109,22 @@
                     <div class="mt-2">
                         <label class="inline-flex items-center">
                             <input type="checkbox" id="square-grid" checked class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            <span class="ml-2 text-sm text-gray-700 dark:text-dark-muted" data-i18n="squareGrid">正方形网格 (锁定宽高比)</span>
+                            <span class="ml-2 text-sm text-gray-700 dark:text-dark-muted" data-i18n="squareGrid"></span>
                         </label>
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-3 justify-center">
                     <button id="apply-custom-grid" class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-md transition-all duration-200 flex-1 sm:flex-none sm:min-w-[120px]">
-                        <i class="fa-solid fa-check mr-1"></i><span data-i18n="apply">应用</span>
+                        <i class="fa-solid fa-check mr-1"></i><span data-i18n="apply"></span>
                     </button>
                     <button id="cancel-custom-grid" class="px-4 py-2 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-md transition-all duration-200 flex-1 sm:flex-none sm:min-w-[120px]">
-                        <i class="fa-solid fa-times mr-1"></i><span data-i18n="cancel">取消</span>
+                        <i class="fa-solid fa-times mr-1"></i><span data-i18n="cancel"></span>
                     </button>
                 </div>
             </div>
         </div>
         <footer class="mt-6 py-3 text-center text-secondary/50 dark:text-dark-muted/50 text-base">
-            <p><i class="fa-solid fa-cube mr-2"></i>滑动之间 数字新生</p>
+            <p><i class="fa-solid fa-cube mr-2"></i></p>
         </footer>
     </div>
     <script>
@@ -2330,11 +2326,11 @@
             if (gameState.history.length === 0) {
                 elements.undoButton.disabled = true;
                 elements.undoButton.classList.add('opacity-50', 'cursor-not-allowed');
-                elements.undoButton.title = '无法撤销（没有历史记录）';
+                elements.undoButton.title = i18n.t('noUndo');
             } else {
                 elements.undoButton.disabled = false;
                 elements.undoButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                elements.undoButton.title = `撤销上一步（可撤销 ${gameState.history.length} 步）`;
+                elements.undoButton.title = i18n.t('undoSteps', { steps: gameState.history.length });
             }
         }
         function updateDifficultyButtons() {
@@ -2370,12 +2366,7 @@
             }
         }
         function getDifficultyName() {
-            switch(gameState.difficulty) {
-                case 'easy': return '简单';
-                case 'medium': return '中等';
-                case 'hard': return '困难';
-                default: return '中等';
-            }
+            return i18n.t(gameState.difficulty || 'medium');
         }
         function saveGameState() {
             try {
@@ -2423,7 +2414,7 @@
             updateDifficultyButtons();
             updateGridButtonState(Math.max(gridRows, gridCols));
             elements.modeDescription.textContent = i18n.t('modeDescription') + (isEndlessMode ? i18n.t('endlessModeDesc') : i18n.t('standardMode'));
-            elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${gridRows}×${gridCols}网格`;
+            elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${gridRows}×${gridCols}` + i18n.t('grid');
             hideGameMessage();
             updateDocumentTitle();
             updateUndoButtonState();
@@ -2665,7 +2656,7 @@
                 if (isConflict) {
                     const icon = document.createElement('i');
                     icon.className = 'fa-solid fa-circle-exclamation text-red-500';
-                    icon.title = window.i18n ? i18n.t('keybindingConflict') : '快捷键冲突';
+                    icon.title = i18n.t('keybindingConflict');
                     wrap.appendChild(icon);
                 }
                 if (action === 'undo') {
@@ -2687,7 +2678,7 @@
             if (!list) return;
             const btn = list.querySelector(`button[data-action="${action}"]`);
             if (!btn) return;
-            btn.textContent = window.i18n ? i18n.t('pressKey') : '按下按键...';
+            btn.textContent = i18n.t('pressKey');
             btn.classList.add('bg-primary', 'text-white', 'animate-pulse');
             const handler = (e) => {
                 e.preventDefault();
@@ -2779,7 +2770,7 @@
                                 gameState.gridRows = newGridSize;
                                 gameState.gridCols = newGridSize;
                                 updateGridButtonState(newGridSize);
-                                elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${gameState.gridRows}×${gameState.gridCols}网格`;
+                                elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${gameState.gridRows}×${gameState.gridCols}` + i18n.t('grid');
                                 initGame(gameState.isEndlessMode, newGridSize, newGridSize);
                             } else if (gameState.score === 0) {
                                 const currentIndex = [3, 4, 5].indexOf(gameState.gridSize);
@@ -2789,7 +2780,7 @@
                                 gameState.gridRows = newGridSize;
                                 gameState.gridCols = newGridSize;
                                 updateGridButtonState(newGridSize);
-                                elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${gameState.gridRows}×${gameState.gridCols}网格`;
+                                elements.difficultyDescription.textContent = i18n.t('difficultyDescription') + i18n.t(gameState.difficulty) + ` - ${gameState.gridRows}×${gameState.gridCols}` + i18n.t('grid');
                                 initGame(gameState.isEndlessMode, newGridSize, newGridSize);
                             }
                         }
@@ -3036,12 +3027,12 @@
                 if (isControlsCollapsed) {
                     elements.controlsContainer.classList.add('collapsed');
                     elements.toggleIcon.classList.add('rotated');
-                    elements.toggleText.textContent = window.i18n ? window.i18n.t('expandControls') : '展开控制';
+                    elements.toggleText.textContent = window.i18n.t('expandControls');
                     localStorage.setItem('controlsCollapsed', 'true');
                 } else {
                     elements.controlsContainer.classList.remove('collapsed');
                     elements.toggleIcon.classList.remove('rotated');
-                    elements.toggleText.textContent = window.i18n ? window.i18n.t('toggleControls') : '收起控制';
+                    elements.toggleText.textContent = window.i18n.t('toggleControls');
                     localStorage.setItem('controlsCollapsed', 'false');
                 }
             }
@@ -3082,7 +3073,7 @@
                 closeKeybindingsButton.addEventListener('click', () => {
                     cancelActiveKeyCapture();
                     if (findKeyConflicts().size > 0) {
-                        alert(window.i18n ? i18n.t('keybindingConflict') : '快捷键冲突，请修改为其他按键');
+                        alert(i18n.t('keybindingConflict'));
                         return;
                     }
                     hideModal('keybindings-modal');
@@ -3492,7 +3483,7 @@
                     window.dataTransfer.autoImportFromUrl();
                 }
                 handleResize();
-                hideLoadingScreen();
+                setTimeout(hideLoadingScreen, 600);
             };
             const preload = [];
             if (localStorage.getItem('2048-setting-theme') === 'custom') preload.push('customTheme');
