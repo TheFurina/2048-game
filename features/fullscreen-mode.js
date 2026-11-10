@@ -1,4 +1,4 @@
-const fullscreenModeVersion = '0.8';
+const fullscreenModeVersion = '0.8-fix.1';
 window.fullscreenModeVersion = fullscreenModeVersion;
 let isFullscreenMode = false;
 let fullscreenDomBound = false;
@@ -100,16 +100,16 @@ function exitFullscreenMode() {
 }
 function showRotateHint() {
     if (document.getElementById('rotate-hint-overlay')) return;
-    const tr = (key, fallback) => (window.i18n && typeof window.i18n.t === 'function' ? window.i18n.t(key) : fallback);
+    const tr = key => (window.i18n && typeof window.i18n.t === 'function' ? window.i18n.t(key) : key);
     const overlay = document.createElement('div');
     overlay.id = 'rotate-hint-overlay';
     overlay.innerHTML = [
         '<div class="rotate-hint-content">',
         '    <i class="fa-solid fa-mobile-screen-button rotate-hint-icon"></i>',
-        `    <p class="rotate-hint-text" data-i18n="rotateHintTitle">${tr('rotateHintTitle', '请旋转至竖屏以获得最佳体验')}</p>`,
+        `    <p class="rotate-hint-text" data-i18n="rotateHintTitle">${tr('rotateHintTitle')}</p>`,
         '    <button type="button" id="rotate-hint-exit-button" class="rotate-hint-exit">',
         '        <i class="fa-solid fa-compress"></i>',
-        `        <span data-i18n="exitFullscreen">${tr('exitFullscreen', '退出全屏')}</span>`,
+        `        <span data-i18n="exitFullscreen">${tr('exitFullscreen')}</span>`,
         '    </button>',
         '</div>'
     ].join('');
