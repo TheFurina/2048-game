@@ -1,4 +1,4 @@
-:root { --module-css-ai-analysis-version: 1.0; }
+:root { --module-css-ai-analysis-version: 1.0-fix.1; }
 .ai-analysis-modal {
     position: fixed;top: 0;left: 0;right: 0;bottom: 0;background: transparent;z-index: 1000; opacity: 1; transform: scale(1); visibility: visible; transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
 }
@@ -65,6 +65,7 @@
     width: 24px;
     text-align: center;
     padding: 0;
+}
 #game-state-assessment {
     font-weight: bold;
 }
@@ -127,5 +128,4 @@
 }
 .dark #score-potential.low {
     background: #e57373;color: #ffebee;
-}
 }
