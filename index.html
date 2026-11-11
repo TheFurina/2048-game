@@ -183,26 +183,6 @@
             }
             return fallback;
         };
-        (function() {
-            try {
-                var savedLang = localStorage.getItem('2048-setting-language') || 'auto';
-                var lang = savedLang;
-                if (lang === 'auto') {
-                    var browserLang = (navigator.language || navigator.userLanguage || '').split('-')[0];
-                    lang = browserLang === 'en' ? 'en' : 'zh';
-                }
-                var loadingText = lang === 'en' ? 'Loading...' : '加载中...';
-                var applyLoadingI18n = function() {
-                    var el = document.querySelector('#loading-screen [data-i18n="loading"]');
-                    if (el) el.textContent = loadingText;
-                };
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', applyLoadingI18n);
-                } else {
-                    applyLoadingI18n();
-                }
-            } catch (e) {}
-        })();
     </script>
     <script>
         (function () {
@@ -300,7 +280,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
     <script src="./features/module-loader.js"></script>
     <script>
-        const gameVersion = '3.0.1';
+        const gameVersion = '3.0.1-fix.1';
         window.gameVersion = gameVersion;
         function loadCssVersion() {
             try {
@@ -808,6 +788,20 @@
             </div>
         </div>
     </div>
+    <script>
+        try {
+            (function () {
+                var lang = localStorage.getItem('2048-setting-language') || 'auto';
+                if (lang === 'auto') {
+                    var browserLang = (navigator.language || navigator.userLanguage || '').split('-')[0];
+                    lang = browserLang === 'en' ? 'en' : 'zh';
+                }
+                var loadingText = lang === 'en' ? 'Loading...' : '加载中...';
+                var el = document.querySelector('#loading-screen [data-i18n="loading"]');
+                if (el) el.textContent = loadingText;
+            })();
+        } catch (e) {}
+    </script>
     <div id="module-loading-overlay" class="fixed inset-0 z-[9998] hidden items-center justify-center bg-black/30 dark:bg-black/50" aria-live="polite">
         <div class="flex items-center gap-3 rounded-lg bg-white/95 dark:bg-dark-surface/95 px-5 py-4 shadow-xl">
             <div class="loading-spinner"></div>
