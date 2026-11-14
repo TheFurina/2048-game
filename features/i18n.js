@@ -1,4 +1,4 @@
-const i18nVersion = '2.2.0';
+const i18nVersion = '2.2.1';
 window.i18nVersion = i18nVersion;
 const TILE_LEVELS = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768];
 function buildTileKeys(lang) {
@@ -788,7 +788,7 @@ const MODULE_TRANSLATIONS = {
     webrtc: {
         zh: {
             webrtcModalTitle: '局域网同步',
-            webrtcSelectDesc: '通过 6 位连接码与另一台设备快速配对同步（信令经公共服务器，游戏数据仍为设备间点对点直连）。也可展开手动模式互换连接码。',
+            webrtcSelectDesc: '输入 6 位连接码即可与另一台设备配对同步，游戏数据点对点直连。',
             webrtcCreateConnection: '创建连接',
             webrtcJoinConnection: '加入连接',
             webrtcHostStep1: '第 1 步：将此连接码发给对方',
@@ -846,7 +846,7 @@ const MODULE_TRANSLATIONS = {
         },
         en: {
             webrtcModalTitle: 'LAN Sync',
-            webrtcSelectDesc: 'Pair with another device via a 6-digit code (signaling goes through a public server, game data is still peer-to-peer). Or expand manual mode to exchange codes.',
+            webrtcSelectDesc: 'Enter a 6-digit code to pair and sync with another device. Game data is peer-to-peer.',
             webrtcCreateConnection: 'Create Connection',
             webrtcJoinConnection: 'Join Connection',
             webrtcHostStep1: 'Step 1: Send this code to the other device',
@@ -904,7 +904,7 @@ const MODULE_TRANSLATIONS = {
         },
         ja: {
             webrtcModalTitle: 'LAN同期',
-            webrtcSelectDesc: '6桁のコードで別のデバイスとペアリングして同期します（シグナリングはパブリックサーバー経由、ゲームデータはデバイス間のピアツーピア接続です）。手動モードを展開してコードを交換することもできます。',
+            webrtcSelectDesc: '6桁のコードを入力するだけで別のデバイスとペアリングして同期できます。ゲームデータはピアツーピア接続です。',
             webrtcCreateConnection: '接続を作成',
             webrtcJoinConnection: '接続に参加',
             webrtcHostStep1: 'ステップ1: このコードを相手に送信してください',
