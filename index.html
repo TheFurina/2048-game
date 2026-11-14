@@ -181,7 +181,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
     <script src="./features/module-loader.js"></script>
     <script>
-        const gameVersion = '3.1.0-fix.1';
+        const gameVersion = '3.1.0-fix.2';
         window.gameVersion = gameVersion;
         function loadCssVersion() {
             try {
@@ -2028,6 +2028,26 @@
                 }
             }, { passive: true });
         }
+        function fitConfirmText(element) {
+            element.style.removeProperty('font-size');
+            const style = getComputedStyle(element);
+            const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+            let iconWidth = 0;
+            const icon = element.querySelector('i');
+            if (icon && getComputedStyle(icon).display !== 'none') {
+                iconWidth = icon.getBoundingClientRect().width + parseFloat(getComputedStyle(icon).marginRight || 0);
+            }
+            const available = element.clientWidth - padding - iconWidth;
+            const text = element.textContent.trim();
+            if (!text || available <= 0) return;
+            const canvas = fitConfirmText.canvas || (fitConfirmText.canvas = document.createElement('canvas'));
+            const context = canvas.getContext('2d');
+            context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+            const textWidth = context.measureText(text).width;
+            if (textWidth > available) {
+                element.style.setProperty('font-size', `${parseFloat(style.fontSize) * available / textWidth}px`, 'important');
+            }
+        }
         function createConfirmButton(options) {
             const { buttonId, element, hasIcon, i18nKey, onConfirm, resetAll } = options;
             const state = { needsConfirm: false };
@@ -2037,6 +2057,7 @@
             function reset() {
                 state.needsConfirm = false;
                 element.className = originalClassName;
+                element.style.removeProperty('font-size');
                 if (hasIcon) {
                     const icon = element.querySelector('i');
                     if (icon) {
@@ -2071,6 +2092,7 @@
                             element.innerHTML = i18n.t('confirm');
                         }
                         element.classList.add('confirm-pending');
+                        fitConfirmText(element);
                     } else {
                         onConfirm();
                     }
