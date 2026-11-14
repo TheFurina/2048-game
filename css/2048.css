@@ -1,4 +1,4 @@
-:root { --css-version: 1.7; }
+:root { --css-version: 1.8; }
 body.modal-scroll-lock {
     overflow: hidden;
 }
@@ -309,6 +309,19 @@ body.modal-scroll-lock {
     }
     .confirm-pending:hover {
         background-color: #dc2626 !important;
+    }
+    #grid-3x3,
+    #grid-4x4,
+    #grid-5x5 {
+        transition-property: background-color, box-shadow, transform, color !important;
+    }
+    #grid-3x3.confirm-pending,
+    #grid-4x4.confirm-pending,
+    #grid-5x5.confirm-pending {
+        padding-left: 0.25rem !important;
+        padding-right: 0.25rem !important;
+        white-space: nowrap;
+        overflow: hidden;
     }
     .modal-enter {
         opacity: 0;
