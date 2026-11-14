@@ -1,4 +1,4 @@
-const aiAutoPlayVersion = '1.4-fix.1';
+const aiAutoPlayVersion = '1.5';
 const aiAutoPlayDomTemplates = {"#settings-module-ai": "                            <div class=\"flex items-center justify-between px-4 py-3 gap-3\">\n                                <div class=\"flex flex-col text-left\">\n                                    <span class=\"text-gray-700 dark:text-dark-muted\" data-i18n=\"aiBestMoveOnly\"></span>\n                                    <span class=\"text-xs text-gray-500 dark:text-dark-muted mt-0.5\" data-i18n=\"aiBestMoveOnlyHint\"></span>\n                                </div>\n                                <label class=\"relative inline-flex items-center cursor-pointer flex-shrink-0\">\n                                    <input type=\"checkbox\" id=\"ai-best-move-only\" class=\"sr-only peer\" checked onchange=\"window.settingsManager.save('ai-best-move-only', this.checked)\">\n                                    <div class=\"w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg\"></div>\n                                </label>\n                            </div>\n                            <div class=\"border-b border-gray-200 dark:border-gray-700 my-1 mx-2\"></div>\n                            <div class=\"flex items-center justify-between px-4 py-3 gap-3\">\n                                <div class=\"flex flex-col text-left\">\n                                    <span class=\"text-gray-700 dark:text-dark-muted\" data-i18n=\"aiAllowUndo\"></span>\n                                    <span class=\"text-xs text-gray-500 dark:text-dark-muted mt-0.5\" data-i18n=\"aiAllowUndoHint\"></span>\n                                </div>\n                                <label class=\"relative inline-flex items-center cursor-pointer flex-shrink-0\">\n                                    <input type=\"checkbox\" id=\"ai-allow-undo\" class=\"sr-only peer\" checked onchange=\"window.settingsManager.save('ai-allow-undo', this.checked)\">\n                                    <div class=\"w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg\"></div>\n                                </label>\n                            </div>\n                            <div class=\"border-b border-gray-200 dark:border-gray-700 my-1 mx-2\"></div>\n                            <div class=\"flex items-center justify-between px-4 py-3 gap-3\">\n                                <div class=\"flex flex-col text-left\">\n                                    <span class=\"text-gray-700 dark:text-dark-muted\" data-i18n=\"autoPlayKeepAwake\"></span>\n                                    <span class=\"text-xs text-gray-500 dark:text-dark-muted mt-0.5\" data-i18n=\"autoPlayKeepAwakeHint\"></span>\n                                </div>\n                                <label class=\"relative inline-flex items-center cursor-pointer flex-shrink-0\">\n                                    <input type=\"checkbox\" id=\"auto-play-keep-screen-awake\" class=\"sr-only peer\" onchange=\"window.settingsManager.save('auto-play-keep-screen-awake', this.checked); if (window.aiAutoPlay) window.aiAutoPlay.setKeepScreenAwake(this.checked)\">\n                                    <div class=\"w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300 hover:shadow-md dark:hover:bg-gray-500 dark:hover:shadow-lg\"></div>\n                                </label>\n                            </div>"};
 window.aiAutoPlayVersion = aiAutoPlayVersion;
 let aiAutoPlayDomBound = false;
@@ -35,11 +35,16 @@ function getAutoPlayAnalysisMode() {
     } catch (e) {}
     return 'algorithm';
 }
-function isAutoPlayKeepAwakeEnabled() {
-    if (window.settingsManager && typeof window.settingsManager.load === 'function') {
-        return window.settingsManager.load('auto-play-keep-screen-awake');
+function readAutoPlaySetting(key, defaultValue) {
+    try {
+        const raw = localStorage.getItem('2048-setting-' + key);
+        return raw === null ? defaultValue : raw !== 'false';
+    } catch (e) {
+        return defaultValue;
     }
-    return false;
+}
+function isAutoPlayKeepAwakeEnabled() {
+    return readAutoPlaySetting('auto-play-keep-screen-awake', false);
 }
 let autoPlayWakeLock = null;
 async function requestAutoPlayWakeLock() {
@@ -75,16 +80,10 @@ function isAutoPlayAiConfigComplete() {
     }
 }
 function isAutoPlayBestMoveOnlyEnabled() {
-    if (window.settingsManager && typeof window.settingsManager.load === 'function') {
-        return window.settingsManager.load('ai-best-move-only');
-    }
-    return true;
+    return readAutoPlaySetting('ai-best-move-only', true);
 }
 function isAutoPlayAllowUndoEnabled() {
-    if (window.settingsManager && typeof window.settingsManager.load === 'function') {
-        return window.settingsManager.load('ai-allow-undo');
-    }
-    return true;
+    return readAutoPlaySetting('ai-allow-undo', true);
 }
 function getAutoPlayValidMoves() {
     const hasHistory = window.gameState && Array.isArray(window.gameState.history) && window.gameState.history.length > 0;
@@ -419,13 +418,23 @@ function toggleAutoPlay() {
     }
 }
 function syncAiAutoPlaySettingToggles() {
-    if (!window.settingsManager || typeof window.settingsManager.load !== 'function') return;
     ['ai-best-move-only', 'ai-allow-undo', 'auto-play-keep-screen-awake'].forEach(function(key) {
         const toggle = document.getElementById(key);
         if (toggle) {
-            toggle.checked = window.settingsManager.load(key);
+            toggle.checked = readAutoPlaySetting(key, key !== 'auto-play-keep-screen-awake');
         }
     });
+}
+function resetAutoPlaySettings() {
+    const bestMoveOnlyToggle = document.getElementById('ai-best-move-only');
+    if (bestMoveOnlyToggle) bestMoveOnlyToggle.checked = true;
+    const allowUndoToggle = document.getElementById('ai-allow-undo');
+    if (allowUndoToggle) allowUndoToggle.checked = true;
+    const keepAwakeToggle = document.getElementById('auto-play-keep-screen-awake');
+    if (keepAwakeToggle) {
+        keepAwakeToggle.checked = false;
+    }
+    releaseAutoPlayWakeLock();
 }
 function setupAiAutoPlay() {
     syncAiAutoPlaySettingToggles();
@@ -464,6 +473,7 @@ if (typeof window !== 'undefined') {
         },
         isActive: function() { return autoPlayStatus.running; },
         refresh: updateAutoPlayUI,
+        resetSettings: resetAutoPlaySettings,
         init: setupAiAutoPlay,
         domMode: 'self',
         domTemplates: aiAutoPlayDomTemplates,

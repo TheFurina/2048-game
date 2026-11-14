@@ -1,4 +1,4 @@
-const i18nVersion = '2.1.1';
+const i18nVersion = '2.2.0';
 window.i18nVersion = i18nVersion;
 const TILE_LEVELS = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768];
 function buildTileKeys(lang) {
@@ -8,6 +8,9 @@ function buildTileKeys(lang) {
         if (lang === 'en') {
             result['tile' + n + 'Bg'] = 'Tile ' + n + ' Background';
             result['tile' + n + 'Text'] = 'Tile ' + n + ' Text Color';
+        } else if (lang === 'ja') {
+            result['tile' + n + 'Bg'] = 'タイル ' + n + ' 背景色';
+            result['tile' + n + 'Text'] = 'タイル ' + n + ' 文字色';
         } else {
             result['tile' + n + 'Bg'] = '数字 ' + n + ' 背景色';
             result['tile' + n + 'Text'] = '数字 ' + n + ' 文字颜色';
@@ -26,6 +29,7 @@ const translations = {
         undo: '撤销',
         pause: '暂停',
         resume: '继续游戏',
+        continueGame: '继续游戏',
         restart: '重新开始',
         settings: '设置',
         gridSize: '网格大小:',
@@ -42,7 +46,7 @@ const translations = {
         endlessModeDesc: '无尽模式 - 尽可能获得高分',
         grid: '网格',
         gameWon: '恭喜你获胜！',
-        gameWonText: '你达到了2048分，可以继续游戏挑战更高分数，或者重新开始。',
+        gameWonText: '你达到了2048分，继续游戏将自动切换为无尽模式，也可以重新开始。',
         gameOver: '游戏结束！',
         gameOverText: '无法进行任何移动。',
         tryAgain: '再玩一次',
@@ -79,6 +83,7 @@ const translations = {
         auto: '跟随浏览器',
         chinese: '中文',
         english: 'English',
+        japanese: '日本語',
         confirmReset: '确定要重置所有设置吗？',
         confirmRestart: '重新开始将重置当前游戏进度，确定要继续吗？',
         confirmModeSwitch: '切换到{mode}将重置当前游戏进度，确定要继续吗？',
@@ -127,6 +132,7 @@ const translations = {
         undo: 'Undo',
         pause: 'Pause',
         resume: 'Resume Game',
+        continueGame: 'Continue Game',
         restart: 'Restart',
         settings: 'Settings',
         gridSize: 'Grid Size:',
@@ -143,7 +149,7 @@ const translations = {
         endlessModeDesc: 'Endless Mode - Get as high a score as possible',
         grid: 'grid',
         gameWon: 'Congratulations!',
-        gameWonText: 'You reached 2048! You can continue playing to try for a higher score, or start over.',
+        gameWonText: 'You reached 2048! Continuing will automatically switch to Endless Mode, or you can start over.',
         gameOver: 'Game Over!',
         gameOverText: 'No more moves available.',
         tryAgain: 'Play Again',
@@ -180,6 +186,7 @@ const translations = {
         auto: 'Follow Browser',
         chinese: '中文',
         english: 'English',
+        japanese: '日本語',
         confirmReset: 'Are you sure you want to reset all settings?',
         confirmRestart: 'Restarting will reset your current game progress. Are you sure you want to continue?',
         confirmModeSwitch: 'Switching to {mode} will reset your current game progress. Are you sure you want to continue?',
@@ -217,6 +224,109 @@ const translations = {
         darkTheme: 'Dark',
         done: 'Done',
         notSet: 'Not set'
+    },
+    ja: {
+        ...buildTileKeys('ja'),
+        gameTitle: '2048',
+        pageTitle: '2048 ゲーム',
+        gameDescription: 'スワイプしてタイルをマージし、2048を作ろう！',
+        newGame: 'スタンダードモード',
+        endlessMode: 'エンドレスモード',
+        undo: '元に戻す',
+        pause: '一時停止',
+        resume: 'ゲームを続ける',
+        continueGame: 'ゲームを続ける',
+        restart: '最初から',
+        settings: '設定',
+        gridSize: 'グリッドサイズ:',
+        difficulty: '難易度:',
+        easy: '簡単',
+        medium: '普通',
+        hard: '難しい',
+        custom: 'カスタム',
+        score: 'スコア',
+        bestScore: 'ハイスコア',
+        modeDescription: '現在のモード：',
+        difficultyDescription: '現在の難易度：',
+        standardMode: 'スタンダードモード - 2048に到達して勝利',
+        endlessModeDesc: 'エンドレスモード - できるだけ高いスコアを目指す',
+        grid: 'グリッド',
+        gameWon: 'おめでとうございます！',
+        gameWonText: '2048に到達しました！続けると自動的にエンドレスモードに切り替わります。最初からやり直すこともできます。',
+        gameOver: 'ゲームオーバー！',
+        gameOverText: 'これ以上移動できません。',
+        tryAgain: 'もう一度プレイ',
+        toggleControls: 'コントロールを隠す',
+        expandControls: 'コントロールを表示',
+        rotateHintTitle: '最適な体験のため、縦向きに回転してください',
+        exitFullscreen: 'フルスクリーンを終了',
+        gamePerformance: 'パフォーマンス',
+        gpuAcceleration: 'GPUアクセラレーション',
+        vibration: 'バイブレーション',
+        tileAnimation: 'タイルアニメーション',
+        scorePopAnimation: 'スコアポップアニメーション',
+        appearance: '外観',
+        theme: 'テーマ',
+        dataManagement: 'データ',
+        dataTransfer: 'データ管理',
+        exportData: 'データをエクスポート',
+        importData: 'データをインポート',
+        dataTextareaPlaceholder: 'エクスポートしたデータをここにコピーするか、インポートするデータを貼り付けてください...',
+        customGrid: 'カスタムグリッドサイズ',
+        gridSizeInput: 'グリッドサイズを入力してください (3-10):',
+        squareGrid: '正方形グリッド (アスペクト比を固定)',
+        apply: '適用',
+        cancel: 'キャンセル',
+        confirm: '確認',
+        resetSettings: 'すべての設定をリセット',
+        versionInfo: '2048 v{version} | by TheFurina',
+        github: 'Github',
+        footer: 'スワイプのたびに数字が生まれ変わる',
+        customTheme: 'カスタムテーマ',
+        save: '保存',
+        reset: 'リセット',
+        language: '言語',
+        auto: 'ブラウザに従う',
+        chinese: '中文',
+        english: 'English',
+        japanese: '日本語',
+        confirmReset: 'すべての設定をリセットしますか？',
+        confirmRestart: '最初からやり直すと現在のゲームの進行状況がリセットされます。続行しますか？',
+        confirmModeSwitch: '{mode}に切り替えると現在のゲームの進行状況がリセットされます。続行しますか？',
+        confirmGridChange: 'グリッドサイズを変更すると現在のゲームの進行状況がリセットされます。続行しますか？',
+        confirmImport: 'データをインポートしますか？現在のゲーム状態が上書きされます。',
+        confirmImportSettings: 'インポートするデータに設定情報が含まれています。現在の設定を上書きしますか？',
+        exportFailed: 'ゲームデータのエクスポートに失敗しました:',
+        importFailed: 'インポートに失敗しました: ',
+        importSuccess: 'データのインポートに成功しました！',
+        noUndo: '元に戻せません（履歴がありません）',
+        undoSteps: '直前の手を元に戻す（{steps} 手戻せます）',
+        vibrationWarning: 'このブラウザはバイブレーションに対応していません',
+        mergeVibration: 'マージ時バイブレーション',
+        winVibration: '勝利時バイブレーション',
+        lossVibration: '敗北時バイブレーション',
+        appearAnimation: '新タイル出現アニメーション',
+        moveAnimation: 'タイル移動アニメーション',
+        mergeAnimation: 'タイルマージアニメーション',
+        animationDetails: 'アニメーション詳細',
+        vibrationDetails: 'バイブレーション詳細',
+        loading: '読み込み中...',
+        moduleLoading: 'リソースを読み込んでいます...',
+        loadingFailed: 'リソースの読み込みに失敗しました',
+        loadingFailedDetail: 'ネットワーク接続を確認してページを更新してください',
+        moduleLoaderFailedDetail: 'モジュールローダーの読み込みに失敗しました。ネットワーク接続を確認してページを更新してください',
+        reloadPage: '再読み込み',
+        error: 'エラー',
+        success: '成功',
+        info: '情報',
+        warning: '警告',
+        gamePaused: 'ゲーム一時停止中',
+        notAvailable: '利用不可',
+        followBrowser: 'ブラウザに従う',
+        lightTheme: 'ライト',
+        darkTheme: 'ダーク',
+        done: '完了',
+        notSet: '未設定'
     }
 };
 const MODULE_TRANSLATIONS = {
@@ -290,6 +400,41 @@ const MODULE_TRANSLATIONS = {
             selectAtLeastOneThemeMode: 'Please select at least one theme mode (light or dark)',
             selectAll: 'Select All',
             export: 'Export'
+        },
+        ja: {
+            customThemeButton: 'カスタムテーマ設定',
+            themeActions: 'テーマ操作',
+            baseColors: '基本色',
+            modalColors: 'モーダル色',
+            tileColors: 'タイル色',
+            bgColor: 'メイン背景色',
+            mainBg: 'メイン背景色',
+            primaryColor: 'プライマリカラー',
+            secondaryColor: 'セカンダリカラー',
+            gridColor: 'グリッド色',
+            cellEmptyColor: '空セルの色',
+            scrollbarColor: 'スクロールバーの色',
+            modalBgColor: 'モーダル背景色',
+            modalTextColor: 'モーダル文字色',
+            modalBg: 'モーダル背景色',
+            modalText: 'モーダル文字色',
+            opacity: '不透明度',
+            tileSuperBg: '大きい数字 背景色',
+            tileSuperText: '大きい数字 文字色',
+            exportTheme: 'テーマをエクスポート',
+            importTheme: 'テーマをインポート',
+            themeSaved: 'テーマを保存しました！',
+            themeImported: 'テーマをインポートしました！',
+            themeExported: 'テーマをエクスポートしました！',
+            invalidThemeFile: '無効なテーマファイルです',
+            customThemeModuleMissing: 'カスタムテーマモジュールが見つかりません。features/custom-theme.js ファイルが存在することを確認してください。',
+            customThemeModuleFailed: 'カスタムテーマモジュールの読み込みに失敗しました:',
+            exportThemeModal: 'テーマをエクスポート',
+            selectThemeItems: 'エクスポートするテーマ項目を選択',
+            selectThemeMode: 'テーマモードを選択',
+            selectAtLeastOneThemeMode: '少なくとも1つのテーマモード（ライトまたはダーク）を選択してください',
+            selectAll: 'すべて選択',
+            export: 'エクスポート'
         }
     },
     dataTransfer: {
@@ -348,6 +493,34 @@ const MODULE_TRANSLATIONS = {
             consoleImportFailed: 'Import failed',
             consoleErrorDetails: 'Error details',
             dataTransferModuleMissing: 'Data transfer module not found. Please ensure features/data-transfer.js file exists.'
+        },
+        ja: {
+            exportAsLink: 'リンクとしてエクスポート',
+            exportAsFile: 'ファイルとしてエクスポート',
+            importFromFile: 'ファイルからインポート',
+            copyLink: 'リンクをコピー',
+            linkCopied: 'リンクをクリップボードにコピーしました',
+            linkExportSuccess: 'リンクを生成しました',
+            encoding: 'エンコード方式:',
+            importFailedEmpty: 'データが空です',
+            importFailedDecode: 'データ形式エラー、デコードできません',
+            importFailedObject: 'データが有効なオブジェクトではありません',
+            importFailedFields: '必須フィールドが不足しています: {fields}',
+            importFailedGrid: '無効なグリッドデータです',
+            importFailedSize: 'グリッドサイズが一致しません',
+            importFailedTiles: 'グリッドに無効なタイル値が含まれています',
+            importDecompressUnsupported: '現在のブラウザはこの圧縮リンクを解凍できません。最新のブラウザを使用して再試行してください。',
+            consoleDataEmpty: 'データ検証失敗: データが空です',
+            consoleBase64Failed: 'Base64デコードに失敗しました',
+            consoleBase91Failed: 'Base91デコードに失敗しました',
+            consoleInvalidObject: 'データ検証失敗: データが有効なオブジェクトではありません',
+            consoleMissingFields: 'データ検証失敗: 必須フィールドが不足しています',
+            consoleInvalidGrid: 'データ検証失敗: 無効なグリッドデータです',
+            consoleSizeMismatch: 'データ検証失敗: グリッドサイズが一致しません',
+            consoleInvalidTiles: 'データ検証失敗: グリッドに無効なタイル値が含まれています',
+            consoleImportFailed: 'インポートに失敗しました',
+            consoleErrorDetails: 'エラー詳細',
+            dataTransferModuleMissing: 'データ転送モジュールが見つかりません。features/data-transfer.js ファイルが存在することを確認してください。'
         }
     },
     ai: {
@@ -482,6 +655,72 @@ const MODULE_TRANSLATIONS = {
             aiApiAvailable: 'API Available',
             aiApiUnavailable: 'API Unavailable',
             aiApiMissingConfig: 'Missing required configuration'
+        },
+        ja: {
+            aiAnalysis: 'AI分析',
+            aiGameAnalysis: 'AIゲーム分析',
+            currentBestMove: '現在の最適な移動方向',
+            limitedMergeOpportunities: 'マージの機会が限られています',
+            bestMove: '最適な手',
+            gameState: 'ゲーム状態',
+            mergeOpportunities: 'マージの機会',
+            scorePotential: 'スコアの潜在性',
+            good: '良好',
+            average: '普通',
+            danger: '危険',
+            high: '高',
+            mediumScore: '中',
+            low: '低',
+            bestMoveDirection: '最適な移動方向',
+            mergeOpportunitiesLabel: '潜在的なマージの機会',
+            gameStateAssessment: 'ゲーム状態の評価',
+            scorePotentialLabel: 'スコアの潜在性分析',
+            noMergeOpportunities: 'なし',
+            mergeOpportunitiesSuffix: 'か所',
+            safe: '安全',
+            scorePotentialHigh: '複数の高価値タイルをマージできます',
+            scorePotentialMedium: 'いくつかのマージの機会があります',
+            hideBestMove: '最適な移動方向を非表示',
+            showBestMove: '最適な移動方向を表示',
+            up: '上',
+            down: '下',
+            left: '左',
+            right: '右',
+            aiAnalysisModuleMissing: 'AI分析モジュールが見つかりません。features/ai-analysis.js ファイルが存在することを確認してください。',
+            aiAnalysisModuleFailed: 'AI分析モジュールの読み込みに失敗しました:',
+            aiAlgorithmAnalysis: 'アルゴリズム分析',
+            aiAiAnalysis: 'AI分析',
+            aiSuggestionLabel: 'AIの提案',
+            regenerate: '再生成',
+            regenerating: '再生成中...',
+            aiApiSettings: 'AI',
+            aiApiSettingsItem: 'API設定',
+            aiBestMoveOnly: '最適な手のみをリクエスト',
+            aiBestMoveOnlyHint: '自動操作時に詳細分析をスキップして応答を高速化',
+            aiAllowUndo: '元に戻す推奨を許可',
+            aiAllowUndoHint: 'AIがミスを挽回するために直前の手を元に戻すことを推奨できます',
+            aiApiBaseUrl: 'API Base URL',
+            aiApiKey: 'API Key',
+            aiApiModel: 'モデル',
+            aiApiSettingsSaved: 'API設定を保存しました！',
+            aiApiSaved: '保存済み',
+            aiApiSettingsSaveFailed: 'API設定の保存に失敗しました！',
+            aiApiConfirmReset: 'AI設定をリセットしますか？',
+            aiApiBaseUrlEmpty: 'API Base URLは空にできません',
+            aiApiBaseUrlInvalid: 'API Base URLの形式が無効です',
+            aiApiKeyEmpty: 'API Keyは空にできません',
+            aiApiModelEmpty: 'モデルは空にできません',
+            aiApiRequestFailed: 'AIリクエストに失敗しました',
+            aiApiParseError: 'AIレスポンスの解析エラー',
+            aiApiNetworkError: 'ネットワークエラー',
+            aiApiModuleMissing: 'AI APIモジュールが見つかりません。features/ai-api.js ファイルが存在することを確認してください。',
+            aiApiLoading: '読み込み中...',
+            aiApiModelsFailed: 'モデルリストの取得に失敗しました',
+            aiApiCheck: '可用性を確認',
+            aiApiChecking: '確認中...',
+            aiApiAvailable: 'API利用可能',
+            aiApiUnavailable: 'API利用不可',
+            aiApiMissingConfig: '必須設定が不足しています'
         }
     },
     autoPlay: {
@@ -524,6 +763,26 @@ const MODULE_TRANSLATIONS = {
             autoPlayKeepAwakeHint: 'Prevent the screen from sleeping while auto play is running',
             autoPlayAiSettingsRequired: 'Please complete the API settings first',
             aiApiConfigIncomplete: 'API settings are incomplete. Tap "API Settings" below to configure'
+        },
+        ja: {
+            autoPlayTitle: 'AI自動操作',
+            autoPlayStart: '自動操作',
+            autoPlayPause: '一時停止',
+            autoPlayResume: '再開',
+            autoPlayStop: '停止',
+            autoPlayStatusIdle: '未開始',
+            autoPlayBadgeRunning: 'AI自動操作中 · {steps} 手実行済み',
+            autoPlayBadgePaused: '自動操作一時停止 · {steps} 手',
+            autoPlayRunning: '実行中 · {steps} 手実行済み',
+            autoPlayPausedStatus: '一時停止 · {steps} 手実行済み',
+            autoPlayGameEnded: 'ゲーム終了、自動操作を停止しました',
+            autoPlayMoveBlocked: '移動できないため、自動操作を停止しました',
+            autoPlayAiUnavailable: 'AIリクエストモジュールが利用できないため、自動操作を停止しました',
+            autoPlayAiFailed: 'AIリクエストに失敗したため、自動操作を停止しました',
+            autoPlayKeepAwake: '自動操作中に画面を常時点灯',
+            autoPlayKeepAwakeHint: '自動操作の実行中に画面がスリープするのを防ぎます',
+            autoPlayAiSettingsRequired: '先にAPI設定を完了してください',
+            aiApiConfigIncomplete: 'API設定が未完了です。下の「API設定」をタップして設定してください'
         }
     },
     webrtc: {
@@ -642,6 +901,64 @@ const MODULE_TRANSLATIONS = {
             disconnect: 'Disconnect',
             syncLiveHint: 'Connection active. Game and setting changes sync automatically.',
             liveSyncData: 'Live sync data'
+        },
+        ja: {
+            webrtcModalTitle: 'LAN同期',
+            webrtcSelectDesc: '6桁のコードで別のデバイスとペアリングして同期します（シグナリングはパブリックサーバー経由、ゲームデータはデバイス間のピアツーピア接続です）。手動モードを展開してコードを交換することもできます。',
+            webrtcCreateConnection: '接続を作成',
+            webrtcJoinConnection: '接続に参加',
+            webrtcHostStep1: 'ステップ1: このコードを相手に送信してください',
+            webrtcCopyOffer: 'コードをコピー',
+            webrtcHostStep2: 'ステップ2: 相手の回答コードを貼り付けてください',
+            webrtcFinishConnection: '接続を完了',
+            webrtcJoinPasteOffer: '接続コードを貼り付け',
+            webrtcGenerateAnswer: '回答コードを生成',
+            webrtcJoinStep2: 'この回答コードを相手に送り返してください',
+            webrtcCopyAnswer: '回答コードをコピー',
+            webrtcConnected: '接続済み',
+            webrtcSendData: 'ゲームデータを送信',
+            webrtcModuleMissing: 'LAN同期モジュールが見つかりません。features/webrtc-sync.js ファイルが存在することを確認してください。',
+            webrtcConnectedReady: '接続済み。ゲームデータを送信できます',
+            webrtcDisconnected: '接続が切断されました',
+            webrtcGeneratingCode: '接続コードを生成中...',
+            webrtcHostInstructions: '1. コードを相手に送信してください\n2. 相手から送られた回答コードを下に貼り付けて「接続を完了」をクリック',
+            webrtcGenerateFailed: 'コードの生成に失敗しました',
+            webrtcConnecting: '接続中...',
+            webrtcInvalidAnswer: '無効な回答コードです',
+            webrtcGeneratingAnswer: '回答コードを生成中...',
+            webrtcSendAnswerBack: '回答コードを相手に送り返し、接続を待っています...',
+            webrtcInvalidOffer: '無効な接続コードです',
+            webrtcDataSent: 'ゲームデータを送信しました',
+            webrtcSendFailed: '送信に失敗しました',
+            webrtcConfirmApply: '相手からゲームデータを受信しました。適用しますか？',
+            webrtcPasteAnswer: '回答コードを貼り付け',
+            webrtcQuickHostTitle: 'この6桁のコードを相手に伝えてください',
+            webrtcQuickJoinTitle: '相手の6桁コードを入力してください',
+            webrtcCopyRoomCode: 'コードをコピー',
+            webrtcRoomRegenerate: '再生成',
+            webrtcConnectRoom: '接続',
+            webrtcCopied: 'コピー済み',
+            webrtcCreatingRoom: '接続コードを取得中...',
+            webrtcWaitingForPeer: '相手の参加を待っています...',
+            webrtcRoomFailed: '接続コードの取得に失敗しました。ネットワークを確認して再試行してください',
+            webrtcCodeInvalid: '6桁のコードを入力してください',
+            webrtcJoiningRoom: '接続中...',
+            webrtcJoinRoomFailed: '接続に失敗しました',
+            webrtcPeerUnavailable: 'このコードに対応するデバイスが見つかりません。相手が接続を作成し、コードが正しいことを確認してください',
+            webrtcServerUnreachable: 'パブリックシグナリングサーバーに接続できません。ネットワークを確認するか、下の手動モードを展開してください',
+            webrtcBrowserIncompatible: 'このブラウザはWebRTCに対応していません。別のブラウザを試すか手動モードを使用してください',
+            webrtcManualMode: '手動モード（フォールバック）: 長いコードを交換',
+            webrtcConnectedBadge: 'LAN接続済み',
+            ready: '準備完了',
+            connected: '接続済み',
+            receiving: '受信中',
+            receivingBytes: '受信中: {bytes} バイト',
+            receivingBytesTotal: '受信中: {bytes} / {total} バイト',
+            includeSettings: '設定データを含める',
+            disconnectConnection: '接続を切断',
+            disconnect: '切断',
+            syncLiveHint: '接続中です。ゲーム状態と設定の変更は自動的に同期されます。',
+            liveSyncData: 'ライブ同期データ'
         }
     },
     keybind: {
@@ -682,6 +999,25 @@ const MODULE_TRANSLATIONS = {
             kbAiAutoPlay: 'AI Auto Play',
             i18nModuleMissing: 'i18n module not found. Please ensure features/i18n.js file exists.',
             i18nModuleFailed: 'i18n module loading failed:'
+        },
+        ja: {
+            operations: '操作',
+            keybindingsSettings: 'キーボードショートカット',
+            keybindingsTip: '方向キーとEscは常に利用可能です。キーボタンをクリックしてから新しいキーを押すと変更できます。Escでキャンセルできます。',
+            resetToDefault: 'デフォルトにリセット',
+            pressKey: 'キーを押してください...',
+            keybindingConflict: 'ショートカットが競合しています。別のキーを選択してください',
+            kbUp: '上に移動',
+            kbDown: '下に移動',
+            kbLeft: '左に移動',
+            kbRight: '右に移動',
+            kbPause: '一時停止/再開',
+            kbUndo: '元に戻す',
+            kbNewGame: '新しいゲーム',
+            kbGrid: 'グリッドサイズを切り替え',
+            kbAiAutoPlay: 'AI自動操作',
+            i18nModuleMissing: 'i18nモジュールが見つかりません。features/i18n.js ファイルが存在することを確認してください。',
+            i18nModuleFailed: 'i18nモジュールの読み込みに失敗しました:'
         }
     }
 };
@@ -875,39 +1211,32 @@ function updateAllTranslations() {
     updateHtmlLangAttribute();
 }
 function updateButtonWidths() {
-    const lang = getLang();
     const undoButton = document.getElementById('undo-button');
     const pauseButton = document.getElementById('pause-button');
     const customGridButton = document.getElementById('custom-grid');
-    const gridButtons = [
-        document.getElementById('grid-3x3'),
-        document.getElementById('grid-4x4'),
-        document.getElementById('grid-5x5')
-    ];
     if (undoButton && pauseButton) {
-        if (lang === 'en') {
-            undoButton.style.width = '88px';
-            pauseButton.style.width = '88px';
-        } else {
-            undoButton.style.width = '72px';
-            pauseButton.style.width = '72px';
-        }
+        undoButton.style.width = 'auto';
+        pauseButton.style.width = 'auto';
+        const maxWidth = Math.max(
+            undoButton.offsetWidth, undoButton.scrollWidth,
+            pauseButton.offsetWidth, pauseButton.scrollWidth
+        );
+        const target = maxWidth > 0 ? maxWidth + 'px' : 'auto';
+        undoButton.style.width = target;
+        pauseButton.style.width = target;
     }
     if (customGridButton) {
-        if (lang === 'en') {
-            customGridButton.style.width = '96px';
-        } else {
-            customGridButton.style.width = '80px';
+        customGridButton.style.width = 'auto';
+        const width = Math.max(customGridButton.offsetWidth, customGridButton.scrollWidth);
+        if (width > 0) {
+            customGridButton.style.width = width + 'px';
         }
     }
-    gridButtons.forEach(btn => {
-        if (!btn) return;
-        btn.style.width = lang === 'en' ? '80px' : '';
-    });
 }
 function updateHtmlLangAttribute() {
     const lang = getLang();
-    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+    const langMap = { zh: 'zh-CN', en: 'en', ja: 'ja' };
+    document.documentElement.lang = langMap[lang] || 'en';
 }
 function updateDynamicContent() {
     if (window.elements && window.gameState) {
@@ -957,9 +1286,16 @@ function updateLanguageSelector() {
     languageLabels.forEach(label => {
         label.textContent = t('language');
     });
-    const currentLangText = currentLanguage === 'auto' ? t('auto') : t(currentLanguage === 'zh' ? 'chinese' : 'english');
-    const selectedEmoji = currentLanguage === 'zh' ? '🇨🇳' : (currentLanguage === 'en' ? '🇺🇸' : '');
-    const selectedIcon = currentLanguage === 'auto' ? 'fa-solid fa-globe' : '';
+    const langMeta = {
+        auto: { text: t('auto'), emoji: '', icon: 'fa-solid fa-globe' },
+        zh: { text: t('chinese'), emoji: '🇨🇳', icon: '' },
+        en: { text: t('english'), emoji: '🇺🇸', icon: '' },
+        ja: { text: t('japanese'), emoji: '🇯🇵', icon: '' }
+    };
+    const currentMeta = langMeta[currentLanguage] || langMeta.auto;
+    const currentLangText = currentMeta.text;
+    const selectedEmoji = currentMeta.emoji;
+    const selectedIcon = currentMeta.icon;
     const languageSelects = document.querySelectorAll('[data-i18n-select="true"]');
     languageSelects.forEach(select => {
         const selectSelectedDiv = select.querySelector('.select-selected');
@@ -972,12 +1308,9 @@ function updateLanguageSelector() {
         }
         selectItems.forEach(item => {
             const value = item.dataset.value;
-            if (value === 'auto') {
-                updateDecoratedText(item, '', 'fa-solid fa-globe mr-1', t('auto'));
-            } else if (value === 'zh') {
-                updateDecoratedText(item, '🇨🇳', 'fa-solid fa-globe mr-1', t('chinese'));
-            } else if (value === 'en') {
-                updateDecoratedText(item, '🇺🇸', 'fa-solid fa-globe mr-1', t('english'));
+            const meta = langMeta[value];
+            if (meta) {
+                updateDecoratedText(item, meta.emoji, meta.icon ? meta.icon + ' mr-1' : '', meta.text);
             }
         });
     });
@@ -1076,12 +1409,14 @@ function setupLanguageSelector() {
     const languages = [
         { value: 'auto', text: t('auto'), icon: 'fa-solid fa-globe' },
         { value: 'zh', text: t('chinese'), emoji: '🇨🇳' },
-        { value: 'en', text: t('english'), emoji: '🇺🇸' }
+        { value: 'en', text: t('english'), emoji: '🇺🇸' },
+        { value: 'ja', text: t('japanese'), emoji: '🇯🇵' }
     ];
+    const langTextKey = { auto: 'auto', zh: 'chinese', en: 'english', ja: 'japanese' };
     const selectSelected = document.createElement('div');
     selectSelected.className = 'select-selected flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md border border-gray-300 dark:border-gray-600 cursor-pointer transition-all duration-200 hover:border-primary/50';
     const selectedText = document.createElement('span');
-    const currentLangText = currentLanguage === 'auto' ? t('auto') : t(currentLanguage === 'zh' ? 'chinese' : 'english');
+    const currentLangText = t(langTextKey[currentLanguage] || 'auto');
     const autoOption = languages.find(lang => lang.value === 'auto');
     if (currentLanguage === 'auto' && autoOption) {
         selectedText.innerHTML = `<i class="${autoOption.icon}"></i> ${currentLangText}`;
@@ -1115,13 +1450,13 @@ function setupLanguageSelector() {
         item.addEventListener('click', (e) => {
             e.stopPropagation();
             setLang(lang.value);
-            const newLangText = lang.value === 'auto' ? t('auto') : t(lang.value === 'zh' ? 'chinese' : 'english');
+            const newLangText = t(langTextKey[lang.value] || 'auto');
             updateDecoratedText(selectedText, lang.emoji || '', lang.icon || '', newLangText);
             languages.forEach(l => {
                 const langItem = selectItems.querySelector(`[data-value="${l.value}"]`);
                 if (langItem) {
                     langItem.classList.toggle('selected', l.value === currentLanguage);
-                    const updatedText = l.value === 'auto' ? t('auto') : t(l.value === 'zh' ? 'chinese' : 'english');
+                    const updatedText = t(langTextKey[l.value] || 'auto');
                     updateDecoratedText(langItem, l.emoji || '', l.icon ? l.icon + ' mr-1' : '', updatedText);
                 }
             });
@@ -1191,8 +1526,16 @@ function initI18n() {
     setupLanguageSelector();
     addI18nAttributes();
     updateAllTranslations();
-    updateButtonWidths();
     updateHtmlLangAttribute();
+    let widthRaf = 0;
+    window.addEventListener('resize', function () {
+        if (widthRaf) cancelAnimationFrame(widthRaf);
+        widthRaf = requestAnimationFrame(function () {
+            widthRaf = 0;
+            updateButtonWidths();
+        });
+    });
+    window.addEventListener('load', updateButtonWidths);
     setTimeout(function() {
         if (typeof updateThemeSelector === 'function') {
             updateThemeSelector();
