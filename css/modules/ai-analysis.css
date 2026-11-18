@@ -1,4 +1,4 @@
-:root { --module-css-ai-analysis-version: 1.0-fix.1; }
+:root { --module-css-ai-analysis-version: 1.1; }
 .ai-analysis-modal {
     position: fixed;top: 0;left: 0;right: 0;bottom: 0;background: transparent;z-index: 1000; opacity: 1; transform: scale(1); visibility: visible; transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
 }
@@ -26,6 +26,14 @@
 .ai-analysis-title {
     font-size: 18px;font-weight: bold;margin-bottom: 15px;padding-bottom: 10px;border-bottom: 1px solid #eeeeee;position: relative;
 }
+#ai-analysis-modal-title > span,
+#analysis-mode-algorithm,
+#analysis-mode-ai,
+#ai-regenerate-button,
+#auto-play-toggle-button,
+#auto-play-stop-button {
+    white-space: nowrap;
+}
 .dark .ai-analysis-title {
     border-bottom: 1px solid #4a5568;
 }
@@ -33,7 +41,17 @@
     margin-bottom: 15px;
 }
 .analysis-label {
-    font-weight: bold;margin-bottom: 5px;color: #666666;
+    font-weight: bold;margin-bottom: 5px;color: #666666;white-space: nowrap;
+}
+@media (max-width: 360px) {
+    #analysis-mode-algorithm,
+    #analysis-mode-ai {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+    .analysis-label {
+        font-size: 14px;
+    }
 }
 .dark .analysis-label {
     color: #a0aec0;
