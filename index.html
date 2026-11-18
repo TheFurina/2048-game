@@ -181,7 +181,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
     <script src="./features/module-loader.js"></script>
     <script>
-        const gameVersion = '3.1.0-fix.2';
+        const gameVersion = '3.2.0';
         window.gameVersion = gameVersion;
         function loadCssVersion() {
             try {
@@ -348,6 +348,124 @@
             })();
         } catch (e) {}
     </script>
+    <script>
+        (function () {
+            window.__resolveLoadingTheme = function () {
+                var theme = 'auto';
+                var palette = 'auto';
+                try {
+                    theme = localStorage.getItem('2048-setting-theme') || 'auto';
+                    palette = localStorage.getItem('2048-setting-custom-theme-palette') || 'auto';
+                } catch (e) {}
+                var prefersDark = false;
+                try {
+                    prefersDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                } catch (e) {}
+                var isDark = theme === 'dark' || (theme !== 'custom' && theme !== 'light' && prefersDark);
+                var colors = isDark
+                    ? { bg: '#121212', title: '#e0e0e0', detail: '#9e9e9e', primary: '#ffb74d' }
+                    : { bg: '#faf8ef', title: '#8f7a66', detail: '#8f7a66', primary: '#faa31b' };
+                if (theme === 'custom') {
+                    if (palette === 'dark') isDark = true;
+                    else if (palette === 'light') isDark = false;
+                    else isDark = prefersDark;
+                    var data = null;
+                    try {
+                        data = JSON.parse(localStorage.getItem('2048-setting-custom-theme') || 'null');
+                    } catch (e) {}
+                    var values = data ? (isDark ? (data.dark || data.light) : (data.light || data.dark)) : null;
+                    if (values) {
+                        colors = {
+                            bg: values.bgColor || colors.bg,
+                            title: values.secondaryColor || colors.title,
+                            detail: values.secondaryColor || colors.detail,
+                            primary: values.primaryColor || colors.primary
+                        };
+                    }
+                }
+                return { dark: isDark, colors: colors };
+            };
+            window.__applyLoadingTheme = function () {
+                var resolved = window.__resolveLoadingTheme();
+                if (resolved.dark) document.documentElement.classList.add('dark');
+                var screen = document.getElementById('loading-screen');
+                if (screen) screen.style.backgroundColor = resolved.colors.bg;
+                var titleEl = document.getElementById('loading-error-text');
+                if (titleEl) titleEl.style.color = resolved.colors.title;
+                var detailEl = document.getElementById('loading-error-detail');
+                if (detailEl) {
+                    detailEl.style.color = resolved.colors.detail;
+                    detailEl.style.opacity = '0.7';
+                }
+                var btn = document.getElementById('loading-reload-btn');
+                if (btn) {
+                    btn.style.backgroundColor = resolved.colors.primary;
+                    btn.style.color = '#ffffff';
+                }
+            };
+            window.__getEssentialAssetsMissing = function () {
+                var missing = [];
+                if (!window.moduleLoaderModuleLoaded || typeof window.ModuleLoader === 'undefined') missing.push('features/module-loader.js');
+                if (!window.modulesReadyPromise || typeof window.modulesReadyPromise.then !== 'function') missing.push('features/module-bridge.js');
+                var cssVersion = '';
+                try {
+                    cssVersion = getComputedStyle(document.documentElement).getPropertyValue('--css-version').trim();
+                } catch (e) {}
+                if (!cssVersion) missing.push('css/2048.css');
+                return missing;
+            };
+            window.__getLoadingFailureTexts = function () {
+                var lang = 'zh';
+                try {
+                    lang = localStorage.getItem('2048-setting-language') || localStorage.getItem('2048-language') || 'auto';
+                } catch (e) {}
+                if (!lang || lang === 'auto') {
+                    var browserLang = (navigator.language || navigator.userLanguage || '').split('-')[0];
+                    lang = browserLang === 'en' ? 'en' : (browserLang === 'ja' ? 'ja' : 'zh');
+                }
+                var fallbackTexts = {
+                    zh: { title: '资源加载失败', detail: '必要文件缺失，请检查网络连接后刷新页面', reload: '重新加载' },
+                    en: { title: 'Failed to load resources', detail: 'Required files are missing. Check your network connection and refresh the page', reload: 'Reload' },
+                    ja: { title: 'リソースの読み込みに失敗しました', detail: '必要なファイルが見つかりません。ネットワーク接続を確認してページを更新してください', reload: '再読み込み' }
+                };
+                var texts = fallbackTexts[lang] || fallbackTexts.zh;
+                try {
+                    if (typeof window.__getLoadingErrorTexts === 'function') {
+                        var localized = window.__getLoadingErrorTexts();
+                        if (localized && localized.title) texts = localized;
+                    }
+                } catch (e) {}
+                return texts;
+            };
+            window.__showLoadingFailure = function (detail) {
+                var loadingScreen = document.getElementById('loading-screen');
+                if (!loadingScreen) return;
+                var errBox = document.getElementById('loading-error');
+                if (errBox && errBox.style.display === 'flex') return;
+                var texts = window.__getLoadingFailureTexts();
+                var spinnerWrap = loadingScreen.querySelector('.loading-spinner-container');
+                if (spinnerWrap) spinnerWrap.style.display = 'none';
+                if (errBox) errBox.style.display = 'flex';
+                var titleEl = document.getElementById('loading-error-text');
+                if (titleEl) titleEl.textContent = texts.title;
+                var detailEl = document.getElementById('loading-error-detail');
+                if (detailEl) detailEl.textContent = detail || texts.detail;
+                var btn = document.getElementById('loading-reload-btn');
+                if (btn) {
+                    btn.textContent = texts.reload;
+                    btn.onclick = function () { location.reload(); };
+                }
+            };
+            window.__showEssentialAssetsError = function (missing) {
+                var list = missing && missing.length ? missing : window.__getEssentialAssetsMissing();
+                var texts = window.__getLoadingFailureTexts();
+                window.__showLoadingFailure(texts.detail + (list.length ? ' (' + list.join(', ') + ')' : ''));
+            };
+            window.__applyLoadingTheme();
+            var missing = window.__getEssentialAssetsMissing();
+            if (missing.length > 0) window.__showEssentialAssetsError(missing);
+        })();
+    </script>
     <main class="max-w-md w-full mx-auto">
         <header id="game-header" class="flex flex-col md:flex-row justify-between items-center mb-6">
             <div>
@@ -363,12 +481,12 @@
                 </button>
             </div>
         </header>
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
             <button id="toggle-controls" class="text-secondary dark:text-dark-muted hover:text-secondary/80 dark:hover:text-dark-muted/80 px-4 rounded transition-all duration-200 focus:outline-none flex items-center text-sm">
                 <i class="fa-solid fa-chevron-up mr-2" id="toggle-icon"></i>
                 <span id="toggle-text"></span>
             </button>
-            <div id="sync-indicator" class="hidden items-center gap-3 pr-1 text-sm"></div>
+            <div id="sync-indicator" class="hidden flex-wrap items-center gap-3 pr-1 text-sm"></div>
         </div>
         <div id="controls-container" class="transition-all duration-300 ease-in-out">
             <div id="game-buttons" class="flex flex-wrap gap-2 mb-4">
@@ -476,7 +594,7 @@
                             <i class="fa-solid fa-gauge-high mr-2"></i><span data-i18n="gamePerformance"></span>
                         </h3>
                         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 py-3 px-2 shadow-sm">
-                            <div class="flex items-center justify-between mb-2 px-2">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-2 px-2">
                                 <span class="text-gray-700 dark:text-dark-muted" data-i18n="gpuAcceleration"></span>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" id="gpu-acceleration" class="sr-only peer" checked title="GPU加速">
@@ -484,7 +602,7 @@
                                 </label>
                             </div>
                             <div class="border-b border-gray-200 dark:border-gray-700 my-3 mx-2"></div>
-                            <div class="vibration-toggle-container flex items-center justify-between mb-2 px-2">
+                            <div class="vibration-toggle-container flex flex-wrap items-center justify-between gap-2 mb-2 px-2">
                                 <div class="flex items-center">
                                     <span class="text-gray-700 dark:text-dark-muted" data-i18n="vibration"></span>
                                     <div id="vibration-warning-container" class="relative ml-2 flex items-center group hidden">
@@ -503,21 +621,21 @@
                                 </label>
                             </div>
                             <div id="vibration-details" class="ml-6 mt-1 space-y-2">
-                                <div class="flex items-center justify-between px-2">
+                                <div class="flex flex-wrap items-center justify-between gap-2 px-2">
                                     <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="mergeVibration"></span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="vibration-merge" class="sr-only peer" checked title="合并振动">
                                         <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
                                     </label>
                                 </div>
-                                <div class="flex items-center justify-between px-2">
+                                <div class="flex flex-wrap items-center justify-between gap-2 px-2">
                                     <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="winVibration"></span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="vibration-win" class="sr-only peer" checked title="获胜振动">
                                         <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
                                     </label>
                                 </div>
-                                <div class="flex items-center justify-between px-2">
+                                <div class="flex flex-wrap items-center justify-between gap-2 px-2">
                                     <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="lossVibration"></span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="vibration-loss" class="sr-only peer" checked title="失败振动">
@@ -526,7 +644,7 @@
                                 </div>
                             </div>
                             <div class="border-b border-gray-200 dark:border-gray-700 my-3 mx-2"></div>
-                            <div class="flex items-center justify-between px-2">
+                            <div class="flex flex-wrap items-center justify-between gap-2 px-2">
                                 <span class="text-gray-700 dark:text-dark-muted" data-i18n="tileAnimation"></span>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" id="tile-animation" class="sr-only peer" checked title="滑块动画">
@@ -534,21 +652,21 @@
                                 </label>
                             </div>
                             <div id="animation-details" class="ml-6 mt-1 space-y-2">
-                                <div class="flex items-center justify-between px-2">
+                                <div class="flex flex-wrap items-center justify-between gap-2 px-2">
                                     <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="appearAnimation"></span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="tile-appear-animation" class="sr-only peer" checked title="新滑块出现动画">
                                         <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
                                     </label>
                                 </div>
-                                <div class="flex items-center justify-between px-2">
+                                <div class="flex flex-wrap items-center justify-between gap-2 px-2">
                                     <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="moveAnimation"></span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="tile-move-animation" class="sr-only peer" checked title="滑块移动动画">
                                         <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-checked:hover:bg-primary/90 peer-checked:dark:hover:bg-primary/90 transition-all duration-300"></div>
                                     </label>
                                 </div>
-                                <div class="flex items-center justify-between px-2">
+                                <div class="flex flex-wrap items-center justify-between gap-2 px-2">
                                     <span class="text-gray-600 dark:text-dark-muted text-sm" data-i18n="mergeAnimation"></span>
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="tile-merge-animation" class="sr-only peer" checked title="滑块合并动画">
@@ -557,7 +675,7 @@
                                 </div>
                             </div>
                             <div class="border-b border-gray-200 dark:border-gray-700 my-3 mx-2"></div>
-                            <div class="flex items-center justify-between px-2">
+                            <div class="flex flex-wrap items-center justify-between gap-2 px-2">
                                 <span class="text-gray-700 dark:text-dark-muted" data-i18n="scorePopAnimation"></span>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" id="score-pop-animation" class="sr-only peer" checked title="分数跳字动画">
@@ -571,7 +689,7 @@
                             <i class="fa-solid fa-paint-roller mr-2"></i><span data-i18n="appearance"></span>
                         </h3>
                         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-3 shadow-sm">
-                            <div class="flex items-center justify-between mt-2 mb-2 px-2">
+                            <div class="settings-select-row flex items-center justify-between mt-2 mb-2 px-2">
                                 <label for="theme-toggle" class="text-gray-700 dark:text-dark-muted" data-i18n="theme"></label>
                                 <div class="custom-select relative w-full max-w-[180px]">
                                     <div class="select-selected flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md border border-gray-300 dark:border-gray-600 cursor-pointer transition-all duration-200 hover:border-primary/50">
@@ -1308,6 +1426,19 @@
         let moveTimer = null;
         let mergeTimer = null;
         let removeTileTimers = {};
+        function scheduleMoveFinish(delay) {
+            if (moveTimer) clearTimeout(moveTimer);
+            moveTimer = setTimeout(() => {
+                if (!gameState.gameWon) {
+                    checkWin();
+                }
+                if (!gameState.gameWon || gameState.isEndlessMode) {
+                    checkGameOver();
+                }
+                saveGameState();
+                moveInProgress = false;
+            }, delay);
+        }
         function move(direction) {
             const modalOpen = typeof window.isBlockingModuleModalOpen === 'function' ? window.isBlockingModuleModalOpen() : false;
             if (gameState.isPaused || gameState.gameOver || !elements.gameMessage.classList.contains('hidden') || (modalOpen && !window.autoPlayActive)) return false;
@@ -1323,7 +1454,7 @@
                     }
                 }
             }
-            saveHistory();
+            const historySnapshot = { grid: cloneGrid(gameState.grid), score: gameState.score };
             switch(direction) {
                 case 'up':
                     for (let x = 0; x < gameState.gridCols; x++) {
@@ -1415,6 +1546,7 @@
                     break;
             }
             if (moved) {
+                saveHistory(historySnapshot);
                 const skipTileSpawn = shouldSkipTileSpawn();
                 if (gameState.tileAnimationEnabled) {
                     if (!skipTileSpawn) generateRandomTile(true);
@@ -1433,31 +1565,11 @@
                             }
                         }
                     }, 300);
-                    if (moveTimer) clearTimeout(moveTimer);
-                    moveTimer = setTimeout(() => {
-                        if (!gameState.gameWon) {
-                            checkWin();
-                        }
-                        if (!gameState.gameWon || gameState.isEndlessMode) {
-                            checkGameOver();
-                        }
-                        saveGameState();
-                        moveInProgress = false;
-                    }, config.animationDuration);
+                    scheduleMoveFinish(config.animationDuration);
                 } else {
                     if (!skipTileSpawn) generateRandomTile(false);
                     renderAllTiles(false);
-                    if (moveTimer) clearTimeout(moveTimer);
-                    moveTimer = setTimeout(() => {
-                        if (!gameState.gameWon) {
-                            checkWin();
-                        }
-                        if (!gameState.gameWon || gameState.isEndlessMode) {
-                            checkGameOver();
-                        }
-                        saveGameState();
-                        moveInProgress = false;
-                    }, 10);
+                    scheduleMoveFinish(10);
                 }
             } else {
                 moveInProgress = false;
@@ -1663,11 +1775,11 @@
                 }, 300);
             }
         }
-        function saveHistory() {
-            const gridCopy = cloneGrid(gameState.grid);
+        function saveHistory(snapshot) {
+            const gridCopy = snapshot ? snapshot.grid : cloneGrid(gameState.grid);
             gameState.history.push({
                 grid: gridCopy,
-                score: gameState.score
+                score: snapshot ? snapshot.score : gameState.score
             });
             if (gameState.history.length > config.maxUndoSteps) {
                 gameState.history.shift();
@@ -2410,28 +2522,34 @@
             }
             elements.resetSettingsButton.addEventListener('click', resetAllSettings);
         }
+        function clearAutoThemeListener() {
+            if (window.themeMediaQueryListener) {
+                window.themeMediaQueryListener.mediaQuery.removeEventListener('change', window.themeMediaQueryListener.handler);
+                window.themeMediaQueryListener = null;
+            }
+        }
+        function enableAutoThemeListener() {
+            clearAutoThemeListener();
+            const themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            const updateTheme = (e) => {
+                document.documentElement.classList.toggle('dark', e.matches);
+            };
+            themeMediaQuery.addEventListener('change', updateTheme);
+            updateTheme(themeMediaQuery);
+            window.themeMediaQueryListener = {
+                mediaQuery: themeMediaQuery,
+                handler: updateTheme
+            };
+        }
         function setupThemeListeners() {
             elements.themeToggle.addEventListener('change', function() {
-                if (window.themeMediaQueryListener) {
-                    window.themeMediaQueryListener.mediaQuery.removeEventListener('change', window.themeMediaQueryListener.handler);
-                    window.themeMediaQueryListener = null;
-                }
                 const theme = this.value;
                 if (theme === 'auto') {
-                    const themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-                    const updateTheme = (e) => {
-                        const isDark = e ? e.matches : window.matchMedia('(prefers-color-scheme: dark)').matches;
-                        document.documentElement.classList.toggle('dark', isDark);
-                    };
-                    themeMediaQuery.addEventListener('change', updateTheme);
-                    updateTheme(themeMediaQuery);
-                    window.themeMediaQueryListener = {
-                        mediaQuery: themeMediaQuery,
-                        handler: updateTheme
-                    };
+                    enableAutoThemeListener();
                     localStorage.setItem('2048-setting-theme', 'auto');
                     if (window.customTheme && typeof window.customTheme.clearApplied === 'function') window.customTheme.clearApplied();
                 } else if (theme === 'custom') {
+                    clearAutoThemeListener();
                     if (!window.customThemeLoaded || !window.customTheme || typeof window.customTheme.activate !== 'function') {
                         alert(i18n.t('customThemeModuleMissing'));
                         this.value = localStorage.getItem('2048-setting-theme');
@@ -2439,6 +2557,7 @@
                     }
                     window.customTheme.activate();
                 } else {
+                    clearAutoThemeListener();
                     if (window.customTheme && typeof window.customTheme.clearApplied === 'function') window.customTheme.clearApplied();
                     const isDark = theme === 'dark';
                     document.documentElement.classList.toggle('dark', isDark);
@@ -2471,21 +2590,9 @@
         function loadGameState() {
             const savedState = localStorage.getItem('2048-game-state');
             const savedTheme = localStorage.getItem('2048-setting-theme');
-            if (window.themeMediaQueryListener) {
-                window.themeMediaQueryListener.mediaQuery.removeEventListener('change', window.themeMediaQueryListener.handler);
-                window.themeMediaQueryListener = null;
-            }
+            clearAutoThemeListener();
             if (savedTheme === 'auto') {
-                const themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-                const updateTheme = (e) => {
-                    document.documentElement.classList.toggle('dark', e.matches);
-                };
-                themeMediaQuery.addEventListener('change', updateTheme);
-                updateTheme(themeMediaQuery);
-                window.themeMediaQueryListener = {
-                    mediaQuery: themeMediaQuery,
-                    handler: updateTheme
-                };
+                enableAutoThemeListener();
                 elements.themeToggle.value = 'auto';
                 if (window.customTheme && typeof window.customTheme.clearApplied === 'function') window.customTheme.clearApplied();
             } else if (savedTheme === 'custom') {
@@ -2496,16 +2603,7 @@
                     if (earlyStyle) {
                         earlyStyle.remove();
                     }
-                    const themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-                    const updateTheme = (e) => {
-                        document.documentElement.classList.toggle('dark', e.matches);
-                    };
-                    themeMediaQuery.addEventListener('change', updateTheme);
-                    updateTheme(themeMediaQuery);
-                    window.themeMediaQueryListener = {
-                        mediaQuery: themeMediaQuery,
-                        handler: updateTheme
-                    };
+                    enableAutoThemeListener();
                     if (window.customTheme && typeof window.customTheme.clearApplied === 'function') window.customTheme.clearApplied();
                 } else {
                     elements.themeToggle.value = 'custom';
@@ -2517,16 +2615,7 @@
                 if (window.customTheme && typeof window.customTheme.clearApplied === 'function') window.customTheme.clearApplied();
             } else {
                 if (window.customTheme && typeof window.customTheme.clearApplied === 'function') window.customTheme.clearApplied();
-                const themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-                const updateTheme = (e) => {
-                    document.documentElement.classList.toggle('dark', e.matches);
-                };
-                themeMediaQuery.addEventListener('change', updateTheme);
-                updateTheme(themeMediaQuery);
-                window.themeMediaQueryListener = {
-                    mediaQuery: themeMediaQuery,
-                    handler: updateTheme
-                };
+                enableAutoThemeListener();
                 elements.themeToggle.value = savedTheme || 'auto';
             }
             if (window.customTheme && typeof window.customTheme.updatePaletteRow === 'function') {
@@ -2575,22 +2664,9 @@
         }
         function showLoadingError(error) {
             try {
-                var loadingScreen = document.getElementById('loading-screen');
-                if (!loadingScreen) return;
-                var spinnerWrap = loadingScreen.querySelector('.loading-spinner-container');
-                if (spinnerWrap) spinnerWrap.style.display = 'none';
-                var errBox = document.getElementById('loading-error');
-                if (errBox) errBox.style.display = 'flex';
-                var text = window.__getLoadingErrorTexts();
-                var titleEl = document.getElementById('loading-error-text');
-                if (titleEl) titleEl.textContent = text.title;
-                var detailEl = document.getElementById('loading-error-detail');
-                if (detailEl) detailEl.textContent = text.detail + (error && error.message ? ' (' + error.message + ')' : '');
-                var btn = document.getElementById('loading-reload-btn');
-                if (btn) {
-                    btn.textContent = text.reload;
-                    btn.onclick = function() { location.reload(); };
-                }
+                if (typeof window.__showLoadingFailure !== 'function') return;
+                var texts = window.__getLoadingFailureTexts();
+                window.__showLoadingFailure(texts.detail + (error && error.message ? ' (' + error.message + ')' : ''));
             } catch (e) {
                 console.error('Failed to show loading error:', e);
             }
@@ -2622,7 +2698,11 @@
             boot();
         }
         console.log('%c   ____     ___    _  _      ___  \n  |___ \\   / _ \\  | || |    ( _ ) \n    __) | | | | | | || |_   / _ \\ \n   / __/  | |_| | |__   _| | (_) | \n  |_____|  \\___/     |_|    \\___/ \n                                   \n    ____                             \n   / ___|   __ _   _ __ ___     ___ \n  | |  _   / _` | | \'_ ` _ \\   / _ \\ \n  | |_| | | (_| | | | | | | | |  __/ \n   \\____|  \\__,_| |_| |_| |_|  \\___| \n                                     ', 'color: #faa31b; font-size: 14px;');
-        window.modulesReadyPromise.then(() => {
+        if (!window.modulesReadyPromise || typeof window.modulesReadyPromise.then !== 'function') {
+            var missingBootAssets = typeof window.__getEssentialAssetsMissing === 'function' ? window.__getEssentialAssetsMissing() : [];
+            console.error('Essential assets failed to load:', missingBootAssets.join(', '));
+            if (typeof window.__showEssentialAssetsError === 'function') window.__showEssentialAssetsError(missingBootAssets);
+        } else window.modulesReadyPromise.then(() => {
             loadCssVersion();
             console.log('2048 v' + gameVersion);
             const versionInfo = document.getElementById('version-info');
