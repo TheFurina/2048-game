@@ -1,4 +1,4 @@
-const webRTCSyncVersion = '0.8';
+const webRTCSyncVersion = '0.9';
 window.webRTCSyncVersion = webRTCSyncVersion;
 const webRTCSyncDomTemplates = {"#module-dom-root": "        <div id=\"webrtc-modal\" class=\"fixed inset-0 flex items-center justify-center bg-black/50 z-50 hidden\" role=\"dialog\" aria-labelledby=\"webrtc-modal-title\" aria-modal=\"true\">\n            <div class=\"bg-white dark:bg-dark-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto text-center shadow-xl relative transform transition-all duration-300 scale-95 opacity-0\">\n                <h2 id=\"webrtc-modal-title\" class=\"text-2xl font-bold text-secondary dark:text-dark-text mb-4\" data-i18n=\"webrtcModalTitle\"></h2>\n                <button id=\"close-webrtc-modal\" class=\"text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl dark:text-dark-muted dark:hover:text-white\" title=\"关闭\">\n                    <i class=\"fa-solid fa-times\"></i>\n                </button>\n                <div id=\"webrtc-select-section\">\n                    <p class=\"text-gray-700 dark:text-dark-muted mb-4\" data-i18n=\"webrtcSelectDesc\"></p>\n                    <div id=\"webrtc-select-actions\" class=\"flex flex-col gap-4 mb-6\">\n                        <button id=\"webrtc-host-button\" class=\"bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-md shadow-md transition-all duration-200\">\n                            <i class=\"fa-solid fa-tower-broadcast mr-2\"></i><span data-i18n=\"webrtcCreateConnection\"></span>\n                        </button>\n                        <button id=\"webrtc-join-button\" class=\"bg-teal-500 hover:bg-teal-600 text-white font-bold py-4 px-6 rounded-md shadow-md transition-all duration-200\">\n                            <i class=\"fa-solid fa-link mr-2\"></i><span data-i18n=\"webrtcJoinConnection\"></span>\n                        </button>\n                    </div>\n                    <div id=\"webrtc-connected-panel\" style=\"display: none;\" class=\"mb-6\">\n                        <p class=\"text-green-600 dark:text-green-400 font-bold mb-2\"><i class=\"fa-solid fa-circle-check mr-1\"></i><span data-i18n=\"webrtcConnected\"></span></p>\n                        <p class=\"text-gray-500 dark:text-dark-muted text-xs mb-4\" data-i18n=\"syncLiveHint\"></p>\n                        <button id=\"webrtc-select-disconnect-button\" class=\"bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200\">\n                            <i class=\"fa-solid fa-link-slash mr-2\"></i><span data-i18n=\"disconnectConnection\"></span>\n                        </button>\n                    </div>\n                </div>\n                <div id=\"webrtc-host-section\" style=\"display: none;\">\n                    <p class=\"text-gray-600 dark:text-dark-muted text-sm mb-2\" data-i18n=\"webrtcQuickHostTitle\"></p>\n                    <div class=\"flex justify-center mb-3\">\n                        <div id=\"webrtc-room-code\" class=\"text-4xl font-bold tracking-[0.35em] text-primary dark:text-dark-primary bg-gray-100 dark:bg-gray-800 rounded-lg px-6 py-3 select-all\">------</div>\n                    </div>\n                    <div class=\"flex flex-wrap gap-2 justify-center mb-2\">\n                        <button id=\"webrtc-copy-room-code\" class=\"bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 text-sm font-bold py-2 px-4 rounded-md\">\n                            <i class=\"fa-solid fa-copy mr-1\"></i><span data-i18n=\"webrtcCopyRoomCode\"></span>\n                        </button>\n                        <button id=\"webrtc-room-regenerate\" class=\"bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 text-sm font-bold py-2 px-4 rounded-md\">\n                            <i class=\"fa-solid fa-rotate-right mr-1\"></i><span data-i18n=\"webrtcRoomRegenerate\"></span>\n                        </button>\n                    </div>\n                    <p id=\"webrtc-room-status\" class=\"text-sm text-gray-500 dark:text-dark-muted whitespace-pre-line mb-4\"></p>\n                    <details id=\"webrtc-host-manual\" class=\"mb-4 text-left\">\n                        <summary class=\"cursor-pointer text-sm text-gray-500 dark:text-dark-muted select-none\" data-i18n=\"webrtcManualMode\"></summary>\n                        <div class=\"mt-3\">\n                            <p class=\"text-gray-600 dark:text-dark-muted text-sm mb-2\" data-i18n=\"webrtcHostStep1\"></p>\n                            <textarea id=\"webrtc-offer-code\" readonly class=\"w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2\"></textarea>\n                            <button id=\"webrtc-copy-offer\" class=\"bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 text-sm font-bold py-2 px-4 rounded-md mb-4\">\n                                <i class=\"fa-solid fa-copy mr-1\"></i><span data-i18n=\"webrtcCopyOffer\"></span>\n                            </button>\n                            <p class=\"text-gray-600 dark:text-dark-muted text-sm mb-2\" data-i18n=\"webrtcHostStep2\"></p>\n                            <textarea id=\"webrtc-answer-input\" class=\"w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2\"></textarea>\n                            <button id=\"webrtc-accept-answer-button\" class=\"bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-md mb-4\"><span data-i18n=\"webrtcFinishConnection\"></span></button>\n                            <p id=\"webrtc-host-status\" class=\"text-sm text-gray-500 dark:text-dark-muted whitespace-pre-line\"></p>\n                        </div>\n                    </details>\n                    <button id=\"webrtc-host-back\" class=\"bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 font-bold py-3 px-6 rounded-md\"><i class=\"fa-solid fa-arrow-left mr-2\"></i><span data-i18n=\"cancel\"></span></button>\n                </div>\n                <div id=\"webrtc-join-section\" style=\"display: none;\">\n                    <p class=\"text-gray-600 dark:text-dark-muted text-sm mb-2\" data-i18n=\"webrtcQuickJoinTitle\"></p>\n                    <div class=\"flex justify-center mb-3\">\n                        <input id=\"webrtc-room-code-input\" maxlength=\"6\" inputmode=\"numeric\" autocomplete=\"off\" class=\"w-full max-w-xs text-center text-3xl font-bold tracking-[0.3em] text-secondary dark:text-dark-text bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary\" placeholder=\"000000\">\n                    </div>\n                    <button id=\"webrtc-join-room-button\" class=\"bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-md mb-2\"><span data-i18n=\"webrtcConnectRoom\"></span></button>\n                    <p id=\"webrtc-join-room-status\" class=\"text-sm text-gray-500 dark:text-dark-muted whitespace-pre-line mb-4\"></p>\n                    <details id=\"webrtc-join-manual\" class=\"mb-4 text-left\">\n                        <summary class=\"cursor-pointer text-sm text-gray-500 dark:text-dark-muted select-none\" data-i18n=\"webrtcManualMode\"></summary>\n                        <div class=\"mt-3\">\n                            <p class=\"text-gray-600 dark:text-dark-muted text-sm mb-2\" data-i18n=\"webrtcJoinPasteOffer\"></p>\n                            <textarea id=\"webrtc-offer-input\" class=\"w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2\"></textarea>\n                            <button id=\"webrtc-generate-answer-button\" class=\"bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-6 rounded-md mb-4\"><span data-i18n=\"webrtcGenerateAnswer\"></span></button>\n                            <div id=\"webrtc-answer-box\" style=\"display: none;\">\n                                <p class=\"text-gray-600 dark:text-dark-muted text-sm mb-2\" data-i18n=\"webrtcJoinStep2\"></p>\n                                <textarea id=\"webrtc-answer-code\" readonly class=\"w-full h-24 p-2 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-dark-text rounded-md mb-2\"></textarea>\n                                <button id=\"webrtc-copy-answer\" class=\"bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 text-sm font-bold py-2 px-4 rounded-md mb-4\">\n                                    <i class=\"fa-solid fa-copy mr-1\"></i><span data-i18n=\"webrtcCopyAnswer\"></span>\n                                </button>\n                            </div>\n                            <p id=\"webrtc-join-status\" class=\"text-sm text-gray-500 dark:text-dark-muted whitespace-pre-line\"></p>\n                        </div>\n                    </details>\n                    <button id=\"webrtc-join-back\" class=\"bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 font-bold py-3 px-6 rounded-md\"><i class=\"fa-solid fa-arrow-left mr-2\"></i><span data-i18n=\"cancel\"></span></button>\n                </div>\n                <div id=\"webrtc-connected-section\" style=\"display: none;\">\n                    <p class=\"text-green-600 font-bold mb-4\" data-i18n=\"webrtcConnected\" data-i18n-mode=\"icon+text\"><i class=\"fa-solid fa-circle-check mr-1\"></i></p>\n                    <div class=\"flex items-center justify-center gap-2 mb-2\">\n                        <input type=\"checkbox\" id=\"webrtc-settings-checkbox\" class=\"w-4 h-4 text-primary bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded\" checked>\n                        <label for=\"webrtc-settings-checkbox\" class=\"text-sm text-gray-700 dark:text-dark-text\" data-i18n=\"includeSettings\"></label>\n                    </div>\n                    <div class=\"flex items-center justify-center gap-2 mb-4\">\n                        <input type=\"checkbox\" id=\"webrtc-live-sync-checkbox\" class=\"w-4 h-4 text-primary bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded\" checked>\n                        <label for=\"webrtc-live-sync-checkbox\" class=\"text-sm text-gray-700 dark:text-dark-text\" data-i18n=\"liveSyncData\"></label>\n                    </div>\n                    <button id=\"webrtc-send-button\" class=\"bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-md shadow-md mb-4\">\n                        <i class=\"fa-solid fa-paper-plane mr-2\"></i><span data-i18n=\"webrtcSendData\"></span>\n                    </button>\n                    <p id=\"webrtc-connected-status\" class=\"text-sm text-gray-500 dark:text-dark-muted mb-4\"></p>\n                    <div class=\"flex flex-wrap gap-3 justify-center\">\n                        <button id=\"webrtc-disconnect-button\" class=\"bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200\">\n                            <i class=\"fa-solid fa-link-slash mr-2\"></i><span data-i18n=\"disconnectConnection\"></span>\n                        </button>\n                        <button id=\"webrtc-connected-back\" class=\"bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 font-bold py-3 px-6 rounded-md\"><i class=\"fa-solid fa-arrow-left mr-2\"></i><span data-i18n=\"cancel\"></span></button>\n                    </div>\n                </div>\n            </div>\n        </div>", "#settings-module-data": "                            <button id=\"webrtc-sync-button\" class=\"flex items-center justify-between w-full px-4 py-3 text-gray-700 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-all duration-200 rounded-lg\">\n                                <span class=\"flex items-center\">\n                                    <i class=\"fa-solid fa-wifi w-5 mr-2\"></i>\n                                    <span data-i18n=\"webrtcModalTitle\"></span>\n                                    <span class=\"ml-2 px-2 py-0.5 text-xs bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-full font-semibold shadow-sm dark:from-green-400 dark:to-teal-400 dark:text-gray-900\">Beta</span>\n                                </span>\n                                <i class=\"fa-solid fa-chevron-right text-xs\"></i>\n                            </button>"};
 if (window.i18n && typeof window.i18n.registerModule === 'function') {
@@ -462,6 +462,7 @@ window.SyncLive = window.SyncLive || {
 };
 window.SyncIndicator = window.SyncIndicator || {
     connections: {},
+    tipDismissed: false,
     meta: {
         webrtc: { labelKey: 'webrtcConnectedBadge', icon: 'fa-solid fa-wifi' }
     },
@@ -499,7 +500,27 @@ window.SyncIndicator = window.SyncIndicator || {
         active.forEach(name => {
             const meta = this.meta[name];
             const group = document.createElement('span');
-            group.className = 'flex items-center gap-1';
+            group.className = 'sync-indicator-group flex items-center gap-1';
+            if (!this.tipDismissed) {
+                const tip = document.createElement('span');
+                tip.className = 'sync-tip is-visible';
+                tip.setAttribute('role', 'tooltip');
+                const tipText = document.createElement('span');
+                tipText.textContent = t('syncIndicatorClickTip');
+                const tipClose = document.createElement('button');
+                tipClose.type = 'button';
+                tipClose.className = 'sync-tip-close';
+                tipClose.setAttribute('aria-label', t('syncIndicatorTipClose'));
+                tipClose.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                tipClose.addEventListener('click', event => {
+                    event.stopPropagation();
+                    tip.classList.remove('is-visible');
+                    window.SyncIndicator.tipDismissed = true;
+                });
+                tip.appendChild(tipText);
+                tip.appendChild(tipClose);
+                group.appendChild(tip);
+            }
             const openBtn = document.createElement('button');
             openBtn.type = 'button';
             openBtn.className = 'sync-open flex items-center text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold transition-colors focus:outline-none';
@@ -819,22 +840,28 @@ async function handleWebRTCJoinRoom() {
         setWebrtcStatus('webrtc-join-room-status', describeWebrtcRoomError(error, webrtcT('webrtcJoinRoomFailed')));
     }
 }
+function copyTextToClipboard(text) {
+    const fallbackCopy = () => {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(fallbackCopy);
+    } else {
+        fallbackCopy();
+    }
+}
 function copyWebrtcRoomCode() {
     const display = document.getElementById('webrtc-room-code');
     const code = display ? display.textContent.trim() : '';
     if (!code || code === '------') {
         return;
     }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(code).catch(() => document.execCommand('copy'));
-    } else {
-        const textarea = document.createElement('textarea');
-        textarea.value = code;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-    }
+    copyTextToClipboard(code);
     setWebrtcStatus('webrtc-room-status', webrtcT('webrtcCopied') + ' · ' + webrtcT('webrtcWaitingForPeer'));
 }
 async function handleWebRTCHostManualOpen() {
@@ -996,11 +1023,7 @@ function copyWebrtcText(elementId) {
         return;
     }
     textarea.select();
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(textarea.value).catch(() => document.execCommand('copy'));
-    } else {
-        document.execCommand('copy');
-    }
+    copyTextToClipboard(textarea.value);
     textarea.blur();
 }
 function showWebRTCModal(mode) {

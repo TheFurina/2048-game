@@ -1,6 +1,6 @@
-const aiAnalysisVersion = '2.10';
+const aiAnalysisVersion = '2.11';
 window.aiAnalysisVersion = aiAnalysisVersion;
-const aiAnalysisDomTemplates = {"#module-dom-root": "        <div id=\"ai-analysis-modal\" class=\"ai-analysis-modal ai-modal-closed\" role=\"dialog\" aria-labelledby=\"ai-analysis-modal-title\" aria-modal=\"true\">\n            <div class=\"ai-analysis-content max-h-[90vh] overflow-y-auto transition-all duration-300 ease-in-out\">\n                <div id=\"ai-analysis-modal-title\" class=\"ai-analysis-title flex items-center justify-between\">\n                    <span data-i18n=\"aiGameAnalysis\"></span>\n                    <div class=\"flex items-center gap-1\">\n                        <div id=\"analysis-switch-container\" class=\"flex bg-gray-200 dark:bg-gray-700 rounded-md p-0.5 relative cursor-grab active:cursor-grabbing\">\n                            <div id=\"analysis-slider\" class=\"absolute top-0.5 left-0.5 bottom-0.5 w-[calc(50%-2px)] bg-white dark:bg-gray-600 rounded transition-all duration-300 ease-out z-0 pointer-events-none\"></div>\n                            <button id=\"analysis-mode-algorithm\" class=\"px-3 py-1 text-xs font-medium text-gray-800 dark:text-gray-200 rounded transition-colors relative z-10 bg-transparent\" data-i18n=\"aiAlgorithmAnalysis\"></button>\n                            <button id=\"analysis-mode-ai\" class=\"px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded transition-colors relative z-10 bg-transparent\" data-i18n=\"aiAiAnalysis\"></button>\n                        </div>\n                        <button id=\"close-ai-modal\" class=\"text-secondary/60 hover:text-secondary focus:outline-none ml-2 text-xl dark:text-dark-muted dark:hover:text-white\" title=\"关闭AI分析\">\n                            <i class=\"fa-solid fa-times\"></i>\n                        </button>\n                    </div>\n                </div>\n                <div class=\"analysis-item\">\n                    <div class=\"flex items-center justify-between\">\n                        <div class=\"analysis-label flex items-center\">\n                            <span data-i18n=\"currentBestMove\"></span>\n                            <button id=\"toggle-best-move\" class=\"text-secondary/60 hover:text-secondary focus:outline-none text-sm ml-2 dark:text-dark-muted dark:hover:text-white\" title=\"隐藏/显示最佳移动方向\">\n                                <i class=\"fa-solid fa-eye\"></i>\n                            </button>\n                        </div>\n                        <button id=\"ai-regenerate-button\" class=\"hidden bg-primary dark:bg-dark-primary hover:bg-primary/90 text-white px-2.5 py-1 rounded-md shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center gap-1 text-xs font-medium -mt-1\">\n                            <i class=\"fa-solid fa-rotate-right\"></i>\n                            <span data-i18n=\"regenerate\"></span>\n                        </button>\n                    </div>\n                    <div id=\"best-move-direction\" class=\"analysis-value best-move w-full\">\n                        <span class=\"best-move-text\">--</span>\n                    </div>\n                </div>\n                <div class=\"analysis-item\">\n                    <div class=\"flex items-center justify-between\">\n                        <div class=\"analysis-label\" data-i18n=\"autoPlayTitle\"></div>\n                        <div class=\"flex items-center gap-2\">\n                            <button id=\"auto-play-stop-button\" class=\"hidden bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 text-xs font-medium px-2.5 py-1 rounded-md shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50\" title=\"停止自动操作\">\n                                <i class=\"fa-solid fa-stop\"></i>\n                            </button>\n                            <button id=\"auto-play-toggle-button\" class=\"bg-primary dark:bg-dark-primary hover:bg-primary/90 text-white px-2.5 py-1 rounded-md shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center gap-1 text-xs font-medium\">\n                                <i class=\"fa-solid fa-play\"></i>\n                                <span data-i18n=\"autoPlayStart\"></span>\n                            </button>\n                        </div>\n                    </div>\n                    <div id=\"auto-play-status\" class=\"analysis-value\">--</div>\n                </div>\n                <div class=\"analysis-item\">\n                    <div class=\"analysis-label\" data-i18n=\"mergeOpportunitiesLabel\"></div>\n                    <div id=\"merge-opportunities\" class=\"analysis-value\">--</div>\n                </div>\n                <div class=\"analysis-item\">\n                    <div class=\"analysis-label\" data-i18n=\"gameStateAssessment\"></div>\n                    <div id=\"game-state-assessment\" class=\"analysis-value\">--</div>\n                </div>\n                <div class=\"analysis-item\">\n                    <div class=\"analysis-label\" data-i18n=\"scorePotentialLabel\"></div>\n                    <div id=\"score-potential\" class=\"analysis-value\">--</div>\n                </div>\n                <div class=\"analysis-item\">\n                    <div class=\"analysis-label\" data-i18n=\"aiSuggestionLabel\"></div>\n                    <div id=\"ai-suggestion\" class=\"analysis-value min-h-[60px]\">--</div>\n                </div>\n                <div id=\"ai-analysis-api-settings-entry\" class=\"hidden mt-2 text-right\">\n                    <button id=\"ai-analysis-api-settings-button\" class=\"inline-flex items-center gap-1 text-primary hover:text-primary/80 text-sm transition-colors duration-200 focus:outline-none\">\n                        <i class=\"fa-solid fa-gear\"></i><span data-i18n=\"aiApiSettingsItem\"></span>\n                    </button>\n                </div>\n            </div>"};
+const aiAnalysisDomTemplates = {"#module-dom-root": "        <div id=\"ai-analysis-modal\" class=\"ai-analysis-modal ai-modal-closed\" role=\"dialog\" aria-labelledby=\"ai-analysis-modal-title\" aria-modal=\"true\">\n            <div class=\"ai-analysis-content max-h-[90vh] overflow-y-auto transition-all duration-300 ease-in-out\">\n                <div id=\"ai-analysis-modal-title\" class=\"ai-analysis-title flex flex-wrap items-center justify-between gap-2 pr-8\">\n                    <span data-i18n=\"aiGameAnalysis\"></span>\n                    <div class=\"flex items-center gap-1\">\n                        <div id=\"analysis-switch-container\" class=\"flex bg-gray-200 dark:bg-gray-700 rounded-md p-0.5 relative cursor-grab active:cursor-grabbing\">\n                            <div id=\"analysis-slider\" class=\"absolute top-0.5 left-0.5 bottom-0.5 w-[calc(50%-2px)] bg-white dark:bg-gray-600 rounded transition-all duration-300 ease-out z-0 pointer-events-none\"></div>\n                            <button id=\"analysis-mode-algorithm\" class=\"px-3 py-1 text-xs font-medium text-gray-800 dark:text-gray-200 rounded transition-colors relative z-10 bg-transparent\" data-i18n=\"aiAlgorithmAnalysis\"></button>\n                            <button id=\"analysis-mode-ai\" class=\"px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded transition-colors relative z-10 bg-transparent\" data-i18n=\"aiAiAnalysis\"></button>\n                        </div>\n                    </div>\n                </div>\n                <button id=\"close-ai-modal\" class=\"text-secondary/60 hover:text-secondary focus:outline-none absolute top-5 right-8 text-xl dark:text-dark-muted dark:hover:text-white\" title=\"关闭AI分析\">\n                    <i class=\"fa-solid fa-times\"></i>\n                </button>\n                <div class=\"analysis-item\">\n                    <div class=\"flex flex-wrap items-center justify-between gap-2\">\n                        <div class=\"analysis-label flex items-center\">\n                            <span data-i18n=\"currentBestMove\"></span>\n                            <button id=\"toggle-best-move\" class=\"text-secondary/60 hover:text-secondary focus:outline-none text-sm ml-2 dark:text-dark-muted dark:hover:text-white\" title=\"隐藏/显示最佳移动方向\">\n                                <i class=\"fa-solid fa-eye\"></i>\n                            </button>\n                        </div>\n                        <button id=\"ai-regenerate-button\" class=\"hidden bg-primary dark:bg-dark-primary hover:bg-primary/90 text-white px-2.5 py-1 rounded-md shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center gap-1 text-xs font-medium -mt-1\">\n                            <i class=\"fa-solid fa-rotate-right\"></i>\n                            <span data-i18n=\"regenerate\"></span>\n                        </button>\n                    </div>\n                    <div id=\"best-move-direction\" class=\"analysis-value best-move w-full\">\n                        <span class=\"best-move-text\">--</span>\n                    </div>\n                </div>\n                <div class=\"analysis-item\">\n                    <div class=\"flex flex-wrap items-center justify-between gap-2\">\n                        <div class=\"analysis-label\" data-i18n=\"autoPlayTitle\"></div>\n                        <div class=\"flex items-center gap-2\">\n                            <button id=\"auto-play-stop-button\" class=\"hidden bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-dark-text text-gray-800 text-xs font-medium px-2.5 py-1 rounded-md shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50\" title=\"停止自动操作\">\n                                <i class=\"fa-solid fa-stop\"></i>\n                            </button>\n                            <button id=\"auto-play-toggle-button\" class=\"bg-primary dark:bg-dark-primary hover:bg-primary/90 text-white px-2.5 py-1 rounded-md shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center gap-1 text-xs font-medium\">\n                                <i class=\"fa-solid fa-play\"></i>\n                                <span data-i18n=\"autoPlayStart\"></span>\n                            </button>\n                        </div>\n                    </div>\n                    <div id=\"auto-play-status\" class=\"analysis-value\">--</div>\n                </div>\n                <div class=\"analysis-item\">\n                    <div class=\"analysis-label\" data-i18n=\"mergeOpportunitiesLabel\"></div>\n                    <div id=\"merge-opportunities\" class=\"analysis-value\">--</div>\n                </div>\n                <div class=\"analysis-item\">\n                    <div class=\"analysis-label\" data-i18n=\"gameStateAssessment\"></div>\n                    <div id=\"game-state-assessment\" class=\"analysis-value\">--</div>\n                </div>\n                <div class=\"analysis-item\">\n                    <div class=\"analysis-label\" data-i18n=\"scorePotentialLabel\"></div>\n                    <div id=\"score-potential\" class=\"analysis-value\">--</div>\n                </div>\n                <div class=\"analysis-item\">\n                    <div class=\"analysis-label\" data-i18n=\"aiSuggestionLabel\"></div>\n                    <div id=\"ai-suggestion\" class=\"analysis-value min-h-[60px]\">--</div>\n                </div>\n                <div id=\"ai-analysis-api-settings-entry\" class=\"hidden mt-2 text-right\">\n                    <button id=\"ai-analysis-api-settings-button\" class=\"inline-flex items-center gap-1 text-primary hover:text-primary/80 text-sm transition-colors duration-200 focus:outline-none\">\n                        <i class=\"fa-solid fa-gear\"></i><span data-i18n=\"aiApiSettingsItem\"></span>\n                    </button>\n                </div>\n            </div>"};
 if (window.i18n && typeof window.i18n.registerModule === 'function') {
     window.i18n.registerModule('ai');
 }
@@ -125,50 +125,42 @@ function setupAiAnalysis() {
                 setRegenerateButtonLoading(true);
                 cachedAiResults = null;
                 try {
-                    const language = i18n.getLang();
-                    const result = await requestGameAnalysis(gameState, language);
-                    if (result && result.success) {
-                        cachedAiResults = result.data;
-                        updateGameStateCache(gameState, undefined, result.data);
-                        updateAnalysisResults(result.data);
-                    } else {
-                        let errorMsg = result?.error ? i18n.t(result.error) : i18n.t('aiApiRequestFailed');
-                        if (result?.message) {
-                            errorMsg += ': ' + result.message;
-                        }
-                        cachedAiResults = {
-                            bestMove: '--',
-                            mergeOpportunities: 0,
-                            gameStateAssessment: 'safe',
-                            scorePotential: 'medium',
-                            aiSuggestion: errorMsg
-                        };
-                        updateGameStateCache(gameState, undefined, cachedAiResults);
-                        updateAnalysisResults(cachedAiResults);
-                    }
+                    await runAiAnalysisAndRender();
                 } finally {
                     setRegenerateButtonLoading(false);
                 }
             });
         }
-        analysisSlider.classList.remove('left-0.5', 'transition-all', 'duration-300', 'ease-out');
-        analysisSlider.style.transition = 'none';
+        const SLIDER_TRANSITION = 'left 0.3s ease-out, width 0.3s ease-out';
+        const syncSliderToMode = (mode, animate = true) => {
+            const targetBtn = mode === 'ai' ? aiBtn : algorithmBtn;
+            if (!targetBtn) return;
+            if (!animate) {
+                analysisSlider.style.transition = 'none';
+                analysisSlider.style.width = targetBtn.offsetWidth + 'px';
+                analysisSlider.style.left = targetBtn.offsetLeft + 'px';
+                analysisSlider.offsetHeight;
+                analysisSlider.style.transition = SLIDER_TRANSITION;
+            } else {
+                analysisSlider.style.transition = SLIDER_TRANSITION;
+                analysisSlider.style.width = targetBtn.offsetWidth + 'px';
+                analysisSlider.style.left = targetBtn.offsetLeft + 'px';
+            }
+        };
+        analysisSlider.classList.remove('left-0.5', 'w-[calc(50%-2px)]', 'transition-all', 'duration-300', 'ease-out');
         if (currentAnalysisMode === 'ai') {
             aiBtn.className = 'px-3 py-1 text-xs font-medium text-gray-800 dark:text-gray-200 rounded transition-colors relative z-10 bg-transparent';
             algorithmBtn.className = 'px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded transition-colors relative z-10 bg-transparent';
-            analysisSlider.style.left = 'calc(50% - 1px)';
             toggleRegenerateButton(true);
             toggleApiSettingsEntry(true);
         } else {
             algorithmBtn.className = 'px-3 py-1 text-xs font-medium text-gray-800 dark:text-gray-200 rounded transition-colors relative z-10 bg-transparent';
             aiBtn.className = 'px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded transition-colors relative z-10 bg-transparent';
-            analysisSlider.style.left = '2px';
             toggleRegenerateButton(false);
             toggleApiSettingsEntry(false);
         }
+        syncSliderToMode(currentAnalysisMode, false);
         toggleAiSuggestionVisibility(currentAnalysisMode === 'ai', true);
-        analysisSlider.offsetHeight;
-        analysisSlider.style.transition = 'left 0.3s ease-out';
         const updateMode = (mode, isInitializing = false) => {
             currentAnalysisMode = mode;
             saveAnalysisMode(mode);
@@ -196,7 +188,6 @@ function setupAiAnalysis() {
                             updateAnalysisResults(cachedAlgorithmResults);
                         } else {
                             showAnalysisLoading();
-                            toggleAiSuggestionVisibility(false, true);
                             const results = analyzeGameStateWithAlgorithm();
                             cachedAlgorithmResults = results;
                             updateGameStateCache(gameState, results, undefined);
@@ -206,10 +197,10 @@ function setupAiAnalysis() {
                         if (hasIncompleteAiConfig()) {
                             const configErrorMsg = buildAiConfigPromptMessage();
                             cachedAiResults = {
-                                bestMove: '--',
-                                mergeOpportunities: 0,
-                                gameStateAssessment: 'safe',
-                                scorePotential: 'medium',
+                                bestMove: '',
+                                mergeOpportunities: null,
+                                gameStateAssessment: '',
+                                scorePotential: '',
                                 aiSuggestion: configErrorMsg
                             };
                             updateGameStateCache(gameState, undefined, cachedAiResults);
@@ -220,28 +211,7 @@ function setupAiAnalysis() {
                             updateAnalysisResults(cachedAiResults);
                         } else {
                             showAnalysisLoading();
-                            toggleAiSuggestionVisibility(true, true);
-                            const language = i18n.getLang();
-                            const result = await requestGameAnalysis(gameState, language);
-                            if (result && result.success) {
-                                cachedAiResults = result.data;
-                                updateGameStateCache(gameState, undefined, result.data);
-                                updateAnalysisResults(result.data);
-                            } else {
-                                let errorMsg = result?.error ? i18n.t(result.error) : i18n.t('aiApiRequestFailed');
-                                if (result?.message) {
-                                    errorMsg += ': ' + result.message;
-                                }
-                                cachedAiResults = {
-                                    bestMove: '--',
-                                    mergeOpportunities: 0,
-                                    gameStateAssessment: 'safe',
-                                    scorePotential: 'medium',
-                                    aiSuggestion: errorMsg
-                                };
-                                updateGameStateCache(gameState, undefined, cachedAiResults);
-                                updateAnalysisResults(cachedAiResults);
-                            }
+                            await runAiAnalysisAndRender();
                         }
                     }
                 })();
@@ -250,32 +220,27 @@ function setupAiAnalysis() {
         const getSliderWidth = () => {
             return analysisSlider.offsetWidth || (sliderContainer.offsetWidth / 2 - 2);
         };
-        window.initAnalysisModeState = () => {
+        const finishSliderDrag = () => {
+            if (!window.isSliderDragging) return;
+            window.isSliderDragging = false;
             const containerWidth = sliderContainer.offsetWidth;
             const sliderWidth = getSliderWidth();
-            analysisSlider.style.transition = 'none';
-            if (currentAnalysisMode === 'ai') {
-                analysisSlider.style.left = Math.max(2, containerWidth - sliderWidth - 2) + 'px';
-            } else {
-                analysisSlider.style.left = '2px';
-            }
-            analysisSlider.offsetHeight;
-            analysisSlider.style.transition = 'left 0.3s ease-out';
+            const sliderCenter = parseFloat(analysisSlider.style.left) + sliderWidth / 2;
+            const mode = sliderCenter < containerWidth / 2 ? 'algorithm' : 'ai';
+            syncSliderToMode(mode, true);
+            updateMode(mode);
+            hasMoved = false;
+        };
+        window.initAnalysisModeState = () => {
+            syncSliderToMode(currentAnalysisMode, false);
         };
         const setSliderPosition = (left) => {
             const containerWidth = sliderContainer.offsetWidth;
             const sliderWidth = getSliderWidth();
-            const minLeft = 2;
-            const maxLeft = containerWidth - sliderWidth - 2;
-            const clampedLeft = Math.max(minLeft, Math.min(left, maxLeft));
+            const mode = left + sliderWidth / 2 < containerWidth / 2 ? 'algorithm' : 'ai';
+            const clampedLeft = Math.max(2, Math.min(left, containerWidth - sliderWidth - 2));
             analysisSlider.style.left = clampedLeft + 'px';
-            const sliderCenter = clampedLeft + sliderWidth / 2;
-            const containerCenter = containerWidth / 2;
-            if (sliderCenter < containerCenter) {
-                if (currentAnalysisMode !== 'algorithm') updateMode('algorithm');
-            } else {
-                if (currentAnalysisMode !== 'ai') updateMode('ai');
-            }
+            if (currentAnalysisMode !== mode) updateMode(mode);
         };
         sliderContainer.addEventListener('mousedown', (e) => {
             window.isSliderDragging = true;
@@ -303,24 +268,7 @@ function setupAiAnalysis() {
             if (Math.abs(deltaX) > 2) hasMoved = true;
             setSliderPosition(startLeft + deltaX);
         });
-        document.addEventListener('mouseup', () => {
-            if (window.isSliderDragging) {
-                window.isSliderDragging = false;
-                analysisSlider.style.transition = 'left 0.3s ease-out';
-                const containerWidth = sliderContainer.offsetWidth;
-                const sliderWidth = getSliderWidth();
-                const sliderCenter = parseInt(analysisSlider.style.left) + sliderWidth / 2;
-                const containerCenter = containerWidth / 2;
-                if (sliderCenter < containerCenter) {
-                    analysisSlider.style.left = '2px';
-                    updateMode('algorithm');
-                } else {
-                    analysisSlider.style.left = (containerWidth - sliderWidth - 2) + 'px';
-                    updateMode('ai');
-                }
-                hasMoved = false;
-            }
-        });
+        document.addEventListener('mouseup', finishSliderDrag);
         sliderContainer.addEventListener('touchstart', (e) => {
             window.isSliderDragging = true;
             hasMoved = false;
@@ -337,36 +285,25 @@ function setupAiAnalysis() {
             if (Math.abs(deltaX) > 2) hasMoved = true;
             setSliderPosition(startLeft + deltaX);
         }, { passive: false });
-        document.addEventListener('touchend', () => {
-            if (window.isSliderDragging) {
-                window.isSliderDragging = false;
-                analysisSlider.style.transition = 'left 0.3s ease-out';
-                const containerWidth = sliderContainer.offsetWidth;
-                const sliderWidth = getSliderWidth();
-                const sliderCenter = parseInt(analysisSlider.style.left) + sliderWidth / 2;
-                const containerCenter = containerWidth / 2;
-                if (sliderCenter < containerCenter) {
-                    analysisSlider.style.left = '2px';
-                    updateMode('algorithm');
-                } else {
-                    analysisSlider.style.left = (containerWidth - sliderWidth - 2) + 'px';
-                    updateMode('ai');
-                }
-                hasMoved = false;
-            }
-        });
+        document.addEventListener('touchend', finishSliderDrag);
         algorithmBtn.addEventListener('click', () => {
-            analysisSlider.style.transition = 'left 0.3s ease-out';
-            analysisSlider.style.left = '2px';
+            syncSliderToMode('algorithm', true);
             updateMode('algorithm');
         });
         aiBtn.addEventListener('click', () => {
-            analysisSlider.style.transition = 'left 0.3s ease-out';
-            const containerWidth = sliderContainer.offsetWidth;
-            const sliderWidth = getSliderWidth();
-            analysisSlider.style.left = (containerWidth - sliderWidth - 2) + 'px';
+            syncSliderToMode('ai', true);
             updateMode('ai');
         });
+        const syncSliderToCurrentMode = () => {
+            if (window.isSliderDragging) return;
+            syncSliderToMode(currentAnalysisMode, false);
+        };
+        if (typeof ResizeObserver === 'function') {
+            const sliderResizeObserver = new ResizeObserver(syncSliderToCurrentMode);
+            sliderResizeObserver.observe(algorithmBtn);
+            sliderResizeObserver.observe(aiBtn);
+        }
+        window.addEventListener('resize', syncSliderToCurrentMode);
     }
     const closeAiModalButton = document.getElementById('close-ai-modal');
     if (closeAiModalButton) {
@@ -623,6 +560,7 @@ function showAnalysisLoading() {
     }
 }
 function updateAnalysisResults(results) {
+    const hasValue = (value) => value !== undefined && value !== null && String(value).trim() !== '';
     const directionNames = {
         up: i18n.t('up'), 
         down: i18n.t('down'), 
@@ -630,36 +568,49 @@ function updateAnalysisResults(results) {
         right: i18n.t('right')
     };
     directionNames.undo = i18n.t('undo');
-    document.getElementById('best-move-direction').innerHTML = `<span class="best-move-text">${directionNames[results.bestMove] || results.bestMove}</span>`;
+    const bestMove = results ? results.bestMove : null;
+    document.getElementById('best-move-direction').innerHTML = `<span class="best-move-text">${hasValue(bestMove) ? (directionNames[bestMove] || bestMove) : '--'}</span>`;
     const mergeOpportunitiesElement = document.getElementById('merge-opportunities');
     mergeOpportunitiesElement.className = 'analysis-value';
-    mergeOpportunitiesElement.textContent = results.mergeOpportunities > 0 ? results.mergeOpportunities + i18n.t('mergeOpportunitiesSuffix') : i18n.t('noMergeOpportunities');
-    const mergeCount = typeof results.mergeOpportunities === 'number' ? results.mergeOpportunities : 0;
-    if (results.mergeOpportunitiesLevel === 'high' || mergeCount >= 3) mergeOpportunitiesElement.classList.add('high');
-    else if (results.mergeOpportunitiesLevel === 'medium' || mergeCount >= 1) mergeOpportunitiesElement.classList.add('medium');
-    else mergeOpportunitiesElement.classList.add('low');
+    const mergeCount = results && typeof results.mergeOpportunities === 'number' && !isNaN(results.mergeOpportunities) ? results.mergeOpportunities : null;
+    if (mergeCount === null) {
+        mergeOpportunitiesElement.textContent = '--';
+    } else {
+        mergeOpportunitiesElement.textContent = mergeCount > 0 ? mergeCount + i18n.t('mergeOpportunitiesSuffix') : i18n.t('noMergeOpportunities');
+        if (results.mergeOpportunitiesLevel === 'high' || mergeCount >= 3) mergeOpportunitiesElement.classList.add('high');
+        else if (results.mergeOpportunitiesLevel === 'medium' || mergeCount >= 1) mergeOpportunitiesElement.classList.add('medium');
+        else mergeOpportunitiesElement.classList.add('low');
+    }
     const gameStateElement = document.getElementById('game-state-assessment');
     gameStateElement.className = 'analysis-value';
-    gameStateElement.textContent = i18n.t(results.gameStateAssessment) || results.gameStateAssessment;
-    const assessment = results.gameStateAssessment || 'safe';
-    if (assessment === 'danger' || assessment === 'danger') gameStateElement.classList.add('danger');
-    else if (assessment === 'warning' || assessment === 'average') gameStateElement.classList.add('average');
-    else gameStateElement.classList.add('good');
+    const assessment = results ? results.gameStateAssessment : null;
+    if (hasValue(assessment)) {
+        gameStateElement.textContent = i18n.t(assessment);
+        if (assessment === 'danger') gameStateElement.classList.add('danger');
+        else if (assessment === 'warning' || assessment === 'average') gameStateElement.classList.add('average');
+        else gameStateElement.classList.add('good');
+    } else {
+        gameStateElement.textContent = '--';
+    }
     const scorePotentialElement = document.getElementById('score-potential');
     scorePotentialElement.className = 'analysis-value';
-    const scorePotential = results.scorePotential || 'medium';
-    const scorePotentialDescriptions = {
-        high: i18n.t('scorePotentialHigh'),
-        medium: i18n.t('scorePotentialMedium'),
-        low: i18n.t('limitedMergeOpportunities')
-    };
-    scorePotentialElement.textContent = `${i18n.t(scorePotential === 'medium' ? 'mediumScore' : scorePotential) || scorePotential} (${scorePotentialDescriptions[scorePotential] || ''})`;
-    if (scorePotential === 'high') scorePotentialElement.classList.add('high');
-    else if (scorePotential === 'medium') scorePotentialElement.classList.add('medium');
-    else scorePotentialElement.classList.add('low');
+    const scorePotential = results ? results.scorePotential : null;
+    if (hasValue(scorePotential)) {
+        const scorePotentialDescriptions = {
+            high: i18n.t('scorePotentialHigh'),
+            medium: i18n.t('scorePotentialMedium'),
+            low: i18n.t('limitedMergeOpportunities')
+        };
+        scorePotentialElement.textContent = `${i18n.t(scorePotential === 'medium' ? 'mediumScore' : scorePotential)} (${scorePotentialDescriptions[scorePotential] || ''})`;
+        if (scorePotential === 'high') scorePotentialElement.classList.add('high');
+        else if (scorePotential === 'medium') scorePotentialElement.classList.add('medium');
+        else scorePotentialElement.classList.add('low');
+    } else {
+        scorePotentialElement.textContent = '--';
+    }
     const aiSuggestionElement = document.getElementById('ai-suggestion');
     if (aiSuggestionElement) {
-        aiSuggestionElement.textContent = results.aiSuggestion || i18n.t('notAvailable');
+        aiSuggestionElement.textContent = hasValue(results && results.aiSuggestion) ? results.aiSuggestion : '--';
     }
 }
 function normalizeGridToNumbers(grid) {
@@ -844,10 +795,10 @@ function aiSearchValue(grid, depth, deadline) {
 function analyzeGameStateWithAlgorithm() {
     if (!gameState || !gameState.grid || !gameState.grid.length) {
         return {
-            bestMove: 'up',
-            mergeOpportunities: 0,
-            gameStateAssessment: 'safe',
-            scorePotential: 'low',
+            bestMove: '',
+            mergeOpportunities: null,
+            gameStateAssessment: '',
+            scorePotential: '',
             aiSuggestion: ''
         };
     }
@@ -995,6 +946,29 @@ async function requestGameAnalysis(gameState, language, options = {}) {
         rawMessage: messageContent
     };
 }
+async function runAiAnalysisAndRender() {
+    const language = i18n.getLang();
+    const result = await requestGameAnalysis(gameState, language);
+    if (result && result.success) {
+        cachedAiResults = result.data;
+        updateGameStateCache(gameState, undefined, result.data);
+        updateAnalysisResults(result.data);
+        return;
+    }
+    let errorMsg = result?.error ? i18n.t(result.error) : i18n.t('aiApiRequestFailed');
+    if (result?.message) {
+        errorMsg += ': ' + result.message;
+    }
+    cachedAiResults = {
+        bestMove: '',
+        mergeOpportunities: null,
+        gameStateAssessment: '',
+        scorePotential: '',
+        aiSuggestion: errorMsg
+    };
+    updateGameStateCache(gameState, undefined, cachedAiResults);
+    updateAnalysisResults(cachedAiResults);
+}
 async function analyzeGameState() {
     const modal = document.getElementById('ai-analysis-modal');
     const overlay = document.getElementById('ai-analysis-overlay');
@@ -1026,27 +1000,7 @@ async function analyzeGameState() {
         cachedAiResults = null;
     }
     if (currentAnalysisMode === 'ai') {
-        const language = i18n.getLang();
-        const result = await requestGameAnalysis(gameState, language);
-        if (result && result.success) {
-            cachedAiResults = result.data;
-            updateGameStateCache(gameState, undefined, result.data);
-            updateAnalysisResults(result.data);
-        } else {
-            let errorMsg = result?.error ? i18n.t(result.error) : i18n.t('aiApiRequestFailed');
-            if (result?.message) {
-                errorMsg += ': ' + result.message;
-            }
-            cachedAiResults = {
-                bestMove: '--',
-                mergeOpportunities: 0,
-                gameStateAssessment: 'safe',
-                scorePotential: 'medium',
-                aiSuggestion: errorMsg
-            };
-            updateGameStateCache(gameState, undefined, cachedAiResults);
-            updateAnalysisResults(cachedAiResults);
-        }
+        await runAiAnalysisAndRender();
     } else {
         const results = analyzeGameStateWithAlgorithm();
         cachedAlgorithmResults = results;

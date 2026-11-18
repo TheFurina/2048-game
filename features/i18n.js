@@ -1,4 +1,4 @@
-const i18nVersion = '2.2.1';
+const i18nVersion = '2.3.0';
 window.i18nVersion = i18nVersion;
 const TILE_LEVELS = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768];
 function buildTileKeys(lang) {
@@ -833,6 +833,8 @@ const MODULE_TRANSLATIONS = {
             webrtcBrowserIncompatible: '当前浏览器不支持 WebRTC，请更换浏览器或使用手动模式',
             webrtcManualMode: '手动模式（备用）：互换长连接码',
             webrtcConnectedBadge: '局域网已连接',
+            syncIndicatorClickTip: '可点击查看',
+            syncIndicatorTipClose: '关闭提示',
             ready: '准备就绪',
             connected: '已连接',
             receiving: '接收中',
@@ -891,6 +893,8 @@ const MODULE_TRANSLATIONS = {
             webrtcBrowserIncompatible: 'This browser does not support WebRTC. Try another browser or use manual mode',
             webrtcManualMode: 'Manual mode (fallback): exchange long codes',
             webrtcConnectedBadge: 'LAN connected',
+            syncIndicatorClickTip: 'Click to view',
+            syncIndicatorTipClose: 'Close tip',
             ready: 'Ready',
             connected: 'Connected',
             receiving: 'Receiving',
@@ -949,6 +953,8 @@ const MODULE_TRANSLATIONS = {
             webrtcBrowserIncompatible: 'このブラウザはWebRTCに対応していません。別のブラウザを試すか手動モードを使用してください',
             webrtcManualMode: '手動モード（フォールバック）: 長いコードを交換',
             webrtcConnectedBadge: 'LAN接続済み',
+            syncIndicatorClickTip: 'クリックして表示',
+            syncIndicatorTipClose: 'ヒントを閉じる',
             ready: '準備完了',
             connected: '接続済み',
             receiving: '受信中',
@@ -1398,7 +1404,7 @@ function updateThemeSelector() {
 }
 function setupLanguageSelector() {
     const languageContainer = document.createElement('div');
-    languageContainer.className = 'flex items-center justify-between mt-2 mb-2 px-2';
+    languageContainer.className = 'settings-select-row flex items-center justify-between mt-2 mb-2 px-2';
     const label = document.createElement('label');
     label.htmlFor = 'language-toggle';
     label.className = 'text-gray-700 dark:text-dark-muted';
