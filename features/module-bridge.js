@@ -1,4 +1,4 @@
-const moduleBridgeVersion = '1.0';
+const moduleBridgeVersion = '1.1';
 window.moduleBridgeVersion = moduleBridgeVersion;
 (function () {
     'use strict';
@@ -53,31 +53,7 @@ window.moduleBridgeVersion = moduleBridgeVersion;
         return fallback;
     };
     if (typeof ModuleLoader === 'undefined' || !window.moduleLoaderModuleLoaded) {
-        var fatal = new Error('Module loader failed to load');
-        var showFatal = function () {
-            var loadingScreen = document.getElementById('loading-screen');
-            if (!loadingScreen) return;
-            var spinnerWrap = loadingScreen.querySelector('.loading-spinner-container');
-            if (spinnerWrap) spinnerWrap.style.display = 'none';
-            var errBox = document.getElementById('loading-error');
-            if (errBox) errBox.style.display = 'flex';
-            var titleEl = document.getElementById('loading-error-text');
-            var detailEl = document.getElementById('loading-error-detail');
-            var btn = document.getElementById('loading-reload-btn');
-            var text = window.__getLoadingErrorTexts();
-            if (titleEl) titleEl.textContent = text.title;
-            if (detailEl) detailEl.textContent = text.loaderDetail + ' (module-loader.js)';
-            if (btn) {
-                btn.textContent = text.reload;
-                btn.onclick = function () { location.reload(); };
-            }
-        };
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', showFatal);
-        } else {
-            showFatal();
-        }
-        window.modulesReadyPromise = Promise.reject(fatal);
+        window.modulesReadyPromise = Promise.reject(new Error('Module loader failed to load'));
         return;
     }
     var modalHooks = {};
@@ -429,22 +405,9 @@ window.moduleBridgeVersion = moduleBridgeVersion;
                 try { error.message = error.message + ' [' + detailMsg + ']'; } catch (e) {}
             }
             var show = function () {
-                var loadingScreen = document.getElementById('loading-screen');
-                if (!loadingScreen) return;
-                var spinnerWrap = loadingScreen.querySelector('.loading-spinner-container');
-                if (spinnerWrap) spinnerWrap.style.display = 'none';
-                var errBox = document.getElementById('loading-error');
-                if (errBox) errBox.style.display = 'flex';
-                var text = window.__getLoadingErrorTexts();
-                var titleEl = document.getElementById('loading-error-text');
-                if (titleEl) titleEl.textContent = text.title;
-                var detailEl = document.getElementById('loading-error-detail');
-                if (detailEl) detailEl.textContent = text.detail + (detailMsg ? ' (' + detailMsg + ')' : '');
-                var btn = document.getElementById('loading-reload-btn');
-                if (btn) {
-                    btn.textContent = text.reload;
-                    btn.onclick = function () { location.reload(); };
-                }
+                if (typeof window.__showLoadingFailure !== 'function') return;
+                var text = window.__getLoadingFailureTexts();
+                window.__showLoadingFailure(text.detail + (detailMsg ? ' (' + detailMsg + ')' : ''));
             };
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', show);

@@ -1,6 +1,32 @@
-const customSelectVersion = '1.4';
+const customSelectVersion = '1.5';
 window.customSelectVersion = customSelectVersion;
 window.customSelectModuleLoaded = true;
+function collapseSelectItems(items) {
+    if (!items || !items.style.maxHeight) return;
+    items.style.maxHeight = null;
+    items.style.opacity = '0';
+    const prevSibling = items.previousElementSibling;
+    if (prevSibling) {
+        prevSibling.classList.remove('active');
+    }
+    setTimeout(() => items.classList.add('hidden'), 300);
+}
+function expandSelectItems(selectItems, selectSelected) {
+    let maxZIndex = 20;
+    document.querySelectorAll('.select-items').forEach(item => {
+        const zIndex = parseInt(item.style.zIndex) || 20;
+        if (zIndex > maxZIndex) {
+            maxZIndex = zIndex;
+        }
+    });
+    selectItems.style.zIndex = maxZIndex + 1;
+    selectItems.classList.remove('hidden');
+    selectSelected.classList.add('active');
+    setTimeout(() => {
+        selectItems.style.maxHeight = "200px";
+        selectItems.style.opacity = '1';
+    }, 10);
+}
 function initCustomSelects() {
     const customSelects = document.querySelectorAll('.custom-select');
     customSelects.forEach(customSelect => {
@@ -43,36 +69,14 @@ function initCustomSelects() {
         customSelect.addEventListener('click', function(e) {
             const selectSelected = this.querySelector('.select-selected');
             if (selectItems.style.maxHeight) {
-                selectItems.style.maxHeight = null;
-                selectItems.style.opacity = '0';
-                selectSelected.classList.remove('active');
-                setTimeout(() => selectItems.classList.add('hidden'), 300);
+                collapseSelectItems(selectItems);
             } else {
                 document.querySelectorAll('.select-items').forEach(items => {
-                    if (items !== selectItems && items.style.maxHeight) {
-                        items.style.maxHeight = null;
-                        items.style.opacity = '0';
-                        const prevSibling = items.previousElementSibling;
-                        if (prevSibling) {
-                            prevSibling.classList.remove('active');
-                        }
-                        setTimeout(() => items.classList.add('hidden'), 300);
+                    if (items !== selectItems) {
+                        collapseSelectItems(items);
                     }
                 });
-                let maxZIndex = 20;
-                document.querySelectorAll('.select-items').forEach(item => {
-                    const zIndex = parseInt(item.style.zIndex) || 20;
-                    if (zIndex > maxZIndex) {
-                        maxZIndex = zIndex;
-                    }
-                });
-                selectItems.style.zIndex = maxZIndex + 1;
-                selectItems.classList.remove('hidden');
-                selectSelected.classList.add('active');
-                setTimeout(() => {
-                    selectItems.style.maxHeight = "200px";
-                    selectItems.style.opacity = '1';
-                }, 10);
+                expandSelectItems(selectItems, selectSelected);
             }
         });
         selectOptions.forEach(option => {
@@ -122,17 +126,7 @@ function initCustomSelects() {
         }
     });
     document.addEventListener('click', function() {
-        document.querySelectorAll('.select-items').forEach(selectItems => {
-            if (selectItems.style.maxHeight) {
-                selectItems.style.maxHeight = null;
-                selectItems.style.opacity = '0';
-                const selectSelected = selectItems.previousElementSibling;
-                if (selectSelected) {
-                    selectSelected.classList.remove('active');
-                }
-                setTimeout(() => selectItems.classList.add('hidden'), 300);
-            }
-        });
+        document.querySelectorAll('.select-items').forEach(collapseSelectItems);
     });
 }
 window.customSelect = {

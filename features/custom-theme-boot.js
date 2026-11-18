@@ -1,4 +1,4 @@
-const customThemeBootVersion = '1.0';
+const customThemeBootVersion = '1.1';
 window.customThemeBootVersion = customThemeBootVersion;
 (function() {
     try {
@@ -35,11 +35,15 @@ window.customThemeBootVersion = customThemeBootVersion;
                     var primaryOpacity = opVal(values, 'primaryColorOpacity', 'primaryOpacity');
                     var secondaryOpacity = opVal(values, 'secondaryColorOpacity', 'secondaryOpacity');
                     var gridOpacity = opVal(values, 'gridColorOpacity', 'gridOpacity');
-                    if (values.bgColor) block += selector + '{background-color:' + values.bgColor + op2hex(bgOpacity) + ' !important;}';
+                    if (values.bgColor) {
+                        block += selector + '{background-color:' + values.bgColor + op2hex(bgOpacity) + ' !important;}';
+                        block += selector + ' .bg-bg{background-color:' + values.bgColor + op2hex(bgOpacity) + ' !important;}';
+                    }
                     if (values.primaryColor) block += selector + ' .bg-primary{background-color:' + values.primaryColor + op2hex(primaryOpacity) + ' !important;}';
                     if (values.secondaryColor) {
                         block += selector + ' .text-secondary{color:' + values.secondaryColor + op2hex(secondaryOpacity) + ' !important;}';
                         block += selector + ' .text-secondary\\/80{color:' + values.secondaryColor + op2hex(Math.round(parseInt(secondaryOpacity) * 0.8)) + ' !important;}';
+                        block += selector + ' .text-secondary\\/60{color:' + values.secondaryColor + op2hex(Math.round(parseInt(secondaryOpacity) * 0.6)) + ' !important;}';
                     }
                     if (values.gridColor) block += selector + ' .bg-grid{background-color:' + values.gridColor + op2hex(gridOpacity) + ' !important;}';
                     return block;
