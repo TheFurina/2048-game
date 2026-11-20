@@ -1,7 +1,7 @@
 window.__modulesManifest = {
     manifestVersion: 2,
     loader: {
-        minVersion: '4.0',
+        minVersion: '4.1',
         apiVersion: 2
     },
     domRoot: '#module-dom-root',
@@ -39,6 +39,9 @@ window.__modulesManifest = {
             src: 'custom-theme.js',
             required: false,
             deferred: true,
+            loadOn: [
+                { anchor: 'settings', event: 'click' }
+            ],
             kind: 'builtin',
             export: 'customTheme',
             check: 'customTheme',
@@ -55,6 +58,10 @@ window.__modulesManifest = {
             src: 'ai-request.js',
             required: false,
             deferred: true,
+            loadOn: [
+                { anchor: 'settings', event: 'click' },
+                { anchor: 'ai-analysis', event: 'click' }
+            ],
             kind: 'builtin',
             export: 'aiRequest',
             check: 'aiRequest',
@@ -71,6 +78,10 @@ window.__modulesManifest = {
             src: 'ai-analysis.js',
             required: false,
             deferred: true,
+            loadOn: [
+                { anchor: 'settings', event: 'click' },
+                { anchor: 'ai-analysis', event: 'click' }
+            ],
             kind: 'builtin',
             export: 'aiAnalysis',
             check: 'aiAnalysis',
@@ -88,6 +99,10 @@ window.__modulesManifest = {
             src: 'ai-autoplay.js',
             required: false,
             deferred: true,
+            loadOn: [
+                { anchor: 'settings', event: 'click' },
+                { anchor: 'ai-analysis', event: 'click' }
+            ],
             kind: 'builtin',
             export: 'aiAutoPlay',
             check: 'aiAutoPlay',
@@ -105,6 +120,9 @@ window.__modulesManifest = {
             src: 'data-transfer.js',
             required: false,
             deferred: true,
+            loadOn: [
+                { anchor: 'settings', event: 'click' }
+            ],
             kind: 'builtin',
             export: 'dataTransfer',
             check: 'dataTransfer',
@@ -121,6 +139,9 @@ window.__modulesManifest = {
             src: 'webrtc-sync.js',
             required: false,
             deferred: true,
+            loadOn: [
+                { anchor: 'settings', event: 'click' }
+            ],
             kind: 'builtin',
             export: 'webrtcSync',
             check: 'webrtcSync',
@@ -156,6 +177,18 @@ window.__modulesManifest = {
             check: 'fullscreenMode',
             domMode: 'self',
             domCheck: 'isDomReady',
+            dependsOn: ['i18n'],
+            init: 'init',
+            moduleApiVersion: 2
+        },
+        {
+            name: 'shareVictory',
+            src: 'share-victory.js',
+            required: false,
+            kind: 'builtin',
+            export: 'shareVictory',
+            check: 'shareVictory',
+            domMode: 'none',
             dependsOn: ['i18n'],
             init: 'init',
             moduleApiVersion: 2
