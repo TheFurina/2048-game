@@ -1,4 +1,4 @@
-:root { --css-version: 1.9; }
+:root { --css-version: 1.10; }
 body.modal-scroll-lock {
     overflow: hidden;
 }
@@ -491,6 +491,9 @@ body.modal-scroll-lock {
     #undo-button, #pause-button, #custom-grid {
         white-space: nowrap;
         flex-shrink: 0;
+    }
+    #settings-modal .flex-wrap > :last-child {
+        margin-left: auto;
     }
     @media (max-width: 480px) {
         .settings-select-row {

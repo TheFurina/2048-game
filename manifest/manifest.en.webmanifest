@@ -1,0 +1,27 @@
+{
+  "id": "../",
+  "version": "1.0",
+  "name": "2048 Game",
+  "short_name": "2048",
+  "description": "Swipe to merge tiles and create 2048!",
+  "lang": "en",
+  "start_url": "../",
+  "scope": "../",
+  "display": "standalone",
+  "background_color": "#faf8ef",
+  "theme_color": "#faa31b",
+  "icons": [
+    {
+      "src": "../icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "../icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

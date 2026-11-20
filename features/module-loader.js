@@ -1,4 +1,4 @@
-const moduleLoaderVersion = '4.0';
+const moduleLoaderVersion = '4.1';
 window.moduleLoaderVersion = moduleLoaderVersion;
 (function () {
     'use strict';
@@ -11,6 +11,7 @@ window.moduleLoaderVersion = moduleLoaderVersion;
     const fallbacks = {};
     const styleFailures = {};
     const domRegistry = {};
+    const lazyListeners = [];
     let currentLoading = null;
     let lastResult = null;
     let loadAllSettled = false;
@@ -103,7 +104,8 @@ window.moduleLoaderVersion = moduleLoaderVersion;
                 kind: 'builtin',
                 moduleApiVersion: LOADER_API_VERSION,
                 template: null,
-                deferred: false
+                deferred: false,
+                loadOn: []
             };
         }
         if (entry && typeof entry === 'object' && entry.name) {
@@ -131,7 +133,12 @@ window.moduleLoaderVersion = moduleLoaderVersion;
                 kind: entry.kind || 'builtin',
                 moduleApiVersion: entry.moduleApiVersion || LOADER_API_VERSION,
                 template: entry.template || null,
-                deferred: entry.deferred === true
+                deferred: entry.deferred === true,
+                loadOn: Array.isArray(entry.loadOn) ? entry.loadOn.filter(function (trigger) {
+                    return trigger && typeof trigger.anchor === 'string' && trigger.anchor && typeof trigger.event === 'string' && trigger.event;
+                }).map(function (trigger) {
+                    return { anchor: trigger.anchor, event: trigger.event };
+                }) : []
             };
         }
         return null;
@@ -668,6 +675,10 @@ window.moduleLoaderVersion = moduleLoaderVersion;
     }
     function resetState() {
         loadAllSettled = false;
+        lazyListeners.forEach(function (listener) {
+            document.removeEventListener(listener.event, listener.handler, true);
+        });
+        lazyListeners.length = 0;
         for (const k in failures) delete failures[k];
         for (const k in modules) delete modules[k];
         for (const k in domRegistry) delete domRegistry[k];
@@ -896,6 +907,42 @@ window.moduleLoaderVersion = moduleLoaderVersion;
         onDemandPromises[name] = task;
         return task;
     }
+    function getLoadOnModules(anchor, eventName) {
+        const names = [];
+        (manifestEntries || []).forEach(function (entry) {
+            entry.loadOn.forEach(function (trigger) {
+                if (trigger.anchor === anchor && trigger.event === eventName && names.indexOf(entry.name) === -1) {
+                    names.push(entry.name);
+                }
+            });
+        });
+        return names;
+    }
+    function setupLazyLoadTriggers(entries) {
+        const eventNames = [];
+        entries.forEach(function (entry) {
+            entry.loadOn.forEach(function (trigger) {
+                if (eventNames.indexOf(trigger.event) === -1) eventNames.push(trigger.event);
+            });
+        });
+        eventNames.forEach(function (eventName) {
+            const handler = function (event) {
+                let target = event.target;
+                if (target && target.nodeType !== 1) target = target.parentElement;
+                if (!target || typeof target.closest !== 'function') return;
+                const anchor = target.closest('[data-module-lazy-anchor]');
+                if (!anchor) return;
+                const anchorName = anchor.getAttribute('data-module-lazy-anchor');
+                getLoadOnModules(anchorName, eventName).forEach(function (name) {
+                    loadOnDemand(name).catch(function (error) {
+                        console.warn('[ModuleLoader] Lazy module "' + name + '" failed to load:', error);
+                    });
+                });
+            };
+            document.addEventListener(eventName, handler, true);
+            lazyListeners.push({ event: eventName, handler: handler });
+        });
+    }
     function loadAll(manifestUrl) {
         resetState();
         const url = manifestUrl || './features/manifest.js';
@@ -920,6 +967,7 @@ window.moduleLoaderVersion = moduleLoaderVersion;
             return loadEntries(activeEntries, baseUrl).then(function () {
                 return waitForDomReady();
             }).then(function () {
+                setupLazyLoadTriggers(entries);
                 return injectDomPhase(activeEntries);
             }).then(function () {
                 return initPhase(activeEntries);
@@ -954,6 +1002,7 @@ window.moduleLoaderVersion = moduleLoaderVersion;
         manifestFormatVersion: MANIFEST_FORMAT_VERSION,
         load: loadModule,
         loadOnDemand: loadOnDemand,
+        getLoadOnModules: getLoadOnModules,
         registerFallback: registerFallback,
         isLoaded: isLoaded,
         isModuleAvailable: isModuleAvailable,

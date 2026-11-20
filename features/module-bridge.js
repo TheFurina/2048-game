@@ -1,4 +1,4 @@
-const moduleBridgeVersion = '1.1';
+const moduleBridgeVersion = '1.2';
 window.moduleBridgeVersion = moduleBridgeVersion;
 (function () {
     'use strict';
@@ -254,8 +254,11 @@ window.moduleBridgeVersion = moduleBridgeVersion;
         return preload;
     }
     window.getModulePreloadList = getModulePreloadList;
+    function ensureAnchorModules(anchor, eventName) {
+        return ensureModules(ModuleLoader.getLoadOnModules(anchor, eventName));
+    }
     function ensureSettingsModules() {
-        return ensureModules(['customTheme', 'dataTransfer', 'webrtcSync', 'aiRequest', 'aiAnalysis', 'aiAutoPlay']);
+        return ensureAnchorModules('settings', 'click');
     }
     window.ensureSettingsModules = ensureSettingsModules;
     function createSettingsSection(id, titleKey, icon) {
@@ -278,6 +281,7 @@ window.moduleBridgeVersion = moduleBridgeVersion;
             if (headerRow) {
                 var aiButton = document.createElement('button');
                 aiButton.id = 'ai-analysis-button';
+                aiButton.setAttribute('data-module-lazy-anchor', 'ai-analysis');
                 aiButton.className = 'bg-primary dark:bg-dark-primary hover:bg-primary/90 text-white w-12 h-12 rounded-full shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center justify-center';
                 aiButton.innerHTML = '<i class="fa-solid fa-brain dark:text-[#282828]"></i>';
                 headerRow.appendChild(aiButton);
@@ -334,7 +338,7 @@ window.moduleBridgeVersion = moduleBridgeVersion;
                 if (window.aiAnalysis) return;
                 event.preventDefault();
                 event.stopImmediatePropagation();
-                ensureModules(['aiRequest', 'aiAnalysis', 'aiAutoPlay']).then(function () {
+                ensureAnchorModules('ai-analysis', 'click').then(function () {
                     if (window.aiAnalysis) aiAnalysisButton.click();
                 });
             }, true);

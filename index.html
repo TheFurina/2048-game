@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="./favicon.ico" sizes="16x16 24x24 32x32 48x48 64x64 128x128 256x256">
+    <meta name="theme-color" content="#faa31b">
+    <link id="app-manifest" rel="manifest" href="./manifest/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
+    <script src="./features/pwa.js"></script>
     <title>2048 Game</title>
     <style>
         html.loading-active,
@@ -181,7 +185,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
     <script src="./features/module-loader.js"></script>
     <script>
-        const gameVersion = '3.2.0';
+        const gameVersion = '3.3.0';
         window.gameVersion = gameVersion;
         function loadCssVersion() {
             try {
@@ -539,7 +543,7 @@
                 <i class="fa-solid fa-chevron-up mr-2" id="toggle-icon"></i>
                 <span id="toggle-text"></span>
             </button>
-            <div id="sync-indicator" class="hidden flex-wrap items-center gap-3 pr-1 text-sm"></div>
+            <div id="sync-indicator" class="hidden flex-wrap items-center gap-3 pr-1 ml-auto text-sm"></div>
         </div>
         <div id="controls-container" class="transition-all duration-300 ease-in-out">
             <div id="game-buttons" class="flex flex-wrap gap-2 mb-4">
@@ -617,6 +621,9 @@
                     <button id="game-message-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-md shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50">
                         <i class="fa-solid fa-refresh mr-2"></i><span data-i18n="tryAgain"></span>
                     </button>
+                    <button id="game-message-share-button" class="hidden self-center text-primary hover:text-primary/80 focus:outline-none text-sm disabled:opacity-60 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-share-nodes mr-1"></i><span data-i18n="shareVictory"></span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -631,7 +638,7 @@
                         <i class="fa-solid fa-refresh mr-2"></i><span></span>
                     </button>
                     <div class="flex justify-center gap-4 mt-2">
-                        <button id="settings-button" class="text-primary hover:text-primary/80 focus:outline-none text-sm">
+                        <button id="settings-button" data-module-lazy-anchor="settings" class="text-primary hover:text-primary/80 focus:outline-none text-sm">
                             <i class="fa-solid fa-cog mr-1"></i><span></span>
                         </button>
                      </div>
@@ -1777,6 +1784,9 @@
             elements.gameMessageTitle.textContent = i18n.t(title);
             elements.gameMessageText.textContent = i18n.t(text);
             elements.gameMessageContinueButton.classList.toggle('hidden', !(title === 'gameWon' && gameState.gameWon && !gameState.isEndlessMode));
+            if (window.shareVictory && typeof window.shareVictory.setVisible === 'function') {
+                window.shareVictory.setVisible(title === 'gameWon');
+            }
             elements.gameMessage.classList.remove('modal-backdrop-fade-out');
             elements.gameMessage.classList.remove('hidden');
             addOpenModal('game-message');
