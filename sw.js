@@ -1,5 +1,5 @@
-const SW_VERSION = '1.1';
-const CACHE_VERSION = '3.4.0-pwa.1';
+const SW_VERSION = '1.0';
+const CACHE_VERSION = '3.4.0-pwa.2';
 const APP_CACHE = '2048-app-' + CACHE_VERSION;
 const RUNTIME_CACHE = '2048-runtime-' + CACHE_VERSION;
 const APP_SHELL = [
@@ -33,6 +33,7 @@ const APP_SHELL = [
     './features/module-loader.js',
     './features/share-victory.js',
     './features/sound-effects.js',
+    './features/tile-font.js',
     './features/webrtc-sync.js'
 ];
 const RUNTIME_HOSTS = [

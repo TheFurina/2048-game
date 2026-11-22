@@ -210,6 +210,19 @@ window.__modulesManifest = {
             moduleApiVersion: 2
         },
         {
+            name: 'tileFont',
+            src: 'tile-font.js',
+            required: false,
+            kind: 'builtin',
+            export: 'tileFont',
+            check: 'tileFont',
+            domMode: 'self',
+            domCheck: 'isDomReady',
+            dependsOn: ['i18n'],
+            init: 'init',
+            moduleApiVersion: 2
+        },
+        {
             name: 'shareVictory',
             src: 'share-victory.js',
             required: false,

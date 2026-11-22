@@ -354,6 +354,7 @@ const MODULE_TRANSLATIONS = {
     sound: {
         zh: {
             soundEffects: '音效',
+            soundSectionTitle: '声音',
             soundVolume: '音量',
             soundMove: '移动音效',
             soundMerge: '合并音效',
@@ -370,6 +371,7 @@ const MODULE_TRANSLATIONS = {
         },
         en: {
             soundEffects: 'Sound Effects',
+            soundSectionTitle: 'Sound',
             soundVolume: 'Volume',
             soundMove: 'Move Sound',
             soundMerge: 'Merge Sound',
@@ -386,6 +388,7 @@ const MODULE_TRANSLATIONS = {
         },
         ja: {
             soundEffects: 'サウンド効果',
+            soundSectionTitle: 'サウンド',
             soundVolume: '音量',
             soundMove: '移動音',
             soundMerge: 'マージ音',
@@ -399,6 +402,32 @@ const MODULE_TRANSLATIONS = {
             soundInvalidFile: 'この音声ファイルを読み込めません',
             soundUploaded: 'カスタム音声を適用しました',
             soundRestored: 'デフォルト音声に戻しました'
+        }
+    },
+    tileFont: {
+        zh: {
+            tileFont: '字体',
+            tileFontSystem: '系统字体',
+            tileFontInterDefault: 'Inter（默认）',
+            tileFontLoading: '加载中',
+            tileFontLoaded: '已应用',
+            tileFontFailed: '加载失败，已回退系统字体'
+        },
+        en: {
+            tileFont: 'Tile Font',
+            tileFontSystem: 'System',
+            tileFontInterDefault: 'Inter (Default)',
+            tileFontLoading: 'Loading',
+            tileFontLoaded: 'Applied',
+            tileFontFailed: 'Load failed, using system font'
+        },
+        ja: {
+            tileFont: 'タイルフォント',
+            tileFontSystem: 'システム',
+            tileFontInterDefault: 'Inter（デフォルト）',
+            tileFontLoading: '読み込み中',
+            tileFontLoaded: '適用済み',
+            tileFontFailed: '読み込みに失敗しました。システムフォントを使用します'
         }
     },
     theme: {
@@ -1538,47 +1567,25 @@ function setupLanguageSelector() {
                 }
             });
             label.textContent = t('language');
-            selectItems.style.maxHeight = null;
-            selectItems.style.opacity = '0';
-            selectSelected.classList.remove('active');
-            setTimeout(() => selectItems.classList.add('hidden'), 300);
+            window.customSelect.close(selectItems);
         });
         selectItems.appendChild(item);
     });
     selectSelected.addEventListener('click', (e) => {
         e.stopPropagation();
         if (selectItems.style.maxHeight) {
-            selectItems.style.maxHeight = null;
-            selectItems.style.opacity = '0';
-            selectSelected.classList.remove('active');
-            setTimeout(() => selectItems.classList.add('hidden'), 300);
+            window.customSelect.close(selectItems);
         } else {
-            const allSelectItems = document.querySelectorAll('.select-items');
-            let maxZIndex = 20;
-            allSelectItems.forEach(item => {
-                const zIndex = parseInt(item.style.zIndex) || 20;
-                if (zIndex > maxZIndex) {
-                    maxZIndex = zIndex;
-                }
-            });
-            selectItems.style.zIndex = maxZIndex + 1;
-            selectItems.classList.remove('hidden');
-            selectSelected.classList.add('active');
-            setTimeout(() => {
-                selectItems.style.maxHeight = "200px";
-                selectItems.style.opacity = '1';
-            }, 10);
+            window.customSelect.closeAll(selectItems);
+            window.customSelect.expand(selectItems, selectSelected);
         }
     });
     selectItems.addEventListener('click', (e) => {
         e.stopPropagation();
     });
     document.addEventListener('click', () => {
-        if (selectItems.style.maxHeight) {
-            selectItems.style.maxHeight = null;
-            selectItems.style.opacity = '0';
-            selectSelected.classList.remove('active');
-            setTimeout(() => selectItems.classList.add('hidden'), 300);
+        if (!selectItems.classList.contains('hidden')) {
+            window.customSelect.close(selectItems);
         }
     });
     customSelect.appendChild(selectSelected);
