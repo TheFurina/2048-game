@@ -1,4 +1,4 @@
-const i18nVersion = '2.3.1';
+const i18nVersion = '2.3.1-fix.1';
 window.i18nVersion = i18nVersion;
 const TILE_LEVELS = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768];
 function buildTileKeys(lang) {
@@ -1505,8 +1505,8 @@ function updateThemeSelector() {
 function setupLanguageSelector() {
     const languageContainer = document.createElement('div');
     languageContainer.className = 'settings-select-row flex items-center justify-between mt-2 mb-2 px-2';
-    const label = document.createElement('label');
-    label.htmlFor = 'language-toggle';
+    const label = document.createElement('span');
+    label.id = 'language-label';
     label.className = 'text-gray-700 dark:text-dark-muted';
     label.textContent = t('language');
     const customSelect = document.createElement('div');
@@ -1521,6 +1521,7 @@ function setupLanguageSelector() {
     const langTextKey = { auto: 'auto', zh: 'chinese', en: 'english', ja: 'japanese' };
     const selectSelected = document.createElement('div');
     selectSelected.className = 'select-selected flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md border border-gray-300 dark:border-gray-600 cursor-pointer transition-all duration-200 hover:border-primary/50';
+    selectSelected.setAttribute('aria-labelledby', 'language-label');
     const selectedText = document.createElement('span');
     const currentLangText = t(langTextKey[currentLanguage] || 'auto');
     const autoOption = languages.find(lang => lang.value === 'auto');
