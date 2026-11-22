@@ -715,31 +715,32 @@
                                     <option value="dark">&#xf186; 深色</option>
                                 </select>
                             </div>
+                            <div id="tile-font-divider" class="border-b border-gray-200 dark:border-gray-700 my-3 mx-2"></div>
                             <div class="tile-font-setting settings-select-row flex flex-wrap items-center justify-between gap-2 mt-2 mb-2 px-2">
                                 <div class="flex items-center gap-2">
                                     <label for="tile-font-select" class="text-gray-700 dark:text-dark-muted" data-i18n="tileFont"></label>
                                     <span id="tile-font-status" class="text-xs text-gray-500 dark:text-dark-muted leading-tight" role="status" aria-live="polite"></span>
                                 </div>
                                 <div class="custom-select relative w-full max-w-[180px]">
-                                        <div class="select-selected flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md border border-gray-300 dark:border-gray-600 cursor-pointer transition-all duration-200 hover:border-primary/50">
-                                            <span><span data-i18n="tileFontInterDefault"></span></span>
-                                            <i class="fa fa-chevron-down text-xs ml-2 text-gray-500 dark:text-gray-400"></i>
-                                        </div>
-                                        <div class="select-items absolute mt-1 w-full bg-gray-100 dark:bg-gray-800 rounded-md shadow-lg border border-gray-300 dark:border-gray-600 z-20 max-h-0 opacity-0 overflow-y-auto transition-all duration-300 ease-in-out">
-                                            <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="system"><span data-i18n="tileFontSystem"></span></div>
-                                            <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="inter"><span data-i18n="tileFontInterDefault"></span></div>
-                                            <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="nunito">Nunito</div>
-                                            <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="press-start-2p">Press Start 2P</div>
-                                            <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="jetbrains-mono">JetBrains Mono</div>
-                                        </div>
-                                        <select id="tile-font-select" style="display: none;">
-                                            <option value="system" data-i18n="tileFontSystem"></option>
-                                            <option value="inter" data-i18n="tileFontInterDefault"></option>
-                                            <option value="nunito">Nunito</option>
-                                            <option value="press-start-2p">Press Start 2P</option>
-                                            <option value="jetbrains-mono">JetBrains Mono</option>
-                                        </select>
+                                    <div class="select-selected flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white rounded-md border border-gray-300 dark:border-gray-600 cursor-pointer transition-all duration-200 hover:border-primary/50">
+                                        <span><span data-i18n="tileFontInterDefault"></span></span>
+                                        <i class="fa fa-chevron-down text-xs ml-2 text-gray-500 dark:text-gray-400"></i>
                                     </div>
+                                    <div class="select-items absolute mt-1 w-full bg-gray-100 dark:bg-gray-800 rounded-md shadow-lg border border-gray-300 dark:border-gray-600 z-20 max-h-0 opacity-0 overflow-y-auto transition-all duration-300 ease-in-out">
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="system"><span data-i18n="tileFontSystem"></span></div>
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="inter"><span data-i18n="tileFontInterDefault"></span></div>
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="nunito">Nunito</div>
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="press-start-2p">Press Start 2P</div>
+                                        <div class="select-item px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white cursor-pointer transition-colors" data-value="jetbrains-mono">JetBrains Mono</div>
+                                    </div>
+                                    <select id="tile-font-select" style="display: none;">
+                                        <option value="system" data-i18n="tileFontSystem"></option>
+                                        <option value="inter" data-i18n="tileFontInterDefault"></option>
+                                        <option value="nunito">Nunito</option>
+                                        <option value="press-start-2p">Press Start 2P</option>
+                                        <option value="jetbrains-mono">JetBrains Mono</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>

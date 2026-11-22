@@ -313,7 +313,12 @@ window.moduleBridgeVersion = moduleBridgeVersion;
             if (appearanceCard) {
                 var appearanceMount = document.createElement('div');
                 appearanceMount.id = 'settings-module-appearance';
-                appearanceCard.appendChild(appearanceMount);
+                var fontDivider = appearanceCard.querySelector('#tile-font-divider');
+                if (fontDivider) {
+                    appearanceCard.insertBefore(appearanceMount, fontDivider);
+                } else {
+                    appearanceCard.appendChild(appearanceMount);
+                }
             }
         }
         if (document.getElementById('settings-module-data')) return;
