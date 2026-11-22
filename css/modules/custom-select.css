@@ -53,8 +53,8 @@
 .select-item {
     display: flex;
     align-items: center;
-    font-family: 'Font Awesome 6 Free', sans-serif;
-    font-weight: 900;
+    font-family: 'Clear Sans', 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 700;
 }
 .select-item.selected {
     background-color: transparent;
@@ -69,8 +69,8 @@
     background-color: #4b5563;
 }
 .select-selected span {
-    font-family: 'Font Awesome 6 Free', sans-serif;
-    font-weight: 900;
+    font-family: 'Clear Sans', 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 700;
 }
 .custom-select .select-selected:focus-visible {
     outline: 2px solid #faa31b;

@@ -242,7 +242,7 @@ function soundSectionTemplate() {
         soundRowTemplate('win', 'soundWin'),
         soundRowTemplate('loss', 'soundLoss')
     ].join('');
-    return `<h3 class="text-base font-semibold text-secondary mb-2 text-left category-title flex items-center"><i class="fa-solid fa-volume-high mr-2"></i><span data-i18n="soundEffects"></span></h3>
+    return `<h3 class="text-base font-semibold text-secondary mb-2 text-left category-title flex items-center"><i class="fa-solid fa-volume-high mr-2"></i><span data-i18n="soundSectionTitle"></span></h3>
     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 py-3 px-2 shadow-sm">
         <div id="sound-toggle-row" class="flex flex-wrap items-center justify-between gap-2 px-2">
             <span class="text-gray-700 dark:text-dark-muted" data-i18n="soundEffects"></span>

@@ -466,6 +466,9 @@ async function importGameData(dataStr) {
             if (window.soundEffects && typeof window.soundEffects.sync === 'function') {
                 window.soundEffects.sync();
             }
+            if (window.tileFont && typeof window.tileFont.sync === 'function') {
+                window.tileFont.sync();
+            }
             handleThemeChange(localStorage.getItem('2048-setting-theme'));
             handleLanguageChange(localStorage.getItem('2048-setting-language'));
             return;

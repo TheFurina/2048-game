@@ -11,6 +11,37 @@ function collapseSelectItems(items) {
     }
     setTimeout(() => items.classList.add('hidden'), 300);
 }
+function closeSelectItems(items) {
+    if (!items) return;
+    if (items._openTimer) {
+        clearTimeout(items._openTimer);
+        items._openTimer = null;
+    }
+    if (items._hideTimer) {
+        clearTimeout(items._hideTimer);
+        items._hideTimer = null;
+    }
+    items.style.maxHeight = null;
+    items.style.opacity = '0';
+    const prevSibling = items.previousElementSibling;
+    if (prevSibling) {
+        prevSibling.classList.remove('active');
+    }
+    items._hideTimer = setTimeout(() => {
+        items._hideTimer = null;
+        items.classList.add('hidden');
+    }, 300);
+}
+function closeAllSelectItems(except) {
+    document.querySelectorAll('.select-items').forEach(items => {
+        if (items === except) return;
+        if (items.style.maxHeight) {
+            collapseSelectItems(items);
+        } else if (!items.classList.contains('hidden')) {
+            closeSelectItems(items);
+        }
+    });
+}
 function expandSelectItems(selectItems, selectSelected) {
     let maxZIndex = 20;
     document.querySelectorAll('.select-items').forEach(item => {
@@ -22,7 +53,16 @@ function expandSelectItems(selectItems, selectSelected) {
     selectItems.style.zIndex = maxZIndex + 1;
     selectItems.classList.remove('hidden');
     selectSelected.classList.add('active');
-    setTimeout(() => {
+    if (selectItems._hideTimer) {
+        clearTimeout(selectItems._hideTimer);
+        selectItems._hideTimer = null;
+    }
+    if (selectItems._openTimer) {
+        clearTimeout(selectItems._openTimer);
+        selectItems._openTimer = null;
+    }
+    selectItems._openTimer = setTimeout(() => {
+        selectItems._openTimer = null;
         selectItems.style.maxHeight = "200px";
         selectItems.style.opacity = '1';
     }, 10);
@@ -180,11 +220,7 @@ function initCustomSelects() {
             if (selectItems.style.maxHeight) {
                 collapseSelectItems(selectItems);
             } else {
-                document.querySelectorAll('.select-items').forEach(items => {
-                    if (items !== selectItems) {
-                        collapseSelectItems(items);
-                    }
-                });
+                closeAllSelectItems(selectItems);
                 expandSelectItems(selectItems, selectSelected);
             }
         });
@@ -239,9 +275,20 @@ function initCustomSelects() {
     });
     observeDynamicSelects();
 }
+document.addEventListener('click', function (event) {
+    const target = event.target;
+    const selected = target && target.closest ? target.closest('.select-selected') : null;
+    if (!selected) return;
+    const wrapper = selected.closest('.custom-select');
+    closeAllSelectItems(wrapper ? wrapper.querySelector('.select-items') : null);
+}, true);
 window.customSelect = {
     version: customSelectVersion,
     init: initCustomSelects,
     domMode: 'none',
-    isDomReady: function () { return true; }
+    isDomReady: function () { return true; },
+    closeAll: closeAllSelectItems,
+    close: closeSelectItems,
+    expand: expandSelectItems,
+    collapse: collapseSelectItems
 };
