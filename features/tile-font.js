@@ -100,7 +100,7 @@ function syncTileFontSelect() {
     const select = document.getElementById('tile-font-select');
     if (!select) return;
     select.value = tileFontCurrent;
-    const wrapper = select.closest('.custom-select');
+    const wrapper = select.parentElement ? select.parentElement.querySelector('.custom-select') : null;
     if (!wrapper) return;
     const display = wrapper.querySelector('.select-selected span');
     wrapper.querySelectorAll('.select-item').forEach(function (item) {
