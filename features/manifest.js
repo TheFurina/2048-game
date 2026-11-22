@@ -54,6 +54,21 @@ window.__modulesManifest = {
             moduleApiVersion: 2
         },
         {
+            name: 'customPageTitle',
+            src: 'custom-page-title.js',
+            required: false,
+            kind: 'builtin',
+            export: 'customPageTitle',
+            check: 'customPageTitle',
+            domMode: 'unified',
+            domMounts: ['#settings-module-appearance'],
+            domIds: ['custom-page-title-input'],
+            dependsOn: ['i18n'],
+            init: 'init',
+            styles: [],
+            moduleApiVersion: 2
+        },
+        {
             name: 'aiRequest',
             src: 'ai-request.js',
             required: false,
@@ -175,6 +190,19 @@ window.__modulesManifest = {
             kind: 'builtin',
             export: 'fullscreenMode',
             check: 'fullscreenMode',
+            domMode: 'self',
+            domCheck: 'isDomReady',
+            dependsOn: ['i18n'],
+            init: 'init',
+            moduleApiVersion: 2
+        },
+        {
+            name: 'soundEffects',
+            src: 'sound-effects.js',
+            required: false,
+            kind: 'builtin',
+            export: 'soundEffects',
+            check: 'soundEffects',
             domMode: 'self',
             domCheck: 'isDomReady',
             dependsOn: ['i18n'],

@@ -1,4 +1,4 @@
-const moduleLoaderVersion = '4.1';
+const moduleLoaderVersion = '4.2';
 window.moduleLoaderVersion = moduleLoaderVersion;
 (function () {
     'use strict';
@@ -528,6 +528,31 @@ window.moduleLoaderVersion = moduleLoaderVersion;
         }
         return { mounts: mounts, templates: templates };
     }
+    function getManifestOrder(name) {
+        if (!manifestEntries) return -1;
+        for (let i = 0; i < manifestEntries.length; i++) {
+            if (manifestEntries[i].name === name) return i;
+        }
+        return -1;
+    }
+    function insertModuleContainer(target, container) {
+        const order = getManifestOrder(container.getAttribute('data-module-dom'));
+        if (order < 0) {
+            target.appendChild(container);
+            return;
+        }
+        const children = Array.prototype.slice.call(target.children);
+        for (let i = 0; i < children.length; i++) {
+            const child = children[i];
+            if (!child.hasAttribute('data-module-dom')) continue;
+            const childOrder = getManifestOrder(child.getAttribute('data-module-dom'));
+            if (childOrder >= 0 && childOrder > order) {
+                target.insertBefore(container, child);
+                return;
+            }
+        }
+        target.appendChild(container);
+    }
     function injectUnifiedDom(entry) {
         const ex = getModuleExport(entry);
         const resolved = resolveTemplates(entry, ex);
@@ -551,12 +576,12 @@ window.moduleLoaderVersion = moduleLoaderVersion;
             const html = resolved.templates[mount];
             if (typeof html === 'string') {
                 container.innerHTML = html;
-                target.appendChild(container);
+                insertModuleContainer(target, container);
                 result.mounts.push(mount);
                 return Promise.resolve();
             }
             if (ex && typeof ex.mount === 'function') {
-                target.appendChild(container);
+                insertModuleContainer(target, container);
                 result.mounts.push(mount);
                 try {
                     return Promise.resolve(ex.mount(container, mount));
@@ -564,7 +589,7 @@ window.moduleLoaderVersion = moduleLoaderVersion;
                     return Promise.reject(e);
                 }
             }
-            target.appendChild(container);
+            insertModuleContainer(target, container);
             result.mounts.push(mount);
             return Promise.resolve();
         });

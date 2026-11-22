@@ -1,4 +1,4 @@
-const i18nVersion = '2.3.0';
+const i18nVersion = '2.3.1';
 window.i18nVersion = i18nVersion;
 const TILE_LEVELS = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768];
 function buildTileKeys(lang) {
@@ -23,6 +23,10 @@ const translations = {
         ...buildTileKeys('zh'),
         gameTitle: '2048',
         pageTitle: '2048 游戏',
+        customPageTitle: '网页标题',
+        customPageTitleHelp: '查看可用占位符',
+        customPageTitlePlaceholder: '留空则显示默认动态标题',
+        customPageTitlePlaceholders: '{pageTitle}：游戏名称\n{mode}：当前模式\n{difficulty}：当前难度\n{gridRows}：网格行数\n{gridCols}：网格列数\n{grid}：网格尺寸，如 4×4\n{score}：当前分数',
         gameDescription: '滑动合并方块，创建2048！',
         newGame: '标准模式',
         endlessMode: '无尽模式',
@@ -129,6 +133,10 @@ const translations = {
         ...buildTileKeys('en'),
         gameTitle: '2048',
         pageTitle: '2048 Game',
+        customPageTitle: 'Page Title',
+        customPageTitleHelp: 'View available placeholders',
+        customPageTitlePlaceholder: 'Leave blank to use the default dynamic title',
+        customPageTitlePlaceholders: '{pageTitle}: Game name\n{mode}: Current mode\n{difficulty}: Current difficulty\n{gridRows}: Grid rows\n{gridCols}: Grid columns\n{grid}: Grid size, e.g. 4×4\n{score}: Current score',
         gameDescription: 'Swipe to merge tiles and create 2048!',
         newGame: 'Standard Mode',
         endlessMode: 'Endless Mode',
@@ -235,6 +243,10 @@ const translations = {
         ...buildTileKeys('ja'),
         gameTitle: '2048',
         pageTitle: '2048 ゲーム',
+        customPageTitle: 'ページタイトル',
+        customPageTitleHelp: '使用可能なプレースホルダーを表示',
+        customPageTitlePlaceholder: '空欄の場合はデフォルトの動的タイトルを使用',
+        customPageTitlePlaceholders: '{pageTitle}：ゲーム名\n{mode}：現在のモード\n{difficulty}：現在の難易度\n{gridRows}：グリッドの行数\n{gridCols}：グリッドの列数\n{grid}：グリッドサイズ（例：4×4）\n{score}：現在のスコア',
         gameDescription: 'スワイプしてタイルをマージし、2048を作ろう！',
         newGame: 'スタンダードモード',
         endlessMode: 'エンドレスモード',
@@ -339,6 +351,56 @@ const translations = {
     }
 };
 const MODULE_TRANSLATIONS = {
+    sound: {
+        zh: {
+            soundEffects: '音效',
+            soundVolume: '音量',
+            soundMove: '移动音效',
+            soundMerge: '合并音效',
+            soundWin: '获胜音效',
+            soundLoss: '失败音效',
+            soundPreview: '试听',
+            soundUpload: '上传音频',
+            soundRestore: '恢复默认',
+            soundCustomHint: '可选：上传本地音频替换内置音效，文件仅保存在本机',
+            soundFileTooLarge: '音频文件过大，请选择不超过 1MB 的文件',
+            soundInvalidFile: '无法读取该音频文件',
+            soundUploaded: '已应用自定义音效',
+            soundRestored: '已恢复默认音效'
+        },
+        en: {
+            soundEffects: 'Sound Effects',
+            soundVolume: 'Volume',
+            soundMove: 'Move Sound',
+            soundMerge: 'Merge Sound',
+            soundWin: 'Win Sound',
+            soundLoss: 'Loss Sound',
+            soundPreview: 'Preview',
+            soundUpload: 'Upload Audio',
+            soundRestore: 'Restore Default',
+            soundCustomHint: 'Optional: upload a local audio file to replace the built-in sound. Files stay on this device.',
+            soundFileTooLarge: 'Audio file is too large. Please choose a file under 1MB.',
+            soundInvalidFile: 'Unable to read this audio file',
+            soundUploaded: 'Custom sound applied',
+            soundRestored: 'Default sound restored'
+        },
+        ja: {
+            soundEffects: 'サウンド効果',
+            soundVolume: '音量',
+            soundMove: '移動音',
+            soundMerge: 'マージ音',
+            soundWin: '勝利音',
+            soundLoss: '敗北音',
+            soundPreview: '試聴',
+            soundUpload: '音声をアップロード',
+            soundRestore: 'デフォルトに戻す',
+            soundCustomHint: '任意：ローカル音声で内蔵サウンドを置き換えられます。ファイルはこの端末にのみ保存されます。',
+            soundFileTooLarge: '音声ファイルが大きすぎます。1MB 以下のファイルを選択してください。',
+            soundInvalidFile: 'この音声ファイルを読み込めません',
+            soundUploaded: 'カスタム音声を適用しました',
+            soundRestored: 'デフォルト音声に戻しました'
+        }
+    },
     theme: {
         zh: {
             customThemeButton: '自定义主题设置',

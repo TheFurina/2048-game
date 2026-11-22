@@ -1,4 +1,4 @@
-const customSelectVersion = '1.5';
+const customSelectVersion = '1.6';
 window.customSelectVersion = customSelectVersion;
 window.customSelectModuleLoaded = true;
 function collapseSelectItems(items) {
@@ -27,9 +27,118 @@ function expandSelectItems(selectItems, selectSelected) {
         selectItems.style.opacity = '1';
     }, 10);
 }
+function isSelectOpen(selectItems) {
+    return !!selectItems.style.maxHeight && !selectItems.classList.contains('hidden');
+}
+function clearSelectKeyboardActive(selectItems) {
+    selectItems.querySelectorAll('.select-item.keyboard-active').forEach(function (item) {
+        item.classList.remove('keyboard-active');
+    });
+}
+function prepareSelectKeyboard(customSelect) {
+    const selectSelected = customSelect.querySelector('.select-selected');
+    const selectItems = customSelect.querySelector('.select-items');
+    const selectOptions = Array.prototype.slice.call(customSelect.querySelectorAll('.select-item'));
+    if (!selectSelected || !selectItems || !selectOptions.length) return;
+    if (selectSelected.dataset.selectKeyboard === 'true') return;
+    selectSelected.dataset.selectKeyboard = 'true';
+    selectSelected.tabIndex = 0;
+    selectSelected.setAttribute('role', 'button');
+    selectSelected.setAttribute('aria-haspopup', 'listbox');
+    selectSelected.setAttribute('aria-expanded', 'false');
+    let activeIndex = -1;
+    const setExpanded = function (value) {
+        selectSelected.setAttribute('aria-expanded', value ? 'true' : 'false');
+    };
+    const highlight = function (index) {
+        if (index < 0 || index >= selectOptions.length) return;
+        clearSelectKeyboardActive(selectItems);
+        activeIndex = index;
+        selectOptions[index].classList.add('keyboard-active');
+        selectOptions[index].scrollIntoView({ block: 'nearest' });
+    };
+    const reset = function () {
+        activeIndex = -1;
+        clearSelectKeyboardActive(selectItems);
+        setExpanded(false);
+    };
+    const open = function () {
+        if (!isSelectOpen(selectItems)) selectSelected.click();
+        setExpanded(true);
+        activeIndex = selectOptions.findIndex(function (option) {
+            return option.classList.contains('selected');
+        });
+        highlight(activeIndex < 0 ? 0 : activeIndex);
+    };
+    const close = function () {
+        if (isSelectOpen(selectItems)) selectSelected.click();
+        reset();
+    };
+    selectSelected.addEventListener('pointerdown', function () {
+        selectSelected.focus();
+    });
+    selectSelected.addEventListener('click', function () {
+        setTimeout(function () {
+            const open = isSelectOpen(selectItems);
+            setExpanded(open);
+            if (!open) activeIndex = -1;
+        }, 20);
+    });
+    selectSelected.addEventListener('keydown', function (event) {
+        const key = event.key;
+        if (event.ctrlKey || event.metaKey || event.altKey) return;
+        if (['ArrowUp', 'ArrowDown', 'Home', 'End', 'Enter', ' ', 'Escape', 'Tab'].indexOf(key) === -1) return;
+        if (key === 'Tab') {
+            reset();
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        if (key === 'Escape') {
+            close();
+            return;
+        }
+        if (key === 'Enter' || key === ' ') {
+            if (isSelectOpen(selectItems) && activeIndex >= 0) {
+                selectOptions[activeIndex].click();
+                selectItems.style.maxHeight = null;
+                selectItems.style.opacity = '0';
+                selectItems.classList.add('hidden');
+                reset();
+                selectSelected.focus();
+            } else {
+                open();
+            }
+            return;
+        }
+        if (!isSelectOpen(selectItems)) open();
+        if (key === 'Home') highlight(0);
+        else if (key === 'End') highlight(selectOptions.length - 1);
+        else if (key === 'ArrowDown') highlight(activeIndex < 0 ? 0 : (activeIndex + 1) % selectOptions.length);
+        else if (key === 'ArrowUp') highlight(activeIndex <= 0 ? selectOptions.length - 1 : activeIndex - 1);
+    });
+    selectSelected.addEventListener('blur', function () {
+        reset();
+    });
+}
+let selectKeyboardObserver = null;
+function observeDynamicSelects() {
+    if (selectKeyboardObserver || !window.MutationObserver) return;
+    selectKeyboardObserver = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            mutation.addedNodes.forEach(function (node) {
+                if (!node || node.nodeType !== 1) return;
+                if (node.classList && node.classList.contains('custom-select')) prepareSelectKeyboard(node);
+                if (node.querySelectorAll) node.querySelectorAll('.custom-select').forEach(prepareSelectKeyboard);
+            });
+        });
+    });
+    selectKeyboardObserver.observe(document.body, { childList: true, subtree: true });
+}
 function initCustomSelects() {
     const customSelects = document.querySelectorAll('.custom-select');
     customSelects.forEach(customSelect => {
+        prepareSelectKeyboard(customSelect);
         if (customSelect.dataset.i18nSelect || customSelect.dataset.customSelectBound) return;
         customSelect.dataset.customSelectBound = 'true';
         const selectedValue = customSelect.querySelector('.select-selected span');
@@ -128,6 +237,7 @@ function initCustomSelects() {
     document.addEventListener('click', function() {
         document.querySelectorAll('.select-items').forEach(collapseSelectItems);
     });
+    observeDynamicSelects();
 }
 window.customSelect = {
     version: customSelectVersion,

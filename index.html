@@ -185,7 +185,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
     <script src="./features/module-loader.js"></script>
     <script>
-        const gameVersion = '3.3.0';
+        const gameVersion = '3.4.0';
         window.gameVersion = gameVersion;
         function loadCssVersion() {
             try {
@@ -943,22 +943,41 @@
                 }
             }
         });
-        const originalConsoleLog = console.log;
-        console.log = function(...args) {
-            originalConsoleLog.apply(console, args);
-        };
         const openModalStack = [];
+        let modalHistoryGuarded = false;
+        let modalHistoryIgnorePop = 0;
+        let modalHistoryClosing = false;
+        function armModalHistoryGuard() {
+            if (modalHistoryGuarded) return;
+            modalHistoryGuarded = true;
+            try {
+                history.pushState({ modalGuard: true }, '');
+            } catch (e) {}
+        }
+        function releaseModalHistoryGuard() {
+            if (!modalHistoryGuarded) return;
+            modalHistoryGuarded = false;
+            if (modalHistoryClosing) return;
+            modalHistoryIgnorePop++;
+            try {
+                history.back();
+            } catch (e) {}
+        }
         function addOpenModal(modalId) {
             const index = openModalStack.indexOf(modalId);
             if (index !== -1) {
                 openModalStack.splice(index, 1);
             }
             openModalStack.push(modalId);
+            armModalHistoryGuard();
         }
         function removeOpenModal(modalId) {
             const index = openModalStack.indexOf(modalId);
             if (index !== -1) {
                 openModalStack.splice(index, 1);
+            }
+            if (openModalStack.length === 0) {
+                releaseModalHistoryGuard();
             }
         }
         function isModalOpen(modalId, modal) {
@@ -990,17 +1009,67 @@
             }
             return false;
         }
+        window.addEventListener('popstate', function () {
+            if (modalHistoryIgnorePop > 0) {
+                modalHistoryIgnorePop--;
+                return;
+            }
+            if (!modalHistoryGuarded) return;
+            modalHistoryGuarded = false;
+            modalHistoryClosing = true;
+            try {
+                closeTopModal();
+            } finally {
+                modalHistoryClosing = false;
+            }
+            if (openModalStack.length > 0) {
+                armModalHistoryGuard();
+            }
+        });
+        if (history.state && history.state.modalGuard) {
+            modalHistoryIgnorePop++;
+            try {
+                history.back();
+            } catch (e) {}
+        }
         document.addEventListener('keydown', (e) => {
             if (e.key !== 'Escape') return;
             if (window.keybindings && typeof window.keybindings.isCapturing === 'function' && window.keybindings.isCapturing()) return;
+            const activeElement = document.activeElement;
+            if (activeElement && activeElement.classList && activeElement.classList.contains('select-selected')) return;
             if (!closeTopModal()) return;
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
         }, true);
+        function isEditableTarget(target) {
+            if (!target || typeof target.tagName !== 'string') return false;
+            const tag = target.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+            return target.isContentEditable === true;
+        }
+        function isFocusableVisible(element) {
+            if (!element || element.disabled) return false;
+            return element.offsetParent !== null;
+        }
+        function getVisibleFocusable(container) {
+            return Array.from(container.querySelectorAll(focusableElements)).filter(isFocusableVisible);
+        }
+        function clearKeyboardNavFocus(except) {
+            document.querySelectorAll('.keyboard-nav-focus').forEach(function (element) {
+                if (element !== except) element.classList.remove('keyboard-nav-focus');
+            });
+        }
+        document.addEventListener('pointerdown', function () {
+            clearKeyboardNavFocus(null);
+        }, true);
+        document.addEventListener('focusin', function (e) {
+            clearKeyboardNavFocus(e.target);
+        });
         function handleModalKeyDown(e) {
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
             if (e.key === 'Tab') {
-                const focusable = Array.from(e.currentTarget.querySelectorAll(focusableElements));
+                const focusable = getVisibleFocusable(e.currentTarget);
                 const currentIndex = focusable.indexOf(document.activeElement);
                 if (focusable.length > 0) {
                     if (e.shiftKey) {
@@ -1013,7 +1082,8 @@
                     e.preventDefault();
                 }
             } else if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-                const focusable = Array.from(e.currentTarget.querySelectorAll(focusableElements));
+                if (isEditableTarget(document.activeElement)) return;
+                const focusable = getVisibleFocusable(e.currentTarget);
                 const currentIndex = focusable.indexOf(document.activeElement);
                 if (focusable.length > 0) {
                     let nextIndex = currentIndex;
@@ -1022,7 +1092,9 @@
                     } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
                         nextIndex = (currentIndex - 1 + focusable.length) % focusable.length;
                     }
-                    focusable[nextIndex].focus();
+                    const next = focusable[nextIndex];
+                    next.focus();
+                    next.classList.add('keyboard-nav-focus');
                     e.preventDefault();
                 }
             }
@@ -1150,9 +1222,26 @@
             toggleText: document.getElementById('toggle-text')
         };
         function updateDocumentTitle() {
+            const pageTitle = i18n.t('pageTitle');
             const mode = gameState.isEndlessMode ? i18n.t('endlessMode') : i18n.t('newGame');
             const difficulty = i18n.t(gameState.difficulty);
-            document.title = `${i18n.t('pageTitle')} | ${mode} | ${difficulty} | ${gameState.gridRows}×${gameState.gridCols} | ${i18n.t('score')}: ${gameState.score}`;
+            const grid = `${gameState.gridRows}×${gameState.gridCols}`;
+            const segments = [pageTitle];
+            if (gameState.isEndlessMode) segments.push(mode);
+            segments.push(`${difficulty} ${grid}`);
+            segments.push(`${i18n.t('score')} ${gameState.score}`);
+            const defaultTitle = segments.join(' · ');
+            document.title = window.customPageTitle && typeof window.customPageTitle.getTitle === 'function'
+                ? window.customPageTitle.getTitle(defaultTitle, {
+                    pageTitle: pageTitle,
+                    mode: mode,
+                    difficulty: difficulty,
+                    gridRows: gameState.gridRows,
+                    gridCols: gameState.gridCols,
+                    grid: grid,
+                    score: gameState.score
+                })
+                : defaultTitle;
         }
         function createEmptyGrid() {
             const grid = [];
@@ -1553,6 +1642,7 @@
                     break;
             }
             if (moved) {
+                if (window.soundEffects && typeof window.soundEffects.play === 'function') window.soundEffects.play('move');
                 saveHistory(historySnapshot);
                 const skipTileSpawn = shouldSkipTileSpawn();
                 if (gameState.tileAnimationEnabled) {
@@ -1656,6 +1746,7 @@
                     targetTile.mergedAnimation = true;
                     targetTile.mergedFrom = [sourceTile];
                     vibrate(50, 'merge');
+                    if (window.soundEffects && typeof window.soundEffects.play === 'function') window.soundEffects.play('merge');
                 }
             });
         }
@@ -1713,6 +1804,7 @@
                 if (!gameState.isEndlessMode) {
                     showGameMessage("gameWon", "gameWonText");
                     vibrate([100, 50, 100], 'win');
+                    if (window.soundEffects && typeof window.soundEffects.play === 'function') window.soundEffects.play('win');
                 }
                 return true;
             }
@@ -1725,9 +1817,15 @@
             gameState.gameOver = true;
             showGameMessage("gameOver", "gameOverText");
             vibrate([50, 50, 50, 50, 50], 'loss');
+            if (window.soundEffects && typeof window.soundEffects.play === 'function') window.soundEffects.play('loss');
             return true;
         }
+        let gameMessageHideTimer = null;
         function showGameMessage(title, text) {
+            if (gameMessageHideTimer) {
+                clearTimeout(gameMessageHideTimer);
+                gameMessageHideTimer = null;
+            }
             elements.gameMessageTitle.textContent = i18n.t(title);
             elements.gameMessageText.textContent = i18n.t(text);
             elements.gameMessageContinueButton.classList.toggle('hidden', !(title === 'gameWon' && gameState.gameWon && !gameState.isEndlessMode));
@@ -1749,14 +1847,26 @@
             messageBox.classList.remove('scale-100');
             messageBox.classList.add('scale-95', 'opacity-0');
             elements.gameMessage.classList.add('modal-backdrop-fade-out');
-            setTimeout(() => {
+            if (gameMessageHideTimer) {
+                clearTimeout(gameMessageHideTimer);
+            }
+            gameMessageHideTimer = setTimeout(() => {
+                gameMessageHideTimer = null;
+                if (!elements.gameMessage.classList.contains('modal-backdrop-fade-out')) {
+                    return;
+                }
                 elements.gameMessage.classList.add('hidden');
                 elements.gameMessage.classList.remove('modal-backdrop-fade-out');
             }, 300);
         }
+        let pauseHideTimer = null;
         function togglePause() {
             gameState.isPaused = !gameState.isPaused;
             if (gameState.isPaused) {
+                if (pauseHideTimer) {
+                    clearTimeout(pauseHideTimer);
+                    pauseHideTimer = null;
+                }
                 if (window.aiAutoPlay && window.aiAutoPlay.pauseForGame) window.aiAutoPlay.pauseForGame();
                 elements.pauseMenu.classList.remove('modal-backdrop-fade-out');
                 elements.pauseMenu.classList.remove('hidden');
@@ -1778,7 +1888,14 @@
                 pauseBox.classList.remove('scale-100');
                 pauseBox.classList.add('scale-95', 'opacity-0');
                 elements.pauseMenu.classList.add('modal-backdrop-fade-out');
-                setTimeout(() => {
+                if (pauseHideTimer) {
+                    clearTimeout(pauseHideTimer);
+                }
+                pauseHideTimer = setTimeout(() => {
+                    pauseHideTimer = null;
+                    if (!elements.pauseMenu.classList.contains('modal-backdrop-fade-out')) {
+                        return;
+                    }
                     elements.pauseMenu.classList.add('hidden');
                     elements.pauseMenu.classList.remove('modal-backdrop-fade-out');
                     elements.pauseMenu.removeEventListener('keydown', handleModalKeyDown);
@@ -1918,6 +2035,12 @@
                 if (window.customTheme && typeof window.customTheme.resetAll === 'function') {
                     window.customTheme.resetAll();
                 }
+                if (window.customPageTitle && typeof window.customPageTitle.reset === 'function') {
+                    window.customPageTitle.reset();
+                }
+                if (window.soundEffects && typeof window.soundEffects.reset === 'function') {
+                    window.soundEffects.reset();
+                }
                 gameState.gpuAccelerationEnabled = true;
                 gameState.tileAnimationEnabled = true;
                 gameState.tileAppearAnimationEnabled = true;
@@ -2030,6 +2153,7 @@
         }
         function setupKeyboardListeners() {
             document.addEventListener('keydown', (e) => {
+                if (isEditableTarget(e.target)) return;
                 if (gameState.isPaused || gameState.gameOver || (gameState.gameWon && !gameState.isEndlessMode)) return;
                 const key = e.key.toLowerCase();
                 const arrowMap = { arrowup: 'up', arrowdown: 'down', arrowleft: 'left', arrowright: 'right' };
@@ -2037,6 +2161,13 @@
                 if (!action && key === 'escape') action = 'pause';
                 if (!action) action = window.keybindings && typeof window.keybindings.resolveAction === 'function' ? window.keybindings.resolveAction(key) : null;
                 if (!action) return;
+                if (e.ctrlKey || e.metaKey || e.altKey) {
+                    if (action === 'undo' && (e.ctrlKey || e.metaKey) && !e.altKey) {
+                        e.preventDefault();
+                        undoMove();
+                    }
+                    return;
+                }
                 e.preventDefault();
                 switch(action) {
                     case 'up':
@@ -2053,11 +2184,6 @@
                         break;
                     case 'pause':
                         togglePause();
-                        break;
-                    case 'undo':
-                        if (e.ctrlKey || e.metaKey) {
-                            undoMove();
-                        }
                         break;
                     case 'restart':
                         if (!e.ctrlKey && !e.metaKey && !e.altKey) {

@@ -1,4 +1,4 @@
-:root { --module-css-custom-select-version: 1.0; }
+:root { --module-css-custom-select-version: 1.1; }
 .custom-select .select-selected i, .custom-select .select-item i, .custom-select .select-selected .emoji-icon, .custom-select .select-item .emoji-icon {
     width: 20px;
     display: inline-block;
@@ -71,4 +71,14 @@
 .select-selected span {
     font-family: 'Font Awesome 6 Free', sans-serif;
     font-weight: 900;
+}
+.custom-select .select-selected:focus-visible {
+    outline: 2px solid #faa31b;
+    outline-offset: 2px;
+}
+.custom-select .select-item.keyboard-active {
+    background-color: rgba(250, 163, 27, 0.16);
+}
+.dark .custom-select .select-item.keyboard-active {
+    background-color: rgba(250, 163, 27, 0.28);
 }

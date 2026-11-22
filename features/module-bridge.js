@@ -1,4 +1,4 @@
-const moduleBridgeVersion = '1.2';
+const moduleBridgeVersion = '1.3';
 window.moduleBridgeVersion = moduleBridgeVersion;
 (function () {
     'use strict';
@@ -282,7 +282,7 @@ window.moduleBridgeVersion = moduleBridgeVersion;
                 var aiButton = document.createElement('button');
                 aiButton.id = 'ai-analysis-button';
                 aiButton.setAttribute('data-module-lazy-anchor', 'ai-analysis');
-                aiButton.className = 'bg-primary dark:bg-dark-primary hover:bg-primary/90 text-white w-12 h-12 rounded-full shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center justify-center';
+                aiButton.className = 'bg-primary dark:bg-dark-primary hover:bg-primary/90 text-white w-12 h-12 round-action-button rounded-full shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center justify-center';
                 aiButton.innerHTML = '<i class="fa-solid fa-brain dark:text-[#282828]"></i>';
                 headerRow.appendChild(aiButton);
             }
