@@ -1,5 +1,5 @@
 const SW_VERSION = '1.0';
-const CACHE_VERSION = '3.4.0-pwa.3';
+const CACHE_VERSION = '3.4.0-pwa.4';
 const APP_CACHE = '2048-app-' + CACHE_VERSION;
 const RUNTIME_CACHE = '2048-runtime-' + CACHE_VERSION;
 const APP_SHELL = [
