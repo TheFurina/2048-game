@@ -144,25 +144,8 @@ function bindTileFontUi() {
         switchTileFont(select.value, true);
     });
 }
-function placeTileFontRow() {
-    const select = document.getElementById('tile-font-select');
-    const languageLabel = document.querySelector('label[for="language-toggle"]');
-    const languageRow = languageLabel ? languageLabel.closest('.settings-select-row') : null;
-    if (!select || !languageRow || !languageRow.parentNode) return;
-    const row = select.closest('.settings-select-row');
-    if (!row || row === languageRow) return;
-    languageRow.parentNode.insertBefore(row, languageRow.nextSibling);
-    let divider = document.getElementById('tile-font-divider');
-    if (!divider) {
-        divider = document.createElement('div');
-        divider.id = 'tile-font-divider';
-        divider.className = 'border-b border-gray-200 dark:border-gray-700 my-3 mx-2';
-    }
-    row.parentNode.insertBefore(divider, row);
-}
 function scheduleTileFontWarmUp() {
     const start = function () {
-        placeTileFontRow();
         if (tileFontCurrent !== 'system' && !tileFontLoaded[tileFontCurrent]) {
             switchTileFont(tileFontCurrent, false);
         }
@@ -182,7 +165,6 @@ function initTileFont() {
     applyTileFont(tileFontCurrent, false);
     bindTileFontUi();
     syncTileFontSelect();
-    placeTileFontRow();
     scheduleTileFontWarmUp();
 }
 function syncTileFont() {

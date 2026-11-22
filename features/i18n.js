@@ -1,4 +1,4 @@
-const i18nVersion = '2.3.1-fix.1';
+const i18nVersion = '2.3.1';
 window.i18nVersion = i18nVersion;
 const TILE_LEVELS = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768];
 function buildTileKeys(lang) {
@@ -406,7 +406,7 @@ const MODULE_TRANSLATIONS = {
     },
     tileFont: {
         zh: {
-            tileFont: '字体',
+            tileFont: '滑块数字字体',
             tileFontSystem: '系统字体',
             tileFontInterDefault: 'Inter（默认）',
             tileFontLoading: '加载中',
@@ -414,7 +414,7 @@ const MODULE_TRANSLATIONS = {
             tileFontFailed: '加载失败，已回退系统字体'
         },
         en: {
-            tileFont: 'Tile Font',
+            tileFont: 'Tile Number Font',
             tileFontSystem: 'System',
             tileFontInterDefault: 'Inter (Default)',
             tileFontLoading: 'Loading',
@@ -422,7 +422,7 @@ const MODULE_TRANSLATIONS = {
             tileFontFailed: 'Load failed, using system font'
         },
         ja: {
-            tileFont: 'タイルフォント',
+            tileFont: 'タイル数字フォント',
             tileFontSystem: 'システム',
             tileFontInterDefault: 'Inter（デフォルト）',
             tileFontLoading: '読み込み中',
