@@ -1,5 +1,5 @@
-const SW_VERSION = '1.0';
-const CACHE_VERSION = '3.3.0-pwa.1';
+const SW_VERSION = '1.1';
+const CACHE_VERSION = '3.4.0-pwa.1';
 const APP_CACHE = '2048-app-' + CACHE_VERSION;
 const RUNTIME_CACHE = '2048-runtime-' + CACHE_VERSION;
 const APP_SHELL = [
@@ -21,6 +21,7 @@ const APP_SHELL = [
     './features/ai-autoplay.js',
     './features/ai-request.js',
     './features/custom-select.js',
+    './features/custom-page-title.js',
     './features/custom-theme-boot.js',
     './features/custom-theme.js',
     './features/data-transfer.js',
@@ -31,6 +32,7 @@ const APP_SHELL = [
     './features/module-bridge.js',
     './features/module-loader.js',
     './features/share-victory.js',
+    './features/sound-effects.js',
     './features/webrtc-sync.js'
 ];
 const RUNTIME_HOSTS = [

@@ -1,4 +1,4 @@
-:root { --css-version: 1.10; }
+:root { --css-version: 1.11; }
 body.modal-scroll-lock {
     overflow: hidden;
 }
@@ -637,6 +637,21 @@ body.modal-scroll-lock {
         opacity: 0;
         margin: 0;
     }
+    #sound-details {
+        max-height: 480px;
+        overflow: hidden;
+        transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+        margin-top: 12px;
+    }
+    #sound-details.collapsed {
+        max-height: 0;
+        opacity: 0;
+        margin: 0;
+    }
+.round-action-button {
+    width: 3rem;
+    height: 3rem;
+}
 @media (max-height: 400px) {
     body {
         padding: 4px;
@@ -700,7 +715,7 @@ body.modal-scroll-lock {
         font-size: 0.7rem !important;
         margin-bottom: 2px;
     }
-    #ai-analysis-button {
+    .round-action-button {
         width: 32px !important;
         height: 32px !important;
         font-size: 1rem !important;
@@ -1221,4 +1236,9 @@ html.dark .score-addition {
         opacity: 0;
         transform: translateY(-32px) scale(1);
     }
+}
+.keyboard-nav-focus {
+    outline: 2px solid #faa31b;
+    outline-offset: 2px;
+    border-radius: 6px;
 }

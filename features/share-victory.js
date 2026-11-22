@@ -1,4 +1,4 @@
-const shareVictoryVersion = '1.0';
+const shareVictoryVersion = '1.0-fix.1';
 window.shareVictoryVersion = shareVictoryVersion;
 (function () {
     'use strict';
@@ -192,5 +192,4 @@ window.shareVictoryVersion = shareVictoryVersion;
         share: share
     };
     window.shareVictoryModuleLoaded = true;
-    console.log('ShareVictory Module v' + shareVictoryVersion + ' loaded');
 })();

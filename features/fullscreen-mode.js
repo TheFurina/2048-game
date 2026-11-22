@@ -1,4 +1,4 @@
-const fullscreenModeVersion = '0.8-fix.1';
+const fullscreenModeVersion = '0.9';
 window.fullscreenModeVersion = fullscreenModeVersion;
 let isFullscreenMode = false;
 let fullscreenDomBound = false;
@@ -261,7 +261,7 @@ function setupFullscreenMode() {
     buttonGroup.className = 'flex gap-2 justify-end';
     const fullscreenButton = document.createElement('button');
     fullscreenButton.id = 'fullscreen-button';
-    fullscreenButton.className = 'bg-primary dark:bg-dark-primary hover:bg-primary/90 text-white w-12 h-12 rounded-full shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center justify-center';
+    fullscreenButton.className = 'bg-primary dark:bg-dark-primary hover:bg-primary/90 text-white w-12 h-12 round-action-button rounded-full shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center justify-center';
     fullscreenButton.innerHTML = '<i class="fa-solid fa-expand dark:text-[#282828]"></i>';
     fullscreenButton.addEventListener('click', toggleFullscreenMode);
     buttonGroup.appendChild(fullscreenButton);
